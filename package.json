@@ -1,0 +1,23 @@
+{
+  "name": "swerve-bot-2025",
+  "version": "0.1.0",
+  "description": "The code for the 2024-2025 swerve robot",
+  "main": "./src/main/java/frc/robot/Robot.java",
+  "scripts": {
+    "prettier": "prettier --write \"src/**/*.java\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/frc8100/swerve-bot-2025.git"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/frc8100/swerve-bot-2025/issues"
+  },
+  "homepage": "https://github.com/frc8100/swerve-bot-2025#readme",
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "prettier-plugin-java": "^2.6.4"
+  }
+}
