@@ -251,11 +251,11 @@ public class Swerve extends SubsystemBase {
     public Rotation2d getYaw() {
         // If the gyro is inverted, return the inverted yaw
         if (SwerveConfig.invertGyro) {
-            return Rotation2d.fromDegrees(360 - gyro.getYaw().getValue());
+            return Rotation2d.fromDegrees(360 - gyro.getYaw().getValueAsDouble());
         }
 
         // Otherwise, return the yaw as-is
-        return Rotation2d.fromDegrees(gyro.getYaw().getValue());
+        return Rotation2d.fromDegrees(gyro.getYaw().getValueAsDouble());
     }
 
     /** Periodically updates the SmartDashboard with information about the swerve modules. */

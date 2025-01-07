@@ -2,12 +2,13 @@ package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
-import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
+// import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PIDConstants;
-import com.pathplanner.lib.util.ReplanningConfig;
-import com.revrobotics.spark.SparkBase;
+// TODO: Add pathplannerlib
+// import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+// import com.pathplanner.lib.util.PIDConstants;
+// import com.pathplanner.lib.util.ReplanningConfig;
+// import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.config.SparkBaseConfig;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -112,21 +113,22 @@ public class SwerveConfig {
      * pplib config, temporary
      */
     // TODO: Update to 2025
-    public static final HolonomicPathFollowerConfig pathFollowerConfig = new HolonomicPathFollowerConfig(
-        new PIDConstants(5.0, 0, 0), // Translation constants 
-        new PIDConstants(5.0, 0, 0), // Rotation constants 
-        maxSpeed,
-        // flModuleOffset.getNorm(), // Drive base radius (distance from center to furthest module)
-        // Placeholder
-        0.1,
-        new ReplanningConfig()
-    );
+    // public static final HolonomicPathFollowerConfig pathFollowerConfig = new HolonomicPathFollowerConfig(
+    //     new PIDConstants(5.0, 0, 0), // Translation constants 
+    //     new PIDConstants(5.0, 0, 0), // Rotation constants 
+    //     maxSpeed,
+    //     // flModuleOffset.getNorm(), // Drive base radius (distance from center to furthest module)
+    //     // Placeholder
+    //     0.1,
+    //     new ReplanningConfig()
+    // );
 
     /** Configures the swerve config */
     public SwerveConfig() {
         // Set up the CANCoder configuration
         MagnetSensorConfigs magnetSenorConfig = new MagnetSensorConfigs()
-            .withAbsoluteSensorRange(AbsoluteSensorRangeValue.Unsigned_0To1)
+            // TODO: This setting is not present in 2025; may cause problems
+            // .withAbsoluteSensorRange(AbsoluteSensorRangeValue.Unsigned_0To1)
             .withSensorDirection(
                 canCoderInvert
                     ? SensorDirectionValue.Clockwise_Positive
