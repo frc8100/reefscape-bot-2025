@@ -4,41 +4,24 @@ This repository is open to contributions. If you would like to contribute, pleas
 
 ## Getting Started
 
-There are two main ways to get started with this code. For each of them, you will need to have the following installed:
+To get started, install WPILib and the necessary software. You can find the installation instructions [here](https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/wpilib-setup.html).
 
-- [Git](https://git-scm.com/)
-- [Visual Studio Code](https://code.visualstudio.com/)
-
-> [!NOTE]
-> It is recommended to use the [WPILib setup guide](https://docs.wpilib.org/en/latest/docs/zero-tos-robot/step-2/wpilib-setup.html) to install VSCode.
+You will also need git installed on your computer. You can find the installation instructions [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
 
 The first way is to code on your own computer.
 
 1. Install the above software.
-2. Open Visual Studio Code.
-3. Open the terminal (press Ctrl+`)
-4. Clone the repository by running `git clone https://github.com/frc8100/swerve-bot-2025.git` in the terminal.
+2. Open Visual Studio Code (you should find a shortcut to the WPILib VSCode in the desktop).
+3. Open the terminal (press `Ctrl+backtick`) 
+4. Clone the repository by running `git clone https://github.com/frc8100/reefscape-bot-2025.git` in the terminal.
     - You could alternatively clone the repository using VSCode's built-in Git functionality.
 5. Open the cloned repository in Visual Studio Code.
-6. Install the recommended extensions (if you haven't already).
-7. You can now start coding.
+6. You can now start coding.
+    - Gradle will automatically download the necessary dependencies.
 
-The second way is to open it on Github Codespaces. This is a cloud-based development environment that allows you to code in the cloud.
+## Deploying Code
 
-1. Open the repository on Github. (You're already here!)
-2. Log into an account in the organization or has access
-    - You could also clone/fork this repo and use your own codespace
-3. Click on the "Code" button.
-4. Click on "Open with Codespaces".
-5. Wait for the environment to load.
-6. Install the recommended extensions (if you haven't already).
-7. You can now start coding.
-
-<!-- ## Building Guide
-
-Using the WPILib VSCode tools, press `Ctrl+shift+p` to open the command palatte. -->
-
-<!-- TODO -->
+See the [WPILib documentation](https://docs.wpilib.org/en/stable/docs/software/vscode-overview/deploying-robot-code.html) for more information on deploying code.
 
 ## Saving and Pulling Changes
 
