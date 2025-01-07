@@ -2,7 +2,7 @@
 # If you remove items from this file, intellisense might break.
 
 # Generated on build
-src/main/robot/BuildConstants.java
+src/main/java/frc/robot/BuildConstants.java
 
 node_modules/
 
