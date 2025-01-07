@@ -7,7 +7,9 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
-import com.revrobotics.CANSparkBase.IdleMode;
+import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.config.SparkBaseConfig;
+
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
@@ -23,8 +25,8 @@ public class SwerveConfig {
     public final CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
 
     //
-    public static final IdleMode driveIdleMode = IdleMode.kBrake;
-    public static final IdleMode angleIdleMode = IdleMode.kBrake;
+    public static final SparkBaseConfig.IdleMode driveIdleMode = SparkBaseConfig.IdleMode.kBrake;
+    public static final SparkBaseConfig.IdleMode angleIdleMode = SparkBaseConfig.IdleMode.kBrake;
     public static final double drivePower = 1;
     public static final double anglePower = .9;
 
