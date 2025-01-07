@@ -2,6 +2,18 @@
 
 This repository is open to contributions. If you would like to contribute, please follow the guidelines below.
 
+## Dependencies
+
+Dependencies are automatically installed unless specified otherwise. The following dependencies are used in this project:
+
+ - [AdvantageKit](https://docs.advantagekit.org/)
+     - For use with [AdvantageScope](https://docs.advantagescope.org/)
+ - [PathplannerLib](https://pathplanner.dev/pathplannerlib.html)
+     - For use with [PathPlanner](https://pathplanner.dev/home.html) (needs to be installed separately)
+ - [CTRE Phoenix 6](https://v6.docs.ctr-electronics.com/en/stable/)
+ - [REVLib](https://docs.revrobotics.com/revlib)
+ - [Limelight](https://docs.limelightvision.io/docs/docs-limelight/apis/limelight-lib)
+
 ## Getting Started
 
 To get started, install WPILib and the necessary software. You can find the installation instructions [here](https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/wpilib-setup.html).
