@@ -1,15 +1,35 @@
+// Copyright 2021-2025 FRC 6328
+// http://github.com/Mechanical-Advantage
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// version 3 as published by the Free Software Foundation or
+// available in the root directory of this project.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.commands.*;
-import frc.robot.subsystems.ArmSubsystem;
-import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.LauncherSubsystem;
-import frc.robot.subsystems.PoseEstimator;
-import frc.robot.subsystems.swerve.Swerve;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.DriveCommands;
+import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.GyroIO;
+import frc.robot.subsystems.drive.GyroIOPigeon2;
+import frc.robot.subsystems.drive.ModuleIO;
+import frc.robot.subsystems.drive.ModuleIOSim;
+import frc.robot.subsystems.drive.ModuleIOSpark;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -18,79 +38,121 @@ import frc.robot.subsystems.swerve.Swerve;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+  // Subsystems
+  private final Drive drive;
 
-    /* Subsystems */
-    private final Swerve s_Swerve = new Swerve();
-    private final PoseEstimator s_PoseEstimator = new PoseEstimator();
-    private final IntakeSubsystem m_intake = new IntakeSubsystem();
-    private final ArmSubsystem m_arm = new ArmSubsystem();
-    private final LauncherSubsystem m_launcher = new LauncherSubsystem();
+  // Controller
+  private final CommandXboxController controller = new CommandXboxController(0);
 
-    /** The container for the robot. Contains subsystems, OI devices, and commands. */
-    public RobotContainer() {
-        s_Swerve.setDefaultCommand(
-            new TeleopSwerve(
-                s_Swerve,
-                () -> -Controls.driverController.getRawAxis(Controls.Drive.translationAxis),
-                () -> -Controls.driverController.getRawAxis(Controls.Drive.strafeAxis),
-                () -> -Controls.driverController.getRawAxis(Controls.Drive.rotationAxis),
-                () -> false,
-                () -> Controls.Drive.dampen.getAsBoolean(),
-                () -> 1 // speed multiplier
-            )
-        );
+  // Dashboard inputs
+  private final LoggedDashboardChooser<Command> autoChooser;
 
-        // Configure the button bindings
-        configureButtonBindings();
+  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  public RobotContainer() {
+    switch (Constants.currentMode) {
+      case REAL:
+        // Real robot, instantiate hardware IO implementations
+        drive =
+            new Drive(
+                new GyroIOPigeon2(),
+                new ModuleIOSpark(0),
+                new ModuleIOSpark(1),
+                new ModuleIOSpark(2),
+                new ModuleIOSpark(3));
+        break;
+
+      case SIM:
+        // Sim robot, instantiate physics sim IO implementations
+        drive =
+            new Drive(
+                new GyroIO() {},
+                new ModuleIOSim(),
+                new ModuleIOSim(),
+                new ModuleIOSim(),
+                new ModuleIOSim());
+        break;
+
+      default:
+        // Replayed robot, disable IO implementations
+        drive =
+            new Drive(
+                new GyroIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {});
+        break;
     }
 
-    /**
-     * Use this method to define your button->command mappings. Buttons can be created by
-     * instantiating a {@link GenericHID} or one of its subclasses ({@link
-     * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-     * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-     */
-    private void configureButtonBindings() {
-        /* Driver Buttons */
-        Controls.Drive.zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroGyro()));
+    // Set up auto routines
+    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
-        // Heading lock bindings
-        Controls.Drive.up
-            .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d90))
-            .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
-        Controls.Drive.left
-            .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d180))
-            .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
-        Controls.Drive.right
-            .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d0))
-            .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
-        Controls.Drive.down
-            .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d270))
-            .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
+    // Set up SysId routines
+    autoChooser.addOption(
+        "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+    autoChooser.addOption(
+        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+    autoChooser.addOption(
+        "Drive SysId (Quasistatic Forward)",
+        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Drive SysId (Quasistatic Reverse)",
+        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
-        // Up system bindings
-        // TODO: Switch up system to event commands
-        // Note: on the Logitech controller, x and a are swapped
-        Controls.upController.b().whileTrue(m_intake.intake());
-        Controls.upController.x().whileTrue(m_intake.eintake());
-        Controls.upController.rightBumper().whileTrue(m_arm.up());
-        Controls.upController.leftBumper().whileTrue(m_arm.down());
-        // Controls.Up.intake.whileTrue(m_intake.intake());
-        // Controls.Up.eintake.whileTrue(m_intake.eintake());
-        // Controls.Up.armUp.whileTrue(m_arm.up());
-        // Controls.Up.armDown.whileTrue(m_arm.down());
+    // Configure the button bindings
+    configureButtonBindings();
+  }
 
-        Controls.upController.leftTrigger(0.75).whileTrue(m_launcher.pushOut());
-        Controls.upController.rightTrigger(0.75).whileTrue(m_launcher.pushIn());
-        // Controls.upController.axisGreaterThan(Controls.Up.launcherInAxis).ifHigh(m_launcher.pushIn());
-    }
+  /**
+   * Use this method to define your button->command mappings. Buttons can be created by
+   * instantiating a {@link GenericHID} or one of its subclasses ({@link
+   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
+   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
+   */
+  private void configureButtonBindings() {
+    // Default command, normal field-relative drive
+    drive.setDefaultCommand(
+        DriveCommands.joystickDrive(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> -controller.getRightX()));
 
-    /**
-     * Use this to pass the autonomous command to the main {@link Robot} class.
-     *
-     * @return the command to run in autonomous
-     */
-    public Command getAutonomousCommand() {
-        return null;
-    }
+    // Lock to 0° when A button is held
+    controller
+        .a()
+        .whileTrue(
+            DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                () -> new Rotation2d()));
+
+    // Switch to X pattern when X button is pressed
+    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+
+    // Reset gyro to 0° when B button is pressed
+    controller
+        .b()
+        .onTrue(
+            Commands.runOnce(
+                    () ->
+                        drive.setPose(
+                            new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
+                    drive)
+                .ignoringDisable(true));
+  }
+
+  /**
+   * Use this to pass the autonomous command to the main {@link Robot} class.
+   *
+   * @return the command to run in autonomous
+   */
+  public Command getAutonomousCommand() {
+    return autoChooser.get();
+  }
 }
