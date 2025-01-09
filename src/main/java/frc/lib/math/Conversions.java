@@ -90,7 +90,8 @@ public class Conversions {
      * @param gearRatio Gear Ratio between Falcon and Wheel
      * @return Meters
      */
-    public static double falconToMeters(double positionCounts, double circumference, double gearRatio) {
+    public static double falconToMeters(
+            double positionCounts, double circumference, double gearRatio) {
         return positionCounts * (circumference / (gearRatio * 2048.0));
     }
 

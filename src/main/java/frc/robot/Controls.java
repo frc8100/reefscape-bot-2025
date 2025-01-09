@@ -25,20 +25,14 @@ public class Controls {
         public static final int rotationAxis = XboxController.Axis.kRightX.value;
 
         // Driver Buttons
-        public static final JoystickButton zeroGyro = new JoystickButton(
-            driverController,
-            XboxController.Button.kY.value
-        );
-        public static final JoystickButton dampen = new JoystickButton(
-            driverController,
-            XboxController.Button.kRightBumper.value
-        );
+        public static final JoystickButton zeroGyro =
+                new JoystickButton(driverController, XboxController.Button.kY.value);
+        public static final JoystickButton dampen =
+                new JoystickButton(driverController, XboxController.Button.kRightBumper.value);
 
         // unused
-        public static final JoystickButton robotCentric = new JoystickButton(
-            driverController,
-            XboxController.Button.kLeftBumper.value
-        );
+        public static final JoystickButton robotCentric =
+                new JoystickButton(driverController, XboxController.Button.kLeftBumper.value);
 
         // Direction buttons
         public static final POVButton up = new POVButton(driverController, 90);

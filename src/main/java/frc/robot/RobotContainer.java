@@ -22,16 +22,15 @@ public class RobotContainer {
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
         s_Swerve.setDefaultCommand(
-            new TeleopSwerve(
-                s_Swerve,
-                () -> -Controls.driverController.getRawAxis(Controls.Drive.translationAxis),
-                () -> -Controls.driverController.getRawAxis(Controls.Drive.strafeAxis),
-                () -> -Controls.driverController.getRawAxis(Controls.Drive.rotationAxis),
-                () -> false,
-                () -> Controls.Drive.dampen.getAsBoolean(),
-                () -> 1 // speed multiplier
-            )
-        );
+                new TeleopSwerve(
+                        s_Swerve,
+                        () -> -Controls.driverController.getRawAxis(Controls.Drive.translationAxis),
+                        () -> -Controls.driverController.getRawAxis(Controls.Drive.strafeAxis),
+                        () -> -Controls.driverController.getRawAxis(Controls.Drive.rotationAxis),
+                        () -> false,
+                        () -> Controls.Drive.dampen.getAsBoolean(),
+                        () -> 1 // speed multiplier
+                        ));
 
         // Configure the button bindings
         configureButtonBindings();
@@ -49,17 +48,17 @@ public class RobotContainer {
 
         // Heading lock bindings
         Controls.Drive.up
-            .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d90))
-            .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
+                .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d90))
+                .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
         Controls.Drive.left
-            .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d180))
-            .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
+                .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d180))
+                .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
         Controls.Drive.right
-            .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d0))
-            .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
+                .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d0))
+                .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
         Controls.Drive.down
-            .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d270))
-            .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
+                .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d270))
+                .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
 
         // Up system bindings
         // TODO: Switch up system to event commands

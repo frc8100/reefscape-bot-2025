@@ -10,7 +10,6 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 // import com.pathplanner.lib.util.ReplanningConfig;
 // import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.config.SparkBaseConfig;
-
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
@@ -33,9 +32,8 @@ public class SwerveConfig {
 
     public static final boolean invertGyro = false; // Always ensure Gyro is CCW+ CW-
 
-    public static final COTSNeoSwerveConstants chosenModule = COTSNeoSwerveConstants.SDSMK4i(
-        COTSNeoSwerveConstants.driveGearRatios.SDSMK4i_L2
-    );
+    public static final COTSNeoSwerveConstants chosenModule =
+            COTSNeoSwerveConstants.SDSMK4i(COTSNeoSwerveConstants.driveGearRatios.SDSMK4i_L2);
 
     /* Drivetrain Constants */
     public static final double trackWidth = Units.inchesToMeters(25.75);
@@ -44,12 +42,12 @@ public class SwerveConfig {
 
     /* Swerve Kinematics
      * No need to ever change this unless you are not doing a traditional rectangular/square 4 module swerve */
-    public static final SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(
-        new Translation2d(wheelBase / 2.0, trackWidth / 2.0),
-        new Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
-        new Translation2d(-wheelBase / 2.0, trackWidth / 2.0),
-        new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0)
-    );
+    public static final SwerveDriveKinematics swerveKinematics =
+            new SwerveDriveKinematics(
+                    new Translation2d(wheelBase / 2.0, trackWidth / 2.0),
+                    new Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
+                    new Translation2d(-wheelBase / 2.0, trackWidth / 2.0),
+                    new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0));
 
     /* Module Gear Ratios */
     public static final double driveGearRatio = chosenModule.driveGearRatio;
@@ -109,13 +107,12 @@ public class SwerveConfig {
     /** Radians per Second */
     public static final double maxAngularVelocity = 5.0; // max 10 or.....
 
-    /**
-     * pplib config, temporary
-     */
+    /** pplib config, temporary */
     // TODO: Update to 2025
-    // public static final HolonomicPathFollowerConfig pathFollowerConfig = new HolonomicPathFollowerConfig(
-    //     new PIDConstants(5.0, 0, 0), // Translation constants 
-    //     new PIDConstants(5.0, 0, 0), // Rotation constants 
+    // public static final HolonomicPathFollowerConfig pathFollowerConfig = new
+    // HolonomicPathFollowerConfig(
+    //     new PIDConstants(5.0, 0, 0), // Translation constants
+    //     new PIDConstants(5.0, 0, 0), // Rotation constants
     //     maxSpeed,
     //     // flModuleOffset.getNorm(), // Drive base radius (distance from center to furthest module)
     //     // Placeholder
@@ -126,14 +123,14 @@ public class SwerveConfig {
     /** Configures the swerve config */
     public SwerveConfig() {
         // Set up the CANCoder configuration
-        MagnetSensorConfigs magnetSenorConfig = new MagnetSensorConfigs()
-            // TODO: This setting is not present in 2025; may cause problems
-            // .withAbsoluteSensorRange(AbsoluteSensorRangeValue.Unsigned_0To1)
-            .withSensorDirection(
-                canCoderInvert
-                    ? SensorDirectionValue.Clockwise_Positive
-                    : SensorDirectionValue.CounterClockwise_Positive
-            );
+        MagnetSensorConfigs magnetSenorConfig =
+                new MagnetSensorConfigs()
+                        // TODO: This setting is not present in 2025; may cause problems
+                        // .withAbsoluteSensorRange(AbsoluteSensorRangeValue.Unsigned_0To1)
+                        .withSensorDirection(
+                                canCoderInvert
+                                        ? SensorDirectionValue.Clockwise_Positive
+                                        : SensorDirectionValue.CounterClockwise_Positive);
 
         canCoderConfig.withMagnetSensor(magnetSenorConfig);
         // TODO: Update to phoenix 6 (missing config, SensorDirection from boolean to enum)

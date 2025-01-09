@@ -31,7 +31,8 @@ public class Robot extends LoggedRobot {
     private static final String defaultAuto = "Default";
     private static final String customAuto = "My Auto";
     private String autoSelected;
-    private final LoggedDashboardChooser<String> chooser = new LoggedDashboardChooser<>("Auto Choices");
+    private final LoggedDashboardChooser<String> chooser =
+            new LoggedDashboardChooser<>("Auto Choices");
 
     /**
      * This function is run when the robot is first started up and should be used for any

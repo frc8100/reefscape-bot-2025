@@ -18,7 +18,8 @@ public class RevSwerveModuleConstants {
      * @param angleOffset
      * @param canBus
      */
-    public RevSwerveModuleConstants(int driveMotorID, int angleMotorID, int canCoderID, Rotation2d angleOffset) {
+    public RevSwerveModuleConstants(
+            int driveMotorID, int angleMotorID, int canCoderID, Rotation2d angleOffset) {
         this.driveMotorID = driveMotorID;
         this.angleMotorID = angleMotorID;
         this.cancoderID = canCoderID;

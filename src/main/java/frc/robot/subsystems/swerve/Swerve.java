@@ -1,12 +1,8 @@
 package frc.robot.subsystems.swerve;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.PathPlannerLogging;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -16,12 +12,11 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.math.GeometryUtils;
+import org.littletonrobotics.junction.Logger;
 
 /** Swerve subsystem, responsible for controlling the swerve drive. */
 public class Swerve extends SubsystemBase {
@@ -38,9 +33,7 @@ public class Swerve extends SubsystemBase {
     /** The gyro. This is used to determine the robot's heading. */
     public final Pigeon2 gyro;
 
-    /**
-     * A 2d representation of the field
-     */
+    /** A 2d representation of the field */
     private Field2d field = new Field2d();
 
     /** Creates a new Swerve subsystem. */
@@ -50,14 +43,16 @@ public class Swerve extends SubsystemBase {
         gyro.getConfigurator().apply(new Pigeon2Configuration());
 
         // Create swerve modules
-        mSwerveMods = new SwerveModule[] {
-            new SwerveMod(0, SwerveConstants.Swerve.Mod0.constants),
-            new SwerveMod(1, SwerveConstants.Swerve.Mod1.constants),
-            new SwerveMod(2, SwerveConstants.Swerve.Mod2.constants),
-            new SwerveMod(3, SwerveConstants.Swerve.Mod3.constants),
-        };
+        mSwerveMods =
+                new SwerveModule[] {
+                    new SwerveMod(0, SwerveConstants.Swerve.Mod0.constants),
+                    new SwerveMod(1, SwerveConstants.Swerve.Mod1.constants),
+                    new SwerveMod(2, SwerveConstants.Swerve.Mod2.constants),
+                    new SwerveMod(3, SwerveConstants.Swerve.Mod3.constants),
+                };
 
-        swerveOdometry = new SwerveDriveOdometry(SwerveConfig.swerveKinematics, getYaw(), getModulePositions());
+        swerveOdometry =
+                new SwerveDriveOdometry(SwerveConfig.swerveKinematics, getYaw(), getModulePositions());
         zeroGyro();
 
         // Load the RobotConfig from the GUI settings. You should probably
@@ -111,21 +106,20 @@ public class Swerve extends SubsystemBase {
         final double LOOP_TIME_S = 0.02;
 
         // Calculate the future robot pose based on the original speeds and loop time
-        Pose2d futureRobotPose = new Pose2d(
-            originalSpeeds.vxMetersPerSecond * LOOP_TIME_S,
-            originalSpeeds.vyMetersPerSecond * LOOP_TIME_S,
-            Rotation2d.fromRadians(originalSpeeds.omegaRadiansPerSecond * LOOP_TIME_S)
-        );
+        Pose2d futureRobotPose =
+                new Pose2d(
+                        originalSpeeds.vxMetersPerSecond * LOOP_TIME_S,
+                        originalSpeeds.vyMetersPerSecond * LOOP_TIME_S,
+                        Rotation2d.fromRadians(originalSpeeds.omegaRadiansPerSecond * LOOP_TIME_S));
 
         // Compute the twist (change in pose) required to reach the future pose
         Twist2d twistForPose = GeometryUtils.log(futureRobotPose);
 
         // Update the speeds based on the computed twist
         return new ChassisSpeeds(
-            twistForPose.dx / LOOP_TIME_S,
-            twistForPose.dy / LOOP_TIME_S,
-            twistForPose.dtheta / LOOP_TIME_S
-        );
+                twistForPose.dx / LOOP_TIME_S,
+                twistForPose.dy / LOOP_TIME_S,
+                twistForPose.dtheta / LOOP_TIME_S);
     }
 
     /**
@@ -136,19 +130,21 @@ public class Swerve extends SubsystemBase {
      * @param fieldRelative Whether the speeds are field-relative.
      * @param isOpenLoop Whether to use open-loop control.
      */
-    public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
+    public void drive(
+            Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
         // Determine the desired chassis speeds based on whether the control is field-relative
-        ChassisSpeeds desiredChassisSpeeds = fieldRelative
-            ? ChassisSpeeds.fromFieldRelativeSpeeds(translation.getX(), translation.getY(), rotation, getYaw())
-            : new ChassisSpeeds(translation.getX(), translation.getY(), rotation);
+        ChassisSpeeds desiredChassisSpeeds =
+                fieldRelative
+                        ? ChassisSpeeds.fromFieldRelativeSpeeds(
+                                translation.getX(), translation.getY(), rotation, getYaw())
+                        : new ChassisSpeeds(translation.getX(), translation.getY(), rotation);
 
         // Correct the chassis speeds for robot dynamics
         desiredChassisSpeeds = correctForDynamics(desiredChassisSpeeds);
 
         // Convert the chassis speeds to swerve module states
-        SwerveModuleState[] swerveModuleStates = SwerveConfig.swerveKinematics.toSwerveModuleStates(
-            desiredChassisSpeeds
-        );
+        SwerveModuleState[] swerveModuleStates =
+                SwerveConfig.swerveKinematics.toSwerveModuleStates(desiredChassisSpeeds);
 
         // Ensure the wheel speeds are within the allowable range
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, SwerveConfig.maxSpeed);

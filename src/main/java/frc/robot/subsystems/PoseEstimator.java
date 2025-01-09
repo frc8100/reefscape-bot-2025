@@ -20,19 +20,19 @@ public class PoseEstimator extends SubsystemBase {
     public Pose2d visionPose = new Pose2d();
 
     public PoseEstimator() {
-        sEstimator = new SwerveDrivePoseEstimator(
-            SwerveConfig.swerveKinematics,
-            new Rotation2d(),
-            new SwerveModulePosition[] {
-                new SwerveModulePosition(),
-                new SwerveModulePosition(),
-                new SwerveModulePosition(),
-                new SwerveModulePosition(),
-            },
-            new Pose2d(),
-            Constants.PoseEstimator.stateStdDevs,
-            Constants.PoseEstimator.VisionStdDevs
-        );
+        sEstimator =
+                new SwerveDrivePoseEstimator(
+                        SwerveConfig.swerveKinematics,
+                        new Rotation2d(),
+                        new SwerveModulePosition[] {
+                            new SwerveModulePosition(),
+                            new SwerveModulePosition(),
+                            new SwerveModulePosition(),
+                            new SwerveModulePosition(),
+                        },
+                        new Pose2d(),
+                        Constants.PoseEstimator.stateStdDevs,
+                        Constants.PoseEstimator.VisionStdDevs);
     }
 
     @Override
