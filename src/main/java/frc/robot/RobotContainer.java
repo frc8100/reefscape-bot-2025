@@ -4,9 +4,12 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.commands.*;
+// import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.PoseEstimator;
 import frc.robot.subsystems.swerve.Swerve;
+import com.pathplanner.lib.auto.AutoBuilder;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -16,9 +19,13 @@ import frc.robot.subsystems.swerve.Swerve;
  */
 public class RobotContainer {
 
-    /* Subsystems */
+    /** Dashboard inputs */
+    private final LoggedDashboardChooser<Command> autoChooser;
+
+    // Subsystems
     private final Swerve s_Swerve = new Swerve();
     private final PoseEstimator s_PoseEstimator = new PoseEstimator();
+    
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
         s_Swerve.setDefaultCommand(
@@ -31,6 +38,25 @@ public class RobotContainer {
                         () -> Controls.Drive.dampen.getAsBoolean(),
                         () -> 1 // speed multiplier
                         ));
+
+        // Set up auto routines
+        autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+
+        // Set up SysId routines
+        // autoChooser.addOption(
+        //         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+        // autoChooser.addOption(
+        //         "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+        // autoChooser.addOption(
+        //         "Drive SysId (Quasistatic Forward)",
+        //         drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        // autoChooser.addOption(
+        //         "Drive SysId (Quasistatic Reverse)",
+        //         drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        // autoChooser.addOption(
+        //         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        // autoChooser.addOption(
+        //         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
         // Configure the button bindings
         configureButtonBindings();
@@ -79,6 +105,6 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return null;
+        return autoChooser.get();
     }
 }
