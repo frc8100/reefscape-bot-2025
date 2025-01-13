@@ -2,6 +2,7 @@ package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -16,6 +17,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.math.GeometryUtils;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 /** Swerve subsystem, responsible for controlling the swerve drive. */
@@ -35,6 +37,13 @@ public class Swerve extends SubsystemBase {
 
     /** A 2d representation of the field */
     private Field2d field = new Field2d();
+
+    // private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
+
+    /** Pose estimator */
+    // private SwerveDrivePoseEstimator poseEstimator =
+    //         new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new
+    // Pose2d());
 
     /** Creates a new Swerve subsystem. */
     public Swerve() {
@@ -57,35 +66,48 @@ public class Swerve extends SubsystemBase {
 
         // Load the RobotConfig from the GUI settings. You should probably
         // store this in your Constants file
-        // 2025 exclusive
-        // RobotConfig config;
-        // try{
-        //     config = RobotConfig.fromGUISettings();
-        // } catch (Exception e) {
-        //     // Handle exception as needed
-        //     e.printStackTrace();
-        // }
+        RobotConfig config;
+        try {
+            config = RobotConfig.fromGUISettings();
+        } catch (Exception e) {
+            // Handle exception as needed
+            e.printStackTrace();
+        }
 
-        // Configure AutoBuilder
-        // AutoBuilder.configureHolonomic(
-        //     this::getPose,
-        //     this::resetPose,
-        //     this::getSpeeds,
-        //     this::driveRobotRelative,
-        //     SwerveConfig.pathFollowerConfig,
-        //     () -> {
-        //         // Boolean supplier that controls when the path will be mirrored for the red alliance
-        //         // This will flip the path being followed to the red side of the field.
-        //         // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+        // TODO: Configure AutoBuilder
+        // AutoBuilder.configure(
+        //         this::getPose,
+        //         this::setPose,
+        //         this::getChassisSpeeds,
+        //         this::runVelocity,
+        //         new PPHolonomicDriveController(
+        //                 new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
+        //         config,
+        //         () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+        //         this);
+        // Pathfinding.setPathfinder(new LocalADStar());
+        // PathPlannerLogging.setLogActivePathCallback(
+        //         (activePath) -> {
+        //             Logger.recordOutput(
+        //                     "Odometry/Trajectory", activePath.toArray(new
+        // Pose2d[activePath.size()]));
+        //         });
+        // PathPlannerLogging.setLogTargetPoseCallback(
+        //         (targetPose) -> {
+        //             Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
+        //         });
 
-        //         Alliance alliance = DriverStation.getAlliance();
-        //         if (alliance.isPresent()) {
-        //             return alliance.get() == DriverStation.Alliance.Red;
-        //         }
-        //         return false;
-        //     },
-        //     this
-        // );
+        // TODO: Configure SysId
+        // sysId =
+        //         new SysIdRoutine(
+        //                 new SysIdRoutine.Config(
+        //                         null,
+        //                         null,
+        //                         null,
+        //                         (state) -> Logger.recordOutput("Drive/SysIdState",
+        // state.toString())),
+        //                 new SysIdRoutine.Mechanism(
+        //                         (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
 
         // Set up custom logging to add the current path to a field 2d widget
         PathPlannerLogging.setLogActivePathCallback((poses) -> field.getObject("path").setPoses(poses));
@@ -175,6 +197,7 @@ public class Swerve extends SubsystemBase {
     /**
      * @return The current pose of the robot. This is determined by the swerve odometry.
      */
+    @AutoLogOutput(key = "Odometry/Robot")
     public Pose2d getPose() {
         Pose2d p = swerveOdometry.getPoseMeters();
         return new Pose2d(-p.getX(), -p.getY(), p.getRotation());
