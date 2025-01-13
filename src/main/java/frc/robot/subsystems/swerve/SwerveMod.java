@@ -19,6 +19,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.lib.util.swerveUtil.CTREModuleState;
 import frc.lib.util.swerveUtil.RevSwerveModuleConstants;
 
+// TODO: Refactor this
+
 /** a Swerve Modules using REV Robotics motor controllers and CTRE CANcoder absolute encoders. */
 public class SwerveMod implements SwerveModule {
 
@@ -92,6 +94,7 @@ public class SwerveMod implements SwerveModule {
     private void configAngleMotor() {
         // Assign the relative angle encoder and configure it
         SparkMaxConfig angleConfig = new SparkMaxConfig();
+        relAngleEncoder = mAngleMotor.getEncoder();
 
         angleConfig
                 .encoder
