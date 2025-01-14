@@ -2,8 +2,16 @@ package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.pathfinding.LocalADStar;
+import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
+
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -13,18 +21,39 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.math.GeometryUtils;
+import frc.robot.Constants;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 /** Swerve subsystem, responsible for controlling the swerve drive. */
 public class Swerve extends SubsystemBase {
-
-    /** The swerve odometry. This is used to determine the robot's position on the field. */
-    public final SwerveDriveOdometry swerveOdometry;
 
     /**
      * The swerve modules. These are the four swerve modules on the robot. Each module has a drive
@@ -35,15 +64,49 @@ public class Swerve extends SubsystemBase {
     /** The gyro. This is used to determine the robot's heading. */
     public final Pigeon2 gyro;
 
+    
+    /* 
+     * Swerve Kinematics
+     * No need to ever change this unless you are not doing a traditional rectangular/square 4 module swerve
+     */
+    private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(SwerveConfig.moduleTranslations);
+
+    /**
+     * The last stored position of the swerve modules
+     * for delta tracking
+     */
+    // TODO: Implement this
+    private SwerveModulePosition[] lastModulePositions =
+            new SwerveModulePosition[] {
+                new SwerveModulePosition(),
+                new SwerveModulePosition(),
+                new SwerveModulePosition(),
+                new SwerveModulePosition()
+            };
+
     /** A 2d representation of the field */
     private Field2d field = new Field2d();
 
+    /**
+     * Raw gryo rotation.
+     * Used for the pose estimator.
+     */
+    // TODO: Implement this
+    private Rotation2d rawGyroRotation = new Rotation2d();
+
     // private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
 
-    /** Pose estimator */
-    // private SwerveDrivePoseEstimator poseEstimator =
-    //         new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new
-    // Pose2d());
+    /**
+     * Pose estimator. This is the same as odometry but includes vision input to correct for drifting.
+     */
+    private SwerveDrivePoseEstimator poseEstimator =
+            new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new
+    Pose2d(), 
+                        Constants.PoseEstimator.stateStdDevs,
+                        Constants.PoseEstimator.VisionStdDevs);
+
+    /** The swerve odometry. This is used to determine the robot's position on the field. */
+    public final SwerveDriveOdometry swerveOdometry;
 
     /** Creates a new Swerve subsystem. */
     public Swerve() {
@@ -61,7 +124,8 @@ public class Swerve extends SubsystemBase {
                 };
 
         swerveOdometry =
-                new SwerveDriveOdometry(SwerveConfig.swerveKinematics, getYaw(), getModulePositions());
+                new SwerveDriveOdometry(kinematics, getYaw(), getModulePositions());
+
         zeroGyro();
 
         // Load the RobotConfig from the GUI settings. You should probably
@@ -75,27 +139,29 @@ public class Swerve extends SubsystemBase {
         }
 
         // TODO: Configure AutoBuilder
-        // AutoBuilder.configure(
-        //         this::getPose,
-        //         this::setPose,
-        //         this::getChassisSpeeds,
-        //         this::runVelocity,
-        //         new PPHolonomicDriveController(
-        //                 new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
-        //         config,
-        //         () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
-        //         this);
-        // Pathfinding.setPathfinder(new LocalADStar());
-        // PathPlannerLogging.setLogActivePathCallback(
-        //         (activePath) -> {
-        //             Logger.recordOutput(
-        //                     "Odometry/Trajectory", activePath.toArray(new
-        // Pose2d[activePath.size()]));
-        //         });
-        // PathPlannerLogging.setLogTargetPoseCallback(
-        //         (targetPose) -> {
-        //             Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
-        //         });
+        AutoBuilder.configure(
+                this::getPose,
+                this::setPose,
+                this::getChassisSpeeds,
+                // TODO: null
+                // this::runVelocity,
+                null,
+                new PPHolonomicDriveController(
+                        new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
+                config,
+                () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+                this);
+        Pathfinding.setPathfinder(new LocalADStar());
+        PathPlannerLogging.setLogActivePathCallback(
+                (activePath) -> {
+                    Logger.recordOutput(
+                            "Odometry/Trajectory", activePath.toArray(new
+        Pose2d[activePath.size()]));
+                });
+        PathPlannerLogging.setLogTargetPoseCallback(
+                (targetPose) -> {
+                    Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
+                });
 
         // TODO: Configure SysId
         // sysId =
@@ -166,7 +232,7 @@ public class Swerve extends SubsystemBase {
 
         // Convert the chassis speeds to swerve module states
         SwerveModuleState[] swerveModuleStates =
-                SwerveConfig.swerveKinematics.toSwerveModuleStates(desiredChassisSpeeds);
+                kinematics.toSwerveModuleStates(desiredChassisSpeeds);
 
         // Ensure the wheel speeds are within the allowable range
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, SwerveConfig.maxSpeed);
@@ -199,8 +265,28 @@ public class Swerve extends SubsystemBase {
      */
     @AutoLogOutput(key = "Odometry/Robot")
     public Pose2d getPose() {
-        Pose2d p = swerveOdometry.getPoseMeters();
-        return new Pose2d(-p.getX(), -p.getY(), p.getRotation());
+        return poseEstimator.getEstimatedPosition();
+        // Pose2d p = swerveOdometry.getPoseMeters();
+        // return new Pose2d(-p.getX(), -p.getY(), p.getRotation());
+    }
+
+    /** @return the current odometry rotation. */
+    public Rotation2d getRotation() {
+        return getPose().getRotation();
+    }
+    
+    /** Resets the current odometry pose. */
+    public void setPose(Pose2d pose) {
+        poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+    }
+
+    /** Adds a new timestamped vision measurement. */
+    public void addVisionMeasurement(
+            Pose2d visionRobotPoseMeters,
+            double timestampSeconds,
+            Matrix<N3, N1> visionMeasurementStdDevs) {
+        poseEstimator.addVisionMeasurement(
+                visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
     }
 
     /**
@@ -241,6 +327,12 @@ public class Swerve extends SubsystemBase {
         }
 
         return positions;
+    }
+
+    /** @return the measured chassis speeds of the robot. */
+    @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
+    private ChassisSpeeds getChassisSpeeds() {
+        return kinematics.toChassisSpeeds(getModuleStates());
     }
 
     /**

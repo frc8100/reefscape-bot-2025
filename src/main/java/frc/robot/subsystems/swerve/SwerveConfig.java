@@ -40,14 +40,16 @@ public class SwerveConfig {
     public static final double wheelBase = Units.inchesToMeters(21.50);
     public static final double wheelCircumference = chosenModule.wheelCircumference;
 
-    /* Swerve Kinematics
-     * No need to ever change this unless you are not doing a traditional rectangular/square 4 module swerve */
-    public static final SwerveDriveKinematics swerveKinematics =
-            new SwerveDriveKinematics(
-                    new Translation2d(wheelBase / 2.0, trackWidth / 2.0),
-                    new Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
-                    new Translation2d(-wheelBase / 2.0, trackWidth / 2.0),
-                    new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0));
+    /**
+     * The module translations.
+     * No need to change.
+     */
+    public static final Translation2d[] moduleTranslations = new Translation2d[] {
+        new Translation2d(wheelBase / 2.0, trackWidth / 2.0),
+        new Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
+        new Translation2d(-wheelBase / 2.0, trackWidth / 2.0),
+        new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0),
+    };
 
     /* Module Gear Ratios */
     public static final double driveGearRatio = chosenModule.driveGearRatio;
