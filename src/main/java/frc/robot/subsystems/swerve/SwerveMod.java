@@ -21,7 +21,7 @@ import frc.lib.util.swerveUtil.RevSwerveModuleConstants;
 
 // TODO: Refactor this
 
-/** a Swerve Modules using REV Robotics motor controllers and CTRE CANcoder absolute encoders. */
+/** a Swerve Module using REV Robotics motor controllers and CTRE CANcoder absolute encoders. */
 public class SwerveMod implements SwerveModule {
 
     /**
@@ -35,19 +35,19 @@ public class SwerveMod implements SwerveModule {
 
     /**
      * The angle motor. This motor is used to control the angle of the module. Uses REV Robotics
-     * SparkMax.
+     * SparkMax controller.
      */
     private SparkMax mAngleMotor;
 
     /**
      * The drive motor. This motor is used to control the speed of the module. Uses REV Robotics
-     * SparkMax.
+     * SparkMax controller.
      */
     private SparkMax mDriveMotor;
 
     /**
-     * The angle encoder. This encoder is used to determine the angle of the module. Uses CTRE Phoenix
-     * CANCoder.
+     * The angle encoder. This encoder is used to determine the angle of the module. Uses CTRE
+     * Phoenix CANCoder.
      */
     private CANcoder angleEncoder;
 
@@ -110,8 +110,7 @@ public class SwerveMod implements SwerveModule {
         // SparkClosedLoopController controller = mAngleMotor.getClosedLoopController();
         angleConfig
                 .closedLoop
-                .pidf(
-                        SwerveConfig.angleKP, SwerveConfig.angleKI, SwerveConfig.angleKD, SwerveConfig.angleKF)
+                .pidf(SwerveConfig.angleKP, SwerveConfig.angleKI, SwerveConfig.angleKD, SwerveConfig.angleKF)
                 .outputRange(-SwerveConfig.anglePower, SwerveConfig.anglePower);
         // controller.setP(SwerveConfig.angleKP, 0);
         // controller.setI(SwerveConfig.angleKI, 0);
@@ -129,8 +128,7 @@ public class SwerveMod implements SwerveModule {
         // mAngleMotor.setIdleMode(SwerveConfig.angleIdleMode);
 
         // ! IMPORTANT: New changes in 2025 may make this inaccurate
-        mAngleMotor.configure(
-                angleConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        mAngleMotor.configure(angleConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     /** Configures the drive motor. */
@@ -151,8 +149,7 @@ public class SwerveMod implements SwerveModule {
         // Configure the PID controller for the drive motor
         driveConfig
                 .closedLoop
-                .pidf(
-                        SwerveConfig.driveKP, SwerveConfig.driveKI, SwerveConfig.driveKD, SwerveConfig.driveKF)
+                .pidf(SwerveConfig.driveKP, SwerveConfig.driveKI, SwerveConfig.driveKD, SwerveConfig.driveKF)
                 .outputRange(-SwerveConfig.drivePower, SwerveConfig.drivePower);
 
         driveConfig
@@ -161,8 +158,7 @@ public class SwerveMod implements SwerveModule {
                 .idleMode(SwerveConfig.driveIdleMode);
 
         // ! IMPORTANT: New changes in 2025 may make this inaccurate
-        mDriveMotor.configure(
-                driveConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        mDriveMotor.configure(driveConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     /**
@@ -264,8 +260,8 @@ public class SwerveMod implements SwerveModule {
     }
 
     /**
-     * Resets the module to absolute position. This is used to zero the module to a specific angle. It
-     * is also called when the robot is enabled to reset the module to the absolute position.
+     * Resets the module to absolute position. This is used to zero the module to a specific angle.
+     * It is also called when the robot is enabled to reset the module to the absolute position.
      */
     private void resetToAbsolute() {
         double absolutePosition = getCanCoder().getDegrees() - angleOffset.getDegrees();

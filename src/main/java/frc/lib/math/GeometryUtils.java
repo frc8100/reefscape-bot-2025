@@ -37,9 +37,7 @@ public class GeometryUtils {
                     -(half_dtheta * Math.sin(transform.getRotation().getRadians())) / cos_minus_one;
         }
         final Translation2d translation_part =
-                transform
-                        .getTranslation()
-                        .rotateBy(new Rotation2d(halftheta_by_tan_of_halfdtheta, -half_dtheta));
+                transform.getTranslation().rotateBy(new Rotation2d(halftheta_by_tan_of_halfdtheta, -half_dtheta));
         return new Twist2d(translation_part.getX(), translation_part.getY(), dtheta);
     }
 }

@@ -11,7 +11,6 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 // import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
 import frc.lib.util.swerveUtil.COTSNeoSwerveConstants;
 
@@ -40,10 +39,7 @@ public class SwerveConfig {
     public static final double wheelBase = Units.inchesToMeters(21.50);
     public static final double wheelCircumference = chosenModule.wheelCircumference;
 
-    /**
-     * The module translations.
-     * No need to change.
-     */
+    /** The module translations. No need to change. */
     public static final Translation2d[] moduleTranslations = new Translation2d[] {
         new Translation2d(wheelBase / 2.0, trackWidth / 2.0),
         new Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
@@ -116,7 +112,8 @@ public class SwerveConfig {
     //     new PIDConstants(5.0, 0, 0), // Translation constants
     //     new PIDConstants(5.0, 0, 0), // Rotation constants
     //     maxSpeed,
-    //     // flModuleOffset.getNorm(), // Drive base radius (distance from center to furthest module)
+    //     // flModuleOffset.getNorm(), // Drive base radius (distance from center to furthest
+    // module)
     //     // Placeholder
     //     0.1,
     //     new ReplanningConfig()
@@ -125,21 +122,21 @@ public class SwerveConfig {
     /** Configures the swerve config */
     public SwerveConfig() {
         // Set up the CANCoder configuration
-        MagnetSensorConfigs magnetSenorConfig =
-                new MagnetSensorConfigs()
-                        // TODO: This setting is not present in 2025; may cause problems
-                        // .withAbsoluteSensorRange(AbsoluteSensorRangeValue.Unsigned_0To1)
-                        .withSensorDirection(
-                                canCoderInvert
-                                        ? SensorDirectionValue.Clockwise_Positive
-                                        : SensorDirectionValue.CounterClockwise_Positive);
+        MagnetSensorConfigs magnetSenorConfig = new MagnetSensorConfigs()
+                // TODO: This setting is not present in 2025; may cause problems
+                // .withAbsoluteSensorRange(AbsoluteSensorRangeValue.Unsigned_0To1)
+                .withSensorDirection(
+                        canCoderInvert
+                                ? SensorDirectionValue.Clockwise_Positive
+                                : SensorDirectionValue.CounterClockwise_Positive);
 
         canCoderConfig.withMagnetSensor(magnetSenorConfig);
         // TODO: Update to phoenix 6 (missing config, SensorDirection from boolean to enum)
         // canCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive
         // canCoderConfig.MagnetSensor.SensorDirection = canCoderInvert ?
         // SensorDirectionValue.Clockwise_Positive : SensorDirectionValue.CounterClockwise_Positive;
-        // canCoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0_To360;
+        // canCoderConfig.MagnetSensor.AbsoluteSensorRange =
+        // AbsoluteSensorRangeValue.Unsigned_0_To360;
         // canCoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
         // canCoderConfig.MagnetSensor.initializationStrategy =
         // SensorInitializationStrategy.BootToAbsolutePosition;

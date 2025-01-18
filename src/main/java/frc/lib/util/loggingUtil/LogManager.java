@@ -27,7 +27,8 @@ public class LogManager {
     private static ArrayList<BooleanLogEntry> booleanLogs = new ArrayList<>();
     private static ArrayList<IntegerLogEntry> intLogs = new ArrayList<>();
 
-    // These are the suppliers, or functions that return values. This is how the values are accessed.
+    // These are the suppliers, or functions that return values. This is how the values are
+    // accessed.
     private static ArrayList<DoubleSupplier> doubleValues = new ArrayList<>();
     private static ArrayList<DoubleSupplier[]> doubleArrayValues = new ArrayList<>();
     private static ArrayList<BooleanSupplier> booleanValues = new ArrayList<>();
@@ -52,9 +53,9 @@ public class LogManager {
 
     /**
      * Logs a single double value to the log. Do not use with the other addDouble() that takes a
-     * double supplier. This will only log the value once, so it should be called periodically or when
-     * needed. If you have a function that consistently returns values, it may be easier to use the
-     * double supplier log.
+     * double supplier. This will only log the value once, so it should be called periodically or
+     * when needed. If you have a function that consistently returns values, it may be easier to use
+     * the double supplier log.
      *
      * @param name The name of the log. Use / to create subdirectories, and keep names unique.
      * @param value the value to be logged.
@@ -79,10 +80,10 @@ public class LogManager {
     }
 
     /**
-     * Logs a single double array to the log. Do not use with the other addDoubleArray() that takes a
-     * double array supplier. This will only log the value once, so it should be called periodically
-     * or when needed. If you have a function that consistently returns values, it may be easier to
-     * use the double array supplier log.
+     * Logs a single double array to the log. Do not use with the other addDoubleArray() that takes
+     * a double array supplier. This will only log the value once, so it should be called
+     * periodically or when needed. If you have a function that consistently returns values, it may
+     * be easier to use the double array supplier log.
      *
      * @param name The name of the log. Use / to create subdirectories, and keep names unique.
      * @param value the value to be logged.
@@ -109,7 +110,8 @@ public class LogManager {
     /**
      * Logs a single int to the log. Do not use with the other addInt() that takes a int supplier.
      * This will only log the value once, so it should be called periodically or when needed. If you
-     * have a function that consistently returns values, it may be easier to use the int supplier log.
+     * have a function that consistently returns values, it may be easier to use the int supplier
+     * log.
      *
      * @param name The name of the log. Use / to create subdirectories, and keep names unique.
      * @param value the value to be logged.

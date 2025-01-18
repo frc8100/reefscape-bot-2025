@@ -50,43 +50,33 @@ public class TeleopSwerve extends Command {
     @Override
     public void execute() {
         /* Get Values, Deadband*/
-        double translationVal =
-                MathUtil.applyDeadband(translationSup.getAsDouble(), Constants.stickDeadband)
-                        * (dampen.getAsBoolean() ? 0.2 : 1)
-                        * ((speedDial.getAsDouble() + 1) / 2);
-        double strafeVal =
-                MathUtil.applyDeadband(strafeSup.getAsDouble(), Constants.stickDeadband)
-                        * (dampen.getAsBoolean() ? 0.2 : 1)
-                        * ((speedDial.getAsDouble() + 1) / 2);
-        double rotationVal =
-                MathUtil.applyDeadband(rotationSup.getAsDouble(), Constants.stickDeadband)
-                        * (dampen.getAsBoolean() ? 0.2 : 1)
-                        * ((speedDial.getAsDouble() + 1) / 2);
+        double translationVal = MathUtil.applyDeadband(translationSup.getAsDouble(), Constants.stickDeadband)
+                * (dampen.getAsBoolean() ? 0.2 : 1)
+                * ((speedDial.getAsDouble() + 1) / 2);
+        double strafeVal = MathUtil.applyDeadband(strafeSup.getAsDouble(), Constants.stickDeadband)
+                * (dampen.getAsBoolean() ? 0.2 : 1)
+                * ((speedDial.getAsDouble() + 1) / 2);
+        double rotationVal = MathUtil.applyDeadband(rotationSup.getAsDouble(), Constants.stickDeadband)
+                * (dampen.getAsBoolean() ? 0.2 : 1)
+                * ((speedDial.getAsDouble() + 1) / 2);
 
         // heading direction state
         switch (States.driveState) {
             case d0:
                 // heading lock
-                rotationVal =
-                        rotationController.calculate(s_Swerve.getYaw().getRadians(), Units.degreesToRadians(0));
+                rotationVal = rotationController.calculate(s_Swerve.getYaw().getRadians(), Units.degreesToRadians(0));
                 break;
             case d90:
                 // heading lock
-                rotationVal =
-                        rotationController.calculate(
-                                s_Swerve.getYaw().getRadians(), Units.degreesToRadians(90));
+                rotationVal = rotationController.calculate(s_Swerve.getYaw().getRadians(), Units.degreesToRadians(90));
                 break;
             case d180:
                 // heading lock
-                rotationVal =
-                        rotationController.calculate(
-                                s_Swerve.getYaw().getRadians(), Units.degreesToRadians(180));
+                rotationVal = rotationController.calculate(s_Swerve.getYaw().getRadians(), Units.degreesToRadians(180));
                 break;
             case d270:
                 // heading lock
-                rotationVal =
-                        rotationController.calculate(
-                                s_Swerve.getYaw().getRadians(), Units.degreesToRadians(270));
+                rotationVal = rotationController.calculate(s_Swerve.getYaw().getRadians(), Units.degreesToRadians(270));
                 break;
             case standard:
                 // normal

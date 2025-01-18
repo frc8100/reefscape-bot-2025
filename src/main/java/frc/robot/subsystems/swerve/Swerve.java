@@ -9,7 +9,6 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.pathfinding.LocalADStar;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
-
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -25,30 +24,11 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.math.GeometryUtils;
 import frc.robot.Constants;
-
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -64,46 +44,38 @@ public class Swerve extends SubsystemBase {
     /** The gyro. This is used to determine the robot's heading. */
     public final Pigeon2 gyro;
 
-    
-    /* 
+    /*
      * Swerve Kinematics
      * No need to ever change this unless you are not doing a traditional rectangular/square 4 module swerve
      */
     private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(SwerveConfig.moduleTranslations);
 
-    /**
-     * The last stored position of the swerve modules
-     * for delta tracking
-     */
+    /** The last stored position of the swerve modules for delta tracking */
     // TODO: Implement this
-    private SwerveModulePosition[] lastModulePositions =
-            new SwerveModulePosition[] {
-                new SwerveModulePosition(),
-                new SwerveModulePosition(),
-                new SwerveModulePosition(),
-                new SwerveModulePosition()
-            };
+    private SwerveModulePosition[] lastModulePositions = new SwerveModulePosition[] {
+        new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition()
+    };
 
     /** A 2d representation of the field */
     private Field2d field = new Field2d();
 
-    /**
-     * Raw gryo rotation.
-     * Used for the pose estimator.
-     */
+    /** Raw gryo rotation. Used for the pose estimator. */
     // TODO: Implement this
     private Rotation2d rawGyroRotation = new Rotation2d();
 
     // private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
 
     /**
-     * Pose estimator. This is the same as odometry but includes vision input to correct for drifting.
+     * Pose estimator. This is the same as odometry but includes vision input to correct for
+     * drifting.
      */
-    private SwerveDrivePoseEstimator poseEstimator =
-            new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new
-    Pose2d(), 
-                        Constants.PoseEstimator.stateStdDevs,
-                        Constants.PoseEstimator.VisionStdDevs);
+    private SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
+            kinematics,
+            rawGyroRotation,
+            lastModulePositions,
+            new Pose2d(),
+            Constants.PoseEstimator.stateStdDevs,
+            Constants.PoseEstimator.VisionStdDevs);
 
     /** The swerve odometry. This is used to determine the robot's position on the field. */
     public final SwerveDriveOdometry swerveOdometry;
@@ -115,16 +87,14 @@ public class Swerve extends SubsystemBase {
         gyro.getConfigurator().apply(new Pigeon2Configuration());
 
         // Create swerve modules
-        mSwerveMods =
-                new SwerveModule[] {
-                    new SwerveMod(0, SwerveConstants.Swerve.Mod0.constants),
-                    new SwerveMod(1, SwerveConstants.Swerve.Mod1.constants),
-                    new SwerveMod(2, SwerveConstants.Swerve.Mod2.constants),
-                    new SwerveMod(3, SwerveConstants.Swerve.Mod3.constants),
-                };
+        mSwerveMods = new SwerveModule[] {
+            new SwerveMod(0, SwerveConstants.Swerve.Mod0.constants),
+            new SwerveMod(1, SwerveConstants.Swerve.Mod1.constants),
+            new SwerveMod(2, SwerveConstants.Swerve.Mod2.constants),
+            new SwerveMod(3, SwerveConstants.Swerve.Mod3.constants),
+        };
 
-        swerveOdometry =
-                new SwerveDriveOdometry(kinematics, getYaw(), getModulePositions());
+        swerveOdometry = new SwerveDriveOdometry(kinematics, getYaw(), getModulePositions());
 
         zeroGyro();
 
@@ -146,22 +116,17 @@ public class Swerve extends SubsystemBase {
                 // TODO: null
                 // this::runVelocity,
                 null,
-                new PPHolonomicDriveController(
-                        new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
+                new PPHolonomicDriveController(new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
                 config,
                 () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
                 this);
         Pathfinding.setPathfinder(new LocalADStar());
-        PathPlannerLogging.setLogActivePathCallback(
-                (activePath) -> {
-                    Logger.recordOutput(
-                            "Odometry/Trajectory", activePath.toArray(new
-        Pose2d[activePath.size()]));
-                });
-        PathPlannerLogging.setLogTargetPoseCallback(
-                (targetPose) -> {
-                    Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
-                });
+        PathPlannerLogging.setLogActivePathCallback((activePath) -> {
+            Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]));
+        });
+        PathPlannerLogging.setLogTargetPoseCallback((targetPose) -> {
+            Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
+        });
 
         // TODO: Configure SysId
         // sysId =
@@ -173,10 +138,12 @@ public class Swerve extends SubsystemBase {
         //                         (state) -> Logger.recordOutput("Drive/SysIdState",
         // state.toString())),
         //                 new SysIdRoutine.Mechanism(
-        //                         (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+        //                         (voltage) -> runCharacterization(voltage.in(Volts)), null,
+        // this));
 
         // Set up custom logging to add the current path to a field 2d widget
-        PathPlannerLogging.setLogActivePathCallback((poses) -> field.getObject("path").setPoses(poses));
+        PathPlannerLogging.setLogActivePathCallback(
+                (poses) -> field.getObject("path").setPoses(poses));
 
         SmartDashboard.putData("Field", field);
         // Logger.recordOutput("Field2d", field);
@@ -194,20 +161,17 @@ public class Swerve extends SubsystemBase {
         final double LOOP_TIME_S = 0.02;
 
         // Calculate the future robot pose based on the original speeds and loop time
-        Pose2d futureRobotPose =
-                new Pose2d(
-                        originalSpeeds.vxMetersPerSecond * LOOP_TIME_S,
-                        originalSpeeds.vyMetersPerSecond * LOOP_TIME_S,
-                        Rotation2d.fromRadians(originalSpeeds.omegaRadiansPerSecond * LOOP_TIME_S));
+        Pose2d futureRobotPose = new Pose2d(
+                originalSpeeds.vxMetersPerSecond * LOOP_TIME_S,
+                originalSpeeds.vyMetersPerSecond * LOOP_TIME_S,
+                Rotation2d.fromRadians(originalSpeeds.omegaRadiansPerSecond * LOOP_TIME_S));
 
         // Compute the twist (change in pose) required to reach the future pose
         Twist2d twistForPose = GeometryUtils.log(futureRobotPose);
 
         // Update the speeds based on the computed twist
         return new ChassisSpeeds(
-                twistForPose.dx / LOOP_TIME_S,
-                twistForPose.dy / LOOP_TIME_S,
-                twistForPose.dtheta / LOOP_TIME_S);
+                twistForPose.dx / LOOP_TIME_S, twistForPose.dy / LOOP_TIME_S, twistForPose.dtheta / LOOP_TIME_S);
     }
 
     /**
@@ -218,21 +182,17 @@ public class Swerve extends SubsystemBase {
      * @param fieldRelative Whether the speeds are field-relative.
      * @param isOpenLoop Whether to use open-loop control.
      */
-    public void drive(
-            Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
+    public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
         // Determine the desired chassis speeds based on whether the control is field-relative
-        ChassisSpeeds desiredChassisSpeeds =
-                fieldRelative
-                        ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                                translation.getX(), translation.getY(), rotation, getYaw())
-                        : new ChassisSpeeds(translation.getX(), translation.getY(), rotation);
+        ChassisSpeeds desiredChassisSpeeds = fieldRelative
+                ? ChassisSpeeds.fromFieldRelativeSpeeds(translation.getX(), translation.getY(), rotation, getYaw())
+                : new ChassisSpeeds(translation.getX(), translation.getY(), rotation);
 
         // Correct the chassis speeds for robot dynamics
         desiredChassisSpeeds = correctForDynamics(desiredChassisSpeeds);
 
         // Convert the chassis speeds to swerve module states
-        SwerveModuleState[] swerveModuleStates =
-                kinematics.toSwerveModuleStates(desiredChassisSpeeds);
+        SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(desiredChassisSpeeds);
 
         // Ensure the wheel speeds are within the allowable range
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, SwerveConfig.maxSpeed);
@@ -270,11 +230,13 @@ public class Swerve extends SubsystemBase {
         // return new Pose2d(-p.getX(), -p.getY(), p.getRotation());
     }
 
-    /** @return the current odometry rotation. */
+    /**
+     * @return the current odometry rotation.
+     */
     public Rotation2d getRotation() {
         return getPose().getRotation();
     }
-    
+
     /** Resets the current odometry pose. */
     public void setPose(Pose2d pose) {
         poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
@@ -282,11 +244,8 @@ public class Swerve extends SubsystemBase {
 
     /** Adds a new timestamped vision measurement. */
     public void addVisionMeasurement(
-            Pose2d visionRobotPoseMeters,
-            double timestampSeconds,
-            Matrix<N3, N1> visionMeasurementStdDevs) {
-        poseEstimator.addVisionMeasurement(
-                visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+            Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
+        poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
     }
 
     /**
@@ -329,7 +288,9 @@ public class Swerve extends SubsystemBase {
         return positions;
     }
 
-    /** @return the measured chassis speeds of the robot. */
+    /**
+     * @return the measured chassis speeds of the robot.
+     */
     @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
     private ChassisSpeeds getChassisSpeeds() {
         return kinematics.toChassisSpeeds(getModuleStates());
@@ -381,7 +342,8 @@ public class Swerve extends SubsystemBase {
             String moduleName = String.format("REV Mod %d", mod.getModuleNumber());
 
             SmartDashboard.putNumber(moduleName + " Cancoder", mod.getCanCoder().getDegrees());
-            SmartDashboard.putNumber(moduleName + " Integrated", mod.getPosition().angle.getDegrees());
+            SmartDashboard.putNumber(
+                    moduleName + " Integrated", mod.getPosition().angle.getDegrees());
             SmartDashboard.putNumber(moduleName + " Velocity", mod.getState().speedMetersPerSecond);
         }
 

@@ -27,19 +27,19 @@ public class RobotContainer {
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
-        s_Swerve.setDefaultCommand(
-                new TeleopSwerve(
-                        s_Swerve,
-                        () -> -Controls.driverController.getRawAxis(Controls.Drive.translationAxis),
-                        () -> -Controls.driverController.getRawAxis(Controls.Drive.strafeAxis),
-                        () -> -Controls.driverController.getRawAxis(Controls.Drive.rotationAxis),
-                        () -> false,
-                        () -> Controls.Drive.dampen.getAsBoolean(),
-                        () -> 1 // speed multiplier
-                        ));
+        s_Swerve.setDefaultCommand(new TeleopSwerve(
+                s_Swerve,
+                () -> -Controls.driverController.getRawAxis(Controls.Drive.translationAxis),
+                () -> -Controls.driverController.getRawAxis(Controls.Drive.strafeAxis),
+                () -> -Controls.driverController.getRawAxis(Controls.Drive.rotationAxis),
+                () -> false,
+                () -> Controls.Drive.dampen.getAsBoolean(),
+                () -> 1 // speed multiplier
+                ));
 
         // Set up auto routines
-        // autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+        // autoChooser = new LoggedDashboardChooser<>("Auto Choices",
+        // AutoBuilder.buildAutoChooser());
 
         // Set up SysId routines
         // autoChooser.addOption(
