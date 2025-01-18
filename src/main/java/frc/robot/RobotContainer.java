@@ -21,14 +21,14 @@ public class RobotContainer {
     // private final LoggedDashboardChooser<Command> autoChooser;
 
     // Subsystems
-    private final Swerve s_Swerve = new Swerve();
+    private final Swerve swerveSubsystem = new Swerve();
 
     private final PoseEstimator s_PoseEstimator = new PoseEstimator();
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
-        s_Swerve.setDefaultCommand(new TeleopSwerve(
-                s_Swerve,
+        swerveSubsystem.setDefaultCommand(new TeleopSwerve(
+                swerveSubsystem,
                 () -> -Controls.driverController.getRawAxis(Controls.Drive.translationAxis),
                 () -> -Controls.driverController.getRawAxis(Controls.Drive.strafeAxis),
                 () -> -Controls.driverController.getRawAxis(Controls.Drive.rotationAxis),
@@ -73,7 +73,7 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         /* Driver Buttons */
-        Controls.Drive.zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroGyro()));
+        Controls.Drive.zeroGyro.onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
 
         // Heading lock bindings
         Controls.Drive.up
