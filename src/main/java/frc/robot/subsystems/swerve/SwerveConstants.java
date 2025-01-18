@@ -15,6 +15,8 @@ public final class SwerveConstants {
     public static final double stickDeadband = 0.1;
     public static final double limelightOffset = 3;
 
+    public static final double debugSpeedMultiplier = 0.3;
+
     /**
      * @return The Pathplanner RobotConfig
      */

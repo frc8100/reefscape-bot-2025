@@ -181,6 +181,9 @@ public class Swerve extends SubsystemBase {
      * @param speed The desired chasssis speeds
      */
     public void runVelocityChassisSpeeds(ChassisSpeeds speed) {
+        // TODO: debug
+        speed = speed.times(SwerveConstants.debugSpeedMultiplier);
+
         // Convert the chassis speeds to swerve module states
         SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(speed);
 
