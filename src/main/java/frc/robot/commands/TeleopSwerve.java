@@ -11,7 +11,6 @@ import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
-
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -108,30 +107,32 @@ public class TeleopSwerve extends Command {
          */
         double dampenAndSpeedConstant = (dampen.getAsBoolean() ? 0.2 : 1) * ((speedDial.getAsDouble() + 1) / 2);
 
-        double translationValue = MathUtil.applyDeadband(translationInput, Constants.stickDeadband)
-                * dampenAndSpeedConstant;
-        double strafeValue = MathUtil.applyDeadband(strafeInput, Constants.stickDeadband)
-                * dampenAndSpeedConstant;
-        double rotationValue = MathUtil.applyDeadband(rotationInput, Constants.stickDeadband)
-                * dampenAndSpeedConstant;
+        double translationValue =
+                MathUtil.applyDeadband(translationInput, Constants.stickDeadband) * dampenAndSpeedConstant;
+        double strafeValue = MathUtil.applyDeadband(strafeInput, Constants.stickDeadband) * dampenAndSpeedConstant;
+        double rotationValue = MathUtil.applyDeadband(rotationInput, Constants.stickDeadband) * dampenAndSpeedConstant;
 
         // Heading direction state
         switch (States.driveState) {
             case d0:
                 // heading lock
-                rotationValue = rotationController.calculate(swerveSubsystem.getYaw().getRadians(), Units.degreesToRadians(0));
+                rotationValue =
+                        rotationController.calculate(swerveSubsystem.getYaw().getRadians(), Units.degreesToRadians(0));
                 break;
             case d90:
                 // heading lock
-                rotationValue = rotationController.calculate(swerveSubsystem.getYaw().getRadians(), Units.degreesToRadians(90));
+                rotationValue =
+                        rotationController.calculate(swerveSubsystem.getYaw().getRadians(), Units.degreesToRadians(90));
                 break;
             case d180:
                 // heading lock
-                rotationValue = rotationController.calculate(swerveSubsystem.getYaw().getRadians(), Units.degreesToRadians(180));
+                rotationValue = rotationController.calculate(
+                        swerveSubsystem.getYaw().getRadians(), Units.degreesToRadians(180));
                 break;
             case d270:
                 // heading lock
-                rotationValue = rotationController.calculate(swerveSubsystem.getYaw().getRadians(), Units.degreesToRadians(270));
+                rotationValue = rotationController.calculate(
+                        swerveSubsystem.getYaw().getRadians(), Units.degreesToRadians(270));
                 break;
             case standard:
                 // normal
@@ -143,7 +144,7 @@ public class TeleopSwerve extends Command {
         Logger.recordOutput("Swerve/TranslationInput", translationInput);
         Logger.recordOutput("Swerve/StrafeInput", strafeInput);
         Logger.recordOutput("Swerve/RotationInput", rotationInput);
-        
+
         Logger.recordOutput("Swerve/TranslationValue", translationValue);
         Logger.recordOutput("Swerve/StrafeValue", strafeValue);
         Logger.recordOutput("Swerve/RotationValue", rotationValue);
@@ -152,7 +153,6 @@ public class TeleopSwerve extends Command {
         swerveSubsystem.drive(
                 new Translation2d(translationValue, strafeValue).times(SwerveConfig.maxSpeed),
                 rotationValue,
-                !robotCentricSup.getAsBoolean(),
-                true);
+                !robotCentricSup.getAsBoolean());
     }
 }

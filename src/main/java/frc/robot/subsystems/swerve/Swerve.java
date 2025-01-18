@@ -4,7 +4,6 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.pathfinding.LocalADStar;
 import com.pathplanner.lib.pathfinding.Pathfinding;
@@ -39,10 +38,15 @@ public class Swerve extends SubsystemBase {
      * The swerve modules. These are the four swerve modules on the robot. Each module has a drive
      * motor and a steering motor.
      */
-    public final SwerveModule[] mSwerveMods;
+    public final SwerveModule[] swerveModules = new SwerveModule[] {
+        new SwerveMod(0, SwerveConstants.Swerve.Mod0.constants),
+        new SwerveMod(1, SwerveConstants.Swerve.Mod1.constants),
+        new SwerveMod(2, SwerveConstants.Swerve.Mod2.constants),
+        new SwerveMod(3, SwerveConstants.Swerve.Mod3.constants),
+    };
 
     /** The gyro. This is used to determine the robot's heading. */
-    public final Pigeon2 gyro;
+    public final Pigeon2 gyro = new Pigeon2(SwerveConstants.REV.pigeonID);
 
     /*
      * Swerve Kinematics
@@ -82,42 +86,21 @@ public class Swerve extends SubsystemBase {
 
     /** Creates a new Swerve subsystem. */
     public Swerve() {
-        gyro = new Pigeon2(SwerveConstants.REV.pigeonID);
         // TODO: implement settings
         gyro.getConfigurator().apply(new Pigeon2Configuration());
-
-        // Create swerve modules
-        mSwerveMods = new SwerveModule[] {
-            new SwerveMod(0, SwerveConstants.Swerve.Mod0.constants),
-            new SwerveMod(1, SwerveConstants.Swerve.Mod1.constants),
-            new SwerveMod(2, SwerveConstants.Swerve.Mod2.constants),
-            new SwerveMod(3, SwerveConstants.Swerve.Mod3.constants),
-        };
 
         swerveOdometry = new SwerveDriveOdometry(kinematics, getYaw(), getModulePositions());
 
         zeroGyro();
-
-        // Load the RobotConfig from the GUI settings. You should probably
-        // store this in your Constants file
-        RobotConfig config;
-        try {
-            config = RobotConfig.fromGUISettings();
-        } catch (Exception e) {
-            // Handle exception as needed
-            e.printStackTrace();
-        }
 
         // TODO: Configure AutoBuilder
         AutoBuilder.configure(
                 this::getPose,
                 this::setPose,
                 this::getChassisSpeeds,
-                // TODO: null
-                // this::runVelocity,
-                null,
+                this::runVelocityChassisSpeeds,
                 new PPHolonomicDriveController(new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
-                config,
+                SwerveConstants.getRobotConfig(),
                 () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
                 this);
         Pathfinding.setPathfinder(new LocalADStar());
@@ -180,9 +163,8 @@ public class Swerve extends SubsystemBase {
      * @param translation The desired translation (x and y speeds).
      * @param rotation The desired rotation speed.
      * @param fieldRelative Whether the speeds are field-relative.
-     * @param isOpenLoop Whether to use open-loop control.
      */
-    public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
+    public void drive(Translation2d translation, double rotation, boolean fieldRelative) {
         // Determine the desired chassis speeds based on whether the control is field-relative
         ChassisSpeeds desiredChassisSpeeds = fieldRelative
                 ? ChassisSpeeds.fromFieldRelativeSpeeds(translation.getX(), translation.getY(), rotation, getYaw())
@@ -191,15 +173,23 @@ public class Swerve extends SubsystemBase {
         // Correct the chassis speeds for robot dynamics
         desiredChassisSpeeds = correctForDynamics(desiredChassisSpeeds);
 
+        runVelocityChassisSpeeds(desiredChassisSpeeds);
+    }
+
+    /**
+     * Drives the swerve modules given a provided chassis speeds.
+     * @param speed The desired chasssis speeds
+     */
+    public void runVelocityChassisSpeeds(ChassisSpeeds speed) {
         // Convert the chassis speeds to swerve module states
-        SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(desiredChassisSpeeds);
+        SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(speed);
 
         // Ensure the wheel speeds are within the allowable range
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, SwerveConfig.maxSpeed);
 
         // Set the desired state for each swerve module
-        for (SwerveModule mod : mSwerveMods) {
-            mod.setDesiredState(swerveModuleStates[mod.getModuleNumber()], isOpenLoop);
+        for (SwerveModule mod : swerveModules) {
+            mod.setDesiredState(swerveModuleStates[mod.getModuleNumber()], SwerveConstants.isOpenLoop);
         }
     }
 
@@ -215,7 +205,7 @@ public class Swerve extends SubsystemBase {
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, SwerveConfig.maxSpeed);
 
         // Set the desired state for each swerve module
-        for (SwerveModule mod : mSwerveMods) {
+        for (SwerveModule mod : swerveModules) {
             mod.setDesiredState(desiredStates[mod.getModuleNumber()], false);
         }
     }
@@ -266,7 +256,7 @@ public class Swerve extends SubsystemBase {
         SwerveModuleState[] states = new SwerveModuleState[4];
 
         // Get the state of each module
-        for (SwerveModule mod : mSwerveMods) {
+        for (SwerveModule mod : swerveModules) {
             states[mod.getModuleNumber()] = mod.getState();
         }
 
@@ -281,7 +271,7 @@ public class Swerve extends SubsystemBase {
         SwerveModulePosition[] positions = new SwerveModulePosition[4];
 
         // Get the position of each module
-        for (SwerveModule mod : mSwerveMods) {
+        for (SwerveModule mod : swerveModules) {
             positions[mod.getModuleNumber()] = mod.getPosition();
         }
 
@@ -337,7 +327,7 @@ public class Swerve extends SubsystemBase {
         SmartDashboard.putNumber("yaw", gyro.getYaw().getValueAsDouble());
 
         // Put the module information on the SmartDashboard
-        for (SwerveModule mod : mSwerveMods) {
+        for (SwerveModule mod : swerveModules) {
             /** The module name. Ex. "REV Mod 0" */
             String moduleName = String.format("REV Mod %d", mod.getModuleNumber());
 

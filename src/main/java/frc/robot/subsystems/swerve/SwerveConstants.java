@@ -1,5 +1,6 @@
 package frc.robot.subsystems.swerve;
 
+import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.util.swerveUtil.RevSwerveModuleConstants;
 
@@ -13,6 +14,30 @@ public final class SwerveConstants {
 
     public static final double stickDeadband = 0.1;
     public static final double limelightOffset = 3;
+
+    /**
+     * @return The Pathplanner RobotConfig
+     */
+    // TODO: instead of loading from GUI, declare explicitly
+    public static RobotConfig getRobotConfig() {
+        // Load the RobotConfig from the GUI settings.
+        RobotConfig config;
+        try {
+            config = RobotConfig.fromGUISettings();
+        } catch (Exception e) {
+            // Handle exception as needed
+            e.printStackTrace();
+            config = null;
+        }
+
+        return config;
+    }
+
+    /**
+     * Whether to use open loop control.
+     * Default is `true`
+     */
+    public static final boolean isOpenLoop = true;
 
     public static final class REV {
 

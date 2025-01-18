@@ -7,8 +7,14 @@ import edu.wpi.first.math.numbers.N3;
 
 public final class Constants {
 
+    /**
+     * The current mode, see {@link Mode}
+     */
     public static final Mode currentMode = Mode.REAL;
 
+    /**
+     * An enum of modes, for AdvantageKit.
+     */
     public static enum Mode {
         /** Running on a real robot. */
         REAL,
