@@ -18,7 +18,7 @@ public final class SwerveConstants {
     /**
      * Multiplier to the input chassis speeds of the swerve. Used temporarily to test.
      */
-    public static final double debugSpeedMultiplier = 0.3;
+    public static final double debugSpeedMultiplier = 0.7;
 
     /**
      * @return The Pathplanner RobotConfig

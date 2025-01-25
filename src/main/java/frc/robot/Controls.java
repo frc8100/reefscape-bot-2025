@@ -2,7 +2,6 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 
@@ -14,7 +13,7 @@ public class Controls {
 
     /** The up controller, on port 1 */
     // public static final XboxController upController = new XboxController(1);
-    public static final CommandXboxController upController = new CommandXboxController(1);
+    // public static final CommandXboxController upController = new CommandXboxController(1);
 
     /** The drive controls */
     public static class Drive {

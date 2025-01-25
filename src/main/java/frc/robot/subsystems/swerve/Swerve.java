@@ -328,20 +328,42 @@ public class Swerve extends SubsystemBase {
         // Put the yaw on the SmartDashboard
         SmartDashboard.putNumber("yaw", gyro.getYaw().getValueAsDouble());
 
+        double[] canCoderOutputs = new double[4];
+        double[] integratedOutputs = new double[4];
+        double[] velocityOutputs = new double[4];
+
         // Put the module information on the SmartDashboard
         for (SwerveModule mod : swerveModules) {
-            /** The module name. Ex. "REV Mod 0" */
-            String moduleName = String.format("REV Mod %d", mod.getModuleNumber());
+            int modId = mod.getModuleNumber();
 
-            SmartDashboard.putNumber(moduleName + " Cancoder", mod.getCanCoder().getDegrees());
-            SmartDashboard.putNumber(
-                    moduleName + " Integrated", mod.getPosition().angle.getDegrees());
-            SmartDashboard.putNumber(moduleName + " Velocity", mod.getState().speedMetersPerSecond);
+            /** The module name. Ex. "REV Mod 0" */
+            String moduleName = String.format("REV Mod %d ", modId);
+            // String akKey = String.format("RevMod%d/", modId);
+
+            double canCoder = mod.getCanCoder().getDegrees();
+            double integrated = mod.getPosition().angle.getDegrees();
+            double velocity = mod.getState().speedMetersPerSecond;
+
+            SmartDashboard.putNumber(moduleName + "Cancoder", canCoder);
+            canCoderOutputs[modId] = canCoder;
+            // Logger.recordOutput(akKey + "Cancoder", canCoder);
+
+            SmartDashboard.putNumber(moduleName + "Integrated", integrated);
+            integratedOutputs[modId] = integrated;
+            // Logger.recordOutput(akKey + "Integrated", integrated);
+
+            SmartDashboard.putNumber(moduleName + "Velocity", velocity);
+            velocityOutputs[modId] = velocity;
+            // Logger.recordOutput(akKey + "Velocity", velocity);
         }
 
         // Record module states
         Logger.recordOutput("SwerveModStates", getModuleStates());
         Logger.recordOutput("SwerveGyro", gyro.getRotation2d());
+
+        Logger.recordOutput("SwerveModuleCancoder", canCoderOutputs);
+        Logger.recordOutput("SwerveModuleIntegrated", integratedOutputs);
+        Logger.recordOutput("SwerveModuleVelocity", velocityOutputs);
 
         Logger.recordOutput("SwervePose2d", swerveOdometry.getPoseMeters());
     }
