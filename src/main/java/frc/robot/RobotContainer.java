@@ -33,13 +33,12 @@ public class RobotContainer {
     public RobotContainer() {
         swerveSubsystem.setDefaultCommand(new TeleopSwerve(
                 swerveSubsystem,
-                () -> -Controls.driverController.getRawAxis(Controls.Drive.translationAxis),
-                () -> -Controls.driverController.getRawAxis(Controls.Drive.strafeAxis),
-                () -> -Controls.driverController.getRawAxis(Controls.Drive.rotationAxis),
-                () -> false,
-                () -> Controls.Drive.dampen.getAsBoolean(),
-                () -> 1 // speed multiplier
-                ));
+                Controls.Drive::getTranslationAxis,
+                Controls.Drive::getStrafeAxis,
+                Controls.Drive::getRotationAxis,
+                Controls.Drive::isRobotCentric,
+                Controls.Drive::isDampen,
+                Controls.Drive::getSpeedMultiplier));
 
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());

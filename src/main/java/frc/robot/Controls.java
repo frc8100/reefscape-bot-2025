@@ -18,6 +18,10 @@ public class Controls {
 
     /** The drive controls */
     public static class Drive {
+        /**
+         * Whether to invert the drive controls. Default is `true`.
+         */
+        public static final boolean invertDriveControls = true;
 
         // Driver Controls
         public static final int translationAxis = XboxController.Axis.kLeftY.value;
@@ -31,14 +35,70 @@ public class Controls {
                 new JoystickButton(driverController, XboxController.Button.kRightBumper.value);
 
         // unused
-        public static final JoystickButton robotCentric =
+        // public static final JoystickButton robotCentric =
+        //         new JoystickButton(driverController, XboxController.Button.kLeftBumper.value);
+
+        /**
+         * When held, slows the robot down to `slowMultiplier`
+         */
+        public static final JoystickButton slowButton =
                 new JoystickButton(driverController, XboxController.Button.kLeftBumper.value);
+
+        public static final double slowMultiplier = 0.5;
 
         // Direction buttons
         public static final POVButton up = new POVButton(driverController, 90);
         public static final POVButton down = new POVButton(driverController, 270);
         public static final POVButton right = new POVButton(driverController, 180);
         public static final POVButton left = new POVButton(driverController, 0);
+
+        /**
+         * @return The translation (x)
+         */
+        public static double getTranslationAxis() {
+            return invertDriveControls
+                    ? -driverController.getRawAxis(translationAxis)
+                    : driverController.getRawAxis(translationAxis);
+        }
+
+        /**
+         * @return The strafe (y)
+         */
+        public static double getStrafeAxis() {
+            return invertDriveControls
+                    ? -driverController.getRawAxis(strafeAxis)
+                    : driverController.getRawAxis(strafeAxis);
+        }
+
+        /**
+         * @return The rotation
+         */
+        public static double getRotationAxis() {
+            return invertDriveControls
+                    ? -driverController.getRawAxis(rotationAxis)
+                    : driverController.getRawAxis(rotationAxis);
+        }
+
+        /**
+         * @return Whether the controls are robot centric. Default is `false`.
+         */
+        public static boolean isRobotCentric() {
+            return false;
+        }
+
+        /**
+         * @return Whether the robot movement is dampened.
+         */
+        public static boolean isDampen() {
+            return Drive.dampen.getAsBoolean();
+        }
+
+        /**
+         * @return The speed multiplier.
+         */
+        public static double getSpeedMultiplier() {
+            return slowButton.getAsBoolean() ? slowMultiplier : 1;
+        }
     }
     /** The up controls ~(very good name)~ */
     // public static class Up {
