@@ -93,7 +93,6 @@ public class Swerve extends SubsystemBase {
 
         zeroGyro();
 
-        // TODO: Configure AutoBuilder
         AutoBuilder.configure(
                 this::getPose,
                 this::setPose,

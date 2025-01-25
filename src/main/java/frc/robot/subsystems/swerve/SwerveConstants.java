@@ -15,6 +15,9 @@ public final class SwerveConstants {
     public static final double stickDeadband = 0.1;
     public static final double limelightOffset = 3;
 
+    /**
+     * Multiplier to the input chassis speeds of the swerve. Used temporarily to test.
+     */
     public static final double debugSpeedMultiplier = 0.3;
 
     /**
@@ -46,9 +49,9 @@ public final class SwerveConstants {
         public static final int pigeonID = 17;
     }
 
+    /* Module Specific Constants */
     public static final class Swerve {
 
-        /* Module Specific Constants */
         /* Front Left Module */
         public static final class Mod0 {
 
