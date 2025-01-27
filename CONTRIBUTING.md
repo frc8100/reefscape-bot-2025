@@ -24,7 +24,7 @@ The first way is to code on your own computer.
 
 1. Install the above software.
 2. Open Visual Studio Code (you should find a shortcut to the WPILib VSCode in the desktop).
-3. Open the terminal (press `Ctrl+backtick`) 
+3. Open the terminal (press `Ctrl+backtick`)
 4. Clone the repository by running `git clone https://github.com/frc8100/reefscape-bot-2025.git` in the terminal.
     - You could alternatively clone the repository using VSCode's built-in Git functionality.
 5. Open the cloned repository in Visual Studio Code.

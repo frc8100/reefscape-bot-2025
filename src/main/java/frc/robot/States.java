@@ -1,8 +1,13 @@
 package frc.robot;
 
+/**
+ * Drive states
+ */
 public class States {
 
-    // Drive states
+    /**
+     * Possible drive states
+     */
     public static enum DriveStates {
         standard,
         d0,
@@ -11,5 +16,8 @@ public class States {
         d270,
     }
 
+    /**
+     * The current drive state
+     */
     public static DriveStates driveState = DriveStates.standard;
 }

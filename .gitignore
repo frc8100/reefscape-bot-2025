@@ -1,9 +1,6 @@
 # This gitignore has been specially created by the WPILib team.
 # If you remove items from this file, intellisense might break.
 
-# Generated on build
-src/main/java/frc/robot/BuildConstants.java
-
 node_modules/
 
 ### C++ ###
@@ -175,7 +172,7 @@ out/
 
 # Simulation GUI and other tools window save file
 networktables.json
-simgui.json
+simgui*.json
 *-window.json
 
 # Simulation data log directory
@@ -188,5 +185,5 @@ ctre_sim/
 /.cache
 compile_commands.json
 
-# Eclipse generated file for annotation processors
-.factorypath
+# Version file
+src/main/java/frc/robot/BuildConstants.java

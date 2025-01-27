@@ -33,5 +33,5 @@ This controller controlls the intake, outake, etc.
 | X | Exit Intake |
 | Right Bumper (R1) | Arm up |
 | Left Bumper (L1) | Arm down |
-| Left Trigger (L2) | Launcher out | 
+| Left Trigger (L2) | Launcher out |
 | Right Trigger (R2) | Launcher in |

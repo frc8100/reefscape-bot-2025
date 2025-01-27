@@ -21,9 +21,8 @@ public class GeometryUtils {
             c = (1.0 - cos_theta) / delta.dtheta;
         }
         return new Pose2d(
-            new Translation2d(delta.dx * s - delta.dy * c, delta.dx * c + delta.dy * s),
-            new Rotation2d(cos_theta, sin_theta)
-        );
+                new Translation2d(delta.dx * s - delta.dy * c, delta.dx * c + delta.dy * s),
+                new Rotation2d(cos_theta, sin_theta));
     }
 
     public static Twist2d log(final Pose2d transform) {
@@ -34,12 +33,11 @@ public class GeometryUtils {
         if (Math.abs(cos_minus_one) < kEps) {
             halftheta_by_tan_of_halfdtheta = 1.0 - (1.0 / 12.0) * dtheta * dtheta;
         } else {
-            halftheta_by_tan_of_halfdtheta = -(half_dtheta * Math.sin(transform.getRotation().getRadians())) /
-            cos_minus_one;
+            halftheta_by_tan_of_halfdtheta =
+                    -(half_dtheta * Math.sin(transform.getRotation().getRadians())) / cos_minus_one;
         }
-        final Translation2d translation_part = transform
-            .getTranslation()
-            .rotateBy(new Rotation2d(halftheta_by_tan_of_halfdtheta, -half_dtheta));
+        final Translation2d translation_part =
+                transform.getTranslation().rotateBy(new Rotation2d(halftheta_by_tan_of_halfdtheta, -half_dtheta));
         return new Twist2d(translation_part.getX(), translation_part.getY(), dtheta);
     }
 }
