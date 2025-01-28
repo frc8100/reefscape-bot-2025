@@ -184,14 +184,19 @@ public class Swerve extends SubsystemBase {
         speed = speed.times(SwerveConstants.debugSpeedMultiplier);
 
         // Convert the chassis speeds to swerve module states
-        SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(speed);
+        ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speed, 0.02);
+        SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
 
         // Ensure the wheel speeds are within the allowable range
-        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, SwerveConfig.maxSpeed);
+        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, SwerveConfig.maxSpeed);
+
+        // Log unoptimized setpoints
+        Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
+        Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
 
         // Set the desired state for each swerve module
         for (SwerveModule mod : swerveModules) {
-            mod.setDesiredState(swerveModuleStates[mod.getModuleNumber()], SwerveConstants.isOpenLoop);
+            mod.setDesiredState(setpointStates[mod.getModuleNumber()], SwerveConstants.isOpenLoop);
         }
     }
 
@@ -201,8 +206,6 @@ public class Swerve extends SubsystemBase {
      * @param desiredStates The desired states for the swerve modules.
      */
     public void setModuleStates(SwerveModuleState[] desiredStates) {
-        // System.out.println("setting module states: "+desiredStates[0]);
-
         // Ensure the wheel speeds are within the allowable range
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, SwerveConfig.maxSpeed);
 
@@ -217,9 +220,9 @@ public class Swerve extends SubsystemBase {
      */
     @AutoLogOutput(key = "Odometry/Robot")
     public Pose2d getPose() {
-        return poseEstimator.getEstimatedPosition();
-        // Pose2d p = swerveOdometry.getPoseMeters();
-        // return new Pose2d(-p.getX(), -p.getY(), p.getRotation());
+        // return poseEstimator.getEstimatedPosition();
+        Pose2d p = swerveOdometry.getPoseMeters();
+        return new Pose2d(-p.getX(), -p.getY(), p.getRotation());
     }
 
     /**
@@ -232,6 +235,7 @@ public class Swerve extends SubsystemBase {
     /** Resets the current odometry pose. */
     public void setPose(Pose2d pose) {
         poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+        swerveOdometry.resetPosition(rawGyroRotation, getModulePositions(), pose);
     }
 
     /** Adds a new timestamped vision measurement. */
@@ -246,6 +250,7 @@ public class Swerve extends SubsystemBase {
      * @param pose The new pose of the robot.
      */
     public void resetOdometry(Pose2d pose) {
+        poseEstimator.resetPosition(new Rotation2d(), getModulePositions(), pose);
         swerveOdometry.resetPosition(new Rotation2d(), getModulePositions(), pose);
         zeroGyro(pose.getRotation().getDegrees());
     }
@@ -302,6 +307,7 @@ public class Swerve extends SubsystemBase {
         // Zero the gyro and update the odometry
         gyro.setYaw(deg);
         swerveOdometry.update(getYaw(), getModulePositions());
+        poseEstimator.update(getYaw(), getModulePositions());
     }
 
     /** Zeros the gyro, setting the angle to 0. */
@@ -312,6 +318,7 @@ public class Swerve extends SubsystemBase {
     /**
      * @return The current yaw of the robot.
      */
+    @AutoLogOutput(key = "Gyro/Yaw")
     public Rotation2d getYaw() {
         // If the gyro is inverted, return the inverted yaw
         if (SwerveConfig.invertGyro) {
@@ -320,6 +327,11 @@ public class Swerve extends SubsystemBase {
 
         // Otherwise, return the yaw as-is
         return Rotation2d.fromDegrees(gyro.getYaw().getValueAsDouble());
+    }
+
+    /** Stops the drive. */
+    public void stop() {
+        runVelocityChassisSpeeds(new ChassisSpeeds());
     }
 
     /** Periodically updates the SmartDashboard with information about the swerve modules. */
@@ -365,6 +377,7 @@ public class Swerve extends SubsystemBase {
         Logger.recordOutput("SwerveModuleIntegrated", integratedOutputs);
         Logger.recordOutput("SwerveModuleVelocity", velocityOutputs);
 
-        Logger.recordOutput("SwervePose2d", swerveOdometry.getPoseMeters());
+        Logger.recordOutput("SwervePose2dOdometry", swerveOdometry.getPoseMeters());
+        // Logger.recordOutput("SwervePose2dOdometry", poseEstimator.getEstimatedPosition());
     }
 }
