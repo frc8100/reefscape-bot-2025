@@ -89,7 +89,7 @@ public class Swerve extends SubsystemBase {
         // TODO: implement settings
         gyro.getConfigurator().apply(new Pigeon2Configuration());
 
-        swerveOdometry = new SwerveDriveOdometry(kinematics, getYaw(), getModulePositions());
+        swerveOdometry = new SwerveDriveOdometry(kinematics, getGyroHeading(), getModulePositions());
 
         zeroGyro();
 
@@ -166,7 +166,8 @@ public class Swerve extends SubsystemBase {
     public void drive(Translation2d translation, double rotation, boolean fieldRelative) {
         // Determine the desired chassis speeds based on whether the control is field-relative
         ChassisSpeeds desiredChassisSpeeds = fieldRelative
-                ? ChassisSpeeds.fromFieldRelativeSpeeds(translation.getX(), translation.getY(), rotation, getYaw())
+                ? ChassisSpeeds.fromFieldRelativeSpeeds(
+                        translation.getX(), translation.getY(), rotation, getGyroHeading())
                 : new ChassisSpeeds(translation.getX(), translation.getY(), rotation);
 
         // Correct the chassis speeds for robot dynamics
@@ -306,8 +307,8 @@ public class Swerve extends SubsystemBase {
 
         // Zero the gyro and update the odometry
         gyro.setYaw(deg);
-        swerveOdometry.update(getYaw(), getModulePositions());
-        poseEstimator.update(getYaw(), getModulePositions());
+        swerveOdometry.update(getGyroHeading(), getModulePositions());
+        poseEstimator.update(getGyroHeading(), getModulePositions());
     }
 
     /** Zeros the gyro, setting the angle to 0. */
@@ -316,7 +317,7 @@ public class Swerve extends SubsystemBase {
     }
 
     /**
-     * @return The current yaw of the robot.
+     * @return The current gyro yaw of the robot.
      */
     @AutoLogOutput(key = "Gyro/Yaw")
     public Rotation2d getYaw() {
@@ -329,6 +330,20 @@ public class Swerve extends SubsystemBase {
         return Rotation2d.fromDegrees(gyro.getYaw().getValueAsDouble());
     }
 
+    /**
+     * @return The current gyro heading of the robot.
+     */
+    @AutoLogOutput(key = "Gyro/Heading")
+    public Rotation2d getGyroHeading() {
+        // If the gyro is inverted, return the inverted yaw
+        if (SwerveConfig.invertGyro) {
+            return gyro.getRotation2d().rotateBy(new Rotation2d(180));
+        }
+
+        // Otherwise, return the yaw as-is
+        return gyro.getRotation2d();
+    }
+
     /** Stops the drive. */
     public void stop() {
         runVelocityChassisSpeeds(new ChassisSpeeds());
@@ -337,6 +352,9 @@ public class Swerve extends SubsystemBase {
     /** Periodically updates the SmartDashboard with information about the swerve modules. */
     @Override
     public void periodic() {
+        // Update Odometry
+        swerveOdometry.update(getGyroHeading(), getModulePositions());
+
         // Put the yaw on the SmartDashboard
         SmartDashboard.putNumber("yaw", gyro.getYaw().getValueAsDouble());
 
