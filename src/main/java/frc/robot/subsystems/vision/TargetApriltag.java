@@ -1,6 +1,6 @@
 package frc.robot.subsystems.vision;
 
-import frc.robot.LimelightHelpers;
+import frc.lib.LimelightHelpers;
 import frc.robot.subsystems.swerve.SwerveConfig;
 
 public class TargetApriltag {

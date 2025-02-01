@@ -102,30 +102,16 @@ public class SwerveMod implements SwerveModule {
                 // The velocity conversion factor is in degrees/sec
                 .velocityConversionFactor(SwerveConfig.DegreesPerTurnRotation / 60);
 
-        // Reset the angle motor to factory defaults
-        // mAngleMotor.restoreFactoryDefaults();
-
         // Configure the PID controller for the angle motor
-        // Note: The 2025 version of SparkPIDController is SparkClosedLoopController
-        // SparkClosedLoopController controller = mAngleMotor.getClosedLoopController();
         angleConfig
                 .closedLoop
                 .pidf(SwerveConfig.angleKP, SwerveConfig.angleKI, SwerveConfig.angleKD, SwerveConfig.angleKF)
                 .outputRange(-SwerveConfig.anglePower, SwerveConfig.anglePower);
-        // controller.setP(SwerveConfig.angleKP, 0);
-        // controller.setI(SwerveConfig.angleKI, 0);
-        // controller.setD(SwerveConfig.angleKD, 0);
-        // controller.setFF(SwerveConfig.angleKF, 0);
-        // controller.setOutputRange(-SwerveConfig.anglePower, SwerveConfig.anglePower);
 
         angleConfig
                 .smartCurrentLimit(SwerveConfig.angleContinuousCurrentLimit)
                 .inverted(SwerveConfig.angleMotorInvert)
                 .idleMode(SwerveConfig.angleIdleMode);
-
-        // mAngleMotor.setSmartCurrentLimit(SwerveConfig.angleContinuousCurrentLimit);
-        // mAngleMotor.setInverted(SwerveConfig.angleMotorInvert);
-        // mAngleMotor.setIdleMode(SwerveConfig.angleIdleMode);
 
         // ! IMPORTANT: New changes in 2025 may make this inaccurate
         mAngleMotor.configure(angleConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -162,7 +148,7 @@ public class SwerveMod implements SwerveModule {
     }
 
     /**
-     * Sets the desired state of the module.
+     * Sets the desired state of the module including the angle and speed. Uses the PID controller.
      *
      * @param desiredState The desired state.
      * @param isOpenLoop Whether the module is in open loop.
@@ -211,8 +197,7 @@ public class SwerveMod implements SwerveModule {
      * @param desiredState The desired state.
      */
     private void setAngle(SwerveModuleState desiredState) {
-        // Stop the motor if the speed is less than 1%
-        // Prevents Jittering
+        // Stop the motor if the speed is less than 1%. Prevents Jittering
         if (Math.abs(desiredState.speedMetersPerSecond) <= (SwerveConfig.maxSpeed * 0.01)) {
             mAngleMotor.stopMotor();
             return;
@@ -222,7 +207,6 @@ public class SwerveMod implements SwerveModule {
         Rotation2d angle = desiredState.angle;
         double degReference = angle.getDegrees();
 
-        // SparkPIDController controller = mAngleMotor.getPIDController();
         SparkClosedLoopController controller = mAngleMotor.getClosedLoopController();
         controller.setReference(degReference, ControlType.kPosition, ClosedLoopSlot.kSlot0);
     }
@@ -238,8 +222,6 @@ public class SwerveMod implements SwerveModule {
      * @return The CANCoder angle of the module.
      */
     public Rotation2d getCanCoder() {
-        // return Rotation2d.fromDegrees(angleEncoder.getAbsolutePosition().getValue() * 360);
-        // ! IMPORTANT: New changes in 2025 may make this inaccurate
         return Rotation2d.fromDegrees(angleEncoder.getAbsolutePosition().getValueAsDouble() * 360);
     }
 

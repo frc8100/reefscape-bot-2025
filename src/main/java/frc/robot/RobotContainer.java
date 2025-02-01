@@ -90,18 +90,6 @@ public class RobotContainer {
         Controls.Drive.down
                 .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d270))
                 .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
-
-        // Up system bindings
-        // TODO: Switch up system to event commands
-        // Note: on the Logitech controller, x and a are swapped
-        // Controls.upController.b().whileTrue(m_intake.intake());
-        // Controls.upController.x().whileTrue(m_intake.eintake());
-        // Controls.upController.rightBumper().whileTrue(m_arm.up());
-        // Controls.upController.leftBumper().whileTrue(m_arm.down());
-
-        // Controls.upController.leftTrigger(0.75).whileTrue(m_launcher.pushOut());
-        // Controls.upController.rightTrigger(0.75).whileTrue(m_launcher.pushIn());
-        // Controls.upController.axisGreaterThan(Controls.Up.launcherInAxis).ifHigh(m_launcher.pushIn());
     }
 
     /**
@@ -111,6 +99,5 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         return autoChooser.get();
-        // return null;
     }
 }

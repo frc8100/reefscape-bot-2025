@@ -8,7 +8,9 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 /** Declares control key bindings */
 public class Controls {
 
-    /** The driver controller, on port 0 */
+    /**
+     * The driver controller, on port 0. Note: although this uses the {@link Joystick} class, it is compatible with {@link XboxController}.
+     */
     public static final Joystick driverController = new Joystick(0);
 
     /** The up controller, on port 1 */
@@ -23,27 +25,45 @@ public class Controls {
         public static final boolean invertDriveControls = true;
 
         // Driver Controls
+        /**
+         * The translation axis. Default is left stick y-axis.
+         */
         public static final int translationAxis = XboxController.Axis.kLeftY.value;
+        /**
+         * The strafe axis. Default is left stick x-axis.
+         */
         public static final int strafeAxis = XboxController.Axis.kLeftX.value;
+        /**
+         * The rotation axis. Default is right stick x-axis.
+         */
         public static final int rotationAxis = XboxController.Axis.kRightX.value;
 
         // Driver Buttons
+        /**
+         * When pressed, zeroes the gyro. Default is {@link XboxController.Button#kY} (top button).
+         * Press when robot is facing towards the drive station to align the robot's forward direction with the field.
+         */
+        // TODO: Flip gyro when enabling?
         public static final JoystickButton zeroGyro =
                 new JoystickButton(driverController, XboxController.Button.kY.value);
+
+        // TODO: Is two buttons for slow and dampen too many?
+        /**
+         * When held, dampens the robot movement. This will decrease the robot's speed a lot.
+         */
         public static final JoystickButton dampen =
                 new JoystickButton(driverController, XboxController.Button.kRightBumper.value);
-
-        // unused
-        // public static final JoystickButton robotCentric =
-        //         new JoystickButton(driverController, XboxController.Button.kLeftBumper.value);
-
         /**
-         * When held, slows the robot down to `slowMultiplier`
+         * When held, slows the robot down to {@link #slowMultiplier}
          */
         public static final JoystickButton slowButton =
                 new JoystickButton(driverController, XboxController.Button.kLeftBumper.value);
 
         public static final double slowMultiplier = 0.5;
+
+        // unused
+        // public static final JoystickButton robotCentric =
+        //         new JoystickButton(driverController, XboxController.Button.kLeftBumper.value);
 
         // Direction buttons
         public static final POVButton up = new POVButton(driverController, 90);
@@ -99,19 +119,4 @@ public class Controls {
             return slowButton.getAsBoolean() ? slowMultiplier : 1;
         }
     }
-    /** The up controls ~(very good name)~ */
-    // public static class Up {
-    //     public static final JoystickButton intake = new JoystickButton(upController,
-    // XboxController.Button.kB.value);
-    //     public static final JoystickButton eintake = new JoystickButton(upController,
-    // XboxController.Button.kX.value);
-
-    //     public static final JoystickButton armUp = new JoystickButton(upController,
-    // XboxController.Button.kRightBumper.value);
-    //     public static final JoystickButton armDown = new JoystickButton(upController,
-    // XboxController.Button.kLeftBumper.value);
-
-    //     public static final int launcherOutAxis = XboxController.Axis.kLeftTrigger.value;
-    //     public static final int launcherInAxis = XboxController.Axis.kRightTrigger.value;
-    // }
 }

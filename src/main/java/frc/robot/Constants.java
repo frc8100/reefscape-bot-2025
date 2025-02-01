@@ -5,6 +5,9 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 
+/**
+ * Contains constants for the robot. Swerve constants are located in {@link SwerveConstants}.
+ */
 public final class Constants {
 
     /**
@@ -26,44 +29,17 @@ public final class Constants {
         REPLAY,
     }
 
+    /**
+     * The deadband for the sticks. This is the range of values that will be considered 0.
+     */
     public static final double stickDeadband = 0.1;
 
+    /**
+     * Constants for the pose estimator. Includes the state and vision standard deviations.
+     */
     public static final class PoseEstimator {
 
         public static final Matrix<N3, N1> stateStdDevs = VecBuilder.fill(0.1, 0.1, 0.1);
         public static final Matrix<N3, N1> VisionStdDevs = VecBuilder.fill(0.9, 0.9, 0.9);
     }
-
-    // public static final class Arm {
-
-    //     public static final int kCanId = 11;
-    //     public static final int kCurrentLimit = 40;
-    // }
-
-    // public static final class Intake {
-
-    //     public static final int kCanId = 7;
-    //     public static final boolean kMotorInverted = true;
-    //     public static final int kCurrentLimit = 40;
-
-    //     public static final double kIntakePower = 0.7;
-
-    //     public static final double kRetractDistance = -3.5;
-
-    //     public static final double kShotFeedTime = 1.0;
-    // }
-
-    // public static final class Launcher {
-
-    //     public static final int kTopCanId = 12;
-    //     public static final int kBottomCanId = 10;
-
-    //     public static final int kCurrentLimit = 40;
-
-    //     public static final double kTopPower = -1.0;
-    //     public static final double kBottomPower = -1.0;
-
-    //     public static final double kTopPowerIn = -0.7;
-    //     public static final double kBottomPowerIn = -0.7;
-    // }
 }
