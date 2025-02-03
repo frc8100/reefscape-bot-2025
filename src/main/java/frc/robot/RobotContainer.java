@@ -8,6 +8,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 // import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.swerve.Swerve;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIOLimelight;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -19,6 +21,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
 
     // Subsystems
+    private final Vision visionSubsystem;
     private final Swerve swerveSubsystem = new Swerve();
 
     // private final PoseEstimator s_PoseEstimator = new PoseEstimator();
@@ -42,6 +45,11 @@ public class RobotContainer {
 
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+
+        // Set up vision
+        visionSubsystem = new Vision(
+                swerveSubsystem::addVisionMeasurement,
+                new VisionIOLimelight("limelight", swerveSubsystem::getRotation));
 
         // Set up SysId routines
         // autoChooser.addOption(

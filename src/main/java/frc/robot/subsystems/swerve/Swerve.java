@@ -67,16 +67,16 @@ public class Swerve extends SubsystemBase {
     // TODO: Implement this
     private Rotation2d rawGyroRotation = new Rotation2d();
 
-    // private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
-
     /**
      * Pose estimator. This is the same as odometry but includes vision input to correct for
      * drifting.
      */
     private SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
             kinematics,
-            rawGyroRotation,
-            lastModulePositions,
+            // rawGyroRotation,
+            getGyroHeading(),
+            // lastModulePositions,
+            getModulePositions(),
             new Pose2d(),
             Constants.PoseEstimator.stateStdDevs,
             Constants.PoseEstimator.VisionStdDevs);
@@ -222,6 +222,8 @@ public class Swerve extends SubsystemBase {
     @AutoLogOutput(key = "Odometry/Robot")
     public Pose2d getPose() {
         // return poseEstimator.getEstimatedPosition();
+        // TODO: Temporary
+        Logger.recordOutput("PoseEstimator/Robot", poseEstimator.getEstimatedPosition());
         Pose2d p = swerveOdometry.getPoseMeters();
         return new Pose2d(-p.getX(), -p.getY(), p.getRotation());
     }
@@ -354,9 +356,15 @@ public class Swerve extends SubsystemBase {
     public void periodic() {
         // Update Odometry
         swerveOdometry.update(getGyroHeading(), getModulePositions());
+        poseEstimator.update(getGyroHeading(), getModulePositions());
+
+        // Stop moving when disabled
+        if (DriverStation.isDisabled()) {
+            stop();
+        }
 
         // Put the yaw on the SmartDashboard
-        SmartDashboard.putNumber("yaw", gyro.getYaw().getValueAsDouble());
+        // SmartDashboard.putNumber("yaw", gyro.getYaw().getValueAsDouble());
 
         double[] canCoderOutputs = new double[4];
         double[] integratedOutputs = new double[4];
