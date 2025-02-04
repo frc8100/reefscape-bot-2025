@@ -2,6 +2,7 @@ package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.ctre.phoenix6.swerve.SwerveModule;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -28,6 +29,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.math.GeometryUtils;
 import frc.robot.Constants;
+import frc.robot.subsystems.drive.GyroIOInputsAutoLogged;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -38,15 +41,19 @@ public class Swerve extends SubsystemBase {
      * The swerve modules. These are the four swerve modules on the robot. Each module has a drive
      * motor and a steering motor.
      */
-    public final SwerveModule[] swerveModules = new SwerveModule[] {
-        new SwerveMod(0, SwerveConstants.Swerve.Mod0.constants),
-        new SwerveMod(1, SwerveConstants.Swerve.Mod1.constants),
-        new SwerveMod(2, SwerveConstants.Swerve.Mod2.constants),
-        new SwerveMod(3, SwerveConstants.Swerve.Mod3.constants),
-    };
+    // public final SwerveModule[] swerveModules = new SwerveModule[] {
+    //     new SwerveMod(0, SwerveConstants.Swerve.Mod0.constants),
+    //     new SwerveMod(1, SwerveConstants.Swerve.Mod1.constants),
+    //     new SwerveMod(2, SwerveConstants.Swerve.Mod2.constants),
+    //     new SwerveMod(3, SwerveConstants.Swerve.Mod3.constants),
+    // };
+    public final Module[] swerveModules = new Module[4];
 
     /** The gyro. This is used to determine the robot's heading. */
-    public final Pigeon2 gyro = new Pigeon2(SwerveConstants.REV.pigeonID);
+    // public final Pigeon2 gyro = new Pigeon2(SwerveConstants.REV.pigeonID);
+    
+    private final GyroIO gyroIO;
+    private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
 
     /*
      * Swerve Kinematics
@@ -85,7 +92,14 @@ public class Swerve extends SubsystemBase {
     public final SwerveDriveOdometry swerveOdometry;
 
     /** Creates a new Swerve subsystem. */
-    public Swerve() {
+    public Swerve(GyroIO gyroIO, ModuleIO[] moduleIOs) {
+        // Create the swerve modules
+        for (int i = 0; i < 4; i++) {
+            swerveModules[i] = new Module(moduleIOs[i], i);
+        }
+
+        this.gyroIO = gyroIO;
+
         // TODO: implement settings
         gyro.getConfigurator().apply(new Pigeon2Configuration());
 
