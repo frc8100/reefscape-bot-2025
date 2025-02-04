@@ -13,8 +13,4 @@ public interface SwerveModule {
     public SwerveModuleState getState();
 
     public SwerveModulePosition getPosition();
-
-    public int getModuleNumber();
-
-    public void setModuleNumber(int moduleNumber);
 }

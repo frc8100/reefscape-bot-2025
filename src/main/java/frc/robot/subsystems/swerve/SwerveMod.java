@@ -25,34 +25,30 @@ import frc.lib.util.swerveUtil.RevSwerveModuleConstants;
 public class SwerveMod implements SwerveModule {
 
     /**
-     * The module number identifier. Access using {@link #getModuleNumber} and {@link
-     * #setModuleNumber}.
+     * The module number identifier.
      */
-    private int moduleNumber;
+    public int moduleNumber;
 
     /** The angle offset. Used to zero the module to a specific angle. */
     private Rotation2d angleOffset;
 
     /**
-     * The angle motor. This motor is used to control the angle of the module. Uses REV Robotics
-     * SparkMax controller.
+     * The angle motor. This motor is used to control the angle of the module.
      */
-    private SparkMax mAngleMotor;
+    private SparkMax angleMotor;
 
     /**
-     * The drive motor. This motor is used to control the speed of the module. Uses REV Robotics
-     * SparkMax controller.
+     * The drive motor. This motor is used to control the speed of the module.
      */
-    private SparkMax mDriveMotor;
+    private SparkMax driveMotor;
 
     /**
-     * The angle encoder. This encoder is used to determine the angle of the module. Uses CTRE
-     * Phoenix CANCoder.
+     * The angle encoder. This encoder is used to determine current angle/rotation of the module.
      */
     private CANcoder angleEncoder;
 
     /**
-     * The relative encoders. These encoders are used to determine the relative angle of the module.
+     * The relative angle encoder
      */
     private RelativeEncoder relAngleEncoder;
 
@@ -74,11 +70,11 @@ public class SwerveMod implements SwerveModule {
         this.angleOffset = moduleConstants.angleOffset;
 
         // Create and configure the angle motor
-        mAngleMotor = new SparkMax(moduleConstants.angleMotorID, MotorType.kBrushless);
+        angleMotor = new SparkMax(moduleConstants.angleMotorID, MotorType.kBrushless);
         configAngleMotor();
 
         // Create and configure the drive motor
-        mDriveMotor = new SparkMax(moduleConstants.driveMotorID, MotorType.kBrushless);
+        driveMotor = new SparkMax(moduleConstants.driveMotorID, MotorType.kBrushless);
         configDriveMotor();
 
         // Create and configure the CANCoder
@@ -94,7 +90,7 @@ public class SwerveMod implements SwerveModule {
     private void configAngleMotor() {
         // Assign the relative angle encoder and configure it
         SparkMaxConfig angleConfig = new SparkMaxConfig();
-        relAngleEncoder = mAngleMotor.getEncoder();
+        relAngleEncoder = angleMotor.getEncoder();
 
         angleConfig
                 .encoder
@@ -114,7 +110,7 @@ public class SwerveMod implements SwerveModule {
                 .idleMode(SwerveConfig.angleIdleMode);
 
         // ! IMPORTANT: New changes in 2025 may make this inaccurate
-        mAngleMotor.configure(angleConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        angleMotor.configure(angleConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     /** Configures the drive motor. */
@@ -129,7 +125,7 @@ public class SwerveMod implements SwerveModule {
                 .velocityConversionFactor(SwerveConfig.driveRpmToMetersPerSecond);
 
         // Assign the relative drive encoder and set the position to 0
-        relDriveEncoder = mDriveMotor.getEncoder();
+        relDriveEncoder = driveMotor.getEncoder();
         relDriveEncoder.setPosition(0);
 
         // Configure the PID controller for the drive motor
@@ -144,7 +140,7 @@ public class SwerveMod implements SwerveModule {
                 .idleMode(SwerveConfig.driveIdleMode);
 
         // ! IMPORTANT: New changes in 2025 may make this inaccurate
-        mDriveMotor.configure(driveConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        driveMotor.configure(driveConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     /**
@@ -180,14 +176,14 @@ public class SwerveMod implements SwerveModule {
         // If the module is in open loop, set the speed directly
         if (isOpenLoop) {
             double percentOutput = desiredState.speedMetersPerSecond / SwerveConfig.maxSpeed;
-            mDriveMotor.set(percentOutput);
+            driveMotor.set(percentOutput);
             return;
         }
 
         // Otherwise, set the speed using the PID controller
         double velocity = desiredState.speedMetersPerSecond;
 
-        SparkClosedLoopController controller = mDriveMotor.getClosedLoopController();
+        SparkClosedLoopController controller = driveMotor.getClosedLoopController();
         controller.setReference(velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
     }
 
@@ -199,7 +195,7 @@ public class SwerveMod implements SwerveModule {
     private void setAngle(SwerveModuleState desiredState) {
         // Stop the motor if the speed is less than 1%. Prevents Jittering
         if (Math.abs(desiredState.speedMetersPerSecond) <= (SwerveConfig.maxSpeed * 0.01)) {
-            mAngleMotor.stopMotor();
+            angleMotor.stopMotor();
             return;
         }
 
@@ -207,7 +203,7 @@ public class SwerveMod implements SwerveModule {
         Rotation2d angle = desiredState.angle;
         double degReference = angle.getDegrees();
 
-        SparkClosedLoopController controller = mAngleMotor.getClosedLoopController();
+        SparkClosedLoopController controller = angleMotor.getClosedLoopController();
         controller.setReference(degReference, ControlType.kPosition, ClosedLoopSlot.kSlot0);
     }
 
@@ -223,22 +219,6 @@ public class SwerveMod implements SwerveModule {
      */
     public Rotation2d getCanCoder() {
         return Rotation2d.fromDegrees(angleEncoder.getAbsolutePosition().getValueAsDouble() * 360);
-    }
-
-    /**
-     * @return The module number.
-     */
-    public int getModuleNumber() {
-        return moduleNumber;
-    }
-
-    /**
-     * Sets the module number.
-     *
-     * @param moduleNumber The module number.
-     */
-    public void setModuleNumber(int moduleNumber) {
-        this.moduleNumber = moduleNumber;
     }
 
     /**

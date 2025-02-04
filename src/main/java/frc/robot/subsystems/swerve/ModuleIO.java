@@ -47,8 +47,14 @@ public interface ModuleIO {
     public default void setTurnOpenLoop(double output) {}
 
     /** Run the drive motor at the specified velocity. */
-    public default void setDriveVelocity(SwerveModuleState velocityRadPerSec) {}
+    // public default void setDriveVelocity(SwerveModuleState velocityRadPerSec) {}
 
     /** Run the turn motor to the specified rotation. */
-    public default void setTurnPosition(SwerveModuleState rotation) {}
+    // public default void setTurnPosition(SwerveModuleState rotation) {}
+
+    /**
+     * Sets the desired state for the module. Should update the turn and drive motors to reach the desired state.
+     * @param desiredState - The desired state for the module.
+     */
+    public default void setDesiredState(SwerveModuleState desiredState) {}
 }
