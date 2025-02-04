@@ -12,7 +12,6 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import frc.lib.util.swerveUtil.COTSNeoSwerveConstants;
 
 /**
  * Swerve configuration class. This class contains all the constants and configurations for the
@@ -31,13 +30,13 @@ public class SwerveConfig {
 
     public static final boolean invertGyro = false; // Always ensure Gyro is CCW+ CW-
 
-    public static final COTSNeoSwerveConstants chosenModule =
-            COTSNeoSwerveConstants.SDSMK4i(COTSNeoSwerveConstants.driveGearRatios.SDSMK4i_L2);
+    // public static final COTSNeoSwerveConstants chosenModule =
+    //         COTSNeoSwerveConstants.SDSMK4i(COTSNeoSwerveConstants.driveGearRatios.SDSMK4i_L2);
 
     /* Drivetrain Constants */
     public static final double trackWidth = Units.inchesToMeters(25.75);
     public static final double wheelBase = Units.inchesToMeters(21.50);
-    public static final double wheelCircumference = chosenModule.wheelCircumference;
+    public static final double wheelCircumference = Units.inchesToMeters(4.0) * Math.PI;
 
     /** The module translations. No need to change. */
     public static final Translation2d[] moduleTranslations = new Translation2d[] {
@@ -48,8 +47,8 @@ public class SwerveConfig {
     };
 
     /* Module Gear Ratios */
-    public static final double driveGearRatio = chosenModule.driveGearRatio;
-    public static final double angleGearRatio = chosenModule.angleGearRatio;
+    public static final double driveGearRatio = 6.75;
+    public static final double angleGearRatio = ((150.0 / 7.0) / 1.0);
 
     // encoder setup
     // meters per rotation
@@ -59,11 +58,11 @@ public class SwerveConfig {
     public static final double DegreesPerTurnRotation = 360 / angleGearRatio;
 
     /* Motor Inverts */
-    public static final boolean angleMotorInvert = chosenModule.angleMotorInvert;
-    public static final boolean driveMotorInvert = chosenModule.driveMotorInvert;
+    public static final boolean angleMotorInvert = true;
+    public static final boolean driveMotorInvert = false;
 
-    /* Angle Encoder Invert */
-    public static final boolean canCoderInvert = chosenModule.canCoderInvert;
+    /** Angle Encoder Invert */
+    public static final boolean canCoderInvert = false;
 
     /* Swerve Current Limiting */
     public static final int angleContinuousCurrentLimit = 20;
