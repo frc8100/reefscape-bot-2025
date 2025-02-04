@@ -36,7 +36,8 @@ public class SwerveConfig {
     /* Drivetrain Constants */
     public static final double trackWidth = Units.inchesToMeters(25.75);
     public static final double wheelBase = Units.inchesToMeters(21.50);
-    public static final double wheelCircumference = Units.inchesToMeters(4.0) * Math.PI;
+    public static final double wheelRadius = Units.inchesToMeters(2.0);
+    public static final double wheelCircumference = wheelRadius * 2 * Math.PI;
 
     /** The module translations. No need to change. */
     public static final Translation2d[] moduleTranslations = new Translation2d[] {
