@@ -15,6 +15,7 @@ package frc.robot.subsystems.swerve;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
+import org.littletonrobotics.junction.AutoLogOutput;
 
 public interface GyroIO {
     @AutoLog
@@ -27,4 +28,25 @@ public interface GyroIO {
     }
 
     public default void updateInputs(GyroIOInputs inputs) {}
+
+    /**
+     * Zeros the gyro.
+     *
+     * @param deg The angle to zero the gyro to.
+     */
+    public default void zeroGyro(double deg) {}
+
+    /**
+     * @return The current gyro yaw of the robot.
+     */
+    @AutoLogOutput(key = "Gyro/Yaw")
+    public abstract Rotation2d getYaw();
+
+    // public abstract Rotation2d getRotation2d();
+
+    /**
+     * @return The current gyro heading of the robot.
+     */
+    @AutoLogOutput(key = "Gyro/Heading")
+    public abstract Rotation2d getGyroHeading();
 }

@@ -1,7 +1,5 @@
 package frc.robot.subsystems.swerve;
 
-import com.ctre.phoenix6.configs.Pigeon2Configuration;
-import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -42,20 +40,17 @@ public class Swerve extends SubsystemBase {
      * The swerve modules. These are the four swerve modules on the robot. Each module has a drive
      * motor and a steering motor.
      */
-    // public final SwerveModule[] swerveModules = new SwerveModule[] {
-    //     new SwerveMod(0, SwerveConstants.Swerve.Mod0.constants),
-    //     new SwerveMod(1, SwerveConstants.Swerve.Mod1.constants),
-    //     new SwerveMod(2, SwerveConstants.Swerve.Mod2.constants),
-    //     new SwerveMod(3, SwerveConstants.Swerve.Mod3.constants),
-    // };
     public final Module[] swerveModules = new Module[4];
 
     /** The gyro. This is used to determine the robot's heading. */
-    public final Pigeon2 gyro = new Pigeon2(SwerveConstants.REV.pigeonID);
+    // public final Pigeon2 gyro = new Pigeon2(SwerveConstants.REV.pigeonID);
 
-    // TODO: Implement this
-    // private final GyroIO gyroIO;
-    // private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+    public final GyroIO gyroIO;
+
+    private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+
+    /** Raw gryo rotation. Used for the pose estimator. */
+    private Rotation2d rawGyroRotation = new Rotation2d();
 
     /*
      * Swerve Kinematics
@@ -71,10 +66,6 @@ public class Swerve extends SubsystemBase {
 
     /** A 2d representation of the field */
     private Field2d field = new Field2d();
-
-    /** Raw gryo rotation. Used for the pose estimator. */
-    // TODO: Implement this
-    private Rotation2d rawGyroRotation = new Rotation2d();
 
     /**
      * Pose estimator. This is the same as odometry but includes vision input to correct for
@@ -93,21 +84,21 @@ public class Swerve extends SubsystemBase {
             swerveModules[i] = new Module(moduleIOs[i], i);
         }
 
-        swerveOdometry = new SwerveDriveOdometry(kinematics, getGyroHeading(), getModulePositions());
+        this.gyroIO = gyroIO;
+
+        swerveOdometry = new SwerveDriveOdometry(kinematics, gyroIO.getGyroHeading(), getModulePositions());
 
         poseEstimator = new SwerveDrivePoseEstimator(
                 kinematics,
                 // rawGyroRotation,
-                getGyroHeading(),
+                gyroIO.getGyroHeading(),
                 // lastModulePositions,
                 getModulePositions(),
                 new Pose2d(),
                 Constants.PoseEstimator.stateStdDevs,
                 Constants.PoseEstimator.VisionStdDevs);
 
-        // this.gyroIO = gyroIO;
-
-        gyro.getConfigurator().apply(new Pigeon2Configuration());
+        // gyro.getConfigurator().apply(new Pigeon2Configuration());
         zeroGyro();
 
         AutoBuilder.configure(
@@ -184,7 +175,7 @@ public class Swerve extends SubsystemBase {
         // Determine the desired chassis speeds based on whether the control is field-relative
         ChassisSpeeds desiredChassisSpeeds = fieldRelative
                 ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                        translation.getX(), translation.getY(), rotation, getGyroHeading())
+                        translation.getX(), translation.getY(), rotation, gyroIO.getGyroHeading())
                 : new ChassisSpeeds(translation.getX(), translation.getY(), rotation);
 
         // Correct the chassis speeds for robot dynamics
@@ -326,51 +317,18 @@ public class Swerve extends SubsystemBase {
     /**
      * Zeros the gyro.
      *
-     * @param deg The angle to zero the gyro to.
+     * @param deg The angle to zero the gyro to. Raw, without invert.
      */
     public void zeroGyro(double deg) {
-        // Invert the gyro if necessary
-        if (SwerveConfig.invertGyro) {
-            deg = -deg;
-        }
+        gyroIO.zeroGyro(deg);
 
-        // Zero the gyro and update the odometry
-        gyro.setYaw(deg);
-        swerveOdometry.update(getGyroHeading(), getModulePositions());
-        poseEstimator.update(getGyroHeading(), getModulePositions());
+        swerveOdometry.update(gyroIO.getGyroHeading(), getModulePositions());
+        poseEstimator.update(gyroIO.getGyroHeading(), getModulePositions());
     }
 
     /** Zeros the gyro, setting the angle to 0. */
     public void zeroGyro() {
         zeroGyro(0);
-    }
-
-    /**
-     * @return The current gyro yaw of the robot.
-     */
-    @AutoLogOutput(key = "Gyro/Yaw")
-    public Rotation2d getYaw() {
-        // If the gyro is inverted, return the inverted yaw
-        if (SwerveConfig.invertGyro) {
-            return Rotation2d.fromDegrees(360 - gyro.getYaw().getValueAsDouble());
-        }
-
-        // Otherwise, return the yaw as-is
-        return Rotation2d.fromDegrees(gyro.getYaw().getValueAsDouble());
-    }
-
-    /**
-     * @return The current gyro heading of the robot.
-     */
-    @AutoLogOutput(key = "Gyro/Heading")
-    public Rotation2d getGyroHeading() {
-        // If the gyro is inverted, return the inverted yaw
-        if (SwerveConfig.invertGyro) {
-            return gyro.getRotation2d().rotateBy(new Rotation2d(180));
-        }
-
-        // Otherwise, return the yaw as-is
-        return gyro.getRotation2d();
     }
 
     /** Stops the drive. */
@@ -382,8 +340,8 @@ public class Swerve extends SubsystemBase {
     @Override
     public void periodic() {
         // Update Odometry
-        swerveOdometry.update(getGyroHeading(), getModulePositions());
-        poseEstimator.update(getGyroHeading(), getModulePositions());
+        swerveOdometry.update(gyroIO.getGyroHeading(), getModulePositions());
+        poseEstimator.update(gyroIO.getGyroHeading(), getModulePositions());
 
         // Stop moving when disabled
         if (DriverStation.isDisabled()) {
@@ -425,7 +383,7 @@ public class Swerve extends SubsystemBase {
 
         // Record module states
         Logger.recordOutput("SwerveModStates", getModuleStates());
-        Logger.recordOutput("SwerveGyro", gyro.getRotation2d());
+        Logger.recordOutput("SwerveGyro", gyroIO.getGyroHeading());
 
         Logger.recordOutput("SwerveModuleCancoder", canCoderOutputs);
         Logger.recordOutput("SwerveModuleIntegrated", integratedOutputs);

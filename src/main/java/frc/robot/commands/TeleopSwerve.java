@@ -116,23 +116,23 @@ public class TeleopSwerve extends Command {
         switch (States.driveState) {
             case d0:
                 // heading lock
-                rotationValue =
-                        rotationController.calculate(swerveSubsystem.getYaw().getRadians(), Units.degreesToRadians(0));
+                rotationValue = rotationController.calculate(
+                        swerveSubsystem.gyroIO.getYaw().getRadians(), Units.degreesToRadians(0));
                 break;
             case d90:
                 // heading lock
-                rotationValue =
-                        rotationController.calculate(swerveSubsystem.getYaw().getRadians(), Units.degreesToRadians(90));
+                rotationValue = rotationController.calculate(
+                        swerveSubsystem.gyroIO.getYaw().getRadians(), Units.degreesToRadians(90));
                 break;
             case d180:
                 // heading lock
                 rotationValue = rotationController.calculate(
-                        swerveSubsystem.getYaw().getRadians(), Units.degreesToRadians(180));
+                        swerveSubsystem.gyroIO.getYaw().getRadians(), Units.degreesToRadians(180));
                 break;
             case d270:
                 // heading lock
                 rotationValue = rotationController.calculate(
-                        swerveSubsystem.getYaw().getRadians(), Units.degreesToRadians(270));
+                        swerveSubsystem.gyroIO.getYaw().getRadians(), Units.degreesToRadians(270));
                 break;
             case standard:
                 // normal

@@ -56,4 +56,42 @@ public class GyroIOPigeon2 implements GyroIO {
         yawTimestampQueue.clear();
         yawPositionQueue.clear();
     }
+
+    @Override
+    public void zeroGyro(double deg) {
+        // Invert the gyro if necessary
+        if (SwerveConfig.invertGyro) {
+            deg = -deg;
+        }
+
+        // Zero the gyro and update the odometry
+        pigeon.setYaw(deg);
+    }
+
+    @Override
+    public Rotation2d getYaw() {
+        // If the gyro is inverted, return the inverted yaw
+        if (SwerveConfig.invertGyro) {
+            return Rotation2d.fromDegrees(360 - pigeon.getYaw().getValueAsDouble());
+        }
+
+        // Otherwise, return the yaw as-is
+        return Rotation2d.fromDegrees(pigeon.getYaw().getValueAsDouble());
+    }
+
+    // @Override
+    // public Rotation2d getRotation2d() {
+    //     return pigeon.getRotation2d();
+    // }
+
+    @Override
+    public Rotation2d getGyroHeading() {
+        // If the gyro is inverted, return the inverted yaw
+        if (SwerveConfig.invertGyro) {
+            return pigeon.getRotation2d().rotateBy(new Rotation2d(180));
+        }
+
+        // Otherwise, return the yaw as-is
+        return pigeon.getRotation2d();
+    }
 }
