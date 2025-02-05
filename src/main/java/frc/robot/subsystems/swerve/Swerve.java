@@ -93,11 +93,6 @@ public class Swerve extends SubsystemBase {
             swerveModules[i] = new Module(moduleIOs[i], i);
         }
 
-        // this.gyroIO = gyroIO;
-
-        gyro.getConfigurator().apply(new Pigeon2Configuration());
-        zeroGyro();
-
         swerveOdometry = new SwerveDriveOdometry(kinematics, getGyroHeading(), getModulePositions());
 
         poseEstimator = new SwerveDrivePoseEstimator(
@@ -109,6 +104,11 @@ public class Swerve extends SubsystemBase {
                 new Pose2d(),
                 Constants.PoseEstimator.stateStdDevs,
                 Constants.PoseEstimator.VisionStdDevs);
+
+        // this.gyroIO = gyroIO;
+
+        gyro.getConfigurator().apply(new Pigeon2Configuration());
+        zeroGyro();
 
         AutoBuilder.configure(
                 this::getPose,

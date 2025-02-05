@@ -313,11 +313,12 @@ public class ModuleIOSpark implements ModuleIO {
      * @param desiredState The desired state.
      * @param isOpenLoop Whether the module is in open loop.
      */
-    public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop) {
+    @Override
+    public void setDesiredState(SwerveModuleState desiredState) {
         // CTREModuleState functions for any motor type
         desiredState = CTREModuleState.optimize(desiredState, getState().angle);
         setAngle(desiredState);
-        setSpeed(desiredState, isOpenLoop);
+        setSpeed(desiredState);
 
         // TODO: Check for sensor faults
         // if (mDriveMotor.getFaults(Faults.kSensorFault)) {
@@ -336,19 +337,23 @@ public class ModuleIOSpark implements ModuleIO {
      * @param desiredState The desired state.
      * @param isOpenLoop Whether the module is in open loop.
      */
-    private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop) {
+    private void setSpeed(SwerveModuleState desiredState) {
         // If the module is in open loop, set the speed directly
-        if (isOpenLoop) {
-            double percentOutput = desiredState.speedMetersPerSecond / SwerveConfig.maxSpeed;
-            driveMotor.set(percentOutput);
-            return;
-        }
+        // if (isOpenLoop) {
+        //     double percentOutput = desiredState.speedMetersPerSecond / SwerveConfig.maxSpeed;
+        //     driveMotor.set(percentOutput);
+        //     return;
+        // }
+
+        double percentOutput = desiredState.speedMetersPerSecond / SwerveConfig.maxSpeed;
+        driveMotor.set(percentOutput);
+        return;
 
         // Otherwise, set the speed using the PID controller
-        double velocity = desiredState.speedMetersPerSecond;
+        // double velocity = desiredState.speedMetersPerSecond;
 
-        SparkClosedLoopController controller = driveMotor.getClosedLoopController();
-        controller.setReference(velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
+        // SparkClosedLoopController controller = driveMotor.getClosedLoopController();
+        // controller.setReference(velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
     }
 
     @Override
