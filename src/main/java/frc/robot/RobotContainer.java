@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.Controls.Drive;
 // import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.swerve.GyroIO;
@@ -44,45 +43,30 @@ public class RobotContainer {
         switch (Constants.currentMode) {
             case REAL:
                 // Real robot, instantiate hardware IO implementations
-                swerveSubsystem = new Swerve(
-                    new GyroIOPigeon2(),
-                    new ModuleIO[] {
-                        new ModuleIOSpark(0, SwerveConstants.Swerve.Mod0.constants),
-                        new ModuleIOSpark(1, SwerveConstants.Swerve.Mod1.constants),
-                        new ModuleIOSpark(2, SwerveConstants.Swerve.Mod2.constants),
-                        new ModuleIOSpark(3, SwerveConstants.Swerve.Mod3.constants)
-                    }
-                );
+                swerveSubsystem = new Swerve(new GyroIOPigeon2(), new ModuleIO[] {
+                    new ModuleIOSpark(0, SwerveConstants.Swerve.Mod0.constants),
+                    new ModuleIOSpark(1, SwerveConstants.Swerve.Mod1.constants),
+                    new ModuleIOSpark(2, SwerveConstants.Swerve.Mod2.constants),
+                    new ModuleIOSpark(3, SwerveConstants.Swerve.Mod3.constants)
+                });
                 break;
 
             case SIM:
                 // Sim robot, instantiate physics sim IO implementations
                 // swerveSubsystem = new Swerve(
                 //         new GyroIO() {}, new ModuleIOSim(), new ModuleIOSim(), new ModuleIOSim(), new ModuleIOSim());
-                swerveSubsystem = new Swerve(
-                    new GyroIO() {},
-                    new ModuleIO[] {
-                        new ModuleIOSim(),
-                        new ModuleIOSim(),
-                        new ModuleIOSim(),
-                        new ModuleIOSim(),
-                    }
-                );
+                swerveSubsystem = new Swerve(new GyroIO() {}, new ModuleIO[] {
+                    new ModuleIOSim(), new ModuleIOSim(), new ModuleIOSim(), new ModuleIOSim(),
+                });
                 break;
 
             default:
                 // Replayed robot, disable IO implementations
                 // swerveSubsystem = new Swerve(
                 //         new GyroIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
-                swerveSubsystem = new Swerve(
-                    new GyroIO() {},
-                    new ModuleIO[] {
-                        new ModuleIO() {},
-                        new ModuleIO() {},
-                        new ModuleIO() {},
-                        new ModuleIO() {},
-                    }
-                );
+                swerveSubsystem = new Swerve(new GyroIO() {}, new ModuleIO[] {
+                    new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {},
+                });
                 break;
         }
 

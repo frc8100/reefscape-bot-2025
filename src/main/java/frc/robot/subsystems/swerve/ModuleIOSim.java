@@ -101,7 +101,7 @@ public class ModuleIOSim implements ModuleIO {
 
     @Override
     public void setDriveVelocity(double velocityRadPerSec) {
-    // public void setDriveVelocity(SwerveModuleState state) {
+        // public void setDriveVelocity(SwerveModuleState state) {
         // double velocityRadPerSec = state.speedMetersPerSecond / SwerveConfig.wheelRadius;
 
         driveClosedLoop = true;
@@ -112,7 +112,7 @@ public class ModuleIOSim implements ModuleIO {
 
     @Override
     public void setTurnPosition(Rotation2d rotation) {
-    // public void setTurnPosition(SwerveModuleState state) {
+        // public void setTurnPosition(SwerveModuleState state) {
         // Rotation2d rotation = state.angle;
 
         turnClosedLoop = true;

@@ -2,7 +2,6 @@ package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
-import com.ctre.phoenix6.swerve.SwerveModule;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -29,11 +28,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.math.GeometryUtils;
 import frc.robot.Constants;
-import frc.robot.subsystems.drive.GyroIOInputsAutoLogged;
-
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -56,7 +52,7 @@ public class Swerve extends SubsystemBase {
 
     /** The gyro. This is used to determine the robot's heading. */
     public final Pigeon2 gyro = new Pigeon2(SwerveConstants.REV.pigeonID);
-    
+
     // TODO: Implement this
     // private final GyroIO gyroIO;
     // private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
