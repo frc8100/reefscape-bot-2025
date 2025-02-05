@@ -16,7 +16,7 @@ package frc.robot.subsystems.swerve;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
+// import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
@@ -100,9 +100,9 @@ public class ModuleIOSim implements ModuleIO {
     }
 
     @Override
-    // public void setDriveVelocity(double velocityRadPerSec) {
-    public void setDriveVelocity(SwerveModuleState state) {
-        double velocityRadPerSec = state.speedMetersPerSecond / SwerveConfig.wheelRadius;
+    public void setDriveVelocity(double velocityRadPerSec) {
+    // public void setDriveVelocity(SwerveModuleState state) {
+        // double velocityRadPerSec = state.speedMetersPerSecond / SwerveConfig.wheelRadius;
 
         driveClosedLoop = true;
         driveFFVolts =
@@ -111,9 +111,9 @@ public class ModuleIOSim implements ModuleIO {
     }
 
     @Override
-    // public void setTurnPosition(Rotation2d rotation) {
-    public void setTurnPosition(SwerveModuleState state) {
-        Rotation2d rotation = state.angle;
+    public void setTurnPosition(Rotation2d rotation) {
+    // public void setTurnPosition(SwerveModuleState state) {
+        // Rotation2d rotation = state.angle;
 
         turnClosedLoop = true;
         turnController.setSetpoint(rotation.getRadians());

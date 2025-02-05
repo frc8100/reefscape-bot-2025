@@ -11,6 +11,7 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 // import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
 /**
@@ -18,6 +19,10 @@ import edu.wpi.first.math.util.Units;
  * swerve drive.
  */
 public class SwerveConfig {
+    // Simulator use
+    public static final DCMotor turnGearbox = DCMotor.getNeo550(1);
+    public static final DCMotor driveGearbox = DCMotor.getNeoVortex(1);
+
     public static final double odometryFrequency = 100; // 100 Hz
 
     /** The CANCoder configuration. */
@@ -87,12 +92,20 @@ public class SwerveConfig {
     public static final double angleKI = 0;
     public static final double angleKD = 0;
     public static final double angleKF = 0;
+    
+    public static final double turnSimP = 8.0;
+    public static final double turnSimD = 0.0;
 
     /* Drive Motor PID Values */
     public static final double driveKP = 0.1;
     public static final double driveKI = 0.0;
     public static final double driveKD = 0.0;
     public static final double driveKF = 0.0;
+
+    public static final double driveSimP = 0.05;
+    public static final double driveSimD = 0.0;
+    public static final double driveSimKs = 0.0;
+    public static final double driveSimKv = 0.0789;
 
     /* Drive Motor Characterization Values
      * Divide SYSID values by 12 to convert from volts to percent output for CTRE */
