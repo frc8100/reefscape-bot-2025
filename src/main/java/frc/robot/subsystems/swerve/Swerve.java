@@ -80,15 +80,7 @@ public class Swerve extends SubsystemBase {
      * Pose estimator. This is the same as odometry but includes vision input to correct for
      * drifting.
      */
-    private SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
-            kinematics,
-            // rawGyroRotation,
-            getGyroHeading(),
-            // lastModulePositions,
-            getModulePositions(),
-            new Pose2d(),
-            Constants.PoseEstimator.stateStdDevs,
-            Constants.PoseEstimator.VisionStdDevs);
+    private SwerveDrivePoseEstimator poseEstimator;
 
     /** The swerve odometry. This is used to determine the robot's position on the field. */
     public final SwerveDriveOdometry swerveOdometry;
@@ -97,16 +89,26 @@ public class Swerve extends SubsystemBase {
     public Swerve(GyroIO gyroIO, ModuleIO[] moduleIOs) {
         // Create the swerve modules
         for (int i = 0; i < 4; i++) {
+            System.out.println("Creating module " + i);
             swerveModules[i] = new Module(moduleIOs[i], i);
         }
 
         // this.gyroIO = gyroIO;
 
         gyro.getConfigurator().apply(new Pigeon2Configuration());
+        zeroGyro();
 
         swerveOdometry = new SwerveDriveOdometry(kinematics, getGyroHeading(), getModulePositions());
 
-        zeroGyro();
+        poseEstimator = new SwerveDrivePoseEstimator(
+                kinematics,
+                // rawGyroRotation,
+                getGyroHeading(),
+                // lastModulePositions,
+                getModulePositions(),
+                new Pose2d(),
+                Constants.PoseEstimator.stateStdDevs,
+                Constants.PoseEstimator.VisionStdDevs);
 
         AutoBuilder.configure(
                 this::getPose,
@@ -211,7 +213,9 @@ public class Swerve extends SubsystemBase {
         Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
 
         // Set the desired state for each swerve module
-        for (Module mod : swerveModules) {
+        // for (Module mod : swerveModules) {
+        for (int i = 0; i < 4; i++) {
+            Module mod = swerveModules[i];
             mod.runSetpoint(setpointStates[mod.index]);
         }
     }
@@ -226,7 +230,9 @@ public class Swerve extends SubsystemBase {
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, SwerveConfig.maxSpeed);
 
         // Set the desired state for each swerve module
-        for (Module mod : swerveModules) {
+        // for (Module mod : swerveModules) {
+        for (int i = 0; i < 4; i++) {
+            Module mod = swerveModules[i];
             // mod.setDesiredState(desiredStates[mod.getModuleNumber()], false);
             mod.runSetpoint(desiredStates[mod.index]);
         }
@@ -282,7 +288,9 @@ public class Swerve extends SubsystemBase {
         SwerveModuleState[] states = new SwerveModuleState[4];
 
         // Get the state of each module
-        for (Module mod : swerveModules) {
+        // for (Module mod : swerveModules) {
+        for (int i = 0; i < 4; i++) {
+            Module mod = swerveModules[i];
             // states[mod.getModuleNumber()] = mod.getState();
             states[mod.index] = mod.getState();
         }
@@ -298,9 +306,10 @@ public class Swerve extends SubsystemBase {
         SwerveModulePosition[] positions = new SwerveModulePosition[4];
 
         // Get the position of each module
-        for (Module mod : swerveModules) {
-            // positions[mod.getModuleNumber()] = mod.getPosition();
-            positions[mod.index] = mod.getPosition();
+        // for (Module mod : swerveModules) {
+        for (int i = 0; i < 4; i++) {
+            Module mod = swerveModules[i];
+            positions[i] = mod.getPosition();
         }
 
         return positions;
