@@ -349,6 +349,11 @@ public class ModuleIOSpark implements ModuleIO {
         controller.setReference(velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
     }
 
+    @Override
+    public void setTurnPosition(Rotation2d rotation) {
+        setAngle(new SwerveModuleState(0, rotation));
+    }
+
     /**
      * Sets the angle of the module.
      *
