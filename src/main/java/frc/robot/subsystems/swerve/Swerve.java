@@ -86,6 +86,9 @@ public class Swerve extends SubsystemBase {
 
         this.gyroIO = gyroIO;
 
+        // Start odometry thread
+        SparkOdometryThread.getInstance().start();
+
         swerveOdometry = new SwerveDriveOdometry(kinematics, gyroIO.getGyroHeading(), getModulePositions());
 
         poseEstimator = new SwerveDrivePoseEstimator(
@@ -274,6 +277,7 @@ public class Swerve extends SubsystemBase {
     /**
      * @return The current module states.
      */
+    @AutoLogOutput(key = "SwerveStates/Measured")
     public SwerveModuleState[] getModuleStates() {
         // Create an array to hold the module states
         SwerveModuleState[] states = new SwerveModuleState[4];
@@ -343,52 +347,56 @@ public class Swerve extends SubsystemBase {
         swerveOdometry.update(gyroIO.getGyroHeading(), getModulePositions());
         poseEstimator.update(gyroIO.getGyroHeading(), getModulePositions());
 
+        // Prevents odometry updates while reading data
+        odometryLock.lock();
+        gyroIO.updateInputs(gyroInputs);
+        Logger.processInputs("Drive/Gyro", gyroInputs);
+        for (Module module : swerveModules) {
+            module.periodic();
+        }
+        odometryLock.unlock();
+
         // Stop moving when disabled
         if (DriverStation.isDisabled()) {
             stop();
         }
 
-        // Put the yaw on the SmartDashboard
-        // SmartDashboard.putNumber("yaw", gyro.getYaw().getValueAsDouble());
+        // Log empty setpoint states when disabled
+        if (DriverStation.isDisabled()) {
+            Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[] {});
+            Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
+        }
 
-        double[] canCoderOutputs = new double[4];
-        double[] integratedOutputs = new double[4];
-        double[] velocityOutputs = new double[4];
+        // Update odometry
+        double[] sampleTimestamps = swerveModules[0].getOdometryTimestamps(); // All signals are sampled together
+        int sampleCount = sampleTimestamps.length;
+        for (int i = 0; i < sampleCount; i++) {
+            // Read wheel positions and deltas from each module
+            SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
+            SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
+            for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
+                modulePositions[moduleIndex] = swerveModules[moduleIndex].getOdometryPositions()[i];
+                moduleDeltas[moduleIndex] = new SwerveModulePosition(
+                        modulePositions[moduleIndex].distanceMeters - lastModulePositions[moduleIndex].distanceMeters,
+                        modulePositions[moduleIndex].angle);
+                lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
+            }
 
-        // Put the module information on the SmartDashboard
-        // for (Module mod : swerveModules) {
-        //     // int modId = mod.getModuleNumber();
-        //     int modId = mod.index;
+            // Update gyro angle
+            if (gyroInputs.connected) {
+                // Use the real gyro angle
+                rawGyroRotation = gyroInputs.odometryYawPositions[i];
+            } else {
+                // Use the angle delta from the kinematics and module deltas
+                Twist2d twist = kinematics.toTwist2d(moduleDeltas);
+                rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
+            }
 
-        //     /** The module name. Ex. "REV Mod 0" */
-        //     String moduleName = String.format("REV Mod %d ", modId);
-        //     // String akKey = String.format("RevMod%d/", modId);
-
-        //     double canCoder = mod.getCanCoder().getDegrees();
-        //     double integrated = mod.getPosition().angle.getDegrees();
-        //     double velocity = mod.getState().speedMetersPerSecond;
-
-        //     SmartDashboard.putNumber(moduleName + "Cancoder", canCoder);
-        //     canCoderOutputs[modId] = canCoder;
-        //     // Logger.recordOutput(akKey + "Cancoder", canCoder);
-
-        //     SmartDashboard.putNumber(moduleName + "Integrated", integrated);
-        //     integratedOutputs[modId] = integrated;
-        //     // Logger.recordOutput(akKey + "Integrated", integrated);
-
-        //     SmartDashboard.putNumber(moduleName + "Velocity", velocity);
-        //     velocityOutputs[modId] = velocity;
-        //     // Logger.recordOutput(akKey + "Velocity", velocity);
-        // }
+            // Apply update
+            poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+        }
 
         // Record module states
-        Logger.recordOutput("SwerveModStates", getModuleStates());
-        Logger.recordOutput("SwerveGyro", gyroIO.getGyroHeading());
-
-        Logger.recordOutput("SwerveModuleCancoder", canCoderOutputs);
-        Logger.recordOutput("SwerveModuleIntegrated", integratedOutputs);
-        Logger.recordOutput("SwerveModuleVelocity", velocityOutputs);
-
         Logger.recordOutput("SwervePose2dOdometry", swerveOdometry.getPoseMeters());
         // Logger.recordOutput("SwervePose2dOdometry", poseEstimator.getEstimatedPosition());
     }
