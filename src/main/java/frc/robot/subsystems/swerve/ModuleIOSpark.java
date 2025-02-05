@@ -34,11 +34,10 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import frc.lib.util.swerveUtil.CTREModuleState;
-import frc.lib.util.swerveUtil.RevSwerveModuleConstants;
 import frc.lib.util.SparkUtil;
 // import frc.robot.subsystems.swerve.SwerveConfig;
-
+import frc.lib.util.swerveUtil.CTREModuleState;
+import frc.lib.util.swerveUtil.RevSwerveModuleConstants;
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
@@ -120,9 +119,11 @@ public class ModuleIOSpark implements ModuleIO {
         // Create odometry queues
         timestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
         drivePositionQueue = SparkOdometryThread.getInstance().registerSignal(driveMotor, relDriveEncoder::getPosition);
-        turnPositionQueue = SparkOdometryThread.getInstance().registerSignal(angleMotor, () -> angleEncoder.getAbsolutePosition().getValueAsDouble() * 360);
+        turnPositionQueue = SparkOdometryThread.getInstance()
+                .registerSignal(
+                        angleMotor, () -> angleEncoder.getAbsolutePosition().getValueAsDouble() * 360);
     }
-    
+
     /**
      * @return The angle of the module.
      */
@@ -194,19 +195,20 @@ public class ModuleIOSpark implements ModuleIO {
                 .appliedOutputPeriodMs(20)
                 .busVoltagePeriodMs(20)
                 .outputCurrentPeriodMs(20);
-    
+
         // angleMotor.configure(angleConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         SparkUtil.tryUntilOk(
                 angleMotor,
                 5,
-                () -> angleMotor.configure(angleConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
+                () -> angleMotor.configure(
+                        angleConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
     }
 
     /** Configures the drive motor. */
     private void configDriveMotor() {
         // Get the config for the encoders
         SparkMaxConfig driveConfig = new SparkMaxConfig();
-        
+
         driveConfig
                 .smartCurrentLimit(SwerveConfig.driveContinuousCurrentLimit)
                 .inverted(SwerveConfig.driveMotorInvert)
@@ -244,7 +246,7 @@ public class ModuleIOSpark implements ModuleIO {
 
         // ! IMPORTANT: New changes in 2025 may make this inaccurate
         // driveMotor.configure(driveConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        
+
         SparkUtil.tryUntilOk(
                 driveMotor,
                 5,

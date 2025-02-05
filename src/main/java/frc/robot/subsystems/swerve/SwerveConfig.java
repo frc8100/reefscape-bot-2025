@@ -92,7 +92,7 @@ public class SwerveConfig {
     public static final double angleKI = 0;
     public static final double angleKD = 0;
     public static final double angleKF = 0;
-    
+
     public static final double turnSimP = 8.0;
     public static final double turnSimD = 0.0;
 
