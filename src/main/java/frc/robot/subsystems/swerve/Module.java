@@ -23,7 +23,7 @@ import org.littletonrobotics.junction.Logger;
 public class Module {
     private final ModuleIO io;
     private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
-    private final int index;
+    public final int index;
 
     private final Alert driveDisconnectedAlert;
     private final Alert turnDisconnectedAlert;
@@ -65,8 +65,9 @@ public class Module {
         // Apply setpoints
         // io.setDriveVelocity(state.speedMetersPerSecond / wheelRadiusMeters);
         // io.setTurnPosition(state.angle);
-        io.setDriveVelocity(state);
-        io.setTurnPosition(state);
+        // io.setDriveVelocity(state);
+        // io.setTurnPosition(state);
+        io.setDesiredState(state);
     }
 
     /** Runs the module with the specified output while controlling to zero degrees. */
@@ -125,5 +126,10 @@ public class Module {
     /** Returns the module velocity in rad/sec. */
     public double getFFCharacterizationVelocity() {
         return inputs.driveVelocityRadPerSec;
+    }
+
+    public int getModuleNumber() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getModuleNumber'");
     }
 }
