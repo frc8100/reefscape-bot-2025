@@ -14,7 +14,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
@@ -43,8 +42,6 @@ public class Swerve extends SubsystemBase {
     public final Module[] swerveModules = new Module[4];
 
     /** The gyro. This is used to determine the robot's heading. */
-    // public final Pigeon2 gyro = new Pigeon2(SwerveConstants.REV.pigeonID);
-
     public final GyroIO gyroIO;
 
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
@@ -59,7 +56,6 @@ public class Swerve extends SubsystemBase {
     private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(SwerveConfig.moduleTranslations);
 
     /** The last stored position of the swerve modules for delta tracking */
-    // TODO: Implement this
     private SwerveModulePosition[] lastModulePositions = new SwerveModulePosition[] {
         new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition()
     };
@@ -74,7 +70,7 @@ public class Swerve extends SubsystemBase {
     private SwerveDrivePoseEstimator poseEstimator;
 
     /** The swerve odometry. This is used to determine the robot's position on the field. */
-    public final SwerveDriveOdometry swerveOdometry;
+    // public final SwerveDriveOdometry swerveOdometry;
 
     /** Creates a new Swerve subsystem. */
     public Swerve(GyroIO gyroIO, ModuleIO[] moduleIOs) {
@@ -89,14 +85,14 @@ public class Swerve extends SubsystemBase {
         // Start odometry thread
         SparkOdometryThread.getInstance().start();
 
-        swerveOdometry = new SwerveDriveOdometry(kinematics, gyroIO.getGyroHeading(), getModulePositions());
+        // swerveOdometry = new SwerveDriveOdometry(kinematics, gyroIO.getGyroHeading(), getModulePositions());
 
         poseEstimator = new SwerveDrivePoseEstimator(
                 kinematics,
-                // rawGyroRotation,
-                gyroIO.getGyroHeading(),
-                // lastModulePositions,
-                getModulePositions(),
+                rawGyroRotation,
+                // gyroIO.getGyroHeading(),
+                lastModulePositions,
+                // getModulePositions(),
                 new Pose2d(),
                 Constants.PoseEstimator.stateStdDevs,
                 Constants.PoseEstimator.VisionStdDevs);
@@ -237,11 +233,11 @@ public class Swerve extends SubsystemBase {
      */
     @AutoLogOutput(key = "Odometry/Robot")
     public Pose2d getPose() {
-        // return poseEstimator.getEstimatedPosition();
+        return poseEstimator.getEstimatedPosition();
         // TODO: Temporary
-        Logger.recordOutput("PoseEstimator/Robot", poseEstimator.getEstimatedPosition());
-        Pose2d p = swerveOdometry.getPoseMeters();
-        return new Pose2d(-p.getX(), -p.getY(), p.getRotation());
+        // Logger.recordOutput("PoseEstimator/Robot", poseEstimator.getEstimatedPosition());
+        // Pose2d p = swerveOdometry.getPoseMeters();
+        // return new Pose2d(-p.getX(), -p.getY(), p.getRotation());
     }
 
     /**
@@ -254,7 +250,7 @@ public class Swerve extends SubsystemBase {
     /** Resets the current odometry pose. */
     public void setPose(Pose2d pose) {
         poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
-        swerveOdometry.resetPosition(rawGyroRotation, getModulePositions(), pose);
+        // swerveOdometry.resetPosition(rawGyroRotation, getModulePositions(), pose);
     }
 
     /** Adds a new timestamped vision measurement. */
@@ -270,7 +266,7 @@ public class Swerve extends SubsystemBase {
      */
     public void resetOdometry(Pose2d pose) {
         poseEstimator.resetPosition(new Rotation2d(), getModulePositions(), pose);
-        swerveOdometry.resetPosition(new Rotation2d(), getModulePositions(), pose);
+        // swerveOdometry.resetPosition(new Rotation2d(), getModulePositions(), pose);
         zeroGyro(pose.getRotation().getDegrees());
     }
 
@@ -326,7 +322,7 @@ public class Swerve extends SubsystemBase {
     public void zeroGyro(double deg) {
         gyroIO.zeroGyro(deg);
 
-        swerveOdometry.update(gyroIO.getGyroHeading(), getModulePositions());
+        // swerveOdometry.update(gyroIO.getGyroHeading(), getModulePositions());
         poseEstimator.update(gyroIO.getGyroHeading(), getModulePositions());
     }
 
@@ -344,8 +340,8 @@ public class Swerve extends SubsystemBase {
     @Override
     public void periodic() {
         // Update Odometry
-        swerveOdometry.update(gyroIO.getGyroHeading(), getModulePositions());
-        poseEstimator.update(gyroIO.getGyroHeading(), getModulePositions());
+        // swerveOdometry.update(gyroIO.getGyroHeading(), getModulePositions());
+        // poseEstimator.update(gyroIO.getGyroHeading(), getModulePositions());
 
         // Prevents odometry updates while reading data
         odometryLock.lock();
@@ -395,9 +391,5 @@ public class Swerve extends SubsystemBase {
             // Apply update
             poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
         }
-
-        // Record module states
-        Logger.recordOutput("SwervePose2dOdometry", swerveOdometry.getPoseMeters());
-        // Logger.recordOutput("SwervePose2dOdometry", poseEstimator.getEstimatedPosition());
     }
 }
