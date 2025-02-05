@@ -18,6 +18,7 @@ import edu.wpi.first.math.util.Units;
  * swerve drive.
  */
 public class SwerveConfig {
+    public static final double odometryFrequency = 100; // 100 Hz
 
     /** The CANCoder configuration. */
     public final CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();

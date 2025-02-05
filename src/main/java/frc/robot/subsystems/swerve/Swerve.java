@@ -31,11 +31,16 @@ import frc.lib.math.GeometryUtils;
 import frc.robot.Constants;
 import frc.robot.subsystems.drive.GyroIOInputsAutoLogged;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 /** Swerve subsystem, responsible for controlling the swerve drive. */
 public class Swerve extends SubsystemBase {
+
+    static final Lock odometryLock = new ReentrantLock();
 
     /**
      * The swerve modules. These are the four swerve modules on the robot. Each module has a drive
@@ -50,10 +55,11 @@ public class Swerve extends SubsystemBase {
     public final Module[] swerveModules = new Module[4];
 
     /** The gyro. This is used to determine the robot's heading. */
-    // public final Pigeon2 gyro = new Pigeon2(SwerveConstants.REV.pigeonID);
+    public final Pigeon2 gyro = new Pigeon2(SwerveConstants.REV.pigeonID);
     
-    private final GyroIO gyroIO;
-    private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+    // TODO: Implement this
+    // private final GyroIO gyroIO;
+    // private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
 
     /*
      * Swerve Kinematics
@@ -98,9 +104,8 @@ public class Swerve extends SubsystemBase {
             swerveModules[i] = new Module(moduleIOs[i], i);
         }
 
-        this.gyroIO = gyroIO;
+        // this.gyroIO = gyroIO;
 
-        // TODO: implement settings
         gyro.getConfigurator().apply(new Pigeon2Configuration());
 
         swerveOdometry = new SwerveDriveOdometry(kinematics, getGyroHeading(), getModulePositions());
@@ -210,8 +215,8 @@ public class Swerve extends SubsystemBase {
         Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
 
         // Set the desired state for each swerve module
-        for (SwerveModule mod : swerveModules) {
-            mod.setDesiredState(setpointStates[mod.getModuleNumber()], SwerveConstants.isOpenLoop);
+        for (Module mod : swerveModules) {
+            mod.runSetpoint(setpointStates[mod.index]);
         }
     }
 
@@ -225,8 +230,9 @@ public class Swerve extends SubsystemBase {
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, SwerveConfig.maxSpeed);
 
         // Set the desired state for each swerve module
-        for (SwerveModule mod : swerveModules) {
-            mod.setDesiredState(desiredStates[mod.getModuleNumber()], false);
+        for (Module mod : swerveModules) {
+            // mod.setDesiredState(desiredStates[mod.getModuleNumber()], false);
+            mod.runSetpoint(desiredStates[mod.index]);
         }
     }
 
@@ -280,8 +286,9 @@ public class Swerve extends SubsystemBase {
         SwerveModuleState[] states = new SwerveModuleState[4];
 
         // Get the state of each module
-        for (SwerveModule mod : swerveModules) {
-            states[mod.getModuleNumber()] = mod.getState();
+        for (Module mod : swerveModules) {
+            // states[mod.getModuleNumber()] = mod.getState();
+            states[mod.index] = mod.getState();
         }
 
         return states;
@@ -295,8 +302,9 @@ public class Swerve extends SubsystemBase {
         SwerveModulePosition[] positions = new SwerveModulePosition[4];
 
         // Get the position of each module
-        for (SwerveModule mod : swerveModules) {
-            positions[mod.getModuleNumber()] = mod.getPosition();
+        for (Module mod : swerveModules) {
+            // positions[mod.getModuleNumber()] = mod.getPosition();
+            positions[mod.index] = mod.getPosition();
         }
 
         return positions;
@@ -385,29 +393,30 @@ public class Swerve extends SubsystemBase {
         double[] velocityOutputs = new double[4];
 
         // Put the module information on the SmartDashboard
-        for (SwerveModule mod : swerveModules) {
-            int modId = mod.getModuleNumber();
+        // for (Module mod : swerveModules) {
+        //     // int modId = mod.getModuleNumber();
+        //     int modId = mod.index;
 
-            /** The module name. Ex. "REV Mod 0" */
-            String moduleName = String.format("REV Mod %d ", modId);
-            // String akKey = String.format("RevMod%d/", modId);
+        //     /** The module name. Ex. "REV Mod 0" */
+        //     String moduleName = String.format("REV Mod %d ", modId);
+        //     // String akKey = String.format("RevMod%d/", modId);
 
-            double canCoder = mod.getCanCoder().getDegrees();
-            double integrated = mod.getPosition().angle.getDegrees();
-            double velocity = mod.getState().speedMetersPerSecond;
+        //     double canCoder = mod.getCanCoder().getDegrees();
+        //     double integrated = mod.getPosition().angle.getDegrees();
+        //     double velocity = mod.getState().speedMetersPerSecond;
 
-            SmartDashboard.putNumber(moduleName + "Cancoder", canCoder);
-            canCoderOutputs[modId] = canCoder;
-            // Logger.recordOutput(akKey + "Cancoder", canCoder);
+        //     SmartDashboard.putNumber(moduleName + "Cancoder", canCoder);
+        //     canCoderOutputs[modId] = canCoder;
+        //     // Logger.recordOutput(akKey + "Cancoder", canCoder);
 
-            SmartDashboard.putNumber(moduleName + "Integrated", integrated);
-            integratedOutputs[modId] = integrated;
-            // Logger.recordOutput(akKey + "Integrated", integrated);
+        //     SmartDashboard.putNumber(moduleName + "Integrated", integrated);
+        //     integratedOutputs[modId] = integrated;
+        //     // Logger.recordOutput(akKey + "Integrated", integrated);
 
-            SmartDashboard.putNumber(moduleName + "Velocity", velocity);
-            velocityOutputs[modId] = velocity;
-            // Logger.recordOutput(akKey + "Velocity", velocity);
-        }
+        //     SmartDashboard.putNumber(moduleName + "Velocity", velocity);
+        //     velocityOutputs[modId] = velocity;
+        //     // Logger.recordOutput(akKey + "Velocity", velocity);
+        // }
 
         // Record module states
         Logger.recordOutput("SwerveModStates", getModuleStates());
