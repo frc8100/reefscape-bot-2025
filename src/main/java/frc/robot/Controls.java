@@ -43,11 +43,9 @@ public class Controls {
          * When pressed, zeroes the gyro. Default is {@link XboxController.Button#kY} (top button).
          * Press when robot is facing towards the drive station to align the robot's forward direction with the field.
          */
-        // TODO: Flip gyro when enabling?
+        // resets the gyro when enabling pressing Y
         public static final JoystickButton zeroGyro =
                 new JoystickButton(driverController, XboxController.Button.kY.value);
-
-        // TODO: Is two buttons for slow and dampen too many?
         /**
          * When held, dampens the robot movement. This will decrease the robot's speed a lot.
          */
