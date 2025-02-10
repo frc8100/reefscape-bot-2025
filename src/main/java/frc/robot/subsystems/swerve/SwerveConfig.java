@@ -57,10 +57,11 @@ public class SwerveConfig {
     public static final double driveGearRatio = 6.75;
     public static final double angleGearRatio = ((150.0 / 7.0) / 1.0);
 
-    // encoder setup
-    // meters per rotation
-    public static final double driveRevToMeters = wheelCircumference / (driveGearRatio);
-    public static final double driveRpmToMetersPerSecond = driveRevToMeters / 60;
+    // Encoder setup
+    // Rotor Rotations -> Wheel Radians
+    public static final double driveEncoderPositionFactor = (2 * Math.PI) / (driveGearRatio);
+    // Rotor RPM -> Wheel Rad/Sec
+    public static final double driveEncoderVelocityFactor = driveEncoderPositionFactor / 60;
     // the number of degrees that a single rotation of the turn motor turns the wheel.
     public static final double DegreesPerTurnRotation = 360 / angleGearRatio;
 

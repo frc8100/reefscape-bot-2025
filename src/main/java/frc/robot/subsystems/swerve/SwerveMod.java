@@ -121,8 +121,8 @@ public class SwerveMod implements SwerveModule {
         // Set the position and velocity conversion factors based on the SwerveConfig
         driveConfig
                 .encoder
-                .positionConversionFactor(SwerveConfig.driveRevToMeters)
-                .velocityConversionFactor(SwerveConfig.driveRpmToMetersPerSecond);
+                .positionConversionFactor(SwerveConfig.driveEncoderPositionFactor)
+                .velocityConversionFactor(SwerveConfig.driveEncoderVelocityFactor);
 
         // Assign the relative drive encoder and set the position to 0
         relDriveEncoder = driveMotor.getEncoder();
