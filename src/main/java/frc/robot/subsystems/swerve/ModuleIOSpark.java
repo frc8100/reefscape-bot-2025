@@ -59,10 +59,14 @@ public class ModuleIOSpark implements ModuleIO {
      */
     private SparkMax angleMotor;
 
+    private SparkClosedLoopController angleClosedLoopController;
+
     /**
      * The drive motor. This motor is used to control the speed of the module.
      */
     private SparkMax driveMotor;
+
+    private SparkClosedLoopController driveClosedLoopController;
 
     /**
      * The angle encoder. This encoder is used to determine current angle/rotation of the module.
@@ -103,10 +107,12 @@ public class ModuleIOSpark implements ModuleIO {
         // Create and configure the angle motor
         angleMotor = new SparkMax(moduleConstants.angleMotorID, MotorType.kBrushless);
         configAngleMotor();
+        angleClosedLoopController = angleMotor.getClosedLoopController();
 
         // Create and configure the drive motor
         driveMotor = new SparkMax(moduleConstants.driveMotorID, MotorType.kBrushless);
         configDriveMotor();
+        driveClosedLoopController = driveMotor.getClosedLoopController();
 
         // Create and configure the CANCoder
         angleEncoder = new CANcoder(moduleConstants.cancoderID);
@@ -217,8 +223,9 @@ public class ModuleIOSpark implements ModuleIO {
         // Set the position and velocity conversion factors based on the SwerveConfig
         driveConfig
                 .encoder
-                .positionConversionFactor(SwerveConfig.driveRevToMeters)
-                .velocityConversionFactor(SwerveConfig.driveRpmToMetersPerSecond)
+                // TODO: debug factor
+                .positionConversionFactor(SwerveConfig.driveEncoderPositionFactor)
+                .velocityConversionFactor(SwerveConfig.driveEncoderVelocityFactor)
                 // ! experimental
                 .uvwMeasurementPeriod(10)
                 .uvwAverageDepth(2);
@@ -352,8 +359,7 @@ public class ModuleIOSpark implements ModuleIO {
         // Otherwise, set the speed using the PID controller
         // double velocity = desiredState.speedMetersPerSecond;
 
-        // SparkClosedLoopController controller = driveMotor.getClosedLoopController();
-        // controller.setReference(velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
+        // driveClosedLoopController.setReference(velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
     }
 
     @Override
@@ -377,7 +383,6 @@ public class ModuleIOSpark implements ModuleIO {
         Rotation2d angle = desiredState.angle;
         double degReference = angle.getDegrees();
 
-        SparkClosedLoopController controller = angleMotor.getClosedLoopController();
-        controller.setReference(degReference, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+        angleClosedLoopController.setReference(degReference, ControlType.kPosition, ClosedLoopSlot.kSlot0);
     }
 }
