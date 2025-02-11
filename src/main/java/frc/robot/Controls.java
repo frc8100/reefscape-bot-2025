@@ -19,33 +19,24 @@ public class Controls {
 
     /** The drive controls */
     public static class Drive {
-        /**
-         * Whether to invert the drive controls. Default is `true`.
-         */
+        /** Whether to invert the drive controls. Default is `true`. */
         public static final boolean invertDriveControls = true;
 
         // Driver Controls
-        /**
-         * The translation axis. Default is left stick y-axis.
-         */
-        public static final int translationAxis = XboxController.Axis.kLeftY.value;
-        /**
-         * The strafe axis. Default is left stick x-axis.
-         */
-        public static final int strafeAxis = XboxController.Axis.kLeftX.value;
-        /**
-         * The rotation axis. Default is right stick x-axis.
-         */
-        public static final int rotationAxis = XboxController.Axis.kRightX.value;
+        // By default, the left stick controls robot movement (translation - y, strafe - x)
+        // and the right stick controls the rotation (x)
+        private static final int translationAxis = XboxController.Axis.kLeftY.value;
+        private static final int strafeAxis = XboxController.Axis.kLeftX.value;
+        private static final int rotationAxis = XboxController.Axis.kRightX.value;
 
         // Driver Buttons
         /**
          * When pressed, zeroes the gyro. Default is {@link XboxController.Button#kY} (top button).
          * Press when robot is facing towards the drive station to align the robot's forward direction with the field.
          */
-        // resets the gyro when enabling pressing Y
         public static final JoystickButton zeroGyro =
                 new JoystickButton(driverController, XboxController.Button.kY.value);
+
         /**
          * When held, dampens the robot movement. This will decrease the robot's speed a lot.
          */
@@ -115,6 +106,41 @@ public class Controls {
          */
         public static double getSpeedMultiplier() {
             return slowButton.getAsBoolean() ? slowMultiplier : 1;
+        }
+    }
+
+    /**
+     * The controls for the arm.
+     */
+    public static class Arm {
+        /**
+         * The controller used for the arm.
+         * Temporarily the same as the driver controller.
+         */
+        public static final Joystick armController = driverController;
+
+        // public static final JoystickButton
+
+        // Buttons for the intake/outtake
+        private static final int intakeAxis = XboxController.Axis.kLeftTrigger.value;
+        private static final int outtakeAxis = XboxController.Axis.kRightTrigger.value;
+
+        /**
+         * Returns the intake or outtake input depending on which one is bigger.
+         * This does not include deadband.
+         * @return A double from [-1, 1]. If it is outtake, it will be negative, otherwise it will be positive.
+         */
+        public static final double getIntakeOrOuttake() {
+            // Get controller input
+            double intakeInput = armController.getRawAxis(intakeAxis);
+            double outtakeInput = armController.getRawAxis(outtakeAxis);
+
+            // Get the larger of them
+            if (intakeInput >= outtakeInput) {
+                return intakeInput;
+            } else {
+                return -outtakeInput;
+            }
         }
     }
 }

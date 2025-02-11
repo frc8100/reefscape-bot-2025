@@ -42,4 +42,21 @@ public final class Constants {
         public static final Matrix<N3, N1> stateStdDevs = VecBuilder.fill(0.1, 0.1, 0.1);
         public static final Matrix<N3, N1> VisionStdDevs = VecBuilder.fill(0.9, 0.9, 0.9);
     }
+
+    /**
+     * Constants for the arm. Includes CAN Ids.
+     */
+    public static final class Arm {
+        /**
+         * Deadband for the arm.
+         */
+        public static final double armDeadband = 0.1;
+
+        /**
+         * The percent power (from 0-1) to run the intake/outtake
+         */
+        public static final double armPercentOutput = 0.15;
+
+        public static final int clawMotorId = 12;
+    }
 }
