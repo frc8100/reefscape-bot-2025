@@ -4,9 +4,11 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 // import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.TeleopSwerve;
+import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.swerve.GyroIOPigeon2;
 import frc.robot.subsystems.swerve.ModuleIO;
 import frc.robot.subsystems.swerve.ModuleIOSpark;
@@ -27,6 +29,7 @@ public class RobotContainer {
     // Subsystems
     // private final Vision visionSubsystem;
     private final Swerve swerveSubsystem;
+    private final ArmSubsystem armSubsystem = new ArmSubsystem();
 
     // private final PoseEstimator s_PoseEstimator = new PoseEstimator();
 
@@ -136,6 +139,10 @@ public class RobotContainer {
         Controls.Drive.down
                 .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d270))
                 .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
+
+        // Arm
+        armSubsystem.setDefaultCommand(
+                Commands.run(() -> armSubsystem.runClaw(Controls.Arm.getIntakeOrOuttake()), armSubsystem));
     }
 
     /**
