@@ -1,5 +1,14 @@
 package frc.robot.subsystems.swerve;
 
+import static edu.wpi.first.units.Units.Kilogram;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Volts;
+
+import org.ironmaple.simulation.drivesims.COTS;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
+
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 // import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
@@ -8,6 +17,7 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
 /**
@@ -115,6 +125,33 @@ public class SwerveConfig {
     public static final double maxSpeed = 4.0;
     /** Radians per Second */
     public static final double maxAngularVelocity = 5.0;
+
+    public static final double robotMassKg = 40.0;
+    public static final double wheelCOF = 1.2;
+
+    // Simulator DC Motors
+    public static final DCMotor driveGearbox = DCMotor.getNEO(1);
+    public static final DCMotor turnGearbox = DCMotor.getNEO(1);
+
+    /**
+     * Maplesim configuration for the swerve drive.
+     */
+    public static final DriveTrainSimulationConfig mapleSimConfig = DriveTrainSimulationConfig.Default()
+        .withCustomModuleTranslations(moduleTranslations)
+        .withRobotMass(Kilogram.of(robotMassKg))
+        .withGyro(COTS.ofPigeon2())
+        .withSwerveModule(new SwerveModuleSimulationConfig(
+                driveGearbox,
+                turnGearbox,
+                // driveMotorReduction,
+                driveGearRatio,
+                // turnMotorReduction,
+                angleGearRatio,
+                Volts.of(0.1),
+                Volts.of(0.1),
+                Meters.of(wheelRadius),
+                KilogramSquareMeters.of(0.02),
+                wheelCOF));
 
     /**
      * @return The Pathplanner RobotConfig

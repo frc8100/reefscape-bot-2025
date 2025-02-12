@@ -27,6 +27,8 @@ import frc.lib.math.GeometryUtils;
 import frc.robot.Constants;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -73,7 +75,7 @@ public class Swerve extends SubsystemBase {
     // public final SwerveDriveOdometry swerveOdometry;
 
     /** Creates a new Swerve subsystem. */
-    public Swerve(GyroIO gyroIO, ModuleIO[] moduleIOs) {
+    public Swerve(GyroIO gyroIO, ModuleIO[] moduleIOs, Consumer<Pose2d> resetSimulationPoseCallBack) {
         // Create the swerve modules
         for (int i = 0; i < 4; i++) {
             System.out.println("Creating module " + i);
