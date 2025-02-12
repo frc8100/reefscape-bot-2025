@@ -23,7 +23,6 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -50,6 +49,7 @@ public class ModuleIOSpark implements ModuleIO {
      * Includes the integrated encoder {@link #relAngleEncoder} and an absolute CANcoder {@link #angleEncoder}.
      */
     private SparkMax angleMotor;
+
     private CANcoder angleEncoder;
     private RelativeEncoder relAngleEncoder;
     private SparkClosedLoopController angleClosedLoopController;
@@ -59,6 +59,7 @@ public class ModuleIOSpark implements ModuleIO {
      * Includes an integrated encoder {@link #relDriveEncoder}.
      */
     private SparkMax driveMotor;
+
     private RelativeEncoder relDriveEncoder;
     private SparkClosedLoopController driveClosedLoopController;
 
@@ -90,7 +91,9 @@ public class ModuleIOSpark implements ModuleIO {
                 angleMotor,
                 5,
                 () -> angleMotor.configure(
-                        SwerveConfig.getAngleMotorConfig(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
+                        SwerveConfig.getAngleMotorConfig(),
+                        ResetMode.kResetSafeParameters,
+                        PersistMode.kPersistParameters));
 
         // Create and configure the drive motor
         driveMotor = new SparkMax(moduleConstants.driveMotorID, MotorType.kBrushless);
@@ -100,7 +103,9 @@ public class ModuleIOSpark implements ModuleIO {
                 driveMotor,
                 5,
                 () -> driveMotor.configure(
-                        SwerveConfig.getDriveMotorConfig(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
+                        SwerveConfig.getDriveMotorConfig(),
+                        ResetMode.kResetSafeParameters,
+                        PersistMode.kPersistParameters));
         SparkUtil.tryUntilOk(driveMotor, 5, () -> relDriveEncoder.setPosition(0.0));
 
         // Create and configure the CANCoder

@@ -15,7 +15,6 @@ package frc.robot.subsystems.swerve;
 
 import static edu.wpi.first.units.Units.*;
 // import static frc.robot.subsystems.drive.DriveConstants.*;
-import frc.robot.subsystems.swerve.SwerveConfig;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -40,10 +39,12 @@ public class ModuleIOSim implements ModuleIO {
 
     public ModuleIOSim(SwerveModuleSimulation moduleSimulation) {
         this.moduleSimulation = moduleSimulation;
-        this.driveMotor =
-                moduleSimulation.useGenericMotorControllerForDrive().withCurrentLimit(Amps.of(SwerveConfig.driveContinuousCurrentLimit));
-        this.turnMotor =
-                moduleSimulation.useGenericControllerForSteer().withCurrentLimit(Amps.of(SwerveConfig.angleContinuousCurrentLimit));
+        this.driveMotor = moduleSimulation
+                .useGenericMotorControllerForDrive()
+                .withCurrentLimit(Amps.of(SwerveConfig.driveContinuousCurrentLimit));
+        this.turnMotor = moduleSimulation
+                .useGenericControllerForSteer()
+                .withCurrentLimit(Amps.of(SwerveConfig.angleContinuousCurrentLimit));
 
         // Enable wrapping for turn PID
         turnController.enableContinuousInput(-Math.PI, Math.PI);
@@ -111,7 +112,8 @@ public class ModuleIOSim implements ModuleIO {
     @Override
     public void setDriveVelocity(double velocityRadPerSec) {
         driveClosedLoop = true;
-        driveFFVolts = SwerveConfig.driveSimKs * Math.signum(velocityRadPerSec) + SwerveConfig.driveSimKv * velocityRadPerSec;
+        driveFFVolts =
+                SwerveConfig.driveSimKs * Math.signum(velocityRadPerSec) + SwerveConfig.driveSimKv * velocityRadPerSec;
         driveController.setSetpoint(velocityRadPerSec);
     }
 

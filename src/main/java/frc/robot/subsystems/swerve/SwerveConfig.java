@@ -7,9 +7,7 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.pathplanner.lib.config.RobotConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
 /**
@@ -30,7 +28,7 @@ public class SwerveConfig {
     public static final double anglePower = 0.9;
 
     public static final boolean invertGyro = false; // Always ensure Gyro is CCW+ CW-
-    
+
     /**
      * Whether to use open loop control.
      * Default is `true`
@@ -161,7 +159,8 @@ public class SwerveConfig {
      */
     public static SparkMaxConfig getAngleMotorConfig() {
         // Assign the relative angle encoder and configure it
-        SparkMaxConfig angleConfig = new SparkMaxConfig();;
+        SparkMaxConfig angleConfig = new SparkMaxConfig();
+        ;
 
         angleConfig
                 .smartCurrentLimit(SwerveConfig.angleContinuousCurrentLimit)
