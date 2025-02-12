@@ -76,7 +76,7 @@ public class GyroIOPigeon2 implements GyroIO {
         }
 
         // Otherwise, return the yaw as-is
-        return Rotation2d.fromDegrees(pigeon.getYaw().getValueAsDouble());
+        return new Rotation2d(pigeon.getYaw().getValue());
     }
 
     // @Override

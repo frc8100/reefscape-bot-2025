@@ -42,8 +42,6 @@ public interface GyroIO {
     @AutoLogOutput(key = "Gyro/Yaw")
     public abstract Rotation2d getYaw();
 
-    // public abstract Rotation2d getRotation2d();
-
     /**
      * @return The current gyro heading of the robot.
      */

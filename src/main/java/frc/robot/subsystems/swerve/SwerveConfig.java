@@ -17,9 +17,6 @@ import edu.wpi.first.math.util.Units;
  * swerve drive.
  */
 public class SwerveConfig {
-    // Simulator use
-    public static final DCMotor turnGearbox = DCMotor.getNeo550(1);
-    public static final DCMotor driveGearbox = DCMotor.getNeoVortex(1);
 
     /** How often the odometry is updated (in Hz). This is independent of the robot's. */
     public static final double odometryFrequency = 100;
