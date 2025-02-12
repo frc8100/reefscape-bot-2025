@@ -46,9 +46,6 @@ import java.util.function.DoubleSupplier;
  * and duty cycle absolute encoder.
  */
 public class ModuleIOSpark implements ModuleIO {
-    /**
-     * The module number identifier.
-     */
     public int moduleNumber;
 
     /** The angle offset. Used to zero the module to a specific angle. */
@@ -56,33 +53,20 @@ public class ModuleIOSpark implements ModuleIO {
 
     /**
      * The angle motor. This motor is used to control the angle of the module.
+     * Includes the integrated encoder {@link #relAngleEncoder} and an absolute CANcoder {@link #angleEncoder}.
      */
     private SparkMax angleMotor;
-
+    private CANcoder angleEncoder;
+    private RelativeEncoder relAngleEncoder;
     private SparkClosedLoopController angleClosedLoopController;
 
     /**
      * The drive motor. This motor is used to control the speed of the module.
+     * Includes an integrated encoder {@link #relDriveEncoder}.
      */
     private SparkMax driveMotor;
-
-    private SparkClosedLoopController driveClosedLoopController;
-
-    /**
-     * The angle encoder. This encoder is used to determine current angle/rotation of the module.
-     */
-    private CANcoder angleEncoder;
-
-    /**
-     * The relative angle encoder
-     */
-    private RelativeEncoder relAngleEncoder;
-
-    /**
-     * The relative drive encoder. This encoder is used to determine the relative position of the
-     * module.
-     */
     private RelativeEncoder relDriveEncoder;
+    private SparkClosedLoopController driveClosedLoopController;
 
     // Queue inputs from odometry thread
     private final Queue<Double> timestampQueue;
@@ -106,18 +90,29 @@ public class ModuleIOSpark implements ModuleIO {
 
         // Create and configure the angle motor
         angleMotor = new SparkMax(moduleConstants.angleMotorID, MotorType.kBrushless);
-        configAngleMotor();
+        relAngleEncoder = angleMotor.getEncoder();
         angleClosedLoopController = angleMotor.getClosedLoopController();
+        SparkUtil.tryUntilOk(
+                angleMotor,
+                5,
+                () -> angleMotor.configure(
+                        SwerveConfig.getAngleMotorConfig(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
 
         // Create and configure the drive motor
         driveMotor = new SparkMax(moduleConstants.driveMotorID, MotorType.kBrushless);
-        configDriveMotor();
+        relDriveEncoder = driveMotor.getEncoder();
         driveClosedLoopController = driveMotor.getClosedLoopController();
+        SparkUtil.tryUntilOk(
+                driveMotor,
+                5,
+                () -> driveMotor.configure(
+                        SwerveConfig.getDriveMotorConfig(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
+        SparkUtil.tryUntilOk(driveMotor, 5, () -> relDriveEncoder.setPosition(0.0));
 
         // Create and configure the CANCoder
         angleEncoder = new CANcoder(moduleConstants.cancoderID);
         angleEncoder.getConfigurator().refresh(new CANcoderConfiguration());
-        angleEncoder.getConfigurator().apply(new SwerveConfig().canCoderConfig);
+        angleEncoder.getConfigurator().apply(SwerveConfig.getCANcoderConfig());
 
         // Reset the module to absolute position
         resetToAbsolute();
@@ -165,101 +160,6 @@ public class ModuleIOSpark implements ModuleIO {
     private void resetToAbsolute() {
         double absolutePosition = getCanCoder().getDegrees() - angleOffset.getDegrees();
         relAngleEncoder.setPosition(absolutePosition);
-    }
-
-    // TODO: Move these to constructor
-    /** Configures the angle motor. */
-    private void configAngleMotor() {
-        // Assign the relative angle encoder and configure it
-        SparkMaxConfig angleConfig = new SparkMaxConfig();
-        relAngleEncoder = angleMotor.getEncoder();
-
-        angleConfig
-                .smartCurrentLimit(SwerveConfig.angleContinuousCurrentLimit)
-                .inverted(SwerveConfig.angleMotorInvert)
-                .idleMode(SwerveConfig.angleIdleMode);
-
-        angleConfig
-                .encoder
-                .positionConversionFactor(SwerveConfig.DegreesPerTurnRotation)
-                // The velocity conversion factor is in degrees/sec
-                .velocityConversionFactor(SwerveConfig.DegreesPerTurnRotation / 60);
-
-        // Configure the PID controller for the angle motor
-        angleConfig
-                .closedLoop
-                .pidf(SwerveConfig.angleKP, SwerveConfig.angleKI, SwerveConfig.angleKD, SwerveConfig.angleKF)
-                .outputRange(-SwerveConfig.anglePower, SwerveConfig.anglePower);
-
-        // ! experimental
-        angleConfig
-                .signals
-                .absoluteEncoderPositionAlwaysOn(true)
-                .absoluteEncoderPositionPeriodMs((int) (1000.0 / SwerveConfig.odometryFrequency))
-                .absoluteEncoderVelocityAlwaysOn(true)
-                .absoluteEncoderVelocityPeriodMs(20)
-                .appliedOutputPeriodMs(20)
-                .busVoltagePeriodMs(20)
-                .outputCurrentPeriodMs(20);
-
-        // angleMotor.configure(angleConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        SparkUtil.tryUntilOk(
-                angleMotor,
-                5,
-                () -> angleMotor.configure(
-                        angleConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
-    }
-
-    /** Configures the drive motor. */
-    private void configDriveMotor() {
-        // Get the config for the encoders
-        SparkMaxConfig driveConfig = new SparkMaxConfig();
-
-        driveConfig
-                .smartCurrentLimit(SwerveConfig.driveContinuousCurrentLimit)
-                .inverted(SwerveConfig.driveMotorInvert)
-                .idleMode(SwerveConfig.driveIdleMode);
-
-        // Set the position and velocity conversion factors based on the SwerveConfig
-        driveConfig
-                .encoder
-                // TODO: debug factor
-                .positionConversionFactor(SwerveConfig.driveEncoderPositionFactor)
-                .velocityConversionFactor(SwerveConfig.driveEncoderVelocityFactor)
-                // ! experimental
-                .uvwMeasurementPeriod(10)
-                .uvwAverageDepth(2);
-
-        // Assign the relative drive encoder and set the position to 0
-        relDriveEncoder = driveMotor.getEncoder();
-        relDriveEncoder.setPosition(0);
-
-        // Configure the PID controller for the drive motor
-        driveConfig
-                .closedLoop
-                .pidf(SwerveConfig.driveKP, SwerveConfig.driveKI, SwerveConfig.driveKD, SwerveConfig.driveKF)
-                .outputRange(-SwerveConfig.drivePower, SwerveConfig.drivePower);
-
-        // ! experimental
-        driveConfig
-                .signals
-                .primaryEncoderPositionAlwaysOn(true)
-                .primaryEncoderPositionPeriodMs((int) (1000.0 / SwerveConfig.odometryFrequency))
-                .primaryEncoderVelocityAlwaysOn(true)
-                .primaryEncoderVelocityPeriodMs(20)
-                .appliedOutputPeriodMs(20)
-                .busVoltagePeriodMs(20)
-                .outputCurrentPeriodMs(20);
-
-        // ! IMPORTANT: New changes in 2025 may make this inaccurate
-        // driveMotor.configure(driveConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
-        SparkUtil.tryUntilOk(
-                driveMotor,
-                5,
-                () -> driveMotor.configure(
-                        driveConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
-        SparkUtil.tryUntilOk(driveMotor, 5, () -> relDriveEncoder.setPosition(0.0));
     }
 
     @Override
@@ -326,16 +226,6 @@ public class ModuleIOSpark implements ModuleIO {
         desiredState = CTREModuleState.optimize(desiredState, getState().angle);
         setAngle(desiredState);
         setSpeed(desiredState);
-
-        // TODO: Check for sensor faults
-        // if (mDriveMotor.getFaults(Faults.kSensorFault)) {
-        //     DriverStation.reportWarning("Sensor Fault on Drive Motor ID:" +
-        // mDriveMotor.getDeviceId(), false);
-        // }
-        // if (mAngleMotor.getFault(FaultID.kSensorFault)) {
-        //     DriverStation.reportWarning("Sensor Fault on Angle Motor ID:" +
-        // mAngleMotor.getDeviceId(), false);
-        // }
     }
 
     /**
@@ -345,20 +235,12 @@ public class ModuleIOSpark implements ModuleIO {
      * @param isOpenLoop Whether the module is in open loop.
      */
     private void setSpeed(SwerveModuleState desiredState) {
-        // If the module is in open loop, set the speed directly
-        // if (isOpenLoop) {
-        //     double percentOutput = desiredState.speedMetersPerSecond / SwerveConfig.maxSpeed;
-        //     driveMotor.set(percentOutput);
-        //     return;
-        // }
-
+        // Calculate the percent output and set the speed
         double percentOutput = desiredState.speedMetersPerSecond / SwerveConfig.maxSpeed;
         driveMotor.set(percentOutput);
-        return;
 
-        // Otherwise, set the speed using the PID controller
+        // TODO: set the speed using the PID controller
         // double velocity = desiredState.speedMetersPerSecond;
-
         // driveClosedLoopController.setReference(velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
     }
 

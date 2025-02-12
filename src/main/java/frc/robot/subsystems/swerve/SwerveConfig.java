@@ -4,12 +4,9 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 // import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-// TODO: Add pathplannerlib
-// import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-// import com.pathplanner.lib.util.PIDConstants;
-// import com.pathplanner.lib.util.ReplanningConfig;
-// import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.config.SparkBaseConfig;
+import com.revrobotics.spark.config.SparkMaxConfig;
+
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
@@ -26,18 +23,14 @@ public class SwerveConfig {
     public static final double odometryFrequency = 100; // 100 Hz
 
     /** The CANCoder configuration. */
-    public final CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
+    // public final CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
 
-    //
     public static final SparkBaseConfig.IdleMode driveIdleMode = SparkBaseConfig.IdleMode.kBrake;
     public static final SparkBaseConfig.IdleMode angleIdleMode = SparkBaseConfig.IdleMode.kBrake;
     public static final double drivePower = 1;
     public static final double anglePower = .9;
 
     public static final boolean invertGyro = false; // Always ensure Gyro is CCW+ CW-
-
-    // public static final COTSNeoSwerveConstants chosenModule =
-    //         COTSNeoSwerveConstants.SDSMK4i(COTSNeoSwerveConstants.driveGearRatios.SDSMK4i_L2);
 
     /* Drivetrain Constants */
     public static final double trackWidth = Units.inchesToMeters(25.75);
@@ -120,22 +113,12 @@ public class SwerveConfig {
     /** Radians per Second */
     public static final double maxAngularVelocity = 5.0; // max 10 or.....
 
-    /** pplib config, temporary */
-    // TODO: Update to 2025
-    // public static final HolonomicPathFollowerConfig pathFollowerConfig = new
-    // HolonomicPathFollowerConfig(
-    //     new PIDConstants(5.0, 0, 0), // Translation constants
-    //     new PIDConstants(5.0, 0, 0), // Rotation constants
-    //     maxSpeed,
-    //     // flModuleOffset.getNorm(), // Drive base radius (distance from center to furthest
-    // module)
-    //     // Placeholder
-    //     0.1,
-    //     new ReplanningConfig()
-    // );
+    /**
+     * @return The CANCoder configuration.
+     */
+    public static CANcoderConfiguration getCANcoderConfig() {
+        CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
 
-    /** Configures the swerve config */
-    public SwerveConfig() {
         // Set up the CANCoder configuration
         MagnetSensorConfigs magnetSenorConfig = new MagnetSensorConfigs()
                 // TODO: This setting is not present in 2025; may cause problems
@@ -156,5 +139,88 @@ public class SwerveConfig {
         // canCoderConfig.MagnetSensor.initializationStrategy =
         // SensorInitializationStrategy.BootToAbsolutePosition;
         // canCoderConfig.MagnetSensor.sensorTimeBase = SensorTimeBase.PerSecond;
+
+        return canCoderConfig;
+    }
+
+    /**
+     * @return The angle motor configuration.
+     * Includes the relative encoder configuration.
+     */
+    public static SparkMaxConfig getAngleMotorConfig() {
+        // Assign the relative angle encoder and configure it
+        SparkMaxConfig angleConfig = new SparkMaxConfig();;
+
+        angleConfig
+                .smartCurrentLimit(SwerveConfig.angleContinuousCurrentLimit)
+                .inverted(SwerveConfig.angleMotorInvert)
+                .idleMode(SwerveConfig.angleIdleMode);
+
+        angleConfig
+                .encoder
+                .positionConversionFactor(SwerveConfig.DegreesPerTurnRotation)
+                // The velocity conversion factor is in degrees/sec
+                .velocityConversionFactor(SwerveConfig.DegreesPerTurnRotation / 60);
+
+        // Configure the PID controller for the angle motor
+        angleConfig
+                .closedLoop
+                .pidf(SwerveConfig.angleKP, SwerveConfig.angleKI, SwerveConfig.angleKD, SwerveConfig.angleKF)
+                .outputRange(-SwerveConfig.anglePower, SwerveConfig.anglePower);
+
+        angleConfig
+                .signals
+                .absoluteEncoderPositionAlwaysOn(true)
+                .absoluteEncoderPositionPeriodMs((int) (1000.0 / SwerveConfig.odometryFrequency))
+                .absoluteEncoderVelocityAlwaysOn(true)
+                .absoluteEncoderVelocityPeriodMs(20)
+                .appliedOutputPeriodMs(20)
+                .busVoltagePeriodMs(20)
+                .outputCurrentPeriodMs(20);
+
+        return angleConfig;
+    }
+
+    /**
+     * @return The drive motor configuration.
+     * Includes the relative encoder configuration.
+     */
+    public static SparkMaxConfig getDriveMotorConfig() {
+        // Get the config for the encoders
+        SparkMaxConfig driveConfig = new SparkMaxConfig();
+
+        driveConfig
+                .smartCurrentLimit(SwerveConfig.driveContinuousCurrentLimit)
+                .inverted(SwerveConfig.driveMotorInvert)
+                .idleMode(SwerveConfig.driveIdleMode);
+
+        // Set the position and velocity conversion factors based on the SwerveConfig
+        driveConfig
+                .encoder
+                // TODO: debug factor
+                .positionConversionFactor(SwerveConfig.driveEncoderPositionFactor)
+                .velocityConversionFactor(SwerveConfig.driveEncoderVelocityFactor)
+                // ! experimental
+                .uvwMeasurementPeriod(10)
+                .uvwAverageDepth(2);
+
+        // Configure the PID controller for the drive motor
+        driveConfig
+                .closedLoop
+                .pidf(SwerveConfig.driveKP, SwerveConfig.driveKI, SwerveConfig.driveKD, SwerveConfig.driveKF)
+                .outputRange(-SwerveConfig.drivePower, SwerveConfig.drivePower);
+
+        // ! experimental
+        driveConfig
+                .signals
+                .primaryEncoderPositionAlwaysOn(true)
+                .primaryEncoderPositionPeriodMs((int) (1000.0 / SwerveConfig.odometryFrequency))
+                .primaryEncoderVelocityAlwaysOn(true)
+                .primaryEncoderVelocityPeriodMs(20)
+                .appliedOutputPeriodMs(20)
+                .busVoltagePeriodMs(20)
+                .outputCurrentPeriodMs(20);
+
+        return driveConfig;
     }
 }
