@@ -11,7 +11,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
-package frc.robot.subsystems.swerve;
+package frc.robot.subsystems.swerve.module;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -31,6 +31,9 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.lib.util.SparkUtil;
 import frc.lib.util.swerveUtil.CTREModuleState;
 import frc.lib.util.swerveUtil.RevSwerveModuleConstants;
+import frc.robot.subsystems.swerve.SparkOdometryThread;
+import frc.robot.subsystems.swerve.SwerveConfig;
+
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
 

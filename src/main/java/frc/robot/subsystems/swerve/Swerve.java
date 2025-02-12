@@ -25,6 +25,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.math.GeometryUtils;
 import frc.robot.Constants;
+import frc.robot.subsystems.swerve.gyro.GyroIO;
+import frc.robot.subsystems.swerve.module.Module;
+import frc.robot.subsystems.swerve.module.ModuleIO;
+
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;

@@ -11,7 +11,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
-package frc.robot.subsystems.swerve;
+package frc.robot.subsystems.swerve.module;
 
 import static edu.wpi.first.units.Units.*;
 // import static frc.robot.subsystems.drive.DriveConstants.*;
@@ -19,6 +19,8 @@ import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.util.SparkUtil;
+import frc.robot.subsystems.swerve.SwerveConfig;
+
 import java.util.Arrays;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController;
