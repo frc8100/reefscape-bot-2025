@@ -4,6 +4,7 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 // import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.pathplanner.lib.config.RobotConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
@@ -20,17 +21,24 @@ public class SwerveConfig {
     public static final DCMotor turnGearbox = DCMotor.getNeo550(1);
     public static final DCMotor driveGearbox = DCMotor.getNeoVortex(1);
 
-    public static final double odometryFrequency = 100; // 100 Hz
+    /** How often the odometry is updated (in Hz). This is independent of the robot's. */
+    public static final double odometryFrequency = 100;
 
-    /** The CANCoder configuration. */
-    // public final CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
-
+    // Behavior of the motors when the robot is disabled/idling
     public static final SparkBaseConfig.IdleMode driveIdleMode = SparkBaseConfig.IdleMode.kBrake;
     public static final SparkBaseConfig.IdleMode angleIdleMode = SparkBaseConfig.IdleMode.kBrake;
-    public static final double drivePower = 1;
-    public static final double anglePower = .9;
+
+    // Percent output value limit for angle and drive motors
+    public static final double drivePower = 0.7;
+    public static final double anglePower = 0.9;
 
     public static final boolean invertGyro = false; // Always ensure Gyro is CCW+ CW-
+    
+    /**
+     * Whether to use open loop control.
+     * Default is `true`
+     */
+    public static final boolean isOpenLoop = true;
 
     /* Drivetrain Constants */
     public static final double trackWidth = Units.inchesToMeters(25.75);
@@ -111,7 +119,26 @@ public class SwerveConfig {
     /** Meters per Second */
     public static final double maxSpeed = 4.0;
     /** Radians per Second */
-    public static final double maxAngularVelocity = 5.0; // max 10 or.....
+    public static final double maxAngularVelocity = 5.0;
+
+    /**
+     * @return The Pathplanner RobotConfig
+     */
+    // TODO: instead of loading from GUI, declare explicitly
+    public static RobotConfig getRobotConfig() {
+        // Load the RobotConfig from the GUI settings.
+        RobotConfig config;
+
+        try {
+            config = RobotConfig.fromGUISettings();
+        } catch (Exception e) {
+            // Handle exception as needed
+            e.printStackTrace();
+            config = null;
+        }
+
+        return config;
+    }
 
     /**
      * @return The CANCoder configuration.
@@ -119,26 +146,14 @@ public class SwerveConfig {
     public static CANcoderConfiguration getCANcoderConfig() {
         CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
 
-        // Set up the CANCoder configuration
+        // The main way to configure the CANcoder is through MagnetSensorConfigs
         MagnetSensorConfigs magnetSenorConfig = new MagnetSensorConfigs()
-                // TODO: This setting is not present in 2025; may cause problems
-                // .withAbsoluteSensorRange(AbsoluteSensorRangeValue.Unsigned_0To1)
                 .withSensorDirection(
                         canCoderInvert
                                 ? SensorDirectionValue.Clockwise_Positive
                                 : SensorDirectionValue.CounterClockwise_Positive);
 
         canCoderConfig.withMagnetSensor(magnetSenorConfig);
-        // TODO: Update to phoenix 6 (missing config, SensorDirection from boolean to enum)
-        // canCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive
-        // canCoderConfig.MagnetSensor.SensorDirection = canCoderInvert ?
-        // SensorDirectionValue.Clockwise_Positive : SensorDirectionValue.CounterClockwise_Positive;
-        // canCoderConfig.MagnetSensor.AbsoluteSensorRange =
-        // AbsoluteSensorRangeValue.Unsigned_0_To360;
-        // canCoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
-        // canCoderConfig.MagnetSensor.initializationStrategy =
-        // SensorInitializationStrategy.BootToAbsolutePosition;
-        // canCoderConfig.MagnetSensor.sensorTimeBase = SensorTimeBase.PerSecond;
 
         return canCoderConfig;
     }

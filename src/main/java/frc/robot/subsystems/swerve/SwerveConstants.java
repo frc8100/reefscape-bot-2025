@@ -1,60 +1,20 @@
 package frc.robot.subsystems.swerve;
 
-import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.util.swerveUtil.RevSwerveModuleConstants;
 
 /**
- * This file comes with command robot projects, and is intended to contain configuration
- * information. I think it would be prudent if this file only contained CanIDs, because it is useful
- * to have all the ids for the whole robot in one place. other configuration goes into subsystem
- * specific configuration files, to make sure this one isn't cluttered.
+ * Contains constants related to the Swerve Drive.
+ * Mainly includes CAN IDs and angle offsets.
  */
 public final class SwerveConstants {
-
-    public static final double stickDeadband = 0.1;
-    public static final double limelightOffset = 3;
-
-    /**
-     * Multiplier to the input chassis speeds of the swerve. Used temporarily to test.
-     */
-    public static final double debugSpeedMultiplier = 0.7;
-
-    /**
-     * @return The Pathplanner RobotConfig
-     */
-    // TODO: instead of loading from GUI, declare explicitly
-    public static RobotConfig getRobotConfig() {
-        // Load the RobotConfig from the GUI settings.
-        RobotConfig config;
-        try {
-            config = RobotConfig.fromGUISettings();
-        } catch (Exception e) {
-            // Handle exception as needed
-            e.printStackTrace();
-            config = null;
-        }
-
-        return config;
-    }
-
-    /**
-     * Whether to use open loop control.
-     * Default is `true`
-     */
-    public static final boolean isOpenLoop = true;
-
-    public static final class REV {
-
-        public static final int pigeonID = 17;
-    }
+    public static final int pigeonID = 17;
 
     /* Module Specific Constants */
     public static final class Swerve {
 
         /* Front Left Module */
         public static final class Mod0 {
-
             public static final int driveMotorID = 4;
             public static final int angleMotorID = 3;
             public static final int canCoderID = 13;
@@ -66,7 +26,6 @@ public final class SwerveConstants {
 
         /* Front Right Module */
         public static final class Mod1 {
-
             public static final int driveMotorID = 6;
             public static final int angleMotorID = 5;
             public static final int canCoderID = 14;
@@ -77,7 +36,6 @@ public final class SwerveConstants {
 
         /* Back Left Module */
         public static final class Mod2 {
-
             public static final int driveMotorID = 2;
             public static final int angleMotorID = 1;
             public static final int canCoderID = 15;
@@ -88,7 +46,6 @@ public final class SwerveConstants {
 
         /* Back Right Module */
         public static final class Mod3 {
-
             public static final int driveMotorID = 8;
             public static final int angleMotorID = 9;
             public static final int canCoderID = 16;

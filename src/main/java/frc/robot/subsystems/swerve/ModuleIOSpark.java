@@ -14,28 +14,22 @@
 package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
-// import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.hardware.CANcoder;
-// import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
-// import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-// import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
-// import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
-// import edu.wpi.first.math.MathUtil;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.lib.util.SparkUtil;
-// import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.lib.util.swerveUtil.CTREModuleState;
 import frc.lib.util.swerveUtil.RevSwerveModuleConstants;
 import java.util.Queue;
@@ -237,6 +231,10 @@ public class ModuleIOSpark implements ModuleIO {
     private void setSpeed(SwerveModuleState desiredState) {
         // Calculate the percent output and set the speed
         double percentOutput = desiredState.speedMetersPerSecond / SwerveConfig.maxSpeed;
+
+        // Clamp the percent output to the max speed
+        percentOutput = MathUtil.clamp(percentOutput, -SwerveConfig.drivePower, SwerveConfig.drivePower);
+
         driveMotor.set(percentOutput);
 
         // TODO: set the speed using the PID controller

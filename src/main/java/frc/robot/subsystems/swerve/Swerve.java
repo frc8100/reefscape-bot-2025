@@ -106,7 +106,7 @@ public class Swerve extends SubsystemBase {
                 this::getChassisSpeeds,
                 this::runVelocityChassisSpeeds,
                 new PPHolonomicDriveController(new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
-                SwerveConstants.getRobotConfig(),
+                SwerveConfig.getRobotConfig(),
                 () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
                 this);
         Pathfinding.setPathfinder(new LocalADStar());
@@ -188,9 +188,6 @@ public class Swerve extends SubsystemBase {
      * @param speed The desired chasssis speeds
      */
     public void runVelocityChassisSpeeds(ChassisSpeeds speed) {
-
-        speed = speed.times(SwerveConstants.debugSpeedMultiplier);
-
         // Convert the chassis speeds to swerve module states
         ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speed, 0.02);
         SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
