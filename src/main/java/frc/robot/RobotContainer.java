@@ -16,9 +16,10 @@ import frc.robot.subsystems.swerve.SwerveSim;
 import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2;
 import frc.robot.subsystems.swerve.module.ModuleIO;
 import frc.robot.subsystems.swerve.module.ModuleIOSpark;
-import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-// import frc.robot.subsystems.vision.Vision;
-// import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionConstants;
+import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.subsystems.vision.VisionIOPhotonSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -30,14 +31,14 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
 
     // Subsystems
-    // private final Vision visionSubsystem;
+    private final Vision visionSubsystem;
     private final SwerveDrive swerveSubsystem;
     private final ArmSubsystem armSubsystem = new ArmSubsystem();
 
     /**
      * The simulation of the robot's drive. Set to null if not in simulation mode.
      */
-    private SwerveDriveSimulation driveSimulation = null;
+    // private SwerveDriveSimulation driveSimulation = null;
 
     // private final PoseEstimator s_PoseEstimator = new PoseEstimator();
 
@@ -62,6 +63,10 @@ public class RobotContainer {
                             new ModuleIOSpark(3, SwerveConstants.Swerve.Mod3.constants)
                         },
                         (robotPose) -> {});
+
+                visionSubsystem = new Vision(
+                        swerveSubsystem::addVisionMeasurement,
+                        new VisionIOLimelight(VisionConstants.camera0Name, swerveSubsystem::getRotation));
                 break;
 
                 // TODO: Implement sim
@@ -83,12 +88,10 @@ public class RobotContainer {
 
                 swerveSubsystem = new SwerveSim();
 
-                // vision = new Vision(
-                //         drive,
-                //         new VisionIOPhotonVisionSim(
-                //                 camera0Name, robotToCamera0, driveSimulation::getSimulatedDriveTrainPose),
-                //         new VisionIOPhotonVisionSim(
-                //                 camera1Name, robotToCamera1, driveSimulation::getSimulatedDriveTrainPose));
+                visionSubsystem = new Vision(
+                        swerveSubsystem::addVisionMeasurement,
+                        new VisionIOPhotonSim(
+                                VisionConstants.camera0Name, VisionConstants.robotToCamera0, swerveSubsystem::getActualPose));
                 break;
 
                 // default:
@@ -113,11 +116,6 @@ public class RobotContainer {
 
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
-
-        // Set up vision
-        // visionSubsystem = new Vision(
-        //         swerveSubsystem::addVisionMeasurement,
-        //         new VisionIOLimelight("limelight", swerveSubsystem::getRotation));
 
         // Set up SysId routines
         // autoChooser.addOption(

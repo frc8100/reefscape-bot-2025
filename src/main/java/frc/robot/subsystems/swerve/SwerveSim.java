@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SelfControlledSwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -109,11 +108,9 @@ public class SwerveSim extends SubsystemBase implements SwerveDrive {
         return simulatedDrive.getOdometryEstimatedPose();
     }
 
-    /**
-     * @return The actual pose of the robot in the simulation world, for logging purposes.
-     */
+    @Override
     @AutoLogOutput(key = "Odometry/Field")
-    private Pose2d getActualPose() {
+    public Pose2d getActualPose() {
         return simulatedDrive.getActualPoseInSimulationWorld();
     }
 
