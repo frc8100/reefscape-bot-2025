@@ -7,7 +7,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Move Forward"
+            "pathName": "Move to reef"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "CR1"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Reef to processor"
           }
         }
       ]
