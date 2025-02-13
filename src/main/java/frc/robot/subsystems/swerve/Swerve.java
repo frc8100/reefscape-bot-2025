@@ -1,10 +1,5 @@
 package frc.robot.subsystems.swerve;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.pathplanner.lib.pathfinding.LocalADStar;
-import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -19,33 +14,29 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.math.GeometryUtils;
 import frc.robot.Constants;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
+import frc.robot.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
 import frc.robot.subsystems.swerve.module.Module;
 import frc.robot.subsystems.swerve.module.ModuleIO;
-
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
-
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 /** Swerve subsystem, responsible for controlling the swerve drive. */
-public class Swerve extends SubsystemBase {
-
+public class Swerve extends SubsystemBase implements SwerveDrive {
     static final Lock odometryLock = new ReentrantLock();
 
     /**
      * The swerve modules. These are the four swerve modules on the robot. Each module has a drive
      * motor and a steering motor.
      */
-    public final Module[] swerveModules = new Module[4];
+    private final Module[] swerveModules = new Module[4];
 
     /** The gyro. This is used to determine the robot's heading. */
     public final GyroIO gyroIO;
@@ -106,22 +97,24 @@ public class Swerve extends SubsystemBase {
         // gyro.getConfigurator().apply(new Pigeon2Configuration());
         zeroGyro();
 
-        AutoBuilder.configure(
-                this::getPose,
-                this::setPose,
-                this::getChassisSpeeds,
-                this::runVelocityChassisSpeeds,
-                new PPHolonomicDriveController(new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
-                SwerveConfig.getRobotConfig(),
-                () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
-                this);
-        Pathfinding.setPathfinder(new LocalADStar());
-        PathPlannerLogging.setLogActivePathCallback((activePath) -> {
-            Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]));
-        });
-        PathPlannerLogging.setLogTargetPoseCallback((targetPose) -> {
-            Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
-        });
+        // AutoBuilder.configure(
+        //         this::getPose,
+        //         this::setPose,
+        //         this::getChassisSpeeds,
+        //         this::runVelocityChassisSpeeds,
+        //         new PPHolonomicDriveController(new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
+        //         SwerveConfig.getRobotConfig(),
+        //         () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+        //         this);
+
+        // Pathfinding.setPathfinder(new LocalADStar());
+        // PathPlannerLogging.setLogActivePathCallback((activePath) -> {
+        //     Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]));
+        // });
+        // PathPlannerLogging.setLogTargetPoseCallback((targetPose) -> {
+        //     Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
+        // });
+        configurePathPlannerAutoBuilder();
 
         // TODO: Configure SysId
         // sysId =
@@ -169,13 +162,7 @@ public class Swerve extends SubsystemBase {
                 twistForPose.dx / LOOP_TIME_S, twistForPose.dy / LOOP_TIME_S, twistForPose.dtheta / LOOP_TIME_S);
     }
 
-    /**
-     * Drives the swerve modules based on the desired translation and rotation.
-     *
-     * @param translation The desired translation (x and y speeds).
-     * @param rotation The desired rotation speed.
-     * @param fieldRelative Whether the speeds are field-relative.
-     */
+    @Override
     public void drive(Translation2d translation, double rotation, boolean fieldRelative) {
         // Determine the desired chassis speeds based on whether the control is field-relative
         ChassisSpeeds desiredChassisSpeeds = fieldRelative
@@ -189,10 +176,7 @@ public class Swerve extends SubsystemBase {
         runVelocityChassisSpeeds(desiredChassisSpeeds);
     }
 
-    /**
-     * Drives the swerve modules given a provided chassis speeds.
-     * @param speed The desired chasssis speeds
-     */
+    @Override
     public void runVelocityChassisSpeeds(ChassisSpeeds speed) {
         // Convert the chassis speeds to swerve module states
         ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speed, 0.02);
@@ -213,11 +197,7 @@ public class Swerve extends SubsystemBase {
         }
     }
 
-    /**
-     * Sets the desired states for the swerve modules. Used by SwerveControllerCommand in Auto.
-     *
-     * @param desiredStates The desired states for the swerve modules.
-     */
+    @Override
     public void setModuleStates(SwerveModuleState[] desiredStates) {
         // Ensure the wheel speeds are within the allowable range
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, SwerveConfig.maxSpeed);
@@ -231,32 +211,17 @@ public class Swerve extends SubsystemBase {
         }
     }
 
-    /**
-     * @return The current pose of the robot. This is determined by the swerve odometry.
-     */
-    @AutoLogOutput(key = "Odometry/Robot")
+    @Override
     public Pose2d getPose() {
         return poseEstimator.getEstimatedPosition();
-        // TODO: Temporary
-        // Logger.recordOutput("PoseEstimator/Robot", poseEstimator.getEstimatedPosition());
-        // Pose2d p = swerveOdometry.getPoseMeters();
-        // return new Pose2d(-p.getX(), -p.getY(), p.getRotation());
     }
 
-    /**
-     * @return the current odometry rotation.
-     */
-    public Rotation2d getRotation() {
-        return getPose().getRotation();
-    }
-
-    /** Resets the current odometry pose. */
+    @Override
     public void setPose(Pose2d pose) {
         poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
-        // swerveOdometry.resetPosition(rawGyroRotation, getModulePositions(), pose);
     }
 
-    /** Adds a new timestamped vision measurement. */
+    @Override
     public void addVisionMeasurement(
             Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
         poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
@@ -267,40 +232,27 @@ public class Swerve extends SubsystemBase {
      *
      * @param pose The new pose of the robot.
      */
-    public void resetOdometry(Pose2d pose) {
+    private void resetOdometry(Pose2d pose) {
         poseEstimator.resetPosition(new Rotation2d(), getModulePositions(), pose);
-        // swerveOdometry.resetPosition(new Rotation2d(), getModulePositions(), pose);
         zeroGyro(pose.getRotation().getDegrees());
     }
 
-    /**
-     * @return The current module states.
-     */
-    @AutoLogOutput(key = "SwerveStates/Measured")
     public SwerveModuleState[] getModuleStates() {
-        // Create an array to hold the module states
         SwerveModuleState[] states = new SwerveModuleState[4];
 
         // Get the state of each module
-        // for (Module mod : swerveModules) {
         for (int i = 0; i < 4; i++) {
             Module mod = swerveModules[i];
-            // states[mod.getModuleNumber()] = mod.getState();
             states[mod.index] = mod.getState();
         }
 
         return states;
     }
 
-    /**
-     * @return The current module positions.
-     */
+    @Override
     public SwerveModulePosition[] getModulePositions() {
-        // Create an array to hold the module positions
         SwerveModulePosition[] positions = new SwerveModulePosition[4];
 
-        // Get the position of each module
-        // for (Module mod : swerveModules) {
         for (int i = 0; i < 4; i++) {
             Module mod = swerveModules[i];
             positions[i] = mod.getPosition();
@@ -309,43 +261,26 @@ public class Swerve extends SubsystemBase {
         return positions;
     }
 
-    /**
-     * @return the measured chassis speeds of the robot.
-     */
-    @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
-    private ChassisSpeeds getChassisSpeeds() {
+    @Override
+    public ChassisSpeeds getChassisSpeeds() {
         return kinematics.toChassisSpeeds(getModuleStates());
     }
 
-    /**
-     * Zeros the gyro.
-     *
-     * @param deg The angle to zero the gyro to. Raw, without invert.
-     */
+    @Override
     public void zeroGyro(double deg) {
         gyroIO.zeroGyro(deg);
 
-        // swerveOdometry.update(gyroIO.getGyroHeading(), getModulePositions());
         poseEstimator.update(gyroIO.getGyroHeading(), getModulePositions());
     }
 
-    /** Zeros the gyro, setting the angle to 0. */
-    public void zeroGyro() {
-        zeroGyro(0);
-    }
-
-    /** Stops the drive. */
-    public void stop() {
-        runVelocityChassisSpeeds(new ChassisSpeeds());
+    @Override
+    public Rotation2d getGyroHeading() {
+        return gyroIO.getGyroHeading();
     }
 
     /** Periodically updates the SmartDashboard with information about the swerve modules. */
     @Override
     public void periodic() {
-        // Update Odometry
-        // swerveOdometry.update(gyroIO.getGyroHeading(), getModulePositions());
-        // poseEstimator.update(gyroIO.getGyroHeading(), getModulePositions());
-
         // Prevents odometry updates while reading data
         odometryLock.lock();
         gyroIO.updateInputs(gyroInputs);

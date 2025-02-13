@@ -7,8 +7,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.States;
-import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveConfig;
+import frc.robot.subsystems.swerve.SwerveDrive;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -21,7 +21,7 @@ public class TeleopSwerve extends Command {
     /**
      * The swerve subsystem.
      */
-    private final Swerve swerveSubsystem;
+    private final SwerveDrive swerveSubsystem;
 
     /**
      * The translation input (x), as a double from 0-1.
@@ -68,7 +68,7 @@ public class TeleopSwerve extends Command {
      * The parameters are members of this class.
      */
     public TeleopSwerve(
-            Swerve swerveSubsystem,
+            SwerveDrive swerveSubsystem,
             DoubleSupplier translationSupplier,
             DoubleSupplier strafeSupplier,
             DoubleSupplier rotationSupplier,
@@ -113,28 +113,24 @@ public class TeleopSwerve extends Command {
         double rotationValue = MathUtil.applyDeadband(rotationInput, Constants.stickDeadband) * dampenAndSpeedConstant;
 
         // Heading direction state
-        double currentGyroYawRadians = swerveSubsystem.gyroIO.getGyroHeading().getRadians();
+        double currentGyroYawRadians = swerveSubsystem.getGyroHeading().getRadians();
 
         switch (States.driveState) {
             case d0:
                 // heading lock
-                rotationValue = rotationController.calculate(
-                        currentGyroYawRadians, Units.degreesToRadians(0));
+                rotationValue = rotationController.calculate(currentGyroYawRadians, Units.degreesToRadians(0));
                 break;
             case d90:
                 // heading lock
-                rotationValue = rotationController.calculate(
-                        currentGyroYawRadians, Units.degreesToRadians(90));
+                rotationValue = rotationController.calculate(currentGyroYawRadians, Units.degreesToRadians(90));
                 break;
             case d180:
                 // heading lock
-                rotationValue = rotationController.calculate(
-                        currentGyroYawRadians, Units.degreesToRadians(180));
+                rotationValue = rotationController.calculate(currentGyroYawRadians, Units.degreesToRadians(180));
                 break;
             case d270:
                 // heading lock
-                rotationValue = rotationController.calculate(
-                        currentGyroYawRadians, Units.degreesToRadians(270));
+                rotationValue = rotationController.calculate(currentGyroYawRadians, Units.degreesToRadians(270));
                 break;
             case standard:
                 // normal

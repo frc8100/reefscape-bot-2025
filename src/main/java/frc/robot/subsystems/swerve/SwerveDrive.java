@@ -1,0 +1,133 @@
+package frc.robot.subsystems.swerve;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.pathfinding.LocalADStar;
+import com.pathplanner.lib.pathfinding.Pathfinding;
+import com.pathplanner.lib.util.PathPlannerLogging;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj2.command.Subsystem;
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
+
+/**
+ * The specification for the swerve drive. Implemented via a real swerve drive or a simulated swerve drive.
+ */
+public interface SwerveDrive extends Subsystem {
+    /**
+     * Configures the path planner auto builder and records the path and trajectory setpoint to the logger.
+     */
+    default void configurePathPlannerAutoBuilder() {
+        AutoBuilder.configure(
+                this::getPose,
+                this::setPose,
+                this::getChassisSpeeds,
+                this::runVelocityChassisSpeeds,
+                new PPHolonomicDriveController(new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
+                SwerveConfig.getRobotConfig(),
+                () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+                this);
+
+        Pathfinding.setPathfinder(new LocalADStar());
+        PathPlannerLogging.setLogActivePathCallback((activePath) -> {
+            Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]));
+        });
+        PathPlannerLogging.setLogTargetPoseCallback((targetPose) -> {
+            Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
+        });
+    }
+
+    /**
+     * Drives the swerve modules based on the desired translation and rotation.
+     * Should convert the translation and rotation to ChassisSpeeds and set the swerve modules to those speeds
+     * in {@link #runVelocityChassisSpeeds}.
+     *
+     * @param translation The desired translation (x and y speeds).
+     * @param rotation The desired rotation speed.
+     * @param fieldRelative Whether the speeds are field-relative.
+     */
+    // TODO: Add isOpenLoop parameter
+    public void drive(Translation2d translation, double rotation, boolean fieldRelative);
+
+    /**
+     * Drives the swerve modules given a provided chassis speeds.
+     * @param speed The desired chasssis speeds
+     */
+    public void runVelocityChassisSpeeds(ChassisSpeeds speed);
+
+    /**
+     * Sets the desired states for the swerve modules. Used by SwerveControllerCommand in Auto.
+     *
+     * @param desiredStates The desired states for the swerve modules.
+     */
+    public void setModuleStates(SwerveModuleState[] desiredStates);
+
+    /**
+     * @return The current pose of the robot. This is determined by the swerve odometry.
+     */
+    @AutoLogOutput(key = "Odometry/Robot")
+    public Pose2d getPose();
+
+    /**
+     * @return The current odometry rotation from {@link #getPose}
+     */
+    public default Rotation2d getRotation() {
+        return getPose().getRotation();
+    }
+
+    /** Resets the current odometry pose. */
+    public void setPose(Pose2d pose);
+
+    /** Adds a new timestamped vision measurement. */
+    public void addVisionMeasurement(
+            Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs);
+
+    /**
+     * @return The current module states.
+     */
+    @AutoLogOutput(key = "SwerveStates/Measured")
+    public SwerveModuleState[] getModuleStates();
+
+    /**
+     * @return The current module positions.
+     */
+    public SwerveModulePosition[] getModulePositions();
+
+    /**
+     * @return The measured chassis speeds of the robot.
+     */
+    @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
+    public ChassisSpeeds getChassisSpeeds();
+
+    /**
+     * Zeros the gyro.
+     *
+     * @param deg The angle to zero the gyro to. Raw, without invert.
+     */
+    public void zeroGyro(double deg);
+
+    public default void zeroGyro() {
+        zeroGyro(0.0);
+    }
+
+    /**
+     * @return The current gyro heading.
+     */
+    public Rotation2d getGyroHeading();
+
+    /** Stops the drive. */
+    public default void stop() {
+        runVelocityChassisSpeeds(new ChassisSpeeds());
+    }
+}
