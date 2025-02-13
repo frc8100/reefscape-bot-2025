@@ -248,7 +248,6 @@ public class SwerveConfig {
         // Set the position and velocity conversion factors based on the SwerveConfig
         driveConfig
                 .encoder
-                // TODO: debug factor
                 .positionConversionFactor(SwerveConfig.driveEncoderPositionFactor)
                 .velocityConversionFactor(SwerveConfig.driveEncoderVelocityFactor)
                 // ! experimental

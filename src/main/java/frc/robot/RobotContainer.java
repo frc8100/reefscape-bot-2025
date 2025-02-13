@@ -69,7 +69,6 @@ public class RobotContainer {
                         new VisionIOLimelight(VisionConstants.camera0Name, swerveSubsystem::getRotation));
                 break;
 
-                // TODO: Implement sim
             case SIM:
                 // Sim robot, instantiate physics sim IO implementations
                 // driveSimulation =
@@ -91,7 +90,9 @@ public class RobotContainer {
                 visionSubsystem = new Vision(
                         swerveSubsystem::addVisionMeasurement,
                         new VisionIOPhotonSim(
-                                VisionConstants.camera0Name, VisionConstants.robotToCamera0, swerveSubsystem::getActualPose));
+                                VisionConstants.camera0Name,
+                                VisionConstants.robotToCamera0,
+                                swerveSubsystem::getActualPose));
                 break;
 
                 // default:

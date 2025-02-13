@@ -128,9 +128,4 @@ public class Module {
     public double getFFCharacterizationVelocity() {
         return inputs.driveVelocityRadPerSec;
     }
-
-    public int getModuleNumber() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getModuleNumber'");
-    }
 }
