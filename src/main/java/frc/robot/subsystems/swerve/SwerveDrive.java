@@ -18,6 +18,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -81,6 +82,7 @@ public interface SwerveDrive extends Subsystem {
      * @return The actual pose of the robot. When in simulation mode, this will return the pose of the robot in the simulation world.
      * When in real mode, this will return the same as {@link #getPose}.
      */
+    @AutoLogOutput(key = "Odometry/Field")
     public default Pose2d getActualPose() {
         return getPose();
     }

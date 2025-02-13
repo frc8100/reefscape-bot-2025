@@ -10,16 +10,22 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.swerve.Swerve;
+import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveConstants;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import frc.robot.subsystems.swerve.SwerveSim;
 import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2;
+import frc.robot.subsystems.swerve.gyro.GyroIOSim;
 import frc.robot.subsystems.swerve.module.ModuleIO;
+import frc.robot.subsystems.swerve.module.ModuleIOSim;
 import frc.robot.subsystems.swerve.module.ModuleIOSpark;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonSim;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -38,9 +44,7 @@ public class RobotContainer {
     /**
      * The simulation of the robot's drive. Set to null if not in simulation mode.
      */
-    // private SwerveDriveSimulation driveSimulation = null;
-
-    // private final PoseEstimator s_PoseEstimator = new PoseEstimator();
+    private SwerveDriveSimulation driveSimulation = null;
 
     // Dashboard inputs
     /**
@@ -54,15 +58,12 @@ public class RobotContainer {
             default:
             case REAL:
                 // Real robot, instantiate hardware IO implementations
-                swerveSubsystem = new Swerve(
-                        new GyroIOPigeon2(),
-                        new ModuleIO[] {
-                            new ModuleIOSpark(0, SwerveConstants.Swerve.Mod0.constants),
-                            new ModuleIOSpark(1, SwerveConstants.Swerve.Mod1.constants),
-                            new ModuleIOSpark(2, SwerveConstants.Swerve.Mod2.constants),
-                            new ModuleIOSpark(3, SwerveConstants.Swerve.Mod3.constants)
-                        },
-                        (robotPose) -> {});
+                swerveSubsystem = new Swerve(new GyroIOPigeon2(), new ModuleIO[] {
+                    new ModuleIOSpark(0, SwerveConstants.Swerve.Mod0.constants),
+                    new ModuleIOSpark(1, SwerveConstants.Swerve.Mod1.constants),
+                    new ModuleIOSpark(2, SwerveConstants.Swerve.Mod2.constants),
+                    new ModuleIOSpark(3, SwerveConstants.Swerve.Mod3.constants)
+                });
 
                 visionSubsystem = new Vision(
                         swerveSubsystem::addVisionMeasurement,
@@ -71,21 +72,23 @@ public class RobotContainer {
 
             case SIM:
                 // Sim robot, instantiate physics sim IO implementations
-                // driveSimulation =
-                //         new SwerveDriveSimulation(SwerveConfig.mapleSimConfig, new Pose2d(3, 3, new Rotation2d()));
+                driveSimulation = new SwerveDriveSimulation(SwerveConfig.mapleSimConfig, SwerveConfig.initialPose);
 
-                // SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
-                // swerveSubsystem = new Swerve(
-                //         new GyroIOSim(driveSimulation.getGyroSimulation()),
-                //         new ModuleIO[] {
-                //             new ModuleIOSim(driveSimulation.getModules()[0]),
-                //             new ModuleIOSim(driveSimulation.getModules()[1]),
-                //             new ModuleIOSim(driveSimulation.getModules()[2]),
-                //             new ModuleIOSim(driveSimulation.getModules()[3]),
-                //         },
-                //         driveSimulation::setSimulationWorldPose);
+                SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
 
-                swerveSubsystem = new SwerveSim();
+                SwerveModuleSimulation[] moduleSims = driveSimulation.getModules();
+
+                swerveSubsystem = new SwerveSim(
+                        new GyroIOSim(driveSimulation.getGyroSimulation()),
+                        new ModuleIO[] {
+                            new ModuleIOSim(moduleSims[0]),
+                            new ModuleIOSim(moduleSims[1]),
+                            new ModuleIOSim(moduleSims[2]),
+                            new ModuleIOSim(moduleSims[3]),
+                        },
+                        driveSimulation);
+
+                // swerveSubsystem = new SwerveSim();
 
                 visionSubsystem = new Vision(
                         swerveSubsystem::addVisionMeasurement,

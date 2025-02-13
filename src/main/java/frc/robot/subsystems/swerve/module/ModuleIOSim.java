@@ -14,15 +14,17 @@
 package frc.robot.subsystems.swerve.module;
 
 import static edu.wpi.first.units.Units.*;
-// import static frc.robot.subsystems.drive.DriveConstants.*;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.lib.util.SparkUtil;
+import frc.lib.util.swerveUtil.CTREModuleState;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import java.util.Arrays;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController;
+import org.littletonrobotics.junction.Logger;
 
 /** Physics sim implementation of module IO. */
 public class ModuleIOSim implements ModuleIO {
@@ -69,6 +71,9 @@ public class ModuleIOSim implements ModuleIO {
         }
 
         // Update simulation state
+        Logger.recordOutput("Sim/DriveMotorVoltageRequested", driveAppliedVolts);
+        Logger.recordOutput("Sim/TurnMotorVoltageRequested", turnAppliedVolts);
+
         driveMotor.requestVoltage(Volts.of(driveAppliedVolts));
         turnMotor.requestVoltage(Volts.of(turnAppliedVolts));
 
@@ -99,6 +104,13 @@ public class ModuleIOSim implements ModuleIO {
     }
 
     @Override
+    public SwerveModuleState getState() {
+        return new SwerveModuleState(
+                moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond) * SwerveConfig.wheelRadius,
+                moduleSimulation.getSteerAbsoluteFacing());
+    }
+
+    @Override
     public void setDriveOpenLoop(double output) {
         driveClosedLoop = false;
         driveAppliedVolts = output;
@@ -108,6 +120,16 @@ public class ModuleIOSim implements ModuleIO {
     public void setTurnOpenLoop(double output) {
         turnClosedLoop = false;
         turnAppliedVolts = output;
+    }
+
+    
+    @Override
+    public void setDesiredState(SwerveModuleState desiredState) {
+        // CTREModuleState functions for any motor type
+        desiredState = CTREModuleState.optimize(desiredState, getState().angle);
+
+        setDriveVelocity(desiredState.speedMetersPerSecond / SwerveConfig.wheelRadius);
+        setTurnPosition(desiredState.angle);
     }
 
     @Override

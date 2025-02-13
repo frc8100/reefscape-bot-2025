@@ -40,6 +40,11 @@ public interface ModuleIO {
     /** Updates the set of loggable inputs. */
     public default void updateInputs(ModuleIOInputs inputs) {}
 
+    /**
+     * @return The state of the module.
+     */
+    public SwerveModuleState getState();
+
     /** Run the drive motor at the specified open loop value. */
     public default void setDriveOpenLoop(double output) {}
 

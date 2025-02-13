@@ -25,12 +25,12 @@ import frc.robot.subsystems.swerve.module.Module;
 import frc.robot.subsystems.swerve.module.ModuleIO;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Consumer;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 /** Swerve subsystem, responsible for controlling the swerve drive. */
 public class Swerve extends SubsystemBase implements SwerveDrive {
+    /** Lock for the odometry thread. */
     static final Lock odometryLock = new ReentrantLock();
 
     /**
@@ -59,7 +59,10 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     };
 
     /** A 2d representation of the field */
-    private Field2d field = new Field2d();
+    protected Field2d field = new Field2d();
+
+    /** The callback to reset the simulation pose */
+    // private final Consumer<Pose2d> resetSimulationPoseCallBack;
 
     /**
      * Pose estimator. This is the same as odometry but includes vision input to correct for
@@ -67,14 +70,10 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
      */
     private SwerveDrivePoseEstimator poseEstimator;
 
-    /** The swerve odometry. This is used to determine the robot's position on the field. */
-    // public final SwerveDriveOdometry swerveOdometry;
-
     /** Creates a new Swerve subsystem. */
-    public Swerve(GyroIO gyroIO, ModuleIO[] moduleIOs, Consumer<Pose2d> resetSimulationPoseCallBack) {
+    public Swerve(GyroIO gyroIO, ModuleIO[] moduleIOs) {
         // Create the swerve modules
         for (int i = 0; i < 4; i++) {
-            System.out.println("Creating module " + i);
             swerveModules[i] = new Module(moduleIOs[i], i);
         }
 
@@ -83,38 +82,16 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         // Start odometry thread
         SparkOdometryThread.getInstance().start();
 
-        // swerveOdometry = new SwerveDriveOdometry(kinematics, gyroIO.getGyroHeading(), getModulePositions());
-
         poseEstimator = new SwerveDrivePoseEstimator(
                 kinematics,
                 rawGyroRotation,
-                // gyroIO.getGyroHeading(),
                 lastModulePositions,
-                // getModulePositions(),
                 new Pose2d(),
                 Constants.PoseEstimator.stateStdDevs,
                 Constants.PoseEstimator.VisionStdDevs);
 
-        // gyro.getConfigurator().apply(new Pigeon2Configuration());
         zeroGyro();
 
-        // AutoBuilder.configure(
-        //         this::getPose,
-        //         this::setPose,
-        //         this::getChassisSpeeds,
-        //         this::runVelocityChassisSpeeds,
-        //         new PPHolonomicDriveController(new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
-        //         SwerveConfig.getRobotConfig(),
-        //         () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
-        //         this);
-
-        // Pathfinding.setPathfinder(new LocalADStar());
-        // PathPlannerLogging.setLogActivePathCallback((activePath) -> {
-        //     Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]));
-        // });
-        // PathPlannerLogging.setLogTargetPoseCallback((targetPose) -> {
-        //     Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
-        // });
         configurePathPlannerAutoBuilder();
 
         // TODO: Configure SysId
@@ -135,7 +112,6 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
                 (poses) -> field.getObject("path").setPoses(poses));
 
         SmartDashboard.putData("Field", field);
-        // Logger.recordOutput("Field2d", field);
     }
 
     /**

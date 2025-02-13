@@ -140,9 +140,7 @@ public class ModuleIOSpark implements ModuleIO {
         return Rotation2d.fromDegrees(angleEncoder.getAbsolutePosition().getValueAsDouble() * 360);
     }
 
-    /**
-     * @return The state of the module.
-     */
+    @Override
     public SwerveModuleState getState() {
         return new SwerveModuleState(relDriveEncoder.getVelocity(), getAngle());
     }
@@ -215,12 +213,6 @@ public class ModuleIOSpark implements ModuleIO {
         angleMotor.setVoltage(output);
     }
 
-    /**
-     * Sets the desired state of the module including the angle and speed. Uses the PID controller.
-     *
-     * @param desiredState The desired state.
-     * @param isOpenLoop Whether the module is in open loop.
-     */
     @Override
     public void setDesiredState(SwerveModuleState desiredState) {
         // CTREModuleState functions for any motor type
