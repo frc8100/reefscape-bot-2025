@@ -12,6 +12,9 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.pathplanner.lib.config.RobotConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
@@ -127,6 +130,8 @@ public class SwerveConfig {
 
     public static final double robotMassKg = 40.0;
     public static final double wheelCOF = 1.2;
+
+    public static final Pose2d initialPose = new Pose2d(3, 3, new Rotation2d());
 
     // Simulator DC Motors
     public static final DCMotor driveGearbox = DCMotor.getNEO(1);

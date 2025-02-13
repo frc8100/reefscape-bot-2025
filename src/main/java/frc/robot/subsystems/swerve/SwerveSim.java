@@ -34,12 +34,9 @@ public class SwerveSim extends SubsystemBase implements SwerveDrive {
     private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(SwerveConfig.moduleTranslations);
 
     public SwerveSim() {
-        // For your own code, please configure your drivetrain properly according to the documentation
-        final DriveTrainSimulationConfig config = SwerveConfig.mapleSimConfig;
-
         // Create the SelfControlledSwerveDriveSimulation instance
         this.simulatedDrive = new SelfControlledSwerveDriveSimulation(
-                new SwerveDriveSimulation(config, new Pose2d(0, 0, new Rotation2d())));
+                new SwerveDriveSimulation(SwerveConfig.mapleSimConfig, SwerveConfig.initialPose));
 
         // Register the drivetrain simulation to the simulation world
         SimulatedArena.getInstance().addDriveTrainSimulation(simulatedDrive.getDriveTrainSimulation());
@@ -110,6 +107,14 @@ public class SwerveSim extends SubsystemBase implements SwerveDrive {
     @AutoLogOutput(key = "Odometry/Robot")
     public Pose2d getPose() {
         return simulatedDrive.getOdometryEstimatedPose();
+    }
+
+    /**
+     * @return The actual pose of the robot in the simulation world, for logging purposes.
+     */
+    @AutoLogOutput(key = "Odometry/Field")
+    private Pose2d getActualPose() {
+        return simulatedDrive.getActualPoseInSimulationWorld();
     }
 
     @Override

@@ -51,8 +51,8 @@ public class Controls {
         public static final double slowMultiplier = 0.5;
 
         // unused
-        // public static final JoystickButton robotCentric =
-        //         new JoystickButton(driverController, XboxController.Button.kLeftBumper.value);
+        public static final JoystickButton robotCentric =
+                new JoystickButton(driverController, XboxController.Button.kB.value);
 
         // Direction buttons
         public static final POVButton up = new POVButton(driverController, 90);
@@ -91,7 +91,8 @@ public class Controls {
          * @return Whether the controls are robot centric. Default is `false`.
          */
         public static boolean isRobotCentric() {
-            return false;
+            // return false;
+            return robotCentric.getAsBoolean();
         }
 
         /**
