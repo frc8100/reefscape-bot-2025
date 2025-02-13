@@ -25,7 +25,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import frc.robot.subsystems.swerve.SparkOdometryThread;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveConstants;
-
 import java.util.Queue;
 
 /** IO implementation for Pigeon 2. */

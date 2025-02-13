@@ -18,9 +18,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import frc.robot.subsystems.swerve.ModuleIOInputsAutoLogged;
 import frc.robot.subsystems.swerve.SwerveConfig;
-
 import org.littletonrobotics.junction.Logger;
 
 public class Module {
