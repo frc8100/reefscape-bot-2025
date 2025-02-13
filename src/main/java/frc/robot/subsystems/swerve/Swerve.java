@@ -26,6 +26,7 @@ import frc.robot.subsystems.swerve.module.ModuleIO;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 /** Swerve subsystem, responsible for controlling the swerve drive. */
@@ -46,7 +47,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     /** Raw gryo rotation. Used for the pose estimator. */
     private Rotation2d rawGyroRotation = new Rotation2d();
 
-    /*
+    /**
      * Swerve Kinematics
      * No need to ever change this unless you are not doing a traditional rectangular/square 4 module swerve
      */
@@ -212,6 +213,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     }
 
     @Override
+    @AutoLogOutput(key = "Odometry/Robot")
     public Pose2d getPose() {
         return poseEstimator.getEstimatedPosition();
     }
@@ -237,6 +239,8 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         zeroGyro(pose.getRotation().getDegrees());
     }
 
+    @Override
+    @AutoLogOutput(key = "SwerveStates/Measured")
     public SwerveModuleState[] getModuleStates() {
         SwerveModuleState[] states = new SwerveModuleState[4];
 
@@ -262,6 +266,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     }
 
     @Override
+    @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
     public ChassisSpeeds getChassisSpeeds() {
         return kinematics.toChassisSpeeds(getModuleStates());
     }

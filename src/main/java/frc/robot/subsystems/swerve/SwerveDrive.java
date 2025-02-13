@@ -18,7 +18,6 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -76,7 +75,6 @@ public interface SwerveDrive extends Subsystem {
     /**
      * @return The current pose of the robot. This is determined by the swerve odometry.
      */
-    @AutoLogOutput(key = "Odometry/Robot")
     public Pose2d getPose();
 
     /**
@@ -96,7 +94,6 @@ public interface SwerveDrive extends Subsystem {
     /**
      * @return The current module states.
      */
-    @AutoLogOutput(key = "SwerveStates/Measured")
     public SwerveModuleState[] getModuleStates();
 
     /**
@@ -107,7 +104,6 @@ public interface SwerveDrive extends Subsystem {
     /**
      * @return The measured chassis speeds of the robot.
      */
-    @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
     public ChassisSpeeds getChassisSpeeds();
 
     /**

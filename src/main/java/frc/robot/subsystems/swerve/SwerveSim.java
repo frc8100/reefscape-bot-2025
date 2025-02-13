@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
@@ -16,6 +17,8 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SelfControlledSwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Simulator implementation of the swerve drive.
@@ -24,6 +27,11 @@ import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 public class SwerveSim extends SubsystemBase implements SwerveDrive {
     private final SelfControlledSwerveDriveSimulation simulatedDrive;
     private final Field2d field2d;
+
+    /**
+     * Swerve Kinematics for debugging
+     */
+    private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(SwerveConfig.moduleTranslations);
 
     public SwerveSim() {
         // For your own code, please configure your drivetrain properly according to the documentation
@@ -45,11 +53,25 @@ public class SwerveSim extends SubsystemBase implements SwerveDrive {
 
     @Override
     public void drive(Translation2d translation, double rotation, boolean fieldRelative) {
-        this.simulatedDrive.runChassisSpeeds(
-                new ChassisSpeeds(translation.getX(), translation.getY(), rotation),
-                new Translation2d(),
-                fieldRelative,
-                true);
+        ChassisSpeeds speeds = new ChassisSpeeds(translation.getX(), translation.getY(), rotation);
+
+        this.simulatedDrive.runChassisSpeeds(speeds, new Translation2d(), fieldRelative, true);
+
+        // Calculate values for logging
+        ChassisSpeeds desiredChassisSpeeds = fieldRelative
+                ? ChassisSpeeds.fromFieldRelativeSpeeds(translation.getX(), translation.getY(), rotation, getRotation())
+                : new ChassisSpeeds(translation.getX(), translation.getY(), rotation);
+
+        // Convert the chassis speeds to swerve module states
+        ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(desiredChassisSpeeds, 0.02);
+        SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
+
+        // Ensure the wheel speeds are within the allowable range
+        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, SwerveConfig.maxSpeed);
+
+        // Log unoptimized setpoints
+        Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
+        Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
     }
 
     @Override
@@ -63,6 +85,7 @@ public class SwerveSim extends SubsystemBase implements SwerveDrive {
     }
 
     @Override
+    @AutoLogOutput(key = "SwerveStates/Measured")
     public SwerveModuleState[] getModuleStates() {
         return simulatedDrive.getMeasuredStates();
     }
@@ -73,6 +96,7 @@ public class SwerveSim extends SubsystemBase implements SwerveDrive {
     }
 
     @Override
+    @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
     public ChassisSpeeds getChassisSpeeds() {
         return simulatedDrive.getMeasuredSpeedsFieldRelative(true);
     }
@@ -83,6 +107,7 @@ public class SwerveSim extends SubsystemBase implements SwerveDrive {
     }
 
     @Override
+    @AutoLogOutput(key = "Odometry/Robot")
     public Pose2d getPose() {
         return simulatedDrive.getOdometryEstimatedPose();
     }

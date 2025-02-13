@@ -13,7 +13,7 @@ public final class Constants {
     /**
      * The current mode, see {@link Mode}
      */
-    public static final Mode currentMode = Mode.REAL;
+    public static final Mode currentMode = Mode.SIM;
 
     /**
      * An enum of modes, for AdvantageKit.
