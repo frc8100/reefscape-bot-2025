@@ -21,7 +21,7 @@ The code for the 2025 season game REEFSCAPE.
 | Left Axis | Translation/strafe |
 | Right Axis | Rotation |
 | Y | Zero gyro |
-| B | Enable field centric (hold) |
+| B | Enable robot centric (hold) |
 | Left Bumper (L1) | Slow movement |
 | Right Bumper (R1) | Very slow movement |
 | Left Trigger (L2) | Claw intake |
