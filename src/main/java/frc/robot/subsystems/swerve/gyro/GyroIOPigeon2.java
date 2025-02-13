@@ -83,11 +83,6 @@ public class GyroIOPigeon2 implements GyroIO {
         return new Rotation2d(pigeon.getYaw().getValue());
     }
 
-    // @Override
-    // public Rotation2d getRotation2d() {
-    //     return pigeon.getRotation2d();
-    // }
-
     @Override
     public Rotation2d getGyroHeading() {
         // If the gyro is inverted, return the inverted yaw

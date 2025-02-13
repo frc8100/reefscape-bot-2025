@@ -7,9 +7,18 @@ import edu.wpi.first.math.util.Units;
 import frc.lib.util.SparkUtil;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
 
+/**
+ * IO implementation for the gyro simulation.
+ */
 public class GyroIOSim implements GyroIO {
+    /**
+     * Use the maplesim gyro simulation. This contains the gyro readings and angular velocity.
+     */
     private final GyroSimulation gyroSimulation;
 
+    /**
+     * Creates a new GyroIOSim given the gyro simulation to use.
+     */
     public GyroIOSim(GyroSimulation gyroSimulation) {
         this.gyroSimulation = gyroSimulation;
     }

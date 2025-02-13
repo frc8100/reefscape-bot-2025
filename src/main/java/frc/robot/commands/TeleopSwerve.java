@@ -113,26 +113,28 @@ public class TeleopSwerve extends Command {
         double rotationValue = MathUtil.applyDeadband(rotationInput, Constants.stickDeadband) * dampenAndSpeedConstant;
 
         // Heading direction state
+        double currentGyroYawRadians = swerveSubsystem.gyroIO.getGyroHeading().getRadians();
+
         switch (States.driveState) {
             case d0:
                 // heading lock
                 rotationValue = rotationController.calculate(
-                        swerveSubsystem.gyroIO.getYaw().getRadians(), Units.degreesToRadians(0));
+                        currentGyroYawRadians, Units.degreesToRadians(0));
                 break;
             case d90:
                 // heading lock
                 rotationValue = rotationController.calculate(
-                        swerveSubsystem.gyroIO.getYaw().getRadians(), Units.degreesToRadians(90));
+                        currentGyroYawRadians, Units.degreesToRadians(90));
                 break;
             case d180:
                 // heading lock
                 rotationValue = rotationController.calculate(
-                        swerveSubsystem.gyroIO.getYaw().getRadians(), Units.degreesToRadians(180));
+                        currentGyroYawRadians, Units.degreesToRadians(180));
                 break;
             case d270:
                 // heading lock
                 rotationValue = rotationController.calculate(
-                        swerveSubsystem.gyroIO.getYaw().getRadians(), Units.degreesToRadians(270));
+                        currentGyroYawRadians, Units.degreesToRadians(270));
                 break;
             case standard:
                 // normal
