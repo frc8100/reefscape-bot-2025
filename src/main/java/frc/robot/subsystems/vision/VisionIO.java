@@ -44,5 +44,8 @@ public interface VisionIO {
         PHOTONVISION
     }
 
+    /**
+     * Updates the inputs of the vision IO.
+     */
     public default void updateInputs(VisionIOInputs inputs) {}
 }

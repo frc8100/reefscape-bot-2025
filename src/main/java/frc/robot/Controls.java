@@ -60,6 +60,9 @@ public class Controls {
         public static final POVButton right = new POVButton(driverController, 180);
         public static final POVButton left = new POVButton(driverController, 0);
 
+        public static final JoystickButton testFollowPose =
+                new JoystickButton(driverController, XboxController.Button.kA.value);
+
         /**
          * @return The translation (x)
          */

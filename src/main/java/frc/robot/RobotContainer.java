@@ -1,6 +1,8 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -172,6 +174,19 @@ public class RobotContainer {
         // Arm
         armSubsystem.setDefaultCommand(
                 Commands.run(() -> armSubsystem.runClaw(Controls.Arm.getIntakeOrOuttake()), armSubsystem));
+
+        // Test
+        // Controls.Drive.testFollowPose.whileTrue(swerveSubsystem.goToPoseCommand(new Pose2d(2, 2, new Rotation2d())));
+
+        Controls.Drive.testFollowPose.whileTrue(
+                // Create a new command that creates a command to follow a pose
+                Commands.runOnce(
+                        () -> swerveSubsystem
+                                .goToPoseCommand(new Pose2d(2, 2, new Rotation2d()))
+                                .andThen(Commands.waitSeconds(10.0))
+                                .until(() -> !Controls.Drive.testFollowPose.getAsBoolean())
+                                .schedule(),
+                        swerveSubsystem));
     }
 
     /**

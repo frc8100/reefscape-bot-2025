@@ -25,14 +25,32 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.vision.VisionIO.PoseObservation;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import java.util.LinkedList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
+/**
+ * The vision subsystem. This subsystem processes vision data and sends it to the robot code.
+ */
 public class Vision extends SubsystemBase {
+    /**
+     * The consumer for vision data. Usually a method to add a measurement to the pose estimator.
+     */
+    @FunctionalInterface
+    public static interface VisionConsumer {
+        public void accept(
+                Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs);
+    }
+
     private final VisionConsumer consumer;
+
+    /**
+     * A list of all vision IOs. Each IO corresponds to a camera.
+     */
     private final VisionIO[] io;
+
     private final VisionIOInputsAutoLogged[] inputs;
     private final Alert[] disconnectedAlerts;
 
@@ -65,6 +83,7 @@ public class Vision extends SubsystemBase {
 
     @Override
     public void periodic() {
+        // Update inputs
         for (int i = 0; i < io.length; i++) {
             io[i].updateInputs(inputs[i]);
             Logger.processInputs("Vision/Camera" + Integer.toString(i), inputs[i]);
@@ -96,7 +115,7 @@ public class Vision extends SubsystemBase {
             }
 
             // Loop over pose observations
-            for (var observation : inputs[cameraIndex].poseObservations) {
+            for (PoseObservation observation : inputs[cameraIndex].poseObservations) {
                 // Check whether to reject pose
                 boolean rejectPose = observation.tagCount() == 0 // Must have at least one tag
                         || (observation.tagCount() == 1
@@ -170,11 +189,5 @@ public class Vision extends SubsystemBase {
         Logger.recordOutput(
                 "Vision/Summary/RobotPosesRejected",
                 allRobotPosesRejected.toArray(new Pose3d[allRobotPosesRejected.size()]));
-    }
-
-    @FunctionalInterface
-    public static interface VisionConsumer {
-        public void accept(
-                Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs);
     }
 }

@@ -10,6 +10,7 @@ import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 // import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.path.PathConstraints;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -124,13 +125,19 @@ public class SwerveConfig {
     /* Swerve Profiling Values */
     /** Meters per Second */
     public static final double maxSpeed = 4.0;
+    // Meters per Second^2
+    public static final double maxAcceleration = 2.0;
     /** Radians per Second */
     public static final double maxAngularVelocity = 5.0;
+
+    public static final double maxAngularAcceleration = 2.0;
 
     public static final double robotMassKg = 40.0;
     public static final double wheelCOF = 1.2;
 
     public static final Pose2d initialPose = new Pose2d(3, 3, new Rotation2d());
+    public static final PathConstraints pathConstraints =
+            new PathConstraints(maxSpeed, maxAcceleration, maxAngularVelocity, maxAngularAcceleration);
 
     // Simulator DC Motors
     public static final DCMotor driveGearbox = DCMotor.getNEO(1);

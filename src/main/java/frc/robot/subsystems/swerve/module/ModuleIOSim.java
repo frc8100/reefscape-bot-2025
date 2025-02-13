@@ -122,7 +122,6 @@ public class ModuleIOSim implements ModuleIO {
         turnAppliedVolts = output;
     }
 
-    
     @Override
     public void setDesiredState(SwerveModuleState desiredState) {
         // CTREModuleState functions for any motor type

@@ -17,6 +17,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -136,4 +137,9 @@ public interface SwerveDrive extends Subsystem {
     public default void stop() {
         runVelocityChassisSpeeds(new ChassisSpeeds());
     }
+
+    /**
+     * @return A command to go to a specific pose.
+     */
+    public Command goToPoseCommand(Pose2d pose);
 }
