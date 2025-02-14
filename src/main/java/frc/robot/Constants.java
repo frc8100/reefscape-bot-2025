@@ -9,11 +9,11 @@ import edu.wpi.first.math.numbers.N3;
  * Contains constants for the robot. Swerve constants are located in {@link SwerveConstants}.
  */
 public final class Constants {
-
     /**
-     * The current mode, see {@link Mode}
+     * The current mode, see {@link Mode}.
+     * Automatically set by robot.
      */
-    public static final Mode currentMode = Mode.SIM;
+    public static Mode currentMode = Mode.REAL;
 
     /**
      * An enum of modes, for AdvantageKit.

@@ -45,6 +45,12 @@ public class Robot extends LoggedRobot {
                 break;
         }
 
+        // Set the current mode
+        Constants.currentMode = 
+                isReal() ? Constants.Mode.REAL
+                : isSimulation() ? Constants.Mode.SIM
+                : Constants.Mode.REPLAY;
+
         // Set up data receivers & replay source
         switch (Constants.currentMode) {
             case REAL:
