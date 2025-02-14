@@ -23,7 +23,6 @@ import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
 import frc.robot.subsystems.swerve.module.Module;
 import frc.robot.subsystems.swerve.module.ModuleIO;
-import frc.robot.subsystems.swerve.path.SwervePathFollow;
 import java.util.ArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -62,15 +61,6 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
     /** A 2d representation of the field */
     protected Field2d field = new Field2d();
-
-    /** The pathfinding */
-    public final SwervePathFollow pathfinding = new SwervePathFollow(this);
-
-    /** The routines to run */
-    private ArrayList<RoutineWithCondition> routines = new ArrayList<>();
-
-    /** The callback to reset the simulation pose */
-    // private final Consumer<Pose2d> resetSimulationPoseCallBack;
 
     /**
      * Pose estimator. This is the same as odometry but includes vision input to correct for
@@ -120,11 +110,6 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
                 (poses) -> field.getObject("path").setPoses(poses));
 
         SmartDashboard.putData("Field", field);
-    }
-
-    @Override
-    public SwervePathFollow getPathfindingInstance() {
-        return pathfinding;
     }
 
     /**
@@ -270,11 +255,6 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     @Override
     public Rotation2d getGyroHeading() {
         return gyroIO.getGyroHeading();
-    }
-
-    @Override
-    public void registerRoutineWhileCondition(RoutineWithCondition routine) {
-        routines.add(routine);
     }
 
     /** Periodically updates the SmartDashboard with information about the swerve modules. */
