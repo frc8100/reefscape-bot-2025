@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
+import frc.robot.Controls;
 import frc.robot.States;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveDrive;
@@ -90,6 +91,20 @@ public class TeleopSwerve extends Command {
         this.robotCentricSup = robotCentricSup;
         this.dampen = dampen;
         this.speedDial = speedDial;
+    }
+
+    /**
+     * Creates the TeleopSwerve command given a {@link Controls.Drive} object.
+     */
+    public TeleopSwerve(SwerveDrive swerveSubsystem, Controls.Drive driveControls) {
+        this(
+                swerveSubsystem,
+                driveControls::getTranslationAxis,
+                driveControls::getStrafeAxis,
+                driveControls::getRotationAxis,
+                driveControls::isRobotCentric,
+                driveControls::isDampen,
+                driveControls::getSpeedMultiplier);
     }
 
     /**

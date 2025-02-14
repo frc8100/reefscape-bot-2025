@@ -4,6 +4,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -105,8 +106,14 @@ public class RobotContainer {
 
                 // Create an opponent robot simulation
                 OpponentRobotSim opponentRobotSim1 = new OpponentRobotSim(new Pose2d(10, 2, new Rotation2d()));
-                opponentRobotSim1.setDefaultCommand(opponentRobotSim1.opponentRobotPathfindToPoseSupplier(swerveSubsystem::getActualPose));
-                
+
+                // Create another joystick drive for the opponent robot
+                Controls.Drive opponentRobotDriveControls = new Controls.Drive(new Joystick(1));
+
+                // Set the default command for the opponent robot
+                opponentRobotSim1.setDefaultCommand(new TeleopSwerve(opponentRobotSim1, opponentRobotDriveControls));
+                // opponentRobotSim1.setDefaultCommand(opponentRobotSim1.opponentRobotPathfindToPoseSupplier(swerveSubsystem::getActualPose));
+
                 // OpponentRobotSim opponentRobotSim2 = new OpponentRobotSim(new Pose2d(13, 6, new Rotation2d()));
                 // opponentRobotSim2.setDefaultCommand(opponentRobotSim2.opponentRobotPathfindToPoseSupplier(swerveSubsystem::getActualPose));
                 break;
@@ -122,14 +129,7 @@ public class RobotContainer {
                 //     break;
         }
 
-        swerveSubsystem.setDefaultCommand(new TeleopSwerve(
-                swerveSubsystem,
-                Controls.Drive::getTranslationAxis,
-                Controls.Drive::getStrafeAxis,
-                Controls.Drive::getRotationAxis,
-                Controls.Drive::isRobotCentric,
-                Controls.Drive::isDampen,
-                Controls.Drive::getSpeedMultiplier));
+        swerveSubsystem.setDefaultCommand(new TeleopSwerve(swerveSubsystem, Controls.mainDriveControls));
 
         // Set up auto routines
         autoRoutines = new AutoRoutines(swerveSubsystem);
@@ -168,21 +168,25 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         /* Driver Buttons */
-        Controls.Drive.zeroGyro.onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
+        // Controls.mainDriveControls.zeroGyro.onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
+        Controls.mainDriveControls
+                .getJoystickButtonOf(Controls.mainDriveControls.zeroGyroButton)
+                .onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
 
         // Heading lock bindings
-        Controls.Drive.up
-                .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d90))
-                .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
-        Controls.Drive.left
-                .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d180))
-                .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
-        Controls.Drive.right
-                .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d0))
-                .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
-        Controls.Drive.down
-                .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d270))
-                .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
+        // TODO: Reimplement
+        // Controls.mainDriveControls.up
+        //         .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d90))
+        //         .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
+        // Controls.mainDriveControls.left
+        //         .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d180))
+        //         .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
+        // Controls.mainDriveControls.right
+        //         .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d0))
+        //         .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
+        // Controls.mainDriveControls.down
+        //         .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d270))
+        //         .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
 
         // Arm
         armSubsystem.setDefaultCommand(
@@ -190,8 +194,14 @@ public class RobotContainer {
 
         // Test
 
-        Controls.Drive.goToCoralStation1.whileTrue(autoRoutines.getCoralFromStation(1));
-        Controls.Drive.goToReef1.whileTrue(autoRoutines.goToReef(1));
+        // Controls.mainDriveControls.goToCoralStation1.whileTrue(autoRoutines.getCoralFromStation(1));
+        // Controls.mainDriveControls.goToReef1.whileTrue(autoRoutines.goToReef(1));
+        Controls.mainDriveControls
+                .getJoystickButtonOf(Controls.mainDriveControls.goToCoralStation1Button)
+                .whileTrue(autoRoutines.getCoralFromStation(1));
+        Controls.mainDriveControls
+                .getJoystickButtonOf(Controls.mainDriveControls.goToReef1Button)
+                .whileTrue(autoRoutines.goToReef(1));
     }
 
     /**
