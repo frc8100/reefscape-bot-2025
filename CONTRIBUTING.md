@@ -35,6 +35,46 @@ The first way is to code on your own computer.
 
 See the [WPILib documentation](https://docs.wpilib.org/en/stable/docs/software/vscode-overview/deploying-robot-code.html) for more information on deploying code.
 
+## Simulation
+
+Once you have the code, you can run the simulation.
+
+1. Open the WPILib command palette (press `Ctrl+Shift+P`).
+2. Search for `WPILib: Simulate Robot Code` and press enter.
+    - When asked for extensions to run, select `Sim GUI` (only select `Use Real Driver Station` if you have a real controller connected).
+3. Configure the keyboard controls.
+    - Drag `16: Keyboard 0` from the `System Joysticks` tab to the `Joysticks[0]` tab.
+    - You can change the keyboard controls by clicking on the `DS` tab on the top and enabling `Keyboard 0 Settings`.
+    - Configure the values of the axis and buttons to your liking. You should click the `+` on Axes count until there are 5 axes, and the `+` on Buttons count until there are 6 buttons. See the simulation to controller mapping table below.
+4. Enable the simulation into teleop mode.
+5. Open AdvantageScope.
+6. In AdvantageScope, connect to the simulation by pressing `Ctrl+Shift+K`.
+7. Drag the logged telemetry values to the `Odometry`, `Swerve`, and `3D Field` tabs. They should look the same as the image below.
+8. You can now see and drive the robot in simulation.
+
+Note: you must be focused on the `Sim GUI` window for keyboard controls to work.
+
+![odometry advantagescope](./images/odometry-as.png)
+![swerve advantagescope](./images/swerve-as.png)
+![3d field advantagescope](./images/3d-field-as.png)
+
+### Simulation to Controller Mapping
+
+| Simulation Button | Controller Button |
+| --- | ----------------- |
+| Axis 0 | Left Axis X |
+| Axis 1 | Left Axis Y |
+| Axis 2 | Left Trigger (L2) |
+| Axis 3 | Right Trigger (R2) |
+| Axis 4 | Right Axis X |
+| Axis 5 | Right Axis Y (unused) |
+| Button 1 | A |
+| Button 2 | B |
+| Button 3 | X |
+| Button 4 | Y |
+| Button 5 | Left Bumper (L1) |
+| Button 6 | Right Bumper (R1) |
+
 ## Saving and Pulling Changes
 
 Once you make changes, you can upload (commit/push) your changes.
@@ -57,3 +97,7 @@ If any changes are made on this repository, you also need to pull/sync the chang
 > Also, see [this article](https://www.atlassian.com/git) and [this article](https://product.hubspot.com/blog/git-and-github-tutorial-for-beginners) for more info about git.
 
 For more details on source control, see the [Git documentation](https://git-scm.com/doc).
+
+## Troubleshooting
+
+If you encounter issues related to dependencies, try `Java: Clean Java Language Server Workspace` in the command palette.

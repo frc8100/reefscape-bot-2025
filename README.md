@@ -22,6 +22,7 @@ The code for the 2025 season game REEFSCAPE.
 | Right Axis | Rotation |
 | Y | Zero gyro |
 | B | Enable robot centric (hold) |
+| Z | (Test) go to coral station 1 (hold) |
 | Left Bumper (L1) | Slow movement |
 | Right Bumper (R1) | Very slow movement |
 | Left Trigger (L2) | Claw intake |
