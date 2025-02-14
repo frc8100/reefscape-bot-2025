@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.swerve.OpponentRobotSim;
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -46,10 +47,8 @@ public class Robot extends LoggedRobot {
         }
 
         // Set the current mode
-        Constants.currentMode = 
-                isReal() ? Constants.Mode.REAL
-                : isSimulation() ? Constants.Mode.SIM
-                : Constants.Mode.REPLAY;
+        Constants.currentMode =
+                isReal() ? Constants.Mode.REAL : isSimulation() ? Constants.Mode.SIM : Constants.Mode.REPLAY;
 
         // Set up data receivers & replay source
         switch (Constants.currentMode) {
@@ -161,5 +160,8 @@ public class Robot extends LoggedRobot {
     @Override
     public void simulationPeriodic() {
         SimulatedArena.getInstance().simulationPeriodic();
+
+        // Log output of opponenet robots
+        Logger.recordOutput("Odometry/OpponentRobotPoses", OpponentRobotSim.getOpponentRobotPoses());
     }
 }
