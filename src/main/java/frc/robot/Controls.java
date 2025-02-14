@@ -61,8 +61,11 @@ public class Controls {
         public static final POVButton left = new POVButton(driverController, 0);
 
         // TODO: give more descriptive name
-        public static final JoystickButton testFollowPose =
+        public static final JoystickButton goToCoralStation1 =
                 new JoystickButton(driverController, XboxController.Button.kA.value);
+
+        public static final JoystickButton goToReef1 =
+                new JoystickButton(driverController, XboxController.Button.kB.value);
 
         /**
          * @return The translation (x)

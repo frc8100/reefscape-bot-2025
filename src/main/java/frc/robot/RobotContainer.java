@@ -42,6 +42,8 @@ public class RobotContainer {
     private final SwerveDrive swerveSubsystem;
     private final ArmSubsystem armSubsystem = new ArmSubsystem();
 
+    private AutoRoutines autoRoutines;
+
     /**
      * The simulation of the robot's drive. Set to null if not in simulation mode.
      */
@@ -120,6 +122,8 @@ public class RobotContainer {
                 Controls.Drive::getSpeedMultiplier));
 
         // Set up auto routines
+        autoRoutines = new AutoRoutines(swerveSubsystem);
+
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
         // Set up SysId routines
@@ -175,9 +179,9 @@ public class RobotContainer {
                 Commands.run(() -> armSubsystem.runClaw(Controls.Arm.getIntakeOrOuttake()), armSubsystem));
 
         // Test
-        AutoRoutines autoRoutines = new AutoRoutines(swerveSubsystem);
 
-        Controls.Drive.testFollowPose.whileTrue(autoRoutines.getCoralFromStation1());
+        Controls.Drive.goToCoralStation1.whileTrue(autoRoutines.getCoralFromStation(1));
+        Controls.Drive.goToReef1.whileTrue(autoRoutines.goToReef(1));
     }
 
     /**
@@ -186,6 +190,8 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return autoChooser.get();
+        // return autoChooser.get();
+        // TODO: Temporary
+        return autoRoutines.getCoralAndGoToAllReefsTest();
     }
 }
