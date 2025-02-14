@@ -19,6 +19,9 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.subsystems.swerve.path.SwervePathFollow;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -48,6 +51,12 @@ public interface SwerveDrive extends Subsystem {
             Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
         });
     }
+
+    /**
+     * @return The pathfinding instance for the swerve drive.
+     */
+    // TODO: unnecessary?
+    SwervePathFollow getPathfindingInstance();
 
     /**
      * Drives the swerve modules based on the desired translation and rotation.
@@ -139,7 +148,22 @@ public interface SwerveDrive extends Subsystem {
     }
 
     /**
-     * @return A command to go to a specific pose.
+     * Registers a routine to run while a condition is true.
+     * The condition and routine are both suppliers to allow for dynamic conditions and routines.
+     * The condition is checked every robot loop during periodic.
      */
-    public Command goToPoseCommand(Pose2d pose);
+    public void registerRoutineWhileCondition(RoutineWithCondition routine);
+
+    /**
+     * A routine with a condition to run while the condition is true.
+     */
+    public static class RoutineWithCondition {
+        public BooleanSupplier condition = () -> false;
+        public Supplier<Command> routine = () -> null;
+
+        public RoutineWithCondition(BooleanSupplier condition, Supplier<Command> routine) {
+            this.condition = condition;
+            this.routine = routine;
+        }
+    }
 }

@@ -1,8 +1,6 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,6 +19,8 @@ import frc.robot.subsystems.swerve.gyro.GyroIOSim;
 import frc.robot.subsystems.swerve.module.ModuleIO;
 import frc.robot.subsystems.swerve.module.ModuleIOSim;
 import frc.robot.subsystems.swerve.module.ModuleIOSpark;
+import frc.robot.subsystems.swerve.path.AutoRoutines;
+import frc.robot.subsystems.swerve.path.SwervePathFollow;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -178,15 +178,49 @@ public class RobotContainer {
         // Test
         // Controls.Drive.testFollowPose.whileTrue(swerveSubsystem.goToPoseCommand(new Pose2d(2, 2, new Rotation2d())));
 
-        Controls.Drive.testFollowPose.whileTrue(
-                // Create a new command that creates a command to follow a pose
-                Commands.runOnce(
-                        () -> swerveSubsystem
-                                .goToPoseCommand(new Pose2d(2, 2, new Rotation2d()))
-                                .andThen(Commands.waitSeconds(10.0))
-                                .until(() -> !Controls.Drive.testFollowPose.getAsBoolean())
-                                .schedule(),
-                        swerveSubsystem));
+        // Controls.Drive.testFollowPose.whileTrue(
+        //         // Create a new command that creates a command to follow a pose
+        //         Commands.runOnce(
+        //                 () -> swerveSubsystem
+        //                         .goToPoseCommand(new Pose2d(2, 2, new Rotation2d()))
+        //                         .andThen(Commands.waitSeconds(10.0))
+        //                         .until(() -> !Controls.Drive.testFollowPose.getAsBoolean())
+        //                         .schedule(),
+        //                 swerveSubsystem));
+
+        // TODO: refactor
+        SwervePathFollow pathFollow = swerveSubsystem.getPathfindingInstance();
+
+        // Controls.Drive.testFollowPose.whileTrue(
+        //     swerveSubsystem
+        //         .getPathfindingInstance()
+        //         .generateDynamicPathFollow(swerveSubsystem, SwervePathFollow.FieldLocations.coralStation1));
+
+        // Controls.Drive.testFollowPose.whileTrue(pathFollow
+        //         .generateDynamicPathFollow(swerveSubsystem, SwervePathFollow.FieldLocations.coralStation1)
+        //         .andThen(Commands.waitSeconds(2.0))
+        //         .andThen(pathFollow.generateDynamicPathFollow(swerveSubsystem,
+        // SwervePathFollow.FieldLocations.reef1))
+        //         .andThen(Commands.waitSeconds(2.0)));
+
+        // Controls.Drive.testFollowPose.whileTrue(
+        //         pathFollow.generateDynamicCommands((BooleanSupplier shouldBeRunning) -> pathFollow
+        //                 .generateGoToPoseCommand(SwervePathFollow.FieldLocations.coralStation1)
+        //                 .andThen(pathFollow.generateGoToPoseCommand(SwervePathFollow.FieldLocations.reef1))
+        //                 .onlyWhile(shouldBeRunning)));
+
+        // Controls.Drive.testFollowPose.whileTrue(pathFollow
+        //         .generateGoToPoseCommand(SwervePathFollow.FieldLocations.coralStation1)
+        //         .andThen(pathFollow.generateGoToPoseCommand(SwervePathFollow.FieldLocations.reef1)));
+
+        AutoRoutines autoRoutines = new AutoRoutines(swerveSubsystem);
+
+        Controls.Drive.testFollowPose.whileTrue(autoRoutines.getCoralFromStation1());
+
+        // swerveSubsystem.registerRoutineWhileCondition(
+        //         new SwerveDrive.RoutineWithCondition(() -> Controls.Drive.testFollowPose.getAsBoolean(), () -> {
+        //             return autoRoutines.getCoralFromStation1();
+        //         }));
     }
 
     /**

@@ -1,10 +1,5 @@
 package frc.robot.subsystems.swerve;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.GoalEndState;
-import com.pathplanner.lib.path.IdealStartingState;
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.path.Waypoint;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -18,13 +13,9 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.math.GeometryUtils;
 import frc.robot.Constants;
@@ -32,7 +23,8 @@ import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
 import frc.robot.subsystems.swerve.module.Module;
 import frc.robot.subsystems.swerve.module.ModuleIO;
-import java.util.List;
+import frc.robot.subsystems.swerve.path.SwervePathFollow;
+import java.util.ArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -70,6 +62,12 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
     /** A 2d representation of the field */
     protected Field2d field = new Field2d();
+
+    /** The pathfinding */
+    public final SwervePathFollow pathfinding = new SwervePathFollow(this);
+
+    /** The routines to run */
+    private ArrayList<RoutineWithCondition> routines = new ArrayList<>();
 
     /** The callback to reset the simulation pose */
     // private final Consumer<Pose2d> resetSimulationPoseCallBack;
@@ -122,6 +120,11 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
                 (poses) -> field.getObject("path").setPoses(poses));
 
         SmartDashboard.putData("Field", field);
+    }
+
+    @Override
+    public SwervePathFollow getPathfindingInstance() {
+        return pathfinding;
     }
 
     /**
@@ -269,46 +272,9 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         return gyroIO.getGyroHeading();
     }
 
-    // TODO: Test this
     @Override
-    public Command goToPoseCommand(Pose2d poseToGoTo) {
-        Pose2d currentPose = getPose();
-
-        // Create a path to the target pose
-        List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(currentPose, poseToGoTo);
-
-        ChassisSpeeds speeds = getChassisSpeeds();
-
-        PathPlannerPath path = new PathPlannerPath(
-                waypoints,
-                SwerveConfig.pathConstraints,
-                new IdealStartingState(
-                        LinearVelocity.ofBaseUnits(
-                                Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond), Units.MetersPerSecond),
-                        rawGyroRotation),
-                new GoalEndState(0, poseToGoTo.getRotation()));
-
-        // Prevent the path from being flipped if the coordinates are already correct
-        path.preventFlipping = true;
-
-        // Create a command to follow the path
-        // return AutoBuilder.followPath(path)
-        Command followPathCommand;
-        try {
-            // This sometimes errors if the robot is at the same position as the target pose and is rotated
-            followPathCommand = AutoBuilder.followPath(path);
-        } catch (Exception e) {
-            // Return an empty command if the path is invalid
-            return Commands.runOnce(() -> {}, this);
-        }
-
-        followPathCommand.addRequirements(this);
-
-        // Debug
-        Logger.recordOutput("Test/Current", currentPose);
-        Logger.recordOutput("Test/Path", poseToGoTo);
-
-        return followPathCommand;
+    public void registerRoutineWhileCondition(RoutineWithCondition routine) {
+        routines.add(routine);
     }
 
     /** Periodically updates the SmartDashboard with information about the swerve modules. */
@@ -361,6 +327,13 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
             // Apply update
             poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+
+            // Check for routines
+            // for (RoutineWithCondition routine : routines) {
+            //     if (routine.condition.getAsBoolean()) {
+            //         routine.routine.get().schedule();
+            //     }
+            // }
         }
     }
 }
