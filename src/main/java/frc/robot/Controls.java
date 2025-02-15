@@ -34,60 +34,60 @@ public class Controls {
         }
 
         /** Whether to invert the drive controls. Default is `true`. */
-        public final boolean invertDriveControls = true;
+        public boolean invertDriveControls = true;
 
         // Driver Controls
         // By default, the left stick controls robot movement (translation - y, strafe - x)
         // and the right stick controls the rotation (x)
-        private final int translationAxis = XboxController.Axis.kLeftY.value;
-        private final int strafeAxis = XboxController.Axis.kLeftX.value;
-        private final int rotationAxis = XboxController.Axis.kRightX.value;
+        public int translationAxis = XboxController.Axis.kLeftY.value;
+        public int strafeAxis = XboxController.Axis.kLeftX.value;
+        public int rotationAxis = XboxController.Axis.kRightX.value;
 
         // Driver Buttons
         /**
          * When pressed, zeroes the gyro. Default is {@link XboxController.Button#kY} (top button).
          * Press when robot is facing towards the drive station to align the robot's forward direction with the field.
          */
-        // public final JoystickButton zeroGyro =
+        // public JoystickButton zeroGyro =
         //         new JoystickButton(driverController, XboxController.Button.kY.value);
-        public final int zeroGyroButton = XboxController.Button.kY.value;
+        public int zeroGyroButton = XboxController.Button.kY.value;
 
         /**
          * When held, dampens the robot movement. This will decrease the robot's speed a lot.
          */
-        // public final JoystickButton dampen =
+        // public JoystickButton dampen =
         //         new JoystickButton(driverController, XboxController.Button.kRightBumper.value);
-        public final int dampenButton = XboxController.Button.kRightBumper.value;
+        public int dampenButton = XboxController.Button.kRightBumper.value;
         /**
          * When held, slows the robot down to {@link #slowMultiplier}
          */
-        // public final JoystickButton slowButton =
+        // public JoystickButton slowButton =
         //         new JoystickButton(driverController, XboxController.Button.kLeftBumper.value);
-        public final int slowButton = XboxController.Button.kLeftBumper.value;
+        public int slowButton = XboxController.Button.kLeftBumper.value;
 
-        public final double slowMultiplier = 0.5;
+        public double slowMultiplier = 0.5;
 
         /**
          * When held, makes the robot move robot centric.
          */
-        // public final JoystickButton robotCentric =
+        // public JoystickButton robotCentric =
         //         new JoystickButton(driverController, XboxController.Button.kB.value);
-        // public final int robotCentricButton = XboxController.Button.kB.value;
+        public int robotCentricButton = XboxController.Button.kX.value;
 
         // Direction buttons
-        // public final POVButton up = new POVButton(driverController, 90);
-        // public final POVButton down = new POVButton(driverController, 270);
-        // public final POVButton right = new POVButton(driverController, 180);
-        // public final POVButton left = new POVButton(driverController, 0);
+        // public POVButton up = new POVButton(driverController, 90);
+        // public POVButton down = new POVButton(driverController, 270);
+        // public POVButton right = new POVButton(driverController, 180);
+        // public POVButton left = new POVButton(driverController, 0);
 
         // ! Test
-        // public final JoystickButton goToCoralStation1 =
+        // public JoystickButton goToCoralStation1 =
         //         new JoystickButton(driverController, XboxController.Button.kA.value);
-        public final int goToCoralStation1Button = XboxController.Button.kA.value;
+        public int goToCoralStation1Button = XboxController.Button.kA.value;
 
-        // public final JoystickButton goToReef1 =
+        // public JoystickButton goToReef1 =
         //         new JoystickButton(driverController, XboxController.Button.kB.value);
-        public final int goToReef1Button = XboxController.Button.kB.value;
+        public int goToReef1Button = XboxController.Button.kB.value;
 
         /**
          * @return The translation (x)
@@ -120,9 +120,9 @@ public class Controls {
          * @return Whether the controls are robot centric. Default is `false`.
          */
         public boolean isRobotCentric() {
-            return false;
+            // return false;
             // return robotCentric.getAsBoolean();
-            // return driverController.getRawButton(robotCentricButton);
+            return driverController.getRawButton(robotCentricButton);
         }
 
         /**
@@ -139,6 +139,20 @@ public class Controls {
         public double getSpeedMultiplier() {
             // return slowButton.getAsBoolean() ? slowMultiplier : 1;
             return driverController.getRawButton(slowButton) ? slowMultiplier : 1;
+        }
+    }
+
+    /**
+     * Drive controls using a joystick
+     */
+    public static class JoystickDrive extends Drive {
+        public JoystickDrive(Joystick driverController) {
+            super(driverController);
+
+            // Override axis values
+            translationAxis = Joystick.AxisType.kY.value;
+            strafeAxis = Joystick.AxisType.kX.value;
+            rotationAxis = Joystick.AxisType.kZ.value;
         }
     }
 

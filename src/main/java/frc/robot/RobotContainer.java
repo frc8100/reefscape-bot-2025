@@ -18,6 +18,7 @@ import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveConstants;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import frc.robot.subsystems.swerve.SwerveSim;
+import frc.robot.subsystems.swerve.OpponentRobotSim.OpponentRobotBehavior;
 import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2;
 import frc.robot.subsystems.swerve.gyro.GyroIOSim;
 import frc.robot.subsystems.swerve.module.ModuleIO;
@@ -105,17 +106,22 @@ public class RobotContainer {
                                 swerveSubsystem::getActualPose));
 
                 // Create an opponent robot simulation
-                OpponentRobotSim opponentRobotSim1 = new OpponentRobotSim(new Pose2d(10, 2, new Rotation2d()));
+                OpponentRobotSim opponentRobotSim1 = new OpponentRobotSim(new Pose2d(10, 2, new Rotation2d()), OpponentRobotBehavior.TeleopSwerve);
 
                 // Create another joystick drive for the opponent robot
-                Controls.Drive opponentRobotDriveControls = new Controls.Drive(new Joystick(1));
+                Controls.Drive opponentRobotDriveControls = new Controls.JoystickDrive(new Joystick(1));
 
                 // Set the default command for the opponent robot
-                opponentRobotSim1.setDefaultCommand(new TeleopSwerve(opponentRobotSim1, opponentRobotDriveControls));
+                opponentRobotSim1.setDefaultCommand(new TeleopSwerve(opponentRobotSim1, opponentRobotDriveControls, false));
                 // opponentRobotSim1.setDefaultCommand(opponentRobotSim1.opponentRobotPathfindToPoseSupplier(swerveSubsystem::getActualPose));
 
                 // OpponentRobotSim opponentRobotSim2 = new OpponentRobotSim(new Pose2d(13, 6, new Rotation2d()));
                 // opponentRobotSim2.setDefaultCommand(opponentRobotSim2.opponentRobotPathfindToPoseSupplier(swerveSubsystem::getActualPose));
+
+                // TODO: refactor
+                opponentRobotDriveControls
+                    .getJoystickButtonOf(opponentRobotDriveControls.zeroGyroButton)
+                    .onTrue(new InstantCommand(() -> opponentRobotSim1.zeroGyro()));
                 break;
 
                 // default:
@@ -129,7 +135,9 @@ public class RobotContainer {
                 //     break;
         }
 
-        swerveSubsystem.setDefaultCommand(new TeleopSwerve(swerveSubsystem, Controls.mainDriveControls));
+        // TODO: add switch for controller and joystick
+        swerveSubsystem.setDefaultCommand(new TeleopSwerve(swerveSubsystem, Controls.mainDriveControls, true));
+        // swerveSubsystem.setDefaultCommand(new TeleopSwerve(swerveSubsystem, new Controls.JoystickDrive(Controls.mainDriverController)));
 
         // Set up auto routines
         autoRoutines = new AutoRoutines(swerveSubsystem);

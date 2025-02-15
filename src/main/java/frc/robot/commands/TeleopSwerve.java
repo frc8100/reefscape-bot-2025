@@ -43,7 +43,7 @@ public class TeleopSwerve extends Command {
     private DoubleSupplier rotationSupplier;
 
     /**
-     * Whether the swervce is robot centric.
+     * Whether the swerve is robot centric.
      * Default is always `false`.
      */
     private BooleanSupplier robotCentricSup;
@@ -65,6 +65,11 @@ public class TeleopSwerve extends Command {
     private PIDController rotationController;
 
     /**
+     * Whether to log values of the drive. Default is `true`
+     */
+    private boolean logValues;
+
+    /**
      * Creates the TeleopSwerve command.
      * The parameters are members of this class.
      */
@@ -75,7 +80,8 @@ public class TeleopSwerve extends Command {
             DoubleSupplier rotationSupplier,
             BooleanSupplier robotCentricSup,
             BooleanSupplier dampen,
-            DoubleSupplier speedDial) {
+            DoubleSupplier speedDial,
+            boolean logValues) {
         this.swerveSubsystem = swerveSubsystem;
         addRequirements(swerveSubsystem);
 
@@ -91,12 +97,13 @@ public class TeleopSwerve extends Command {
         this.robotCentricSup = robotCentricSup;
         this.dampen = dampen;
         this.speedDial = speedDial;
+        this.logValues = logValues;
     }
 
     /**
      * Creates the TeleopSwerve command given a {@link Controls.Drive} object.
      */
-    public TeleopSwerve(SwerveDrive swerveSubsystem, Controls.Drive driveControls) {
+    public TeleopSwerve(SwerveDrive swerveSubsystem, Controls.Drive driveControls, boolean logValues) {
         this(
                 swerveSubsystem,
                 driveControls::getTranslationAxis,
@@ -104,7 +111,8 @@ public class TeleopSwerve extends Command {
                 driveControls::getRotationAxis,
                 driveControls::isRobotCentric,
                 driveControls::isDampen,
-                driveControls::getSpeedMultiplier);
+                driveControls::getSpeedMultiplier,
+                logValues);
     }
 
     /**
@@ -120,7 +128,7 @@ public class TeleopSwerve extends Command {
         /**
          * The constant to muliply each value by
          */
-        double dampenAndSpeedConstant = (dampen.getAsBoolean() ? 0.2 : 1) * ((speedDial.getAsDouble() + 1) / 2);
+        double dampenAndSpeedConstant = (dampen.getAsBoolean() ? 0.2 : 1) * (speedDial.getAsDouble());
 
         double translationValue =
                 MathUtil.applyDeadband(translationInput, Constants.stickDeadband) * dampenAndSpeedConstant;
@@ -154,18 +162,21 @@ public class TeleopSwerve extends Command {
         }
 
         // Log the values
-        Logger.recordOutput("Swerve/TranslationInput", translationInput);
-        Logger.recordOutput("Swerve/StrafeInput", strafeInput);
-        Logger.recordOutput("Swerve/RotationInput", rotationInput);
+        if (logValues) {
+            Logger.recordOutput("Swerve/TranslationInput", translationInput);
+            Logger.recordOutput("Swerve/StrafeInput", strafeInput);
+            Logger.recordOutput("Swerve/RotationInput", rotationInput);
 
-        Logger.recordOutput("Swerve/TranslationValue", translationValue);
-        Logger.recordOutput("Swerve/StrafeValue", strafeValue);
-        Logger.recordOutput("Swerve/RotationValue", rotationValue);
+            Logger.recordOutput("Swerve/TranslationValue", translationValue);
+            Logger.recordOutput("Swerve/StrafeValue", strafeValue);
+            Logger.recordOutput("Swerve/RotationValue", rotationValue);
+        }
 
         // Drive
         swerveSubsystem.drive(
                 new Translation2d(translationValue, strafeValue).times(SwerveConfig.maxSpeed),
                 rotationValue,
-                !robotCentricSup.getAsBoolean());
+                !robotCentricSup.getAsBoolean()
+            );
     }
 }

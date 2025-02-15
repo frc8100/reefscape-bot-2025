@@ -30,6 +30,24 @@ import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
  * This simulation is not as detailed/complex as the main robot simulation.
  */
 public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
+    /**
+     * Determines the behavior of opponent robots.
+     * ! Note: this does not automatically set any commands. 
+     */
+    public static enum OpponentRobotBehavior {
+        /**
+         * Follows a path.
+         * The default behavior.
+         */
+        FollowPath,
+
+        /**
+         * Use teleop swerve.
+         * Enables more resource-intensive
+         */
+        TeleopSwerve,
+    }
+
     /** List of opponent robot poses */
     private static ArrayList<Supplier<Pose2d>> opponentRobotPoses = new ArrayList<>();
 
@@ -47,6 +65,8 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
         new Pose2d(-3, 0, new Rotation2d()),
         new Pose2d(-2, 0, new Rotation2d())
     };
+
+    public OpponentRobotBehavior behavior = OpponentRobotBehavior.FollowPath;
 
     /** PathPlanner configuration */
     // private static final RobotConfig PP_CONFIG = new RobotConfig(
@@ -69,7 +89,9 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
     // private Pose2d queeningPose;
     // private int id;
 
-    public OpponentRobotSim(Pose2d startingPose) {
+    public OpponentRobotSim(Pose2d startingPose, OpponentRobotBehavior behavior) {
+        this.behavior = behavior;
+
         // Set the queening pose based on the ID
         // try {
         //     this.id = id;
@@ -154,7 +176,7 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
     @Override
     public void drive(Translation2d translation, double rotation, boolean fieldRelative) {
         ChassisSpeeds speeds = new ChassisSpeeds(translation.getX(), translation.getY(), rotation);
-        this.simulatedDrive.runChassisSpeeds(speeds, new Translation2d(), fieldRelative, true);
+        this.simulatedDrive.runChassisSpeeds(speeds, new Translation2d(), true, true);
     }
 
     @Override
@@ -179,9 +201,16 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
 
     @Override
     public ChassisSpeeds getChassisSpeeds() {
-        // return simulatedDrive.getMeasuredSpeedsFieldRelative(true);
-        // Returns the speeds in the simulation world to save resources
-        return simulatedDrive.getActualSpeedsFieldRelative();
+        switch (behavior) {
+            default:
+            case FollowPath:
+                // Return actual pose to save resources
+                return simulatedDrive.getActualSpeedsFieldRelative();
+        
+            case TeleopSwerve:
+                // Return accurate odometry pose
+                return simulatedDrive.getMeasuredSpeedsFieldRelative(true);
+        }
     }
 
     @Override
@@ -193,37 +222,47 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
 
     @Override
     public Pose2d getPose() {
-        // return simulatedDrive.getOdometryEstimatedPose();
-        // Returns the pose in the simulation world to save resources
-        return simulatedDrive.getActualPoseInSimulationWorld();
+        switch (behavior) {
+            default:
+            case FollowPath:
+                // Return actual pose to save resources
+                return simulatedDrive.getActualPoseInSimulationWorld();
+        
+            case TeleopSwerve:
+                // Return accurate odometry pose
+                return simulatedDrive.getOdometryEstimatedPose();
+        }
     }
 
-    // @Override
-    // public Pose2d getActualPose() {
-    //     return simulatedDrive.getActualPoseInSimulationWorld();
-    // }
+    @Override
+    public Pose2d getActualPose() {
+        return simulatedDrive.getActualPoseInSimulationWorld();
+    }
 
     @Override
     public void setPose(Pose2d pose) {
         simulatedDrive.setSimulationWorldPose(pose);
-        // simulatedDrive.resetOdometry(pose);
+        simulatedDrive.resetOdometry(pose);
     }
 
     @Override
-    public void zeroGyro(double deg) {
-        // Unimplemented
+    public void zeroGyro(double deg) {  
+        // Set the pose but with a new rotation value
+        setPose(new Pose2d(getPose().getTranslation(), Rotation2d.fromDegrees(deg)));
     }
 
     @Override
     public void addVisionMeasurement(
             Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
         // Unimplemented
-        // simulatedDrive.addVisionEstimation(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+        simulatedDrive.addVisionEstimation(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
     }
 
-    // @Override
-    // public void periodic() {
-    //     // ! No need to run to save resources
-    //     simulatedDrive.periodic();
-    // }
+    @Override
+    public void periodic() {
+        // Only update if teleop swerve is on
+        if (behavior == OpponentRobotBehavior.TeleopSwerve) {
+            simulatedDrive.periodic();
+        }
+    }
 }
