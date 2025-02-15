@@ -32,6 +32,8 @@ import frc.robot.subsystems.vision.VisionIOPhotonSim;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
+import org.ironmaple.simulation.seasonspecific.reefscape2025.Arena2025Reefscape;
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeReefSimulation;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -79,6 +81,13 @@ public class RobotContainer {
                 break;
 
             case SIM:
+                // Create a reefscape arena
+                var arenaSimulation = new Arena2025Reefscape();
+
+                SimulatedArena.overrideInstance(arenaSimulation);
+                SimulatedArena.getInstance().addCustomSimulation(new ReefscapeReefSimulation(arenaSimulation));
+                SimulatedArena.getInstance().placeGamePiecesOnField();
+
                 // Sim robot, instantiate physics sim IO implementations
                 driveSimulation = new SwerveDriveSimulation(SwerveConfig.mapleSimConfig, SwerveConfig.initialPose);
 
@@ -105,6 +114,7 @@ public class RobotContainer {
                                 VisionConstants.robotToCamera0,
                                 swerveSubsystem::getActualPose));
 
+                // TODO: Add behavior chooser
                 // Create an opponent robot simulation
                 OpponentRobotSim opponentRobotSim1 =
                         new OpponentRobotSim(new Pose2d(10, 2, new Rotation2d()), OpponentRobotBehavior.TeleopSwerve);

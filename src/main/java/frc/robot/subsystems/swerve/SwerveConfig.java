@@ -124,7 +124,7 @@ public class SwerveConfig {
 
     /* Swerve Profiling Values */
     /** Meters per Second */
-    public static final double maxSpeed = 4.0;
+    public static final double maxSpeed = 5.0;
     // Meters per Second^2
     public static final double maxAcceleration = 2.0;
     /** Radians per Second */

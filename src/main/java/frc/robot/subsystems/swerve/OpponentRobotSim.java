@@ -110,7 +110,7 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
         SimulatedArena.getInstance().addDriveTrainSimulation(simulatedDrive.getDriveTrainSimulation());
 
         // Add the pose supplier to the list
-        opponentRobotPoses.add(this::getPose);
+        opponentRobotPoses.add(this::getActualPose);
     }
 
     /**

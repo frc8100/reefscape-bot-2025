@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
 /** Declares control key bindings */
@@ -24,7 +25,14 @@ public class Controls {
          */
         public Drive(Joystick driverController) {
             this.driverController = driverController;
+
+            // Register toggle modes
+            getJoystickButtonOf(robotCentricButton)
+                    .onTrue(Commands.runOnce(() -> isCurrentlyRobotCentric = !isCurrentlyRobotCentric));
         }
+
+        // Toggle modes
+        public boolean isCurrentlyRobotCentric = false;
 
         /**
          * @return A new {@link JoystickButton} for the given button number
@@ -122,7 +130,8 @@ public class Controls {
         public boolean isRobotCentric() {
             // return false;
             // return robotCentric.getAsBoolean();
-            return driverController.getRawButton(robotCentricButton);
+            // return driverController.getRawButton(robotCentricButton);
+            return isCurrentlyRobotCentric;
         }
 
         /**
