@@ -32,7 +32,7 @@ import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
     /**
      * Determines the behavior of opponent robots.
-     * ! Note: this does not automatically set any commands. 
+     * ! Note: this does not automatically set any commands.
      */
     public static enum OpponentRobotBehavior {
         /**
@@ -206,7 +206,7 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
             case FollowPath:
                 // Return actual pose to save resources
                 return simulatedDrive.getActualSpeedsFieldRelative();
-        
+
             case TeleopSwerve:
                 // Return accurate odometry pose
                 return simulatedDrive.getMeasuredSpeedsFieldRelative(true);
@@ -227,7 +227,7 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
             case FollowPath:
                 // Return actual pose to save resources
                 return simulatedDrive.getActualPoseInSimulationWorld();
-        
+
             case TeleopSwerve:
                 // Return accurate odometry pose
                 return simulatedDrive.getOdometryEstimatedPose();
@@ -246,7 +246,7 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
     }
 
     @Override
-    public void zeroGyro(double deg) {  
+    public void zeroGyro(double deg) {
         // Set the pose but with a new rotation value
         setPose(new Pose2d(getPose().getTranslation(), Rotation2d.fromDegrees(deg)));
     }

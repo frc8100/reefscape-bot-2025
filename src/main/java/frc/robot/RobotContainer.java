@@ -7,18 +7,18 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 // import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.TeleopSwerve;
-import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.subsystems.superstructure.claw.Claw;
+import frc.robot.subsystems.superstructure.claw.ClawIOSpark;
 import frc.robot.subsystems.swerve.OpponentRobotSim;
+import frc.robot.subsystems.swerve.OpponentRobotSim.OpponentRobotBehavior;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveConstants;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import frc.robot.subsystems.swerve.SwerveSim;
-import frc.robot.subsystems.swerve.OpponentRobotSim.OpponentRobotBehavior;
 import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2;
 import frc.robot.subsystems.swerve.gyro.GyroIOSim;
 import frc.robot.subsystems.swerve.module.ModuleIO;
@@ -45,7 +45,7 @@ public class RobotContainer {
     // Subsystems
     private final Vision visionSubsystem;
     private final SwerveDrive swerveSubsystem;
-    private final ArmSubsystem armSubsystem = new ArmSubsystem();
+    private final Claw clawSubsystem;
 
     private AutoRoutines autoRoutines;
 
@@ -106,13 +106,15 @@ public class RobotContainer {
                                 swerveSubsystem::getActualPose));
 
                 // Create an opponent robot simulation
-                OpponentRobotSim opponentRobotSim1 = new OpponentRobotSim(new Pose2d(10, 2, new Rotation2d()), OpponentRobotBehavior.TeleopSwerve);
+                OpponentRobotSim opponentRobotSim1 =
+                        new OpponentRobotSim(new Pose2d(10, 2, new Rotation2d()), OpponentRobotBehavior.TeleopSwerve);
 
                 // Create another joystick drive for the opponent robot
                 Controls.Drive opponentRobotDriveControls = new Controls.JoystickDrive(new Joystick(1));
 
                 // Set the default command for the opponent robot
-                opponentRobotSim1.setDefaultCommand(new TeleopSwerve(opponentRobotSim1, opponentRobotDriveControls, false));
+                opponentRobotSim1.setDefaultCommand(
+                        new TeleopSwerve(opponentRobotSim1, opponentRobotDriveControls, false));
                 // opponentRobotSim1.setDefaultCommand(opponentRobotSim1.opponentRobotPathfindToPoseSupplier(swerveSubsystem::getActualPose));
 
                 // OpponentRobotSim opponentRobotSim2 = new OpponentRobotSim(new Pose2d(13, 6, new Rotation2d()));
@@ -120,8 +122,8 @@ public class RobotContainer {
 
                 // TODO: refactor
                 opponentRobotDriveControls
-                    .getJoystickButtonOf(opponentRobotDriveControls.zeroGyroButton)
-                    .onTrue(new InstantCommand(() -> opponentRobotSim1.zeroGyro()));
+                        .getJoystickButtonOf(opponentRobotDriveControls.zeroGyroButton)
+                        .onTrue(new InstantCommand(() -> opponentRobotSim1.zeroGyro()));
                 break;
 
                 // default:
@@ -135,9 +137,13 @@ public class RobotContainer {
                 //     break;
         }
 
+        // TODO: sim implementation
+        clawSubsystem = new Claw(new ClawIOSpark());
+
         // TODO: add switch for controller and joystick
         swerveSubsystem.setDefaultCommand(new TeleopSwerve(swerveSubsystem, Controls.mainDriveControls, true));
-        // swerveSubsystem.setDefaultCommand(new TeleopSwerve(swerveSubsystem, new Controls.JoystickDrive(Controls.mainDriverController)));
+        // swerveSubsystem.setDefaultCommand(new TeleopSwerve(swerveSubsystem, new
+        // Controls.JoystickDrive(Controls.mainDriverController)));
 
         // Set up auto routines
         autoRoutines = new AutoRoutines(swerveSubsystem);
@@ -196,9 +202,10 @@ public class RobotContainer {
         //         .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d270))
         //         .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
 
-        // Arm
-        armSubsystem.setDefaultCommand(
-                Commands.run(() -> armSubsystem.runClaw(Controls.Arm.getIntakeOrOuttake()), armSubsystem));
+        // Claw
+        // clawSubsystem.setDefaultCommand(
+        //         Commands.run(() -> clawSubsystem.runClaw(Controls.Arm.getIntakeOrOuttake()), clawSubsystem));
+        clawSubsystem.setDefaultCommand(clawSubsystem.getRunCommand(Controls.Arm::getIntakeOrOuttake));
 
         // Test
 
