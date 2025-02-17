@@ -1,19 +1,16 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.SwerveSysidRoutines;
 // import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.superstructure.claw.Claw;
 import frc.robot.subsystems.superstructure.claw.ClawIOSpark;
-import frc.robot.subsystems.swerve.OpponentRobotSim;
-import frc.robot.subsystems.swerve.OpponentRobotSim.OpponentRobotBehavior;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveConstants;
@@ -116,24 +113,25 @@ public class RobotContainer {
 
                 // TODO: Add behavior chooser
                 // Create an opponent robot simulation
-                OpponentRobotSim opponentRobotSim1 =
-                        new OpponentRobotSim(new Pose2d(10, 2, new Rotation2d()), OpponentRobotBehavior.TeleopSwerve);
+                // OpponentRobotSim opponentRobotSim1 =
+                //         new OpponentRobotSim(new Pose2d(10, 2, new Rotation2d()),
+                // OpponentRobotBehavior.TeleopSwerve);
 
                 // Create another joystick drive for the opponent robot
-                Controls.Drive opponentRobotDriveControls = new Controls.JoystickDrive(new Joystick(1));
+                // Controls.Drive opponentRobotDriveControls = new Controls.JoystickDrive(new Joystick(1));
 
                 // Set the default command for the opponent robot
-                opponentRobotSim1.setDefaultCommand(
-                        new TeleopSwerve(opponentRobotSim1, opponentRobotDriveControls, false));
+                // opponentRobotSim1.setDefaultCommand(
+                //         new TeleopSwerve(opponentRobotSim1, opponentRobotDriveControls, false));
                 // opponentRobotSim1.setDefaultCommand(opponentRobotSim1.opponentRobotPathfindToPoseSupplier(swerveSubsystem::getActualPose));
 
                 // OpponentRobotSim opponentRobotSim2 = new OpponentRobotSim(new Pose2d(13, 6, new Rotation2d()));
                 // opponentRobotSim2.setDefaultCommand(opponentRobotSim2.opponentRobotPathfindToPoseSupplier(swerveSubsystem::getActualPose));
 
                 // TODO: refactor
-                opponentRobotDriveControls
-                        .getJoystickButtonOf(opponentRobotDriveControls.zeroGyroButton)
-                        .onTrue(new InstantCommand(() -> opponentRobotSim1.zeroGyro()));
+                // opponentRobotDriveControls
+                //         .getJoystickButtonOf(opponentRobotDriveControls.zeroGyroButton)
+                //         .onTrue(new InstantCommand(() -> opponentRobotSim1.zeroGyro()));
                 break;
 
                 // default:
@@ -161,24 +159,22 @@ public class RobotContainer {
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
         // Set up SysId routines
-        // autoChooser.addOption(
-        //         "Drive Wheel Radius Characterization",
-        // DriveCommands.wheelRadiusCharacterization(drive));
-        // autoChooser.addOption(
-        //         "Drive Simple FF Characterization",
-        // DriveCommands.feedforwardCharacterization(drive));
-        // autoChooser.addOption(
-        //         "Drive SysId (Quasistatic Forward)",
-        //         drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-        // autoChooser.addOption(
-        //         "Drive SysId (Quasistatic Reverse)",
-        //         drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-        // autoChooser.addOption(
-        //         "Drive SysId (Dynamic Forward)",
-        // drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        // autoChooser.addOption(
-        //         "Drive SysId (Dynamic Reverse)",
-        // drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+        autoChooser.addOption(
+                "Drive Wheel Radius Characterization",
+                SwerveSysidRoutines.wheelRadiusCharacterization(swerveSubsystem));
+        autoChooser.addOption(
+                "Drive Simple FF Characterization", SwerveSysidRoutines.feedforwardCharacterization(swerveSubsystem));
+        autoChooser.addOption(
+                "Drive SysId (Quasistatic Forward)", swerveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        autoChooser.addOption(
+                "Drive SysId (Quasistatic Reverse)", swerveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        autoChooser.addOption(
+                "Drive SysId (Dynamic Forward)", swerveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        autoChooser.addOption(
+                "Drive SysId (Dynamic Reverse)", swerveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
+        // TODO: Temporary
+        autoChooser.addOption("Coral and Go To All Reefs Test", autoRoutines.getCoralAndGoToAllReefsTest());
 
         // Configure the button bindings
         configureButtonBindings();
@@ -235,8 +231,6 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        // return autoChooser.get();
-        // TODO: Temporary
-        return autoRoutines.getCoralAndGoToAllReefsTest();
+        return autoChooser.get();
     }
 }

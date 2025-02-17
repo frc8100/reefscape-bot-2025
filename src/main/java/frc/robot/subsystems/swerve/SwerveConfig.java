@@ -50,6 +50,7 @@ public class SwerveConfig {
     /* Drivetrain Constants */
     public static final double trackWidth = Units.inchesToMeters(25.75);
     public static final double wheelBase = Units.inchesToMeters(21.50);
+    public static final double driveBaseRadius = Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
     public static final double wheelRadius = Units.inchesToMeters(2.0);
     public static final double wheelCircumference = wheelRadius * 2 * Math.PI;
 

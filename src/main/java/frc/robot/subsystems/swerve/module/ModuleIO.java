@@ -45,10 +45,10 @@ public interface ModuleIO {
      */
     public SwerveModuleState getState();
 
-    /** Run the drive motor at the specified open loop value. */
+    /** Run the drive motor at the specified open loop value (in volts). */
     public default void setDriveOpenLoop(double output) {}
 
-    /** Run the turn motor at the specified open loop value. */
+    /** Run the turn motor at the specified open loop value (in volts). */
     public default void setTurnOpenLoop(double output) {}
 
     /** Run the drive motor at the specified velocity. Used internally. */

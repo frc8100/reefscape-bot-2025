@@ -1,5 +1,7 @@
 package frc.robot.subsystems.swerve;
 
+import static edu.wpi.first.units.Units.Volt;
+
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -16,7 +18,9 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.math.GeometryUtils;
 import frc.robot.Constants;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
@@ -67,6 +71,8 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
      */
     private SwerveDrivePoseEstimator poseEstimator;
 
+    private final SysIdRoutine sysId;
+
     /** Creates a new Swerve subsystem. */
     public Swerve(GyroIO gyroIO, ModuleIO[] moduleIOs) {
         // Create the swerve modules
@@ -92,17 +98,10 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         configurePathPlannerAutoBuilder();
 
         // TODO: Configure SysId
-        // sysId =
-        //         new SysIdRoutine(
-        //                 new SysIdRoutine.Config(
-        //                         null,
-        //                         null,
-        //                         null,
-        //                         (state) -> Logger.recordOutput("Drive/SysIdState",
-        // state.toString())),
-        //                 new SysIdRoutine.Mechanism(
-        //                         (voltage) -> runCharacterization(voltage.in(Volts)), null,
-        // this));
+        sysId = new SysIdRoutine(
+                new SysIdRoutine.Config(
+                        null, null, null, (state) -> Logger.recordOutput("Swerve/SysIdState", state.toString())),
+                new SysIdRoutine.Mechanism((voltage) -> runCharacterization(voltage.in(Volt)), null, this));
 
         // Set up custom logging to add the current path to a field 2d widget
         PathPlannerLogging.setLogActivePathCallback(
@@ -183,6 +182,41 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
             // mod.setDesiredState(desiredStates[mod.getModuleNumber()], false);
             mod.runSetpoint(desiredStates[mod.index]);
         }
+    }
+
+    @Override
+    public void runCharacterization(double output) {
+        for (int i = 0; i < 4; i++) {
+            swerveModules[i].runCharacterization(output);
+        }
+    }
+
+    @Override
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return run(() -> runCharacterization(0.0)).withTimeout(1.0).andThen(sysId.quasistatic(direction));
+    }
+
+    @Override
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return run(() -> runCharacterization(0.0)).withTimeout(1.0).andThen(sysId.dynamic(direction));
+    }
+
+    @Override
+    public double[] getWheelRadiusCharacterizationPositions() {
+        double[] values = new double[4];
+        for (int i = 0; i < 4; i++) {
+            values[i] = swerveModules[i].getWheelRadiusCharacterizationPosition();
+        }
+        return values;
+    }
+
+    @Override
+    public double getFFCharacterizationVelocity() {
+        double output = 0.0;
+        for (int i = 0; i < 4; i++) {
+            output += swerveModules[i].getFFCharacterizationVelocity() / 4.0;
+        }
+        return output;
     }
 
     @Override

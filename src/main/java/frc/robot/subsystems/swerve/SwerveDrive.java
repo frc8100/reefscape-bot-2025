@@ -17,7 +17,10 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -59,6 +62,30 @@ public interface SwerveDrive extends Subsystem {
      */
     // TODO: Add isOpenLoop parameter
     public void drive(Translation2d translation, double rotation, boolean fieldRelative);
+
+    /** Runs the drive in a straight line with the specified drive output. By default, this does nothing. */
+    public default void runCharacterization(double output) {}
+    ;
+
+    /** Returns a command to run a quasistatic test in the specified direction. By default, this does nothing. */
+    public default Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return Commands.none();
+    }
+
+    /** Returns a command to run a dynamic test in the specified direction. By default, this does nothing. */
+    public default Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return Commands.none();
+    }
+
+    /** Returns the position of each module in radians. By default, this returns an empty array. */
+    public default double[] getWheelRadiusCharacterizationPositions() {
+        return new double[] {};
+    }
+
+    /** Returns the average velocity of the modules in rad/sec. By default, this returns 0. */
+    public default double getFFCharacterizationVelocity() {
+        return 0.0;
+    }
 
     /**
      * Drives the swerve modules given a provided chassis speeds.
