@@ -86,14 +86,23 @@ public interface GenericSparkIO<TInputs> {
          * Should be overridden by the user.
          */
         public GenericSparkIOConfig() {}
+
+        /**
+         * Gets the configuration for the Spark max motor.
+         */
+        public SparkMaxConfig getConfig() {
+            return getDefaultConfig(this);
+        }
     }
 
     /**
+     * Note: use {@link GenericSparkIOConfig#getConfig()} instead.
      * Gets the default configuration for the Spark max motor.
      * @param config - The configuration to use. See {@link GenericSparkIOConfig}.
      * @return The default configuration for the Spark max motor.
      */
-    public static SparkMaxConfig getDefaultConfig(GenericSparkIOConfig config) {
+    @Deprecated
+    private static SparkMaxConfig getDefaultConfig(GenericSparkIOConfig config) {
         SparkMaxConfig outputConfig = new SparkMaxConfig();
 
         outputConfig.idleMode(config.idleMode)
@@ -132,10 +141,10 @@ public interface GenericSparkIO<TInputs> {
      * Runs the motor.
      * @param motorInput - Percent input, from [-1, 1] without deadband.
      */
-    public void runMotor(double motorInput);
+    // public void runMotor(double motorInput);
 
     /**
      * Stops the motor.
      */
-    public void stop();
+    // public void stop();
 }

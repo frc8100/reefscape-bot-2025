@@ -208,7 +208,6 @@ public class SwerveConfig {
     public static SparkMaxConfig getAngleMotorConfig() {
         // Assign the relative angle encoder and configure it
         SparkMaxConfig angleConfig = new SparkMaxConfig();
-        ;
 
         angleConfig
                 .smartCurrentLimit(SwerveConfig.angleContinuousCurrentLimit)

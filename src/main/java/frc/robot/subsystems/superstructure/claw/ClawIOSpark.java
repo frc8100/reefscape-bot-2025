@@ -1,82 +1,155 @@
 package frc.robot.subsystems.superstructure.claw;
 
 import static frc.lib.util.SparkUtil.*;
-import frc.lib.util.GenericSparkIO;
+
+import java.util.function.DoubleSupplier;
+
+import org.littletonrobotics.junction.Logger;
 
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.geometry.Rotation2d;
+import frc.lib.util.GenericSparkIO;
 import frc.robot.Constants;
-import java.util.function.DoubleSupplier;
-import org.littletonrobotics.junction.Logger;
 
 /**
  * IO implementation for spark motors
  */
 public class ClawIOSpark implements ClawIO {
+    // Turn motor variables
     /**
-     * The motor for the claw.
+     * The motor for the rotation of the claw.
      */
-    private final SparkMax clawMotor;
+    private final SparkMax angleMotor;
 
     /**
-     * The relative encoder for the claw.
-     * Determines the position and velocity of the claw.
+     * The relative encoder for the rotation motor.
      */
-    private final RelativeEncoder encoder;
-    private final SparkMaxConfig config;
+    private final RelativeEncoder angleEncoder;
+
+    /**
+     * The closed loop controller for the rotation motor.
+     */
+    private final SparkClosedLoopController angleClosedLoopController;
 
     /**
      * A debouncer for the connected state, to prevent flickering.
      */
-    private final Debouncer connectedDebouncer = new Debouncer(0.5);
+    private final Debouncer angleConnectedDebouncer = new Debouncer(0.5);
+
+    // Outtake motor variables
+    /**
+     * The motor for the outtake of the claw.
+     */
+    private final SparkMax outakeMotor;
 
     /**
-     * The default config for the spark motor.
+     * The relative encoder for the outtake motor.
+     */ 
+    private final RelativeEncoder outakeEncoder;
+    /**
+     * The closed loop controller for the outtake motor.
      */
-    private static class DefaultConfig extends GenericSparkIOConfig {
-        public DefaultConfig() {
+    // private final SparkClosedLoopController outakeClosedLoopController;
+    
+    /**
+     * A debouncer for the connected state, to prevent flickering.
+     */
+    private final Debouncer outakeConnectedDebouncer = new Debouncer(0.5);
+
+    /**
+     * The config for the turn motor.
+     */
+    private static class AngleConfig extends GenericSparkIOConfig {
+        public AngleConfig() {
             super();
 
             // Override the default config
             this.idleMode = SparkBaseConfig.IdleMode.kBrake;
-            this.inverted = Constants.Claw.inverted;
-            this.smartCurrentLimit = Constants.Claw.currentLimit;
-            this.gearRatio = Constants.Claw.reduction;
+            this.inverted = Constants.Claw.angleMotorInverted;
+            this.smartCurrentLimit = Constants.Claw.angleMotorCurrentLimit;
+            this.gearRatio = Constants.Claw.angleGearRatio;
         }
     }
 
+    /**
+     * The config for the outtake motor.
+     */
+    private static class OutakeConfig extends GenericSparkIOConfig {
+        public OutakeConfig() {
+            super();
+
+            // Override the default config
+            this.idleMode = SparkBaseConfig.IdleMode.kBrake;
+            this.inverted = Constants.Claw.outakeMotorInverted;
+            this.smartCurrentLimit = Constants.Claw.outakeMotorCurrentLimit;
+            this.gearRatio = Constants.Claw.outakeGearRatio;
+        }
+    }
     public ClawIOSpark() {
         // Create the motor and configure it
-        clawMotor = new SparkMax(Constants.Claw.clawMotorId, MotorType.kBrushless);
-        encoder = clawMotor.getEncoder();
+        angleMotor = new SparkMax(Constants.Claw.angleClawMotorId, MotorType.kBrushless);
+        angleEncoder = angleMotor.getEncoder();
+        angleClosedLoopController = angleMotor.getClosedLoopController();
 
-        config = GenericSparkIO.getDefaultConfig(new DefaultConfig());
+        SparkMaxConfig angleConfig = new AngleConfig().getConfig();
+
+        // Apply PID config for the angle motor
+        angleConfig
+                .closedLoop
+                .pidf(
+                        Constants.Claw.angleKP,
+                        Constants.Claw.angleKI,
+                        Constants.Claw.angleKD,
+                        Constants.Claw.angleKF)
+                .outputRange(-Constants.Claw.anglePower, Constants.Claw.anglePower);
 
         // Apply the config
         tryUntilOk(
-                clawMotor,
+                angleMotor,
                 5,
-                () -> clawMotor.configure(
-                        config, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters));
+                () -> angleMotor.configure(
+                        angleConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters));
 
         // Reset the encoder
-        tryUntilOk(clawMotor, 5, () -> encoder.setPosition(0.0));
+        tryUntilOk(angleMotor, 5, () -> angleEncoder.setPosition(0.0));
+
+        // Create the outake motor and configure it
+        outakeMotor = new SparkMax(Constants.Claw.outakeClawMotorId, MotorType.kBrushless);
+        outakeEncoder = outakeMotor.getEncoder();
+        // outakeClosedLoopController = outakeMotor.getClosedLoopController();
+
+        SparkMaxConfig outakeConfig = new OutakeConfig().getConfig();
+
+        // Apply the config
+        tryUntilOk(
+                outakeMotor,
+                5,
+                () -> outakeMotor.configure(
+                        outakeConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters));
+
+        // Reset the encoder
+        tryUntilOk(outakeMotor, 5, () -> outakeEncoder.setPosition(0.0));
     }
 
     @Override
-    public void runMotor(double motorInput) {
+    public void runOutake(double motorInput) {
         // Apply deadband
         motorInput = MathUtil.applyDeadband(motorInput, Constants.Claw.armDeadband);
 
         // Run the motor
         double percentOutput = Constants.Claw.armPercentOutput * motorInput;
-        clawMotor.set(percentOutput);
+        outakeMotor.set(percentOutput);
 
         // Log
         Logger.recordOutput("Claw/motorInput", motorInput);
@@ -85,7 +158,14 @@ public class ClawIOSpark implements ClawIO {
 
     @Override
     public void stop() {
-        clawMotor.stopMotor();
+        angleMotor.stopMotor();
+        outakeMotor.stopMotor();
+    }
+
+    @Override
+    public void setTurnPosition(Rotation2d rotation) {
+        // Set the position of the turn motor
+        angleClosedLoopController.setReference(rotation.getDegrees(), ControlType.kPosition, ClosedLoopSlot.kSlot0);
     }
 
     @Override
@@ -93,23 +173,43 @@ public class ClawIOSpark implements ClawIO {
         // Reset spark sticky fault
         sparkStickyFault = false;
 
+        // Update inputs for the turn motor
+
         // Set the position and velocity
-        ifOk(clawMotor, encoder::getPosition, position -> inputs.positionRad = position);
-        ifOk(clawMotor, encoder::getVelocity, velocity -> inputs.velocityRadPerSec = velocity);
+        ifOk(angleMotor, angleEncoder::getPosition, position -> inputs.turnPositionRad = position);
+        ifOk(angleMotor, angleEncoder::getVelocity, velocity -> inputs.turnVelocityRadPerSec = velocity);
 
         // Set the supply current based on the bus voltage multiplied by the applied output
         ifOk(
-                clawMotor,
-                new DoubleSupplier[] { clawMotor::getBusVoltage, clawMotor::getAppliedOutput },
-                x -> inputs.appliedVolts = x[0] * x[1]);
+                angleMotor,
+                new DoubleSupplier[] { angleMotor::getBusVoltage, angleMotor::getAppliedOutput },
+                x -> inputs.turnAppliedVolts = x[0] * x[1]);
 
         // Set the torque current
-        ifOk(clawMotor, clawMotor::getOutputCurrent, current -> inputs.torqueCurrentAmps = current);
+        ifOk(angleMotor, angleMotor::getOutputCurrent, current -> inputs.turnTorqueCurrentAmps = current);
 
         // Set the connected state with a debouncer
-        inputs.connected = connectedDebouncer.calculate(!sparkStickyFault);
+        inputs.turnConnected = angleConnectedDebouncer.calculate(!sparkStickyFault);
 
         // Set the temperature
-        ifOk(clawMotor, clawMotor::getMotorTemperature, temp -> inputs.tempCelsius = temp);
+        ifOk(angleMotor, angleMotor::getMotorTemperature, temp -> inputs.turnTempCelsius = temp);
+
+        // Update inputs for the outake motor
+
+        // Set the position and velocity
+        ifOk(outakeMotor, outakeEncoder::getPosition, position -> inputs.outakePositionRad = position);
+        ifOk(outakeMotor, outakeEncoder::getVelocity, velocity -> inputs.outakeVelocityRadPerSec = velocity);
+
+        // Set the supply current based on the bus voltage multiplied by the applied output
+        ifOk(
+                outakeMotor,
+                new DoubleSupplier[] { outakeMotor::getBusVoltage, outakeMotor::getAppliedOutput },
+                x -> inputs.outakeAppliedVolts = x[0] * x[1]);
+
+        // Set the torque current
+        ifOk(outakeMotor, outakeMotor::getOutputCurrent, current -> inputs.outakeTorqueCurrentAmps = current);
+
+        // Set the connected state with a debouncer
+        inputs.outakeConnected = outakeConnectedDebouncer.calculate(!sparkStickyFault);
     }
 }

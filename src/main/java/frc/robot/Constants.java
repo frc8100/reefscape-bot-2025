@@ -58,15 +58,33 @@ public final class Constants {
          */
         public static final double armPercentOutput = 0.15;
 
-        // Motor configs
-        public static final int clawMotorId = 12;
+        // Turn motor configs
+        public static final int angleClawMotorId = 12;
+        // TODO: Configure this
+        public static final double angleGearRatio = 10.0;
+        public static final boolean angleMotorInverted = false;
+        public static final int angleMotorCurrentLimit = 40;
+
+        // PID configs
+        public static final double angleKP = 0.1;
+        public static final double angleKI = 0.0;
+        public static final double angleKD = 0.0;
+        public static final double angleKF = 0.0;
 
         /**
-         * The reduction of the claw.
-         * Also converts between rotataions to radians, and RPM to rad/s.
+         * The maximum power for the angle motor, from 0-1.
          */
-        public static final double reduction = 1.0;
-        public static final boolean inverted = false;
-        public static final int currentLimit = 40;
+        public static final double anglePower = 0.8;
+
+        // Outake motor configs
+        public static final int outakeClawMotorId = 13;
+        public static final double outakeGearRatio = 1.0;
+        public static final boolean outakeMotorInverted = false;
+        public static final int outakeMotorCurrentLimit = 40;
+
+        /**
+         * The maximum power for the outake motor, from 0-1.
+         */
+        public static final double outakePower = 0.7;
     }
 }
