@@ -22,7 +22,7 @@ public class Claw extends SubsystemBase {
      * @param motorInputSupplier - the supplier for the percent motor input.
      */
     public Command getRunCommand(DoubleSupplier motorInputSupplier) {
-        return new RunCommand(() -> io.runClaw(motorInputSupplier.getAsDouble()), this);
+        return new RunCommand(() -> io.runMotor(motorInputSupplier.getAsDouble()), this);
     }
 
     @Override

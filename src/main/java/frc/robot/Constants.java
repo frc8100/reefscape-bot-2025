@@ -44,11 +44,12 @@ public final class Constants {
     }
 
     /**
-     * Constants for the arm. Includes CAN Ids.
+     * Constants for the claw. Includes CAN Ids.
      */
-    public static final class Arm {
+    // TODO: Move to its own file
+    public static final class Claw {
         /**
-         * Deadband for the arm.
+         * Deadband for the claw (controller input).
          */
         public static final double armDeadband = 0.1;
 
@@ -57,6 +58,15 @@ public final class Constants {
          */
         public static final double armPercentOutput = 0.15;
 
+        // Motor configs
         public static final int clawMotorId = 12;
+
+        /**
+         * The reduction of the claw.
+         * Also converts between rotataions to radians, and RPM to rad/s.
+         */
+        public static final double reduction = 1.0;
+        public static final boolean inverted = false;
+        public static final int currentLimit = 40;
     }
 }
