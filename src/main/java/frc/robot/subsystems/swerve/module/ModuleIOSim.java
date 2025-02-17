@@ -24,7 +24,6 @@ import frc.robot.subsystems.swerve.SwerveConfig;
 import java.util.Arrays;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController;
-import org.littletonrobotics.junction.Logger;
 
 /** Physics sim implementation of module IO. */
 public class ModuleIOSim implements ModuleIO {
@@ -71,9 +70,6 @@ public class ModuleIOSim implements ModuleIO {
         }
 
         // Update simulation state
-        Logger.recordOutput("Sim/DriveMotorVoltageRequested", driveAppliedVolts);
-        Logger.recordOutput("Sim/TurnMotorVoltageRequested", turnAppliedVolts);
-
         driveMotor.requestVoltage(Volts.of(driveAppliedVolts));
         turnMotor.requestVoltage(Volts.of(turnAppliedVolts));
 
