@@ -1,12 +1,7 @@
 package frc.lib.util;
 
-import org.littletonrobotics.junction.AutoLog;
-
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
-import frc.robot.Constants;
-import frc.robot.subsystems.superstructure.claw.ClawIO.ClawIOInputs;
 
 /**
  * Generic interface for Spark IO. Should be extended by IO implementation for involving 1 spark motor.
@@ -105,12 +100,11 @@ public interface GenericSparkIO<TInputs> {
     private static SparkMaxConfig getDefaultConfig(GenericSparkIOConfig config) {
         SparkMaxConfig outputConfig = new SparkMaxConfig();
 
-        outputConfig.idleMode(config.idleMode)
-                .inverted(config.inverted)
-                .smartCurrentLimit(config.smartCurrentLimit);
+        outputConfig.idleMode(config.idleMode).inverted(config.inverted).smartCurrentLimit(config.smartCurrentLimit);
 
         // Configure the encoder
-        outputConfig.encoder
+        outputConfig
+                .encoder
                 // Rotations to radians
                 .positionConversionFactor(2 * Math.PI / config.gearRatio)
                 // RPM to rad/s
@@ -119,7 +113,8 @@ public interface GenericSparkIO<TInputs> {
                 .uvwAverageDepth(2);
 
         // Configure the signals
-        outputConfig.signals
+        outputConfig
+                .signals
                 .primaryEncoderPositionAlwaysOn(true)
                 .primaryEncoderPositionPeriodMs(20)
                 .primaryEncoderVelocityAlwaysOn(true)

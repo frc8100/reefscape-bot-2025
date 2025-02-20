@@ -1,9 +1,8 @@
 package frc.robot.subsystems.superstructure.claw;
 
-import org.littletonrobotics.junction.AutoLog;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.util.GenericSparkIO;
+import org.littletonrobotics.junction.AutoLog;
 
 /**
  * The IO interface for the claw.
@@ -30,7 +29,7 @@ public interface ClawIO extends GenericSparkIO<ClawIO.ClawIOInputs> {
         public double outakeAppliedVolts = 0.0;
         public double outakeSupplyCurrentAmps = 0.0;
         public double outakeTorqueCurrentAmps = 0.0;
-        public double outakeTempCelsius = 0.0; 
+        public double outakeTempCelsius = 0.0;
     }
 
     /**

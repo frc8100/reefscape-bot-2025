@@ -2,25 +2,21 @@ package frc.robot.subsystems.superstructure.claw;
 
 import static frc.lib.util.SparkUtil.*;
 
-import java.util.function.DoubleSupplier;
-
-import org.littletonrobotics.junction.Logger;
-
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.lib.util.GenericSparkIO;
 import frc.robot.Constants;
+import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * IO implementation for spark motors
@@ -55,13 +51,13 @@ public class ClawIOSpark implements ClawIO {
 
     /**
      * The relative encoder for the outtake motor.
-     */ 
+     */
     private final RelativeEncoder outakeEncoder;
     /**
      * The closed loop controller for the outtake motor.
      */
     // private final SparkClosedLoopController outakeClosedLoopController;
-    
+
     /**
      * A debouncer for the connected state, to prevent flickering.
      */
@@ -96,6 +92,7 @@ public class ClawIOSpark implements ClawIO {
             this.gearRatio = Constants.Claw.outakeGearRatio;
         }
     }
+
     public ClawIOSpark() {
         // Create the motor and configure it
         angleMotor = new SparkMax(Constants.Claw.angleClawMotorId, MotorType.kBrushless);
@@ -107,11 +104,7 @@ public class ClawIOSpark implements ClawIO {
         // Apply PID config for the angle motor
         angleConfig
                 .closedLoop
-                .pidf(
-                        Constants.Claw.angleKP,
-                        Constants.Claw.angleKI,
-                        Constants.Claw.angleKD,
-                        Constants.Claw.angleKF)
+                .pidf(Constants.Claw.angleKP, Constants.Claw.angleKI, Constants.Claw.angleKD, Constants.Claw.angleKF)
                 .outputRange(-Constants.Claw.anglePower, Constants.Claw.anglePower);
 
         // Apply the config
@@ -119,7 +112,9 @@ public class ClawIOSpark implements ClawIO {
                 angleMotor,
                 5,
                 () -> angleMotor.configure(
-                        angleConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters));
+                        angleConfig,
+                        SparkBase.ResetMode.kResetSafeParameters,
+                        SparkBase.PersistMode.kPersistParameters));
 
         // Reset the encoder
         tryUntilOk(angleMotor, 5, () -> angleEncoder.setPosition(0.0));
@@ -136,7 +131,9 @@ public class ClawIOSpark implements ClawIO {
                 outakeMotor,
                 5,
                 () -> outakeMotor.configure(
-                        outakeConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters));
+                        outakeConfig,
+                        SparkBase.ResetMode.kResetSafeParameters,
+                        SparkBase.PersistMode.kPersistParameters));
 
         // Reset the encoder
         tryUntilOk(outakeMotor, 5, () -> outakeEncoder.setPosition(0.0));
@@ -182,7 +179,7 @@ public class ClawIOSpark implements ClawIO {
         // Set the supply current based on the bus voltage multiplied by the applied output
         ifOk(
                 angleMotor,
-                new DoubleSupplier[] { angleMotor::getBusVoltage, angleMotor::getAppliedOutput },
+                new DoubleSupplier[] {angleMotor::getBusVoltage, angleMotor::getAppliedOutput},
                 x -> inputs.turnAppliedVolts = x[0] * x[1]);
 
         // Set the torque current
@@ -203,7 +200,7 @@ public class ClawIOSpark implements ClawIO {
         // Set the supply current based on the bus voltage multiplied by the applied output
         ifOk(
                 outakeMotor,
-                new DoubleSupplier[] { outakeMotor::getBusVoltage, outakeMotor::getAppliedOutput },
+                new DoubleSupplier[] {outakeMotor::getBusVoltage, outakeMotor::getAppliedOutput},
                 x -> inputs.outakeAppliedVolts = x[0] * x[1]);
 
         // Set the torque current
