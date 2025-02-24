@@ -62,7 +62,6 @@ public class RobotContainer {
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
         switch (Constants.currentMode) {
-            default:
             case REAL:
                 // Real robot, instantiate hardware IO implementations
                 swerveSubsystem = new Swerve(new GyroIOPigeon2(), new ModuleIO[] {
@@ -77,6 +76,7 @@ public class RobotContainer {
                         new VisionIOLimelight(VisionConstants.camera0Name, swerveSubsystem::getRotation));
                 break;
 
+            default:
             case SIM:
                 // Create a reefscape arena
                 var arenaSimulation = new Arena2025Reefscape();
@@ -134,14 +134,14 @@ public class RobotContainer {
                 //         .onTrue(new InstantCommand(() -> opponentRobotSim1.zeroGyro()));
                 break;
 
+                // case REPLAY:
                 // default:
                 //     // Replayed robot, disable IO implementations
-                //     // swerveSubsystem = new Swerve(
-                //     //         new GyroIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new
-                // ModuleIO() {});
                 //     swerveSubsystem = new Swerve(new GyroIO() {}, new ModuleIO[] {
-                //         new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {},
+                //             new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {},
                 //     });
+
+                //     visionSubsystem = new Vision()
                 //     break;
         }
 

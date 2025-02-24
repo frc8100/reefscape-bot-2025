@@ -11,7 +11,7 @@ import edu.wpi.first.math.numbers.N3;
 public final class Constants {
     /**
      * The current mode, see {@link Mode}.
-     * Automatically set by robot.
+     * Automatically set by the robot, unless set to Mode.REPLAY.
      */
     public static Mode currentMode = Mode.REAL;
 
