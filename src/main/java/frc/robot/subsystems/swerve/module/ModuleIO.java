@@ -38,7 +38,7 @@ public interface ModuleIO {
     }
 
     /** Updates the set of loggable inputs. */
-    public default void updateInputs(ModuleIOInputs inputs) {}
+    public abstract void updateInputs(ModuleIOInputs inputs);
 
     /**
      * @return The state of the module.
@@ -46,20 +46,20 @@ public interface ModuleIO {
     public SwerveModuleState getState();
 
     /** Run the drive motor at the specified open loop value (in volts). */
-    public default void setDriveOpenLoop(double output) {}
+    public abstract void setDriveOpenLoop(double output);
 
     /** Run the turn motor at the specified open loop value (in volts). */
-    public default void setTurnOpenLoop(double output) {}
+    public abstract void setTurnOpenLoop(double output);
 
     /** Run the drive motor at the specified velocity. Used internally. */
-    public default void setDriveVelocity(double velocityRadPerSec) {}
+    public abstract void setDriveVelocity(double velocityMetersPerSecond);
 
     /** Run the turn motor to the specified rotation. Used internally. */
-    public default void setTurnPosition(Rotation2d rotation) {}
+    public abstract void setTurnPosition(Rotation2d rotation);
 
     /**
      * Sets the desired state for the module. Should update the turn and drive motors to reach the desired state.
      * @param desiredState - The desired state for the module.
      */
-    public default void setDesiredState(SwerveModuleState desiredState) {}
+    public abstract void setDesiredState(SwerveModuleState desiredState);
 }

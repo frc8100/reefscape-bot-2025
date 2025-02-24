@@ -123,12 +123,14 @@ public class ModuleIOSim implements ModuleIO {
         // CTREModuleState functions for any motor type
         desiredState = CTREModuleState.optimize(desiredState, getState().angle);
 
-        setDriveVelocity(desiredState.speedMetersPerSecond / SwerveConfig.wheelRadius);
+        setDriveVelocity(desiredState.speedMetersPerSecond);
         setTurnPosition(desiredState.angle);
     }
 
     @Override
-    public void setDriveVelocity(double velocityRadPerSec) {
+    public void setDriveVelocity(double speedMetersPerSecond) {
+        double velocityRadPerSec = speedMetersPerSecond / SwerveConfig.wheelRadius;
+
         driveClosedLoop = true;
         driveFFVolts =
                 SwerveConfig.driveSimKs * Math.signum(velocityRadPerSec) + SwerveConfig.driveSimKv * velocityRadPerSec;

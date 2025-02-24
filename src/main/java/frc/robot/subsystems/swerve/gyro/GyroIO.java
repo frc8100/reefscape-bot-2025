@@ -59,14 +59,14 @@ public interface GyroIO {
      *
      * @param inputs The gyro inputs to update.
      */
-    public default void updateInputs(GyroIOInputs inputs) {}
+    public abstract void updateInputs(GyroIOInputs inputs);
 
     /**
      * Zeros the gyro.
      *
      * @param deg The angle to zero the gyro to.
      */
-    public default void zeroGyro(double deg) {}
+    public abstract void zeroGyro(double deg);
 
     /**
      * Note: this is functionally equivalent to {@link #getGyroHeading()}.

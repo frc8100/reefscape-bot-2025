@@ -221,6 +221,11 @@ public class ModuleIOSpark implements ModuleIO {
         setSpeed(desiredState);
     }
 
+    @Override
+    public void setDriveVelocity(double speedMetersPerSecond) {
+        setSpeed(new SwerveModuleState(speedMetersPerSecond, new Rotation2d()));
+    }
+
     /**
      * Sets the speed of the module.
      *
