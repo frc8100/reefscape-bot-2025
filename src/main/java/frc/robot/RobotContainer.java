@@ -179,12 +179,16 @@ public class RobotContainer {
         autoChooser.addOption("Coral and Go To All Reefs Test", autoRoutines.getCoralAndGoToAllReefsTest());
 
         // TODO: Temporary claw position settings
+        SendableChooser<Command> clawAngleSendableChooser = new SendableChooser<>();
         LoggedDashboardChooser<Command> clawAngleChooser =
-                new LoggedDashboardChooser<>("Claw Angle", new SendableChooser<>());
+                new LoggedDashboardChooser<>("Claw Angle", clawAngleSendableChooser);
 
         clawAngleChooser.addDefaultOption(
                 "Resting", clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.RESTING_ANGLE));
         clawAngleChooser.addOption("L4", clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.L4ANGLE));
+
+        // Schedule command on change
+        clawAngleSendableChooser.onChange(Command::schedule);
 
         // Configure the button bindings
         configureButtonBindings();
