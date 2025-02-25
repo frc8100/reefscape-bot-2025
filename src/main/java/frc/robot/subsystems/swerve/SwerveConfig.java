@@ -1,9 +1,6 @@
 package frc.robot.subsystems.swerve;
 
-import static edu.wpi.first.units.Units.Kilogram;
-import static edu.wpi.first.units.Units.KilogramSquareMeters;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
@@ -18,6 +15,15 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.AngularAcceleration;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.units.measure.Velocity;
+
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
@@ -48,47 +54,74 @@ public class SwerveConfig {
     public static final boolean isOpenLoop = true;
 
     /* Drivetrain Constants */
-    public static final double trackWidth = Units.inchesToMeters(25.75);
-    public static final double wheelBase = Units.inchesToMeters(21.50);
-    public static final double driveBaseRadius = Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
-    public static final double wheelRadius = Units.inchesToMeters(2.0);
-    public static final double wheelCircumference = wheelRadius * 2 * Math.PI;
+    public static final Distance trackWidth = Inches.of(25.75);
+    public static final Distance wheelBase = Inches.of(21.50);
+    // public static final double driveBaseRadius = Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
+    public static final Distance driveBaseRadius = Meters.of(Math.hypot(trackWidth.in(Meters) / 2.0, wheelBase.in(Meters) / 2.0));
 
-    /** The module translations. No need to change. */
+    public static final Distance wheelRadius = Inches.of(2.0);
+    public static final Distance wheelCircumference = wheelRadius.times(2 * Math.PI);
+
+    /**
+     * The locations of the swerve modules relative to the center of the robot. Used in {@link SwerveDriveKinematics}
+     */
     public static final Translation2d[] moduleTranslations = new Translation2d[] {
-        new Translation2d(wheelBase / 2.0, trackWidth / 2.0),
-        new Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
-        new Translation2d(-wheelBase / 2.0, trackWidth / 2.0),
-        new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0),
+        new Translation2d(wheelBase.div(2), trackWidth.div(2)),
+        new Translation2d(wheelBase.div(2), trackWidth.div(-2)),
+        new Translation2d(wheelBase.div(-2), trackWidth.div(2)),
+        new Translation2d(wheelBase.div(-2), trackWidth.div(-2)),
     };
 
-    /* Module Gear Ratios */
+    /**
+     * The gear ratio of the drive motor.
+     */
     public static final double driveGearRatio = 6.75;
+
+    /**
+     * The gear ratio of the angle motor.
+     */
     public static final double angleGearRatio = ((150.0 / 7.0) / 1.0);
 
     // Encoder setup
-    // Rotor Rotations -> Wheel Radians
+    /**
+     * Factor to convert the drive encoder position from rotations to wheel radians.
+     */
     public static final double driveEncoderPositionFactor = (2 * Math.PI) / (driveGearRatio);
-    // Rotor RPM -> Wheel Rad/Sec
+
+    /**
+     * Factor to convert the drive encoder velocity from RPM to wheel radians per second.
+     */
     public static final double driveEncoderVelocityFactor = driveEncoderPositionFactor / 60;
-    // the number of degrees that a single rotation of the turn motor turns the wheel.
+
+    /**
+     * The number of degrees that a single rotation of the turn motor turns the wheel.
+     */
     public static final double DegreesPerTurnRotation = 360 / angleGearRatio;
 
     /* Motor Inverts */
+    /**
+     * Whether the angle motor is inverted.
+     */
     public static final boolean angleMotorInvert = true;
+
+    /**
+     * Whether the drive motor is inverted.
+     */
     public static final boolean driveMotorInvert = false;
 
-    /** Angle Encoder Invert */
+    /** Whether the CANCoder is inverted. */
     public static final boolean canCoderInvert = false;
 
     /* Swerve Current Limiting */
-    public static final int angleContinuousCurrentLimit = 20;
-    public static final int anglePeakCurrentLimit = 40;
+    public static final Current angleContinuousCurrentLimit = Amps.of(20);
+    public static final Current anglePeakCurrentLimit = Amps.of(40);
     public static final double anglePeakCurrentDuration = 0.1;
     public static final boolean angleEnableCurrentLimit = true;
 
-    public static final int driveContinuousCurrentLimit = 35;
-    public static final int drivePeakCurrentLimit = 60;
+    // public static final int driveContinuousCurrentLimit = 35;
+    // public static final int drivePeakCurrentLimit = 60;
+    public static final Current driveContinuousCurrentLimit = Amps.of(35);
+    public static final Current drivePeakCurrentLimit = Amps.of(60);
     public static final double drivePeakCurrentDuration = 0.1;
     public static final boolean driveEnableCurrentLimit = true;
 
@@ -125,15 +158,15 @@ public class SwerveConfig {
 
     /* Swerve Profiling Values */
     /** Meters per Second */
-    public static final double maxSpeed = 5.0;
-    // Meters per Second^2
-    public static final double maxAcceleration = 2.0;
+    public static final LinearVelocity maxSpeed = MetersPerSecond.of(5.0);
+    // Meters per Second^
+    public static final LinearAcceleration maxAcceleration = MetersPerSecondPerSecond.of(2.0);
     /** Radians per Second */
-    public static final double maxAngularVelocity = 5.0;
+    public static final AngularVelocity maxAngularVelocity = RadiansPerSecond.of(5.0);
+    public static final AngularAcceleration maxAngularAcceleration = RadiansPerSecondPerSecond.of(2.0);
 
-    public static final double maxAngularAcceleration = 2.0;
+    public static final Mass robotMassKg = Kilogram.of(40.0);
 
-    public static final double robotMassKg = 40.0;
     public static final double wheelCOF = 1.2;
 
     public static final Pose2d initialPose = new Pose2d(3, 3, new Rotation2d());
@@ -149,7 +182,7 @@ public class SwerveConfig {
      */
     public static final DriveTrainSimulationConfig mapleSimConfig = DriveTrainSimulationConfig.Default()
             .withCustomModuleTranslations(moduleTranslations)
-            .withRobotMass(Kilogram.of(robotMassKg))
+            .withRobotMass(robotMassKg)
             .withGyro(COTS.ofPigeon2())
             .withSwerveModule(new SwerveModuleSimulationConfig(
                     driveGearbox,
@@ -160,7 +193,7 @@ public class SwerveConfig {
                     angleGearRatio,
                     Volts.of(0.1),
                     Volts.of(0.1),
-                    Meters.of(wheelRadius),
+                    wheelRadius,
                     KilogramSquareMeters.of(0.02),
                     wheelCOF));
 
@@ -210,7 +243,7 @@ public class SwerveConfig {
         SparkMaxConfig angleConfig = new SparkMaxConfig();
 
         angleConfig
-                .smartCurrentLimit(SwerveConfig.angleContinuousCurrentLimit)
+                .smartCurrentLimit((int) SwerveConfig.angleContinuousCurrentLimit.in(Amps))
                 .inverted(SwerveConfig.angleMotorInvert)
                 .idleMode(SwerveConfig.angleIdleMode);
 
@@ -248,7 +281,7 @@ public class SwerveConfig {
         SparkMaxConfig driveConfig = new SparkMaxConfig();
 
         driveConfig
-                .smartCurrentLimit(SwerveConfig.driveContinuousCurrentLimit)
+                .smartCurrentLimit((int) SwerveConfig.driveContinuousCurrentLimit.in(Amps))
                 .inverted(SwerveConfig.driveMotorInvert)
                 .idleMode(SwerveConfig.driveIdleMode);
 

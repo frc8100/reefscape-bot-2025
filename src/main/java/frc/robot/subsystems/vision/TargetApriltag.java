@@ -1,5 +1,8 @@
 package frc.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+
 import frc.lib.LimelightHelpers;
 import frc.robot.subsystems.swerve.SwerveConfig;
 
@@ -21,7 +24,7 @@ public class TargetApriltag {
         double targetingAngularVelocity = LimelightHelpers.getTX("limelight") * kP;
 
         // convert to radians per second for our drive method
-        targetingAngularVelocity *= SwerveConfig.maxAngularVelocity;
+        targetingAngularVelocity *= SwerveConfig.maxAngularVelocity.in(RadiansPerSecond);
 
         // invert since tx is positive when the target is to the right of the crosshair
         targetingAngularVelocity *= -1.0;
@@ -36,7 +39,7 @@ public class TargetApriltag {
     double limelight_range_proportional() {
         double kP = .1;
         double targetingForwardSpeed = LimelightHelpers.getTY("limelight") * kP;
-        targetingForwardSpeed *= SwerveConfig.maxSpeed;
+        targetingForwardSpeed *= SwerveConfig.maxSpeed.in(MetersPerSecond);
         targetingForwardSpeed *= -1.0;
         return targetingForwardSpeed;
     }

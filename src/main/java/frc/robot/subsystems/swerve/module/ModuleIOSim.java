@@ -43,10 +43,10 @@ public class ModuleIOSim implements ModuleIO {
         this.moduleSimulation = moduleSimulation;
         this.driveMotor = moduleSimulation
                 .useGenericMotorControllerForDrive()
-                .withCurrentLimit(Amps.of(SwerveConfig.driveContinuousCurrentLimit));
+                .withCurrentLimit(SwerveConfig.driveContinuousCurrentLimit);
         this.turnMotor = moduleSimulation
                 .useGenericControllerForSteer()
-                .withCurrentLimit(Amps.of(SwerveConfig.angleContinuousCurrentLimit));
+                .withCurrentLimit(SwerveConfig.angleContinuousCurrentLimit);
 
         // Enable wrapping for turn PID
         turnController.enableContinuousInput(-Math.PI, Math.PI);
@@ -102,7 +102,7 @@ public class ModuleIOSim implements ModuleIO {
     @Override
     public SwerveModuleState getState() {
         return new SwerveModuleState(
-                moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond) * SwerveConfig.wheelRadius,
+                moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond) * SwerveConfig.wheelRadius.in(Meters),
                 moduleSimulation.getSteerAbsoluteFacing());
     }
 
@@ -120,16 +120,13 @@ public class ModuleIOSim implements ModuleIO {
 
     @Override
     public void setDesiredState(SwerveModuleState desiredState) {
-        // CTREModuleState functions for any motor type
-        desiredState = CTREModuleState.optimize(desiredState, getState().angle);
-
         setDriveVelocity(desiredState.speedMetersPerSecond);
         setTurnPosition(desiredState.angle);
     }
 
     @Override
     public void setDriveVelocity(double speedMetersPerSecond) {
-        double velocityRadPerSec = speedMetersPerSecond / SwerveConfig.wheelRadius;
+        double velocityRadPerSec = speedMetersPerSecond / SwerveConfig.wheelRadius.in(Meters);
 
         driveClosedLoop = true;
         driveFFVolts =

@@ -9,6 +9,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveDrive;
+
+import static edu.wpi.first.units.Units.Meters;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
@@ -18,6 +21,8 @@ import java.util.List;
  * Contains commands for use with the SysId characterization tool.
  */
 public class SwerveSysidRoutines {
+    private SwerveSysidRoutines() {}
+
     private static final double FF_START_DELAY = 2.0; // Secs
     private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
     private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
@@ -42,9 +47,7 @@ public class SwerveSysidRoutines {
 
                 // Allow modules to orient
                 Commands.run(
-                                () -> {
-                                    drive.runCharacterization(0.0);
-                                },
+                                () -> drive.runCharacterization(0.0),
                                 drive)
                         .withTimeout(FF_START_DELAY),
 
@@ -93,9 +96,7 @@ public class SwerveSysidRoutines {
                 // Drive control sequence
                 Commands.sequence(
                         // Reset acceleration limiter
-                        Commands.runOnce(() -> {
-                            limiter.reset(0.0);
-                        }),
+                        Commands.runOnce(() -> limiter.reset(0.0)),
 
                         // Turn in place, accelerating up to full speed
                         Commands.run(
@@ -132,7 +133,7 @@ public class SwerveSysidRoutines {
                                     for (int i = 0; i < 4; i++) {
                                         wheelDelta += Math.abs(positions[i] - state.positions[i]) / 4.0;
                                     }
-                                    double wheelRadius = (state.gyroDelta * SwerveConfig.driveBaseRadius) / wheelDelta;
+                                    double wheelRadius = (state.gyroDelta * SwerveConfig.driveBaseRadius.in(Meters)) / wheelDelta;
 
                                     NumberFormat formatter = new DecimalFormat("#0.000");
                                     System.out.println("********** Wheel Radius Characterization Results **********");

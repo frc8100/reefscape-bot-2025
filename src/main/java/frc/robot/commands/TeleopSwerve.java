@@ -10,6 +10,10 @@ import frc.robot.Controls;
 import frc.robot.States;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveDrive;
+
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -157,7 +161,7 @@ public class TeleopSwerve extends Command {
                 break;
             case standard:
                 // normal
-                rotationValue = rotationValue * SwerveConfig.maxAngularVelocity;
+                rotationValue = rotationValue * SwerveConfig.maxAngularVelocity.in(RadiansPerSecond);
                 break;
         }
 
@@ -174,7 +178,7 @@ public class TeleopSwerve extends Command {
 
         // Drive
         swerveSubsystem.drive(
-                new Translation2d(translationValue, strafeValue).times(SwerveConfig.maxSpeed),
+                new Translation2d(translationValue, strafeValue).times(SwerveConfig.maxSpeed.in(MetersPerSecond)),
                 rotationValue,
                 !robotCentricSup.getAsBoolean());
     }

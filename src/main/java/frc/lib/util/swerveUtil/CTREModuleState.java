@@ -21,7 +21,11 @@ public class CTREModuleState {
             targetSpeed = -targetSpeed;
             targetAngle = delta > 90 ? (targetAngle -= 180) : (targetAngle += 180);
         }
-        return new SwerveModuleState(targetSpeed, Rotation2d.fromDegrees(targetAngle));
+
+        SwerveModuleState optimizedState = new SwerveModuleState(targetSpeed, Rotation2d.fromDegrees(targetAngle));
+        optimizedState.cosineScale(currentAngle);
+
+        return optimizedState;
     }
 
     /**
