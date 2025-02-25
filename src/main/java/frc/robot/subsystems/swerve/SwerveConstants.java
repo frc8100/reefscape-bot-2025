@@ -8,50 +8,60 @@ import frc.lib.util.swerveUtil.RevSwerveModuleConstants;
  * Mainly includes CAN IDs and angle offsets.
  */
 public final class SwerveConstants {
-    public static final int pigeonID = 17;
+    private SwerveConstants() {}
 
-    /* Module Specific Constants */
+    public static final int PIGEON_ID = 17;
+
+    /** Module Specific Constants */
     public static final class Swerve {
+        private Swerve() {}
 
-        /* Front Left Module */
+        /** Front Left Module */
         public static final class Mod0 {
-            public static final int driveMotorID = 4;
-            public static final int angleMotorID = 3;
-            public static final int canCoderID = 13;
-            public static final Rotation2d angleOffset =
-                    Rotation2d.fromDegrees(17.402344); // Rotation2d.fromDegrees(37.7);
+            private Mod0() {}
+
+            public static final int DRIVE_MOTOR_ID = 4;
+            public static final int ANGLE_MOTOR_ID = 3;
+            public static final int CANCODER_ID = 13;
+            public static final Rotation2d ANGLE_OFFSET = Rotation2d.fromDegrees(17.402344);
             public static final RevSwerveModuleConstants constants =
-                    new RevSwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
+                    new RevSwerveModuleConstants(DRIVE_MOTOR_ID, ANGLE_MOTOR_ID, CANCODER_ID, ANGLE_OFFSET);
         }
 
-        /* Front Right Module */
+        /** Front Right Module */
         public static final class Mod1 {
-            public static final int driveMotorID = 6;
-            public static final int angleMotorID = 5;
-            public static final int canCoderID = 14;
-            public static final Rotation2d angleOffset = Rotation2d.fromDegrees((79.277344) + 180.0);
+            private Mod1() {}
+
+            public static final int DRIVE_MOTOR_ID = 6;
+            public static final int ANGLE_MOTOR_ID = 5;
+            public static final int CANCODER_ID = 14;
+            public static final Rotation2d ANGLE_OFFSET = Rotation2d.fromDegrees((79.277344) + 180.0);
             public static final RevSwerveModuleConstants constants =
-                    new RevSwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
+                    new RevSwerveModuleConstants(DRIVE_MOTOR_ID, ANGLE_MOTOR_ID, CANCODER_ID, ANGLE_OFFSET);
         }
 
-        /* Back Left Module */
+        /** Back Left Module */
         public static final class Mod2 {
-            public static final int driveMotorID = 2;
-            public static final int angleMotorID = 1;
-            public static final int canCoderID = 15;
-            public static final Rotation2d angleOffset = Rotation2d.fromDegrees((73.740234));
+            private Mod2() {}
+
+            public static final int DRIVE_MOTOR_ID = 2;
+            public static final int ANGLE_MOTOR_ID = 1;
+            public static final int CANCODER_ID = 15;
+            public static final Rotation2d ANGLE_OFFSET = Rotation2d.fromDegrees((73.740234));
             public static final RevSwerveModuleConstants constants =
-                    new RevSwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
+                    new RevSwerveModuleConstants(DRIVE_MOTOR_ID, ANGLE_MOTOR_ID, CANCODER_ID, ANGLE_OFFSET);
         }
 
-        /* Back Right Module */
+        /** Back Right Module */
         public static final class Mod3 {
-            public static final int driveMotorID = 8;
-            public static final int angleMotorID = 9;
-            public static final int canCoderID = 16;
-            public static final Rotation2d angleOffset = Rotation2d.fromDegrees((185.273438) + 180.0);
+            private Mod3() {}
+
+            public static final int DRIVE_MOTOR_ID = 8;
+            public static final int ANGLE_MOTOR_ID = 9;
+            public static final int CANCODER_ID = 16;
+            public static final Rotation2d ANGLE_OFFSET = Rotation2d.fromDegrees((185.273438) + 180.0);
             public static final RevSwerveModuleConstants constants =
-                    new RevSwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
+                    new RevSwerveModuleConstants(DRIVE_MOTOR_ID, ANGLE_MOTOR_ID, CANCODER_ID, ANGLE_OFFSET);
         }
     }
 }

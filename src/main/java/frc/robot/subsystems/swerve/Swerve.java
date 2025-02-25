@@ -55,7 +55,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
      * Swerve Kinematics
      * No need to ever change this unless you are not doing a traditional rectangular/square 4 module swerve
      */
-    private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(SwerveConfig.moduleTranslations);
+    private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(SwerveConfig.MODULE_TRANSLATIONS);
 
     /** The last stored position of the swerve modules for delta tracking */
     private SwerveModulePosition[] lastModulePositions = new SwerveModulePosition[] {
@@ -156,7 +156,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
 
         // Ensure the wheel speeds are within the allowable range
-        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, SwerveConfig.maxSpeed);
+        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, SwerveConfig.MAX_SPEED);
 
         // Log unoptimized setpoints
         Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
@@ -173,7 +173,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     @Override
     public void setModuleStates(SwerveModuleState[] desiredStates) {
         // Ensure the wheel speeds are within the allowable range
-        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, SwerveConfig.maxSpeed);
+        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, SwerveConfig.MAX_SPEED);
 
         // Set the desired state for each swerve module
         // for (Module mod : swerveModules) {

@@ -15,8 +15,6 @@ package frc.robot.subsystems.swerve.module;
 
 import static edu.wpi.first.units.Units.Meters;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -24,6 +22,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.lib.util.swerveUtil.CTREModuleState;
 import frc.robot.subsystems.swerve.SwerveConfig;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * A single swerve module, including a drive motor and a turn motor.
@@ -44,6 +43,7 @@ public class Module {
 
     /** Alerts for disconnected motors. */
     private final Alert driveDisconnectedAlert;
+
     private final Alert turnDisconnectedAlert;
 
     /** The odometry positions received this cycle. This is processed in {@link SparkSwerveOdometryThread}. */
@@ -73,7 +73,7 @@ public class Module {
 
         // For each sample, convert the drive position to meters and pair it with the turn angle
         for (int i = 0; i < sampleCount; i++) {
-            double positionMeters = inputs.odometryDrivePositionsRad[i] * SwerveConfig.wheelRadius.in(Meters);
+            double positionMeters = inputs.odometryDrivePositionsRad[i] * SwerveConfig.WHEEL_RADIUS.in(Meters);
             Rotation2d angle = inputs.odometryTurnPositions[i];
 
             // Store the position
@@ -88,7 +88,7 @@ public class Module {
     /** Runs the module with the specified setpoint state. Mutates the state to optimize it. */
     public void runSetpoint(SwerveModuleState state) {
         // Optimize velocity setpoint
-        
+
         // CTREModuleState functions for any motor type
         state = CTREModuleState.optimize(state, inputs.turnPosition);
 
@@ -119,12 +119,12 @@ public class Module {
 
     /** Returns the current drive position of the module in meters. */
     public double getPositionMeters() {
-        return inputs.drivePositionRad * SwerveConfig.wheelRadius.in(Meters);
+        return inputs.drivePositionRad * SwerveConfig.WHEEL_RADIUS.in(Meters);
     }
 
     /** Returns the current drive velocity of the module in meters per second. */
     public double getVelocityMetersPerSec() {
-        return inputs.driveVelocityRadPerSec * SwerveConfig.wheelRadius.in(Meters);
+        return inputs.driveVelocityRadPerSec * SwerveConfig.WHEEL_RADIUS.in(Meters);
     }
 
     /** Returns the module position (turn angle and drive position). */

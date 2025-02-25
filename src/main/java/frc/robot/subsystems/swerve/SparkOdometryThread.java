@@ -53,7 +53,7 @@ public class SparkOdometryThread {
 
     public void start() {
         if (timestampQueues.size() > 0) {
-            notifier.startPeriodic(1.0 / SwerveConfig.odometryFrequency);
+            notifier.startPeriodic(1.0 / SwerveConfig.ODOMETRY_FREQUENCY_HZ);
         }
     }
 

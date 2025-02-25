@@ -48,7 +48,8 @@ public class Robot extends LoggedRobot {
 
         // Set the current mode automatically if it is not replay
         if (Constants.currentMode != Constants.Mode.REPLAY) {
-            Constants.currentMode = isReal() ? Constants.Mode.REAL : isSimulation() ? Constants.Mode.SIM : Constants.Mode.REPLAY;
+            Constants.currentMode =
+                    isReal() ? Constants.Mode.REAL : isSimulation() ? Constants.Mode.SIM : Constants.Mode.REPLAY;
         }
 
         // Set up data receivers & replay source

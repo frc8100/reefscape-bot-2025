@@ -29,7 +29,7 @@ import java.util.Queue;
 
 /** IO implementation for Pigeon 2. */
 public class GyroIOPigeon2 implements GyroIO {
-    private final Pigeon2 pigeon = new Pigeon2(SwerveConstants.pigeonID);
+    private final Pigeon2 pigeon = new Pigeon2(SwerveConstants.PIGEON_ID);
     private final StatusSignal<Angle> yaw = pigeon.getYaw();
     private final Queue<Double> yawPositionQueue;
     private final Queue<Double> yawTimestampQueue;
@@ -38,7 +38,7 @@ public class GyroIOPigeon2 implements GyroIO {
     public GyroIOPigeon2() {
         pigeon.getConfigurator().apply(new Pigeon2Configuration());
         pigeon.getConfigurator().setYaw(0.0);
-        yaw.setUpdateFrequency(SwerveConfig.odometryFrequency);
+        yaw.setUpdateFrequency(SwerveConfig.ODOMETRY_FREQUENCY_HZ);
         yawVelocity.setUpdateFrequency(50.0);
         pigeon.optimizeBusUtilization();
         yawTimestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
@@ -63,7 +63,7 @@ public class GyroIOPigeon2 implements GyroIO {
     @Override
     public void zeroGyro(double deg) {
         // Invert the gyro if necessary
-        if (SwerveConfig.invertGyro) {
+        if (SwerveConfig.IS_GYRO_INVERTED) {
             deg = -deg;
         }
 
@@ -74,7 +74,7 @@ public class GyroIOPigeon2 implements GyroIO {
     @Override
     public Rotation2d getYaw() {
         // If the gyro is inverted, return the inverted yaw
-        if (SwerveConfig.invertGyro) {
+        if (SwerveConfig.IS_GYRO_INVERTED) {
             return Rotation2d.fromDegrees(360 - pigeon.getYaw().getValueAsDouble());
         }
 
@@ -85,7 +85,7 @@ public class GyroIOPigeon2 implements GyroIO {
     @Override
     public Rotation2d getGyroHeading() {
         // If the gyro is inverted, return the inverted yaw
-        if (SwerveConfig.invertGyro) {
+        if (SwerveConfig.IS_GYRO_INVERTED) {
             return pigeon.getRotation2d().rotateBy(new Rotation2d(180));
         }
 

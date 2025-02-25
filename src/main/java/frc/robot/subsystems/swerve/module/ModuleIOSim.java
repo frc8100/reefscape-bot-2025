@@ -19,7 +19,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.lib.util.SparkUtil;
-import frc.lib.util.swerveUtil.CTREModuleState;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import java.util.Arrays;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
@@ -33,8 +32,8 @@ public class ModuleIOSim implements ModuleIO {
 
     private boolean driveClosedLoop = false;
     private boolean turnClosedLoop = false;
-    private PIDController driveController = new PIDController(SwerveConfig.driveSimP, 0, SwerveConfig.driveSimD);
-    private PIDController turnController = new PIDController(SwerveConfig.turnSimP, 0, SwerveConfig.turnSimD);
+    private PIDController driveController = new PIDController(SwerveConfig.driveSimKP, 0, SwerveConfig.driveSimKD);
+    private PIDController turnController = new PIDController(SwerveConfig.angleSimKP, 0, SwerveConfig.angleSimKD);
     private double driveFFVolts = 0.0;
     private double driveAppliedVolts = 0.0;
     private double turnAppliedVolts = 0.0;
@@ -43,10 +42,10 @@ public class ModuleIOSim implements ModuleIO {
         this.moduleSimulation = moduleSimulation;
         this.driveMotor = moduleSimulation
                 .useGenericMotorControllerForDrive()
-                .withCurrentLimit(SwerveConfig.driveContinuousCurrentLimit);
+                .withCurrentLimit(SwerveConfig.DRIVE_CONTINUOUS_CURRENT_LIMIT);
         this.turnMotor = moduleSimulation
                 .useGenericControllerForSteer()
-                .withCurrentLimit(SwerveConfig.angleContinuousCurrentLimit);
+                .withCurrentLimit(SwerveConfig.ANGLE_CONTINUOUS_CURRENT_LIMIT);
 
         // Enable wrapping for turn PID
         turnController.enableContinuousInput(-Math.PI, Math.PI);
@@ -102,7 +101,7 @@ public class ModuleIOSim implements ModuleIO {
     @Override
     public SwerveModuleState getState() {
         return new SwerveModuleState(
-                moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond) * SwerveConfig.wheelRadius.in(Meters),
+                moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond) * SwerveConfig.WHEEL_RADIUS.in(Meters),
                 moduleSimulation.getSteerAbsoluteFacing());
     }
 
@@ -126,7 +125,7 @@ public class ModuleIOSim implements ModuleIO {
 
     @Override
     public void setDriveVelocity(double speedMetersPerSecond) {
-        double velocityRadPerSec = speedMetersPerSecond / SwerveConfig.wheelRadius.in(Meters);
+        double velocityRadPerSec = speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters);
 
         driveClosedLoop = true;
         driveFFVolts =

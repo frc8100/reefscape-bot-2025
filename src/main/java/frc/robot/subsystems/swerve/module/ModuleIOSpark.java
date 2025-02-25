@@ -13,6 +13,8 @@
 
 package frc.robot.subsystems.swerve.module;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.RelativeEncoder;
@@ -32,9 +34,6 @@ import frc.lib.util.SparkUtil;
 import frc.lib.util.swerveUtil.RevSwerveModuleConstants;
 import frc.robot.subsystems.swerve.SparkOdometryThread;
 import frc.robot.subsystems.swerve.SwerveConfig;
-
-import static edu.wpi.first.units.Units.MetersPerSecond;
-
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
@@ -234,10 +233,10 @@ public class ModuleIOSpark implements ModuleIO {
      */
     private void setSpeed(SwerveModuleState desiredState) {
         // Calculate the percent output and set the speed
-        double percentOutput = desiredState.speedMetersPerSecond / SwerveConfig.maxSpeed.in(MetersPerSecond);
+        double percentOutput = desiredState.speedMetersPerSecond / SwerveConfig.MAX_SPEED.in(MetersPerSecond);
 
         // Clamp the percent output to the max speed
-        percentOutput = MathUtil.clamp(percentOutput, -SwerveConfig.drivePower, SwerveConfig.drivePower);
+        percentOutput = MathUtil.clamp(percentOutput, -SwerveConfig.MAX_DRIVE_POWER, SwerveConfig.MAX_DRIVE_POWER);
 
         driveMotor.set(percentOutput);
 
@@ -258,7 +257,7 @@ public class ModuleIOSpark implements ModuleIO {
      */
     private void setAngle(SwerveModuleState desiredState) {
         // Stop the motor if the speed is less than 1%. Prevents Jittering
-        if (Math.abs(desiredState.speedMetersPerSecond) <= (SwerveConfig.maxSpeed.in(MetersPerSecond) * 0.01)) {
+        if (Math.abs(desiredState.speedMetersPerSecond) <= (SwerveConfig.MAX_SPEED.in(MetersPerSecond) * 0.01)) {
             angleMotor.stopMotor();
             return;
         }

@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.Meters;
+
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -9,9 +11,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveDrive;
-
-import static edu.wpi.first.units.Units.Meters;
-
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
@@ -46,10 +45,7 @@ public class SwerveSysidRoutines {
                 }),
 
                 // Allow modules to orient
-                Commands.run(
-                                () -> drive.runCharacterization(0.0),
-                                drive)
-                        .withTimeout(FF_START_DELAY),
+                Commands.run(() -> drive.runCharacterization(0.0), drive).withTimeout(FF_START_DELAY),
 
                 // Start timer
                 Commands.runOnce(timer::restart),
@@ -133,7 +129,8 @@ public class SwerveSysidRoutines {
                                     for (int i = 0; i < 4; i++) {
                                         wheelDelta += Math.abs(positions[i] - state.positions[i]) / 4.0;
                                     }
-                                    double wheelRadius = (state.gyroDelta * SwerveConfig.driveBaseRadius.in(Meters)) / wheelDelta;
+                                    double wheelRadius =
+                                            (state.gyroDelta * SwerveConfig.DRIVE_BASE_RADIUS.in(Meters)) / wheelDelta;
 
                                     NumberFormat formatter = new DecimalFormat("#0.000");
                                     System.out.println("********** Wheel Radius Characterization Results **********");

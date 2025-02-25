@@ -1,5 +1,6 @@
 package frc.robot.subsystems.superstructure.claw;
 
+import static edu.wpi.first.units.Units.Amps;
 import static frc.lib.util.SparkUtil.*;
 
 import com.revrobotics.RelativeEncoder;
@@ -72,9 +73,9 @@ public class ClawIOSpark implements ClawIO {
 
             // Override the default config
             this.idleMode = SparkBaseConfig.IdleMode.kBrake;
-            this.inverted = Constants.Claw.angleMotorInverted;
-            this.smartCurrentLimit = Constants.Claw.angleMotorCurrentLimit;
-            this.gearRatio = Constants.Claw.angleGearRatio;
+            this.inverted = Constants.Claw.IS_ANGLE_MOTOR_INVERTED;
+            this.smartCurrentLimit = (int) Constants.Claw.ANGLE_MOTOR_CURRENT_LIMIT.in(Amps);
+            this.gearRatio = Constants.Claw.ANGLE_GEAR_RATIO;
         }
     }
 
@@ -87,15 +88,15 @@ public class ClawIOSpark implements ClawIO {
 
             // Override the default config
             this.idleMode = SparkBaseConfig.IdleMode.kBrake;
-            this.inverted = Constants.Claw.outakeMotorInverted;
-            this.smartCurrentLimit = Constants.Claw.outakeMotorCurrentLimit;
-            this.gearRatio = Constants.Claw.outakeGearRatio;
+            this.inverted = Constants.Claw.IS_OUTTAKE_MOTOR_INVERTED;
+            this.smartCurrentLimit = (int) Constants.Claw.OUTTAKE_MOTOR_CURRENT_LIMIT.in(Amps);
+            this.gearRatio = Constants.Claw.OUTTAKE_GEAR_RATIO;
         }
     }
 
     public ClawIOSpark() {
         // Create the motor and configure it
-        angleMotor = new SparkMax(Constants.Claw.angleClawMotorId, MotorType.kBrushless);
+        angleMotor = new SparkMax(Constants.Claw.ANGLE_MOTOR_ID, MotorType.kBrushless);
         angleEncoder = angleMotor.getEncoder();
         angleClosedLoopController = angleMotor.getClosedLoopController();
 
@@ -104,8 +105,12 @@ public class ClawIOSpark implements ClawIO {
         // Apply PID config for the angle motor
         angleConfig
                 .closedLoop
-                .pidf(Constants.Claw.angleKP, Constants.Claw.angleKI, Constants.Claw.angleKD, Constants.Claw.angleKF)
-                .outputRange(-Constants.Claw.anglePower, Constants.Claw.anglePower);
+                .pidf(
+                        Constants.Claw.ANGLE_KP,
+                        Constants.Claw.ANGLE_KI,
+                        Constants.Claw.ANGLE_KD,
+                        Constants.Claw.ANGLE_KF)
+                .outputRange(-Constants.Claw.MAX_ANGLE_POWER, Constants.Claw.MAX_ANGLE_POWER);
 
         // Apply the config
         tryUntilOk(
@@ -120,7 +125,7 @@ public class ClawIOSpark implements ClawIO {
         tryUntilOk(angleMotor, 5, () -> angleEncoder.setPosition(0.0));
 
         // Create the outake motor and configure it
-        outakeMotor = new SparkMax(Constants.Claw.outakeClawMotorId, MotorType.kBrushless);
+        outakeMotor = new SparkMax(Constants.Claw.OUTTAKE_MOTOR_ID, MotorType.kBrushless);
         outakeEncoder = outakeMotor.getEncoder();
         // outakeClosedLoopController = outakeMotor.getClosedLoopController();
 
@@ -142,10 +147,10 @@ public class ClawIOSpark implements ClawIO {
     @Override
     public void runOutake(double motorInput) {
         // Apply deadband
-        motorInput = MathUtil.applyDeadband(motorInput, Constants.Claw.armDeadband);
+        motorInput = MathUtil.applyDeadband(motorInput, Constants.Claw.ARM_CONTROLLER_DEADBAND);
 
         // Run the motor
-        double percentOutput = Constants.Claw.armPercentOutput * motorInput;
+        double percentOutput = Constants.Claw.ARM_MAX_OUTPUT * motorInput;
         outakeMotor.set(percentOutput);
 
         // Log

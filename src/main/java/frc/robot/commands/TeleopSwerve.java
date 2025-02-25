@@ -1,19 +1,17 @@
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants;
 import frc.robot.Controls;
 import frc.robot.States;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveDrive;
-
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -130,14 +128,16 @@ public class TeleopSwerve extends Command {
         double rotationInput = rotationSupplier.getAsDouble();
 
         /**
-         * The constant to muliply each value by
+         * The constant to multiply each value by
          */
         double dampenAndSpeedConstant = (dampen.getAsBoolean() ? 0.2 : 1) * (speedDial.getAsDouble());
 
         double translationValue =
-                MathUtil.applyDeadband(translationInput, Constants.stickDeadband) * dampenAndSpeedConstant;
-        double strafeValue = MathUtil.applyDeadband(strafeInput, Constants.stickDeadband) * dampenAndSpeedConstant;
-        double rotationValue = MathUtil.applyDeadband(rotationInput, Constants.stickDeadband) * dampenAndSpeedConstant;
+                MathUtil.applyDeadband(translationInput, SwerveConfig.DRIVE_STICK_DEADBAND) * dampenAndSpeedConstant;
+        double strafeValue =
+                MathUtil.applyDeadband(strafeInput, SwerveConfig.DRIVE_STICK_DEADBAND) * dampenAndSpeedConstant;
+        double rotationValue =
+                MathUtil.applyDeadband(rotationInput, SwerveConfig.DRIVE_STICK_DEADBAND) * dampenAndSpeedConstant;
 
         // Heading direction state
         double currentGyroYawRadians = swerveSubsystem.getGyroHeading().getRadians();
@@ -161,7 +161,7 @@ public class TeleopSwerve extends Command {
                 break;
             case standard:
                 // normal
-                rotationValue = rotationValue * SwerveConfig.maxAngularVelocity.in(RadiansPerSecond);
+                rotationValue = rotationValue * SwerveConfig.MAX_ANGULAR_VELOCITY.in(RadiansPerSecond);
                 break;
         }
 
@@ -178,7 +178,7 @@ public class TeleopSwerve extends Command {
 
         // Drive
         swerveSubsystem.drive(
-                new Translation2d(translationValue, strafeValue).times(SwerveConfig.maxSpeed.in(MetersPerSecond)),
+                new Translation2d(translationValue, strafeValue).times(SwerveConfig.MAX_SPEED.in(MetersPerSecond)),
                 rotationValue,
                 !robotCentricSup.getAsBoolean());
     }

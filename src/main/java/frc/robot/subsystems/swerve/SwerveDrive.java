@@ -31,7 +31,7 @@ public interface SwerveDrive extends Subsystem {
     /**
      * Configures the path planner auto builder and records the path and trajectory setpoint to the logger.
      */
-    default void configurePathPlannerAutoBuilder() {
+    public default void configurePathPlannerAutoBuilder() {
         AutoBuilder.configure(
                 this::getPose,
                 this::setPose,
@@ -43,12 +43,10 @@ public interface SwerveDrive extends Subsystem {
                 this);
 
         Pathfinding.setPathfinder(new LocalADStar());
-        PathPlannerLogging.setLogActivePathCallback((activePath) -> {
-            Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]));
-        });
-        PathPlannerLogging.setLogTargetPoseCallback((targetPose) -> {
-            Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
-        });
+        PathPlannerLogging.setLogActivePathCallback((activePath) ->
+                Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()])));
+        PathPlannerLogging.setLogTargetPoseCallback(
+                (targetPose) -> Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose));
     }
 
     /**
@@ -65,7 +63,6 @@ public interface SwerveDrive extends Subsystem {
 
     /** Runs the drive in a straight line with the specified drive output. By default, this does nothing. */
     public default void runCharacterization(double output) {}
-    ;
 
     /** Returns a command to run a quasistatic test in the specified direction. By default, this does nothing. */
     public default Command sysIdQuasistatic(SysIdRoutine.Direction direction) {

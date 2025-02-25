@@ -18,34 +18,46 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 
+/**
+ * Vision constants. Some must be configured in the web UI.
+ */
 public class VisionConstants {
-    // AprilTag layout
-    public static AprilTagFieldLayout aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+    private VisionConstants() {}
 
-    // Camera names, must match names configured on coprocessor
-    public static String camera0Name = "limelight";
+    /**
+     * The AprilTag field layout. Note: see TU 12
+     */
+    public static final AprilTagFieldLayout aprilTagLayout =
+            AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
 
-    // Robot to camera transforms
-    // (Not used by Limelight, configure in web UI instead)
-    public static Transform3d robotToCamera0 = new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0));
+    /**
+     * Camera names, must match names configured on coprocessor
+     */
+    public static final String CAMERA_0_NAME = "limelight";
+
+    /**
+     * Robot to camera 0 transform
+     * (Not used by Limelight, configure in web UI instead)
+     */
+    public static final Transform3d TRANSFORM_TO_CAMERA_0 =
+            new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0));
 
     // Basic filtering thresholds
-    public static double maxAmbiguity = 0.3;
-    public static double maxZError = 0.75;
+    public static final double MAX_AMBIGUITY = 0.3;
+    public static final double MAX_Z_ERROR = 0.75;
 
     // Standard deviation baselines, for 1 meter distance and 1 tag
     // (Adjusted automatically based on distance and # of tags)
-    public static double linearStdDevBaseline = 0.02; // Meters
-    public static double angularStdDevBaseline = 0.06; // Radians
+    public static final double LINEAR_STD_DEV_BASELINE = 0.02; // Meters
+    public static final double ANGULAR_STD_DEV_BASELINE = 0.06; // Radians
 
     // Standard deviation multipliers for each camera
     // (Adjust to trust some cameras more than others)
-    public static double[] cameraStdDevFactors = new double[] {
+    public static final double[] CAMERA_STD_DEV_FACTORS = new double[] {
         1.0, // Camera 0
-        1.0 // Camera 1
     };
 
     // Multipliers to apply for MegaTag 2 observations
-    public static double linearStdDevMegatag2Factor = 0.5; // More stable than full 3D solve
-    public static double angularStdDevMegatag2Factor = Double.POSITIVE_INFINITY; // No rotation data available
+    public static final double LINEAR_STD_DEV_MEGATAG2_FACTOR = 0.5; // More stable than full 3D solve
+    public static final double ANGULAR_STD_DEV_MEGATAG2_FACTOR = Double.POSITIVE_INFINITY; // No rotation data available
 }

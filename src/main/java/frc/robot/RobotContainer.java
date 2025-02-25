@@ -73,7 +73,7 @@ public class RobotContainer {
 
                 visionSubsystem = new Vision(
                         swerveSubsystem::addVisionMeasurement,
-                        new VisionIOLimelight(VisionConstants.camera0Name, swerveSubsystem::getRotation));
+                        new VisionIOLimelight(VisionConstants.CAMERA_0_NAME, swerveSubsystem::getRotation));
                 break;
 
             default:
@@ -107,8 +107,8 @@ public class RobotContainer {
                 visionSubsystem = new Vision(
                         swerveSubsystem::addVisionMeasurement,
                         new VisionIOPhotonSim(
-                                VisionConstants.camera0Name,
-                                VisionConstants.robotToCamera0,
+                                VisionConstants.CAMERA_0_NAME,
+                                VisionConstants.TRANSFORM_TO_CAMERA_0,
                                 swerveSubsystem::getActualPose));
 
                 // TODO: Add behavior chooser

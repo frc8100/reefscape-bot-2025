@@ -69,5 +69,24 @@
   "[java]": {
     "editor.defaultFormatter": "richardwillis.vscode-spotless-gradle"
   },
-  "wpilib.selectDefaultSimulateExtension": true
+  "wpilib.selectDefaultSimulateExtension": true,
+  "cSpell.words": [
+    "CANCODER",
+    "CTRE",
+    "DEADBAND",
+    "Debouncer",
+    "debouncers",
+    "hashtable",
+    "hashtables",
+    "Holonomic",
+    "maplesim",
+    "odometry",
+    "Pathfinding",
+    "Quasistatic",
+    "Reefscape",
+    "setpoint",
+    "setpoints",
+    "teleop",
+    "wpilibj"
+  ]
 }

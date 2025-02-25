@@ -24,7 +24,7 @@ public class TargetApriltag {
         double targetingAngularVelocity = LimelightHelpers.getTX("limelight") * kP;
 
         // convert to radians per second for our drive method
-        targetingAngularVelocity *= SwerveConfig.maxAngularVelocity.in(RadiansPerSecond);
+        targetingAngularVelocity *= SwerveConfig.MAX_ANGULAR_VELOCITY.in(RadiansPerSecond);
 
         // invert since tx is positive when the target is to the right of the crosshair
         targetingAngularVelocity *= -1.0;
@@ -39,7 +39,7 @@ public class TargetApriltag {
     double limelight_range_proportional() {
         double kP = .1;
         double targetingForwardSpeed = LimelightHelpers.getTY("limelight") * kP;
-        targetingForwardSpeed *= SwerveConfig.maxSpeed.in(MetersPerSecond);
+        targetingForwardSpeed *= SwerveConfig.MAX_SPEED.in(MetersPerSecond);
         targetingForwardSpeed *= -1.0;
         return targetingForwardSpeed;
     }
