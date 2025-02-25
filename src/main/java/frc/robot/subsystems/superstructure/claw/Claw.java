@@ -1,5 +1,6 @@
 package frc.robot.subsystems.superstructure.claw;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -23,6 +24,14 @@ public class Claw extends SubsystemBase {
      */
     public Command getRunCommand(DoubleSupplier motorInputSupplier) {
         return new RunCommand(() -> io.runOutake(motorInputSupplier.getAsDouble()), this);
+    }
+
+    /**
+     * @return A command to move the claw to a specific angle.
+     * @param rotationToRotateClawTo - the angle to move to
+     */
+    public Command getAngleCommand(Rotation2d rotationToRotateClawTo) {
+        return new RunCommand(() -> io.setTurnPosition(rotationToRotateClawTo), this);
     }
 
     @Override

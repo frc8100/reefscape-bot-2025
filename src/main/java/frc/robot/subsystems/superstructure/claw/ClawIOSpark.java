@@ -15,7 +15,6 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.robot.Constants;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -73,9 +72,9 @@ public class ClawIOSpark implements ClawIO {
 
             // Override the default config
             this.idleMode = SparkBaseConfig.IdleMode.kBrake;
-            this.inverted = Constants.Claw.IS_ANGLE_MOTOR_INVERTED;
-            this.smartCurrentLimit = (int) Constants.Claw.ANGLE_MOTOR_CURRENT_LIMIT.in(Amps);
-            this.gearRatio = Constants.Claw.ANGLE_GEAR_RATIO;
+            this.inverted = ClawConstants.IS_ANGLE_MOTOR_INVERTED;
+            this.smartCurrentLimit = (int) ClawConstants.ANGLE_MOTOR_CURRENT_LIMIT.in(Amps);
+            this.positionConversionFactor = ClawConstants.ANGLE_ENCODER_POSITION_FACTOR;
         }
     }
 
@@ -88,15 +87,15 @@ public class ClawIOSpark implements ClawIO {
 
             // Override the default config
             this.idleMode = SparkBaseConfig.IdleMode.kBrake;
-            this.inverted = Constants.Claw.IS_OUTTAKE_MOTOR_INVERTED;
-            this.smartCurrentLimit = (int) Constants.Claw.OUTTAKE_MOTOR_CURRENT_LIMIT.in(Amps);
-            this.gearRatio = Constants.Claw.OUTTAKE_GEAR_RATIO;
+            this.inverted = ClawConstants.IS_OUTTAKE_MOTOR_INVERTED;
+            this.smartCurrentLimit = (int) ClawConstants.OUTTAKE_MOTOR_CURRENT_LIMIT.in(Amps);
+            this.positionConversionFactor = ClawConstants.OUTTAKE_ENCODER_POSITION_FACTOR;
         }
     }
 
     public ClawIOSpark() {
         // Create the motor and configure it
-        angleMotor = new SparkMax(Constants.Claw.ANGLE_MOTOR_ID, MotorType.kBrushless);
+        angleMotor = new SparkMax(ClawConstants.ANGLE_MOTOR_ID, MotorType.kBrushless);
         angleEncoder = angleMotor.getEncoder();
         angleClosedLoopController = angleMotor.getClosedLoopController();
 
@@ -105,12 +104,8 @@ public class ClawIOSpark implements ClawIO {
         // Apply PID config for the angle motor
         angleConfig
                 .closedLoop
-                .pidf(
-                        Constants.Claw.ANGLE_KP,
-                        Constants.Claw.ANGLE_KI,
-                        Constants.Claw.ANGLE_KD,
-                        Constants.Claw.ANGLE_KF)
-                .outputRange(-Constants.Claw.MAX_ANGLE_POWER, Constants.Claw.MAX_ANGLE_POWER);
+                .pidf(ClawConstants.ANGLE_KP, ClawConstants.ANGLE_KI, ClawConstants.ANGLE_KD, ClawConstants.ANGLE_KF)
+                .outputRange(-ClawConstants.MAX_ANGLE_POWER, ClawConstants.MAX_ANGLE_POWER);
 
         // Apply the config
         tryUntilOk(
@@ -125,7 +120,7 @@ public class ClawIOSpark implements ClawIO {
         tryUntilOk(angleMotor, 5, () -> angleEncoder.setPosition(0.0));
 
         // Create the outake motor and configure it
-        outakeMotor = new SparkMax(Constants.Claw.OUTTAKE_MOTOR_ID, MotorType.kBrushless);
+        outakeMotor = new SparkMax(ClawConstants.OUTTAKE_MOTOR_ID, MotorType.kBrushless);
         outakeEncoder = outakeMotor.getEncoder();
         // outakeClosedLoopController = outakeMotor.getClosedLoopController();
 
@@ -147,10 +142,10 @@ public class ClawIOSpark implements ClawIO {
     @Override
     public void runOutake(double motorInput) {
         // Apply deadband
-        motorInput = MathUtil.applyDeadband(motorInput, Constants.Claw.ARM_CONTROLLER_DEADBAND);
+        motorInput = MathUtil.applyDeadband(motorInput, ClawConstants.ARM_CONTROLLER_DEADBAND);
 
         // Run the motor
-        double percentOutput = Constants.Claw.ARM_MAX_OUTPUT * motorInput;
+        double percentOutput = ClawConstants.ARM_MAX_OUTPUT * motorInput;
         outakeMotor.set(percentOutput);
 
         // Log
@@ -167,7 +162,7 @@ public class ClawIOSpark implements ClawIO {
     @Override
     public void setTurnPosition(Rotation2d rotation) {
         // Set the position of the turn motor
-        angleClosedLoopController.setReference(rotation.getDegrees(), ControlType.kPosition, ClosedLoopSlot.kSlot0);
+        angleClosedLoopController.setReference(rotation.getRadians(), ControlType.kPosition, ClosedLoopSlot.kSlot0);
     }
 
     @Override

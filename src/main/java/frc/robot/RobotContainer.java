@@ -3,6 +3,7 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -10,6 +11,7 @@ import frc.robot.commands.SwerveSysidRoutines;
 // import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.superstructure.claw.Claw;
+import frc.robot.subsystems.superstructure.claw.ClawConstants;
 import frc.robot.subsystems.superstructure.claw.ClawIOSpark;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveConfig;
@@ -175,6 +177,14 @@ public class RobotContainer {
 
         // TODO: Temporary
         autoChooser.addOption("Coral and Go To All Reefs Test", autoRoutines.getCoralAndGoToAllReefsTest());
+
+        // TODO: Temporary claw position settings
+        LoggedDashboardChooser<Command> clawAngleChooser =
+                new LoggedDashboardChooser<>("Claw Angle", new SendableChooser<>());
+
+        clawAngleChooser.addDefaultOption(
+                "Resting", clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.RESTING_ANGLE));
+        clawAngleChooser.addOption("L4", clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.L4ANGLE));
 
         // Configure the button bindings
         configureButtonBindings();

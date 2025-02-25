@@ -91,10 +91,14 @@ public class SwerveConfig {
     public static final double DRIVE_ENCODER_VELOCITY_FACTOR = DRIVE_ENCODER_POSITION_FACTOR / 60;
 
     /**
-     * The number of degrees that a single rotation of the turn motor turns the wheel.
-     * Example: If the gear ratio is 10:1, then the wheel turns 36 degrees for every 1 rotation of the motor.
+     * Factor to convert the angle encoder position from rotations to degrees
      */
-    public static final double DEGREES_PER_ANGLE_MOTOR_ROTATION = 360 / ANGLE_GEAR_RATIO;
+    public static final double ANGLE_ENCODER_POSITION_FACTOR = 360 / ANGLE_GEAR_RATIO;
+
+    /**
+     * Factor to convert the angle encoder position from RPM to degrees/sec
+     */
+    public static final double ANGLE_ENCODER_VELOCITY_FACTOR = ANGLE_ENCODER_POSITION_FACTOR / 60;
 
     // Motor Inverts
     /**
@@ -246,9 +250,9 @@ public class SwerveConfig {
 
         angleConfig
                 .encoder
-                .positionConversionFactor(SwerveConfig.DEGREES_PER_ANGLE_MOTOR_ROTATION)
+                .positionConversionFactor(SwerveConfig.ANGLE_ENCODER_POSITION_FACTOR)
                 // The velocity conversion factor is in degrees/sec
-                .velocityConversionFactor(SwerveConfig.DEGREES_PER_ANGLE_MOTOR_ROTATION / 60);
+                .velocityConversionFactor(SwerveConfig.ANGLE_ENCODER_VELOCITY_FACTOR);
 
         // Configure the PID controller for the angle motor
         angleConfig

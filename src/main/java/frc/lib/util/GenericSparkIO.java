@@ -67,14 +67,14 @@ public interface GenericSparkIO<TInputs> {
         public boolean inverted = false;
 
         /**
-         * The current limit of the motor.
+         * The current limit of the motor, in amps.
          */
         public int smartCurrentLimit = 40;
 
         /**
-         * The gear ratio of the motor.
+         * Converts from position in rotations to the desired unit.
          */
-        public double gearRatio = 1.0;
+        public double positionConversionFactor = 1.0;
 
         /**
          * Creates a new configuration with default values.
@@ -105,10 +105,8 @@ public interface GenericSparkIO<TInputs> {
         // Configure the encoder
         outputConfig
                 .encoder
-                // Rotations to radians
-                .positionConversionFactor(2 * Math.PI / config.gearRatio)
-                // RPM to rad/s
-                .velocityConversionFactor(2 * Math.PI / 60.0 / config.gearRatio)
+                .positionConversionFactor(config.positionConversionFactor)
+                .velocityConversionFactor(config.positionConversionFactor / 60)
                 .uvwMeasurementPeriod(10)
                 .uvwAverageDepth(2);
 
