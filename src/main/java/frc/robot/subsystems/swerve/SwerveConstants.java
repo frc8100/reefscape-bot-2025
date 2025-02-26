@@ -57,7 +57,7 @@ public final class SwerveConstants {
             private Mod3() {}
 
             public static final int DRIVE_MOTOR_ID = 1;
-            public static final int ANGLE_MOTOR_ID = 9;
+            public static final int ANGLE_MOTOR_ID = 8;
             public static final int CANCODER_ID = 16;
             public static final Rotation2d ANGLE_OFFSET = Rotation2d.fromDegrees((185.273438) + 180.0);
             public static final RevSwerveModuleConstants constants =
