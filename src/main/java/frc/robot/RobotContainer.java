@@ -12,6 +12,7 @@ import frc.robot.commands.SwerveSysidRoutines;
 import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.superstructure.claw.Claw;
 import frc.robot.subsystems.superstructure.claw.ClawConstants;
+import frc.robot.subsystems.superstructure.claw.ClawIOSim;
 import frc.robot.subsystems.superstructure.claw.ClawIOSpark;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveConfig;
@@ -76,6 +77,8 @@ public class RobotContainer {
                 visionSubsystem = new Vision(
                         swerveSubsystem::addVisionMeasurement,
                         new VisionIOLimelight(VisionConstants.CAMERA_0_NAME, swerveSubsystem::getRotation));
+
+                clawSubsystem = new Claw(new ClawIOSpark());
                 break;
 
             default:
@@ -104,14 +107,14 @@ public class RobotContainer {
                         },
                         driveSimulation);
 
-                // swerveSubsystem = new SwerveSim();
-
                 visionSubsystem = new Vision(
                         swerveSubsystem::addVisionMeasurement,
                         new VisionIOPhotonSim(
                                 VisionConstants.CAMERA_0_NAME,
                                 VisionConstants.TRANSFORM_TO_CAMERA_0,
                                 swerveSubsystem::getActualPose));
+
+                clawSubsystem = new Claw(new ClawIOSim());
 
                 // TODO: Add behavior chooser
                 // Create an opponent robot simulation
@@ -147,9 +150,6 @@ public class RobotContainer {
                 //     break;
         }
 
-        // TODO: sim implementation
-        clawSubsystem = new Claw(new ClawIOSpark());
-
         // TODO: add switch for controller and joystick
         swerveSubsystem.setDefaultCommand(new TeleopSwerve(swerveSubsystem, Controls.mainDriveControls, true));
         // swerveSubsystem.setDefaultCommand(new TeleopSwerve(swerveSubsystem, new
@@ -179,16 +179,22 @@ public class RobotContainer {
         autoChooser.addOption("Coral and Go To All Reefs Test", autoRoutines.getCoralAndGoToAllReefsTest());
 
         // TODO: Temporary claw position settings
-        SendableChooser<Command> clawAngleSendableChooser = new SendableChooser<>();
-        LoggedDashboardChooser<Command> clawAngleChooser =
-                new LoggedDashboardChooser<>("Claw Angle", clawAngleSendableChooser);
+        // SendableChooser<Command> clawAngleSendableChooser = new SendableChooser<>();
+        // LoggedDashboardChooser<Command> clawAngleChooser =
+        //         new LoggedDashboardChooser<>("Claw Angle", clawAngleSendableChooser);
 
-        clawAngleChooser.addDefaultOption(
-                "Resting", clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.RESTING_ANGLE));
-        clawAngleChooser.addOption("L4", clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.L4ANGLE));
+        // clawAngleChooser.addDefaultOption(
+        //         "Resting", clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.RESTING_ANGLE));
+        // clawAngleChooser.addOption("L4", clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.L4ANGLE));
 
-        // Schedule command on change
-        clawAngleSendableChooser.onChange(Command::schedule);
+        // // Schedule command on change
+        // // clawAngleSendableChooser.onChange(Command::schedule);
+        // clawAngleSendableChooser.onChange((Command commandToSchedule) -> {
+        //     // Debug
+        //     System.out.println("Claw angle command scheduled");
+
+        //     commandToSchedule.schedule();
+        // });
 
         // Configure the button bindings
         configureButtonBindings();
@@ -225,7 +231,12 @@ public class RobotContainer {
         // Claw
         // clawSubsystem.setDefaultCommand(
         //         Commands.run(() -> clawSubsystem.runClaw(Controls.Arm.getIntakeOrOuttake()), clawSubsystem));
-        clawSubsystem.setDefaultCommand(clawSubsystem.getRunCommand(Controls.Arm::getIntakeOrOuttake));
+        clawSubsystem.setDefaultCommand(clawSubsystem.getRunCommand(Controls.Claw::getIntakeOrOuttake));
+
+        Controls.Claw.moveToL1.onTrue(clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.L1ANGLE));
+        Controls.Claw.moveToL2.onTrue(clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.L2ANGLE));
+        Controls.Claw.moveToL3.onTrue(clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.L3ANGLE));
+        Controls.Claw.moveToL4.onTrue(clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.L4ANGLE));
 
         // Test
 

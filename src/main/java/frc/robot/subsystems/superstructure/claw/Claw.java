@@ -36,6 +36,8 @@ public class Claw extends SubsystemBase {
 
     @Override
     public void periodic() {
+        io.periodic();
+
         // Update inputs
         io.updateInputs(inputs);
         Logger.processInputs("Claw", inputs);

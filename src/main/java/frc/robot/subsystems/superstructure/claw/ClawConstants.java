@@ -1,9 +1,9 @@
 package frc.robot.subsystems.superstructure.claw;
 
 import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Degrees;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Current;
 
 /**
@@ -18,8 +18,16 @@ public final class ClawConstants {
     public static final class RotationPositions {
         private RotationPositions() {}
 
-        public static final Rotation2d RESTING_ANGLE = new Rotation2d();
-        public static final Rotation2d L4ANGLE = new Rotation2d(Degrees.of(10));
+        /**
+         * The initial angle of the claw when it is resting (against the mechanical lock).
+         */
+        public static final Rotation2d RESTING_ANGLE = Rotation2d.fromDegrees(0);
+
+        // TODO: Find angles
+        public static final Rotation2d L4ANGLE = Rotation2d.fromDegrees(90);
+        public static final Rotation2d L3ANGLE = Rotation2d.fromDegrees(75);
+        public static final Rotation2d L2ANGLE = Rotation2d.fromDegrees(60);
+        public static final Rotation2d L1ANGLE = Rotation2d.fromDegrees(45);
     }
 
     /**
@@ -34,7 +42,8 @@ public final class ClawConstants {
 
     // Turn motor configs
     public static final int ANGLE_MOTOR_ID = 12;
-    public static final double ANGLE_GEAR_RATIO = 15.0;
+    // TODO: set to 30
+    public static final double ANGLE_GEAR_RATIO = 2.0;
     public static final boolean IS_ANGLE_MOTOR_INVERTED = false;
     public static final Current ANGLE_MOTOR_CURRENT_LIMIT = Amps.of(40);
     /** Rotations to radians */
@@ -49,7 +58,8 @@ public final class ClawConstants {
     /**
      * The maximum power for the angle motor, from 0-1.
      */
-    public static final double MAX_ANGLE_POWER = 0.8;
+    // TODO: Tune
+    public static final double MAX_ANGLE_POWER = 0.6;
 
     // Outtake motor configs
     public static final int OUTTAKE_MOTOR_ID = 13;
@@ -62,5 +72,21 @@ public final class ClawConstants {
     /**
      * The maximum power for the outtake motor, from 0-1.
      */
-    public static final double MAX_OUTTAKE_POWER = 0.7;
+    public static final double MAX_OUTTAKE_POWER = 0.5;
+
+    // Simulator configs
+    public static final DCMotor SIM_ANGLE_MOTOR = DCMotor.getNEO(1);
+
+    /**
+     * The moment of inertia for the claw arm.
+     */
+    // TODO: Tune MOI
+    public static final double SIM_ANGLE_MOI = 0.01;
+
+    public static final DCMotor SIM_OUTTAKE_MOTOR = DCMotor.getNEO(1);
+
+    /**
+     * The moment of inertia for the outtake.
+     */
+    public static final double SIM_OUTTAKE_MOI = 0.01;
 }

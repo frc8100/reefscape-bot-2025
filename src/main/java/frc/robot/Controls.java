@@ -4,9 +4,11 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
 
 /** Declares control key bindings */
 public class Controls {
+    private Controls() {}
 
     /**
      * The driver controller, on port 0. Note: although this uses the {@link Joystick} class, it is compatible with {@link XboxController}.
@@ -166,11 +168,13 @@ public class Controls {
     }
 
     /**
-     * The controls for the arm.
+     * The controls for the claw.
      */
-    public static class Arm {
+    public static class Claw {
+        private Claw() {}
+
         /**
-         * The controller used for the arm.
+         * The controller used for the claw.
          * Temporarily the same as the driver controller.
          */
         public static final Joystick armController = mainDriverController;
@@ -180,6 +184,26 @@ public class Controls {
         // Buttons for the intake/outtake
         private static final int intakeAxis = XboxController.Axis.kLeftTrigger.value;
         private static final int outtakeAxis = XboxController.Axis.kRightTrigger.value;
+
+        /**
+         * The button to make the claw rotated at L4. Default is up on the D-pad.
+         */
+        public static final POVButton moveToL4 = new POVButton(armController, 90);
+
+        /**
+         * The button to make the claw rotated at L3. Default is right on the D-pad.
+         */
+        public static final POVButton moveToL3 = new POVButton(armController, 180);
+
+        /**
+         * The button to make the claw rotated at L2. Default is down on the D-pad.
+         */
+        public static final POVButton moveToL2 = new POVButton(armController, 270);
+
+        /**
+         * The button to make the claw rotated at L1. Default is left on the D-pad.
+         */
+        public static final POVButton moveToL1 = new POVButton(armController, 0);
 
         /**
          * Returns the intake or outtake input depending on which one is bigger.

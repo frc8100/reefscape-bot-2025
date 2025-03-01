@@ -48,4 +48,10 @@ public interface ClawIO extends GenericSparkIO<ClawIO.ClawIOInputs> {
      * @param motorInput - The percent output to run the motor at, from [-1, 1] without deadband.
      */
     public void runOutake(double motorInput);
+
+    /**
+     * Periodic function to be called by the subsystem.
+     * Optional, do not update the IO here.
+     */
+    public default void periodic() {}
 }
