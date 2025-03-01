@@ -41,10 +41,15 @@ public final class ClawConstants {
     public static final double ARM_MAX_OUTPUT = 0.15;
 
     // Turn motor configs
-    public static final int ANGLE_MOTOR_ID = 12;
+    public static final int ANGLE_MOTOR_ID = 9;
+    /**
+     * The maximum power for the angle motor, from 0-1.
+     */
+    // TODO: Tune
+    public static final double MAX_ANGLE_POWER = 0.08;
     // TODO: set to 30
-    public static final double ANGLE_GEAR_RATIO = 2.0;
-    public static final boolean IS_ANGLE_MOTOR_INVERTED = false;
+    public static final double ANGLE_GEAR_RATIO = 30;
+    public static final boolean IS_ANGLE_MOTOR_INVERTED = true;
     public static final Current ANGLE_MOTOR_CURRENT_LIMIT = Amps.of(40);
     /** Rotations to radians */
     public static final double ANGLE_ENCODER_POSITION_FACTOR = (2 * Math.PI) / ANGLE_GEAR_RATIO;
@@ -54,12 +59,6 @@ public final class ClawConstants {
     public static final double ANGLE_KI = 0.0;
     public static final double ANGLE_KD = 0.0;
     public static final double ANGLE_KF = 0.0;
-
-    /**
-     * The maximum power for the angle motor, from 0-1.
-     */
-    // TODO: Tune
-    public static final double MAX_ANGLE_POWER = 0.6;
 
     // Outtake motor configs
     public static final int OUTTAKE_MOTOR_ID = 13;
