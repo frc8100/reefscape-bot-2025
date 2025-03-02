@@ -93,11 +93,11 @@ public class Controls {
         // ! Test
         // public JoystickButton goToCoralStation1 =
         //         new JoystickButton(driverController, XboxController.Button.kA.value);
-        public int goToCoralStation1Button = XboxController.Button.kA.value;
+        // public int goToCoralStation1Button = XboxController.Button.kA.value;
 
         // public JoystickButton goToReef1 =
         //         new JoystickButton(driverController, XboxController.Button.kB.value);
-        public int goToReef1Button = XboxController.Button.kB.value;
+        // public int goToReef1Button = XboxController.Button.kB.value;
 
         /**
          * @return The translation (x)
@@ -204,6 +204,12 @@ public class Controls {
          * The button to make the claw rotated at L1. Default is left on the D-pad.
          */
         public static final POVButton moveToL1 = new POVButton(armController, 0);
+
+        /**
+         * The button to make the claw rotated at the resting position. Default is A.
+         */
+        public static final JoystickButton resetClawButton =
+                new JoystickButton(armController, XboxController.Button.kA.value);
 
         /**
          * Returns the intake or outtake input depending on which one is bigger.

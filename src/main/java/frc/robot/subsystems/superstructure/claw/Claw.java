@@ -1,10 +1,13 @@
 package frc.robot.subsystems.superstructure.claw;
 
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -41,5 +44,14 @@ public class Claw extends SubsystemBase {
         // Update inputs
         io.updateInputs(inputs);
         Logger.processInputs("Claw", inputs);
+    }
+
+    /**
+     * @return The position of the claw.
+     */
+    @AutoLogOutput(key = "ComponentPositions/claw")
+    public Pose3d getPose() {
+        // TODO: Add elevator pose
+        return new Pose3d(0, 0, 0, new Rotation3d(0, inputs.turnPositionRad, 0));
     }
 }

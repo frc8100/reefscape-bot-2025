@@ -47,12 +47,13 @@ public class ClawIOSpark implements ClawIO {
     /**
      * The motor for the outtake of the claw.
      */
-    // private final SparkMax outakeMotor;
+    private final SparkMax outakeMotor;
 
     /**
      * The relative encoder for the outtake motor.
      */
-    // private final RelativeEncoder outakeEncoder;
+    private final RelativeEncoder outakeEncoder;
+
     /**
      * The closed loop controller for the outtake motor.
      */
@@ -61,7 +62,7 @@ public class ClawIOSpark implements ClawIO {
     /**
      * A debouncer for the connected state, to prevent flickering.
      */
-    // private final Debouncer outakeConnectedDebouncer = new Debouncer(0.5);
+    private final Debouncer outakeConnectedDebouncer = new Debouncer(0.5);
 
     /**
      * The config for the turn motor.
@@ -120,23 +121,23 @@ public class ClawIOSpark implements ClawIO {
         tryUntilOk(angleMotor, 5, () -> angleEncoder.setPosition(0.0));
 
         // Create the outake motor and configure it
-        // outakeMotor = new SparkMax(ClawConstants.OUTTAKE_MOTOR_ID, MotorType.kBrushless);
-        // outakeEncoder = outakeMotor.getEncoder();
-        // // outakeClosedLoopController = outakeMotor.getClosedLoopController();
+        outakeMotor = new SparkMax(ClawConstants.OUTTAKE_MOTOR_ID, MotorType.kBrushless);
+        outakeEncoder = outakeMotor.getEncoder();
+        // outakeClosedLoopController = outakeMotor.getClosedLoopController();
 
-        // SparkMaxConfig outakeConfig = new OutakeConfig().getConfig();
+        SparkMaxConfig outakeConfig = new OutakeConfig().getConfig();
 
-        // // Apply the config
-        // tryUntilOk(
-        //         outakeMotor,
-        //         5,
-        //         () -> outakeMotor.configure(
-        //                 outakeConfig,
-        //                 SparkBase.ResetMode.kResetSafeParameters,
-        //                 SparkBase.PersistMode.kPersistParameters));
+        // Apply the config
+        tryUntilOk(
+                outakeMotor,
+                5,
+                () -> outakeMotor.configure(
+                        outakeConfig,
+                        SparkBase.ResetMode.kResetSafeParameters,
+                        SparkBase.PersistMode.kPersistParameters));
 
-        // // Reset the encoder
-        // tryUntilOk(outakeMotor, 5, () -> outakeEncoder.setPosition(0.0));
+        // Reset the encoder
+        tryUntilOk(outakeMotor, 5, () -> outakeEncoder.setPosition(0.0));
     }
 
     @Override
@@ -146,7 +147,7 @@ public class ClawIOSpark implements ClawIO {
 
         // Run the motor
         double percentOutput = ClawConstants.ARM_MAX_OUTPUT * motorInput;
-        // outakeMotor.set(percentOutput);
+        outakeMotor.set(percentOutput);
 
         // Log
         Logger.recordOutput("Claw/motorInput", motorInput);
@@ -156,7 +157,7 @@ public class ClawIOSpark implements ClawIO {
     @Override
     public void stop() {
         angleMotor.stopMotor();
-        // outakeMotor.stopMotor();
+        outakeMotor.stopMotor();
     }
 
     @Override
@@ -194,19 +195,19 @@ public class ClawIOSpark implements ClawIO {
         // Update inputs for the outake motor
 
         // Set the position and velocity
-        // ifOk(outakeMotor, outakeEncoder::getPosition, position -> inputs.outakePositionRad = position);
-        // ifOk(outakeMotor, outakeEncoder::getVelocity, velocity -> inputs.outakeVelocityRadPerSec = velocity);
+        ifOk(outakeMotor, outakeEncoder::getPosition, position -> inputs.outakePositionRad = position);
+        ifOk(outakeMotor, outakeEncoder::getVelocity, velocity -> inputs.outakeVelocityRadPerSec = velocity);
 
-        // // Set the supply current based on the bus voltage multiplied by the applied output
-        // ifOk(
-        //         outakeMotor,
-        //         new DoubleSupplier[] {outakeMotor::getBusVoltage, outakeMotor::getAppliedOutput},
-        //         x -> inputs.outakeAppliedVolts = x[0] * x[1]);
+        // Set the supply current based on the bus voltage multiplied by the applied output
+        ifOk(
+                outakeMotor,
+                new DoubleSupplier[] {outakeMotor::getBusVoltage, outakeMotor::getAppliedOutput},
+                x -> inputs.outakeAppliedVolts = x[0] * x[1]);
 
-        // // Set the torque current
-        // ifOk(outakeMotor, outakeMotor::getOutputCurrent, current -> inputs.outakeTorqueCurrentAmps = current);
+        // Set the torque current
+        ifOk(outakeMotor, outakeMotor::getOutputCurrent, current -> inputs.outakeTorqueCurrentAmps = current);
 
-        // // Set the connected state with a debouncer
-        // inputs.outakeConnected = outakeConnectedDebouncer.calculate(!sparkStickyFault);
+        // Set the connected state with a debouncer
+        inputs.outakeConnected = outakeConnectedDebouncer.calculate(!sparkStickyFault);
     }
 }

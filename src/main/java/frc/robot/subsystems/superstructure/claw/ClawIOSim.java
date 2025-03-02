@@ -28,7 +28,7 @@ public class ClawIOSim implements ClawIO {
      * The PID angle controller for the claw.
      */
     private final PIDController angleController =
-            new PIDController(ClawConstants.ANGLE_KP, ClawConstants.ANGLE_KI, ClawConstants.ANGLE_KD);
+            new PIDController(ClawConstants.SIM_ANGLE_KP, ClawConstants.SIM_ANGLE_KI, ClawConstants.SIM_ANGLE_KD);
 
     /**
      * The simulation model for the claw outtake motor.
@@ -43,16 +43,26 @@ public class ClawIOSim implements ClawIO {
                     outtakeMotorGearbox, ClawConstants.SIM_OUTTAKE_MOI, ClawConstants.OUTTAKE_GEAR_RATIO),
             outtakeMotorGearbox);
 
+    /**
+     * Whether the angle controller is using PID or not.
+     * If false, the angle motor will not be updated by the PID controller.
+     * The PID controller will still be updated.
+     */
+    private boolean isAngleUsingPID = true;
+
     @Override
     public void stop() {
         // Stop the angle motor
-        // TODO: Also stop PID controller
+        isAngleUsingPID = false;
+
         angleMotorSim.setInputVoltage(0);
         outtakeMotorSim.setInputVoltage(0);
     }
 
     @Override
     public void setTurnPosition(Rotation2d rotation) {
+        isAngleUsingPID = true;
+
         // Set the setpoint of the angle controller
         angleController.setSetpoint(rotation.getRadians());
     }
@@ -70,13 +80,14 @@ public class ClawIOSim implements ClawIO {
         // Set the output of the motors based on the PID controller
         double angleMotorOutput = angleController.calculate(angleMotorSim.getAngularPositionRad());
 
-        angleMotorSim.setInputVoltage(angleMotorOutput);
+        if (isAngleUsingPID) {
+            angleMotorSim.setInputVoltage(angleMotorOutput);
+        }
 
         // Debug
         Logger.recordOutput("ClawSim/angleMotorOutput", angleMotorOutput);
 
         // Update the simulation
-        // TODO: add dt
         angleMotorSim.update(0.02);
         outtakeMotorSim.update(0.02);
     }
@@ -90,7 +101,7 @@ public class ClawIOSim implements ClawIO {
         inputs.turnAppliedVolts = angleMotorSim.getInputVoltage();
         inputs.turnSupplyCurrentAmps = angleMotorSim.getCurrentDrawAmps();
         inputs.turnTorqueCurrentAmps = angleMotorSim.getCurrentDrawAmps();
-        inputs.turnTempCelsius = 0;
+        inputs.turnSetpointRad = angleController.getSetpoint();
 
         // Set outtake inputs
         inputs.outakeConnected = true;
@@ -99,6 +110,12 @@ public class ClawIOSim implements ClawIO {
         inputs.outakeAppliedVolts = outtakeMotorSim.getInputVoltage();
         inputs.outakeSupplyCurrentAmps = outtakeMotorSim.getCurrentDrawAmps();
         inputs.outakeTorqueCurrentAmps = outtakeMotorSim.getCurrentDrawAmps();
-        inputs.outakeTempCelsius = 0;
     }
+
+    // Simulation
+    // @AutoLogOutput(key = "ClawSim/anglePosition")
+    // public Pose3d getPose() {
+    //     return new Pose3d(0, 0, 0, new Rotation3d(
+    //             0, 0, angleMotorSim.getAngularPositionRad()));
+    // }
 }

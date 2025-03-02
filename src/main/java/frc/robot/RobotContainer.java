@@ -177,24 +177,6 @@ public class RobotContainer {
         // TODO: Temporary
         autoChooser.addOption("Coral and Go To All Reefs Test", autoRoutines.getCoralAndGoToAllReefsTest());
 
-        // TODO: Temporary claw position settings
-        // SendableChooser<Command> clawAngleSendableChooser = new SendableChooser<>();
-        // LoggedDashboardChooser<Command> clawAngleChooser =
-        //         new LoggedDashboardChooser<>("Claw Angle", clawAngleSendableChooser);
-
-        // clawAngleChooser.addDefaultOption(
-        //         "Resting", clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.RESTING_ANGLE));
-        // clawAngleChooser.addOption("L4", clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.L4ANGLE));
-
-        // // Schedule command on change
-        // // clawAngleSendableChooser.onChange(Command::schedule);
-        // clawAngleSendableChooser.onChange((Command commandToSchedule) -> {
-        //     // Debug
-        //     System.out.println("Claw angle command scheduled");
-
-        //     commandToSchedule.schedule();
-        // });
-
         // Configure the button bindings
         configureButtonBindings();
     }
@@ -228,26 +210,26 @@ public class RobotContainer {
         //         .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
 
         // Claw
-        // clawSubsystem.setDefaultCommand(
-        //         Commands.run(() -> clawSubsystem.runClaw(Controls.Arm.getIntakeOrOuttake()), clawSubsystem));
         clawSubsystem.setDefaultCommand(clawSubsystem.getRunCommand(Controls.Claw::getIntakeOrOuttake));
 
         Controls.Claw.moveToL1.onTrue(clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.L1ANGLE));
         Controls.Claw.moveToL2.onTrue(clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.L2ANGLE));
-        // TODO
-        Controls.Claw.moveToL3.onTrue(clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.RESTING_ANGLE));
+        Controls.Claw.moveToL3.onTrue(clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.L3ANGLE));
         Controls.Claw.moveToL4.onTrue(clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.L4ANGLE));
+
+        Controls.Claw.resetClawButton.onTrue(
+                clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.RESTING_ANGLE));
 
         // Test
 
         // Controls.mainDriveControls.goToCoralStation1.whileTrue(autoRoutines.getCoralFromStation(1));
         // Controls.mainDriveControls.goToReef1.whileTrue(autoRoutines.goToReef(1));
-        Controls.mainDriveControls
-                .getJoystickButtonOf(Controls.mainDriveControls.goToCoralStation1Button)
-                .whileTrue(autoRoutines.getCoralFromStation(1));
-        Controls.mainDriveControls
-                .getJoystickButtonOf(Controls.mainDriveControls.goToReef1Button)
-                .whileTrue(autoRoutines.goToReef(1));
+        // Controls.mainDriveControls
+        //         .getJoystickButtonOf(Controls.mainDriveControls.goToCoralStation1Button)
+        //         .whileTrue(autoRoutines.getCoralFromStation(1));
+        // Controls.mainDriveControls
+        //         .getJoystickButtonOf(Controls.mainDriveControls.goToReef1Button)
+        //         .whileTrue(autoRoutines.goToReef(1));
     }
 
     /**

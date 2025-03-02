@@ -21,13 +21,14 @@ public final class ClawConstants {
         /**
          * The initial angle of the claw when it is resting (against the mechanical lock).
          */
+        public static final Rotation2d ANGLE_OFFSET = Rotation2d.fromDegrees(45);
+
         public static final Rotation2d RESTING_ANGLE = Rotation2d.fromDegrees(0);
 
-        // TODO: Find angles
-        public static final Rotation2d L4ANGLE = Rotation2d.fromDegrees(90);
-        public static final Rotation2d L3ANGLE = Rotation2d.fromDegrees(75);
-        public static final Rotation2d L2ANGLE = Rotation2d.fromDegrees(60);
-        public static final Rotation2d L1ANGLE = Rotation2d.fromDegrees(45);
+        public static final Rotation2d L4ANGLE = Rotation2d.fromDegrees(90).minus(ANGLE_OFFSET);
+        public static final Rotation2d L3ANGLE = Rotation2d.fromDegrees(35).minus(ANGLE_OFFSET);
+        public static final Rotation2d L2ANGLE = Rotation2d.fromDegrees(35).minus(ANGLE_OFFSET);
+        public static final Rotation2d L1ANGLE = Rotation2d.fromDegrees(45).minus(ANGLE_OFFSET);
     }
 
     /**
@@ -47,7 +48,7 @@ public final class ClawConstants {
      */
     // TODO: Tune
     public static final double MAX_ANGLE_POWER = 0.08;
-    // TODO: set to 30
+
     public static final double ANGLE_GEAR_RATIO = 30;
     public static final boolean IS_ANGLE_MOTOR_INVERTED = true;
     public static final Current ANGLE_MOTOR_CURRENT_LIMIT = Amps.of(40);
@@ -75,17 +76,11 @@ public final class ClawConstants {
 
     // Simulator configs
     public static final DCMotor SIM_ANGLE_MOTOR = DCMotor.getNEO(1);
-
-    /**
-     * The moment of inertia for the claw arm.
-     */
-    // TODO: Tune MOI
     public static final double SIM_ANGLE_MOI = 0.01;
+    public static final double SIM_ANGLE_KP = 5.0;
+    public static final double SIM_ANGLE_KI = 0.0;
+    public static final double SIM_ANGLE_KD = 0.0;
 
     public static final DCMotor SIM_OUTTAKE_MOTOR = DCMotor.getNEO(1);
-
-    /**
-     * The moment of inertia for the outtake.
-     */
     public static final double SIM_OUTTAKE_MOI = 0.01;
 }
