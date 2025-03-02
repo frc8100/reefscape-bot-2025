@@ -14,6 +14,7 @@ import org.littletonrobotics.junction.Logger;
  * The subsystem responsible for the arm.
  */
 public class Claw extends SubsystemBase {
+
     private final ClawIO io;
     private final ClawIOInputsAutoLogged inputs = new ClawIOInputsAutoLogged();
 

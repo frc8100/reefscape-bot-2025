@@ -178,16 +178,17 @@ createVersionFile.dependsOn(eventDeploy)
 // Spotless formatting
 project.compileJava.dependsOn(spotlessApply)
 spotless {
-    java {
-        target fileTree(".") {
-            include "**/*.java"
-            exclude "**/build/**", "**/build-*/**"
-        }
-        toggleOffOn()
-        palantirJavaFormat()
-        trimTrailingWhitespace()
-        endWithNewline()
-    }
+    // java {
+    //     target fileTree(".") {
+    //         include "**/*.java"
+    //         exclude "**/build/**", "**/build-*/**"
+    //     }
+    //     toggleOffOn()
+    //     prettier().npmInstallCache("${rootProject.rootDir}/.gradle/spotless-npm-cache") // will use the specified directory (creating it if not existing)
+    //     prettier().configFile("./.prettierrc.json")
+    //     trimTrailingWhitespace()
+    //     endWithNewline()
+    // }
     groovyGradle {
         target fileTree(".") {
             include "**/*.gradle"

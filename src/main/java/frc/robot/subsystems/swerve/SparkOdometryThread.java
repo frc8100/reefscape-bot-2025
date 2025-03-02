@@ -30,6 +30,7 @@ import java.util.function.DoubleSupplier;
  * all measurements in the sample are valid.
  */
 public class SparkOdometryThread {
+
     private final List<SparkBase> sparks = new ArrayList<>();
     private final List<DoubleSupplier> sparkSignals = new ArrayList<>();
     private final List<DoubleSupplier> genericSignals = new ArrayList<>();

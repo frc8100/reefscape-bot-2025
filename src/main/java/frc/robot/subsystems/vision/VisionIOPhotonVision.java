@@ -26,6 +26,7 @@ import org.photonvision.PhotonCamera;
 
 /** IO implementation for real PhotonVision hardware. */
 public class VisionIOPhotonVision implements VisionIO {
+
     protected final PhotonCamera camera;
     protected final Transform3d robotToCamera;
 
@@ -51,8 +52,9 @@ public class VisionIOPhotonVision implements VisionIO {
             // Update latest target observation
             if (result.hasTargets()) {
                 inputs.latestTargetObservation = new TargetObservation(
-                        Rotation2d.fromDegrees(result.getBestTarget().getYaw()),
-                        Rotation2d.fromDegrees(result.getBestTarget().getPitch()));
+                    Rotation2d.fromDegrees(result.getBestTarget().getYaw()),
+                    Rotation2d.fromDegrees(result.getBestTarget().getPitch())
+                );
             } else {
                 inputs.latestTargetObservation = new TargetObservation(new Rotation2d(), new Rotation2d());
             }
@@ -69,22 +71,23 @@ public class VisionIOPhotonVision implements VisionIO {
                 // Calculate average tag distance
                 double totalTagDistance = 0.0;
                 for (var target : result.targets) {
-                    totalTagDistance +=
-                            target.bestCameraToTarget.getTranslation().getNorm();
+                    totalTagDistance += target.bestCameraToTarget.getTranslation().getNorm();
                 }
 
                 // Add tag IDs
                 tagIds.addAll(multitagResult.fiducialIDsUsed);
 
                 // Add observation
-                poseObservations.add(new PoseObservation(
+                poseObservations.add(
+                    new PoseObservation(
                         result.getTimestampSeconds(), // Timestamp
                         robotPose, // 3D pose estimate
                         multitagResult.estimatedPose.ambiguity, // Ambiguity
                         multitagResult.fiducialIDsUsed.size(), // Tag count
                         totalTagDistance / result.targets.size(), // Average tag distance
-                        PoseObservationType.PHOTONVISION)); // Observation type
-
+                        PoseObservationType.PHOTONVISION
+                    )
+                ); // Observation type
             } else if (!result.targets.isEmpty()) { // Single tag result
                 var target = result.targets.get(0);
 
@@ -92,7 +95,9 @@ public class VisionIOPhotonVision implements VisionIO {
                 var tagPose = aprilTagLayout.getTagPose(target.fiducialId);
                 if (tagPose.isPresent()) {
                     Transform3d fieldToTarget = new Transform3d(
-                            tagPose.get().getTranslation(), tagPose.get().getRotation());
+                        tagPose.get().getTranslation(),
+                        tagPose.get().getRotation()
+                    );
                     Transform3d cameraToTarget = target.bestCameraToTarget;
                     Transform3d fieldToCamera = fieldToTarget.plus(cameraToTarget.inverse());
                     Transform3d fieldToRobot = fieldToCamera.plus(robotToCamera.inverse());
@@ -102,13 +107,16 @@ public class VisionIOPhotonVision implements VisionIO {
                     tagIds.add((short) target.fiducialId);
 
                     // Add observation
-                    poseObservations.add(new PoseObservation(
+                    poseObservations.add(
+                        new PoseObservation(
                             result.getTimestampSeconds(), // Timestamp
                             robotPose, // 3D pose estimate
                             target.poseAmbiguity, // Ambiguity
                             1, // Tag count
                             cameraToTarget.getTranslation().getNorm(), // Average tag distance
-                            PoseObservationType.PHOTONVISION)); // Observation type
+                            PoseObservationType.PHOTONVISION
+                        )
+                    ); // Observation type
                 }
             }
         }

@@ -11,12 +11,14 @@ import edu.wpi.first.units.measure.Current;
  * Constants for the claw. Includes CAN Ids.
  */
 public final class ClawConstants {
+
     private ClawConstants() {}
 
     /**
      * Contains the angle measures for certain claw rotations
      */
     public static final class RotationPositions {
+
         private RotationPositions() {}
 
         /**

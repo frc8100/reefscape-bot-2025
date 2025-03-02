@@ -13,6 +13,7 @@ public interface ClawIO extends GenericSparkIO<ClawIO.ClawIOInputs> {
      */
     @AutoLog
     public static class ClawIOInputs {
+
         // Inputs from the turn motor
         public boolean turnConnected = true;
         public double turnPositionRad = 0.0;

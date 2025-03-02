@@ -11,6 +11,7 @@ import org.littletonrobotics.junction.Logger;
  * The simulator implementation for the claw.
  */
 public class ClawIOSim implements ClawIO {
+
     /**
      * The simulation model for the claw angle motor.
      */
@@ -20,15 +21,22 @@ public class ClawIOSim implements ClawIO {
      * The simulated angle motor. Controls the angle of the claw.
      */
     private final DCMotorSim angleMotorSim = new DCMotorSim(
-            LinearSystemId.createSingleJointedArmSystem(
-                    angleMotorGearbox, ClawConstants.SIM_ANGLE_MOI, ClawConstants.ANGLE_GEAR_RATIO),
-            angleMotorGearbox);
+        LinearSystemId.createSingleJointedArmSystem(
+            angleMotorGearbox,
+            ClawConstants.SIM_ANGLE_MOI,
+            ClawConstants.ANGLE_GEAR_RATIO
+        ),
+        angleMotorGearbox
+    );
 
     /**
      * The PID angle controller for the claw.
      */
-    private final PIDController angleController =
-            new PIDController(ClawConstants.SIM_ANGLE_KP, ClawConstants.SIM_ANGLE_KI, ClawConstants.SIM_ANGLE_KD);
+    private final PIDController angleController = new PIDController(
+        ClawConstants.SIM_ANGLE_KP,
+        ClawConstants.SIM_ANGLE_KI,
+        ClawConstants.SIM_ANGLE_KD
+    );
 
     /**
      * The simulation model for the claw outtake motor.
@@ -39,9 +47,13 @@ public class ClawIOSim implements ClawIO {
      * The simulated outtake motor. Controls the outtake of the claw.
      */
     private final DCMotorSim outtakeMotorSim = new DCMotorSim(
-            LinearSystemId.createSingleJointedArmSystem(
-                    outtakeMotorGearbox, ClawConstants.SIM_OUTTAKE_MOI, ClawConstants.OUTTAKE_GEAR_RATIO),
-            outtakeMotorGearbox);
+        LinearSystemId.createSingleJointedArmSystem(
+            outtakeMotorGearbox,
+            ClawConstants.SIM_OUTTAKE_MOI,
+            ClawConstants.OUTTAKE_GEAR_RATIO
+        ),
+        outtakeMotorGearbox
+    );
 
     /**
      * Whether the angle controller is using PID or not.

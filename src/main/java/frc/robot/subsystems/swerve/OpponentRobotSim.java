@@ -30,6 +30,7 @@ import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
  * This simulation is not as detailed/complex as the main robot simulation.
  */
 public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
+
     /**
      * Determines the behavior of opponent robots.
      * ! Note: this does not automatically set any commands.
@@ -63,7 +64,7 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
         new Pose2d(-5, 0, new Rotation2d()),
         new Pose2d(-4, 0, new Rotation2d()),
         new Pose2d(-3, 0, new Rotation2d()),
-        new Pose2d(-2, 0, new Rotation2d())
+        new Pose2d(-2, 0, new Rotation2d()),
     };
 
     public OpponentRobotBehavior behavior = OpponentRobotBehavior.FollowPath;
@@ -82,10 +83,13 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
     private static final PathConstraints PATH_CONSTRAINTS = SwerveConfig.pathConstraints;
 
     /** PathPlanner PID settings */
-    private final PPHolonomicDriveController driveController =
-            new PPHolonomicDriveController(new PIDConstants(5.0, 0.02), new PIDConstants(7.0, 0.05));
+    private final PPHolonomicDriveController driveController = new PPHolonomicDriveController(
+        new PIDConstants(5.0, 0.02),
+        new PIDConstants(7.0, 0.05)
+    );
 
     private final SelfControlledSwerveDriveSimulation simulatedDrive;
+
     // private Pose2d queeningPose;
     // private int id;
 
@@ -104,7 +108,8 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
 
         // Create the SelfControlledSwerveDriveSimulation instance
         this.simulatedDrive = new SelfControlledSwerveDriveSimulation(
-                new SwerveDriveSimulation(SwerveConfig.mapleSimConfig, startingPose));
+            new SwerveDriveSimulation(SwerveConfig.mapleSimConfig, startingPose)
+        );
 
         // Register the drivetrain simulation to the simulation world
         SimulatedArena.getInstance().addDriveTrainSimulation(simulatedDrive.getDriveTrainSimulation());
@@ -118,20 +123,19 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
      */
     public Command opponentRobotFollowPath(PathPlannerPath path) {
         return new FollowPathCommand(
-                path,
-                // Provide actual robot pose in simulation, bypassing odometry error
-                simulatedDrive::getActualPoseInSimulationWorld,
-                // Provide actual robot speed in simulation, bypassing encoder measurement error
-                simulatedDrive::getActualSpeedsRobotRelative,
-                // Chassis speeds output
-                (speeds, feedforwards) -> simulatedDrive.runChassisSpeeds(speeds, new Translation2d(), false, false),
-                driveController,
-                PP_CONFIG,
-                // Flip path based on alliance side
-                () -> DriverStation.getAlliance()
-                        .orElse(DriverStation.Alliance.Blue)
-                        .equals(DriverStation.Alliance.Red),
-                this);
+            path,
+            // Provide actual robot pose in simulation, bypassing odometry error
+            simulatedDrive::getActualPoseInSimulationWorld,
+            // Provide actual robot speed in simulation, bypassing encoder measurement error
+            simulatedDrive::getActualSpeedsRobotRelative,
+            // Chassis speeds output
+            (speeds, feedforwards) -> simulatedDrive.runChassisSpeeds(speeds, new Translation2d(), false, false),
+            driveController,
+            PP_CONFIG,
+            // Flip path based on alliance side
+            () -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue).equals(DriverStation.Alliance.Red),
+            this
+        );
     }
 
     /**
@@ -139,14 +143,15 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
      */
     public Command opponentRobotPathfindToPose(Pose2d targetPose) {
         return new PathfindingCommand(
-                targetPose,
-                PATH_CONSTRAINTS,
-                simulatedDrive::getActualPoseInSimulationWorld,
-                simulatedDrive::getActualSpeedsRobotRelative,
-                (speeds, feedforwards) -> simulatedDrive.runChassisSpeeds(speeds, new Translation2d(), false, false),
-                driveController,
-                PP_CONFIG,
-                this);
+            targetPose,
+            PATH_CONSTRAINTS,
+            simulatedDrive::getActualPoseInSimulationWorld,
+            simulatedDrive::getActualSpeedsRobotRelative,
+            (speeds, feedforwards) -> simulatedDrive.runChassisSpeeds(speeds, new Translation2d(), false, false),
+            driveController,
+            PP_CONFIG,
+            this
+        );
     }
 
     /**
@@ -154,23 +159,23 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
      */
     public Command opponentRobotPathfindToPoseSupplier(Supplier<Pose2d> poseSupplier) {
         return new PathfindingCommand(
-                        poseSupplier.get(),
-                        PATH_CONSTRAINTS,
-                        simulatedDrive::getActualPoseInSimulationWorld,
-                        simulatedDrive::getActualSpeedsRobotRelative,
-                        (speeds, feedforwards) ->
-                                simulatedDrive.runChassisSpeeds(speeds, new Translation2d(), false, false),
-                        driveController,
-                        PP_CONFIG,
-                        this)
-                // Create a new command to recursively pathfind to the next pose every 1 second
-                .withTimeout(1)
-                .finallyDo(() -> {
-                    // System.out.println("OpponentRobotSim: Pathfinding complete");
-                    Command nextCommand = opponentRobotPathfindToPoseSupplier(poseSupplier);
-                    // nextCommand.schedule();
-                    setDefaultCommand(nextCommand);
-                });
+            poseSupplier.get(),
+            PATH_CONSTRAINTS,
+            simulatedDrive::getActualPoseInSimulationWorld,
+            simulatedDrive::getActualSpeedsRobotRelative,
+            (speeds, feedforwards) -> simulatedDrive.runChassisSpeeds(speeds, new Translation2d(), false, false),
+            driveController,
+            PP_CONFIG,
+            this
+        )
+            // Create a new command to recursively pathfind to the next pose every 1 second
+            .withTimeout(1)
+            .finallyDo(() -> {
+                // System.out.println("OpponentRobotSim: Pathfinding complete");
+                Command nextCommand = opponentRobotPathfindToPoseSupplier(poseSupplier);
+                // nextCommand.schedule();
+                setDefaultCommand(nextCommand);
+            });
     }
 
     @Override
@@ -206,7 +211,6 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
             case FollowPath:
                 // Return actual pose to save resources
                 return simulatedDrive.getActualSpeedsFieldRelative();
-
             case TeleopSwerve:
                 // Return accurate odometry pose
                 return simulatedDrive.getMeasuredSpeedsFieldRelative(true);
@@ -227,7 +231,6 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
             case FollowPath:
                 // Return actual pose to save resources
                 return simulatedDrive.getActualPoseInSimulationWorld();
-
             case TeleopSwerve:
                 // Return accurate odometry pose
                 return simulatedDrive.getOdometryEstimatedPose();
@@ -253,7 +256,10 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
 
     @Override
     public void addVisionMeasurement(
-            Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
+        Pose2d visionRobotPoseMeters,
+        double timestampSeconds,
+        Matrix<N3, N1> visionMeasurementStdDevs
+    ) {
         // Unimplemented
         simulatedDrive.addVisionEstimation(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
     }

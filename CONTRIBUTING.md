@@ -75,6 +75,20 @@ Note: you must be focused on the `Sim GUI` window for keyboard controls to work.
 | Button 5 | Left Bumper (L1) |
 | Button 6 | Right Bumper (R1) |
 
+## Linting
+
+Requirements:
+ - [Node.js](https://nodejs.org/en/download/)
+    - [npm](https://www.npmjs.com/get-npm) (comes with Node.js)
+
+This project uses [Prettier](https://prettier.io/) for code formatting. You can install the [Prettier VSCode extension](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) to automatically format your code on save.
+
+To run Prettier manually, run the following command in the terminal (after installing dependencies using `npm install`):
+
+```bash
+npm run prettier
+```
+
 ## Saving and Pulling Changes
 
 Once you make changes, you can upload (commit/push) your changes.

@@ -66,16 +66,20 @@ public class RobotContainer {
         switch (Constants.currentMode) {
             case REAL:
                 // Real robot, instantiate hardware IO implementations
-                swerveSubsystem = new Swerve(new GyroIOPigeon2(), new ModuleIO[] {
-                    new ModuleIOSpark(0, SwerveConstants.Swerve.Mod0.constants),
-                    new ModuleIOSpark(1, SwerveConstants.Swerve.Mod1.constants),
-                    new ModuleIOSpark(2, SwerveConstants.Swerve.Mod2.constants),
-                    new ModuleIOSpark(3, SwerveConstants.Swerve.Mod3.constants)
-                });
+                swerveSubsystem = new Swerve(
+                    new GyroIOPigeon2(),
+                    new ModuleIO[] {
+                        new ModuleIOSpark(0, SwerveConstants.Swerve.Mod0.constants),
+                        new ModuleIOSpark(1, SwerveConstants.Swerve.Mod1.constants),
+                        new ModuleIOSpark(2, SwerveConstants.Swerve.Mod2.constants),
+                        new ModuleIOSpark(3, SwerveConstants.Swerve.Mod3.constants),
+                    }
+                );
 
                 visionSubsystem = new Vision(
-                        swerveSubsystem::addVisionMeasurement,
-                        new VisionIOLimelight(VisionConstants.CAMERA_0_NAME, swerveSubsystem::getRotation));
+                    swerveSubsystem::addVisionMeasurement,
+                    new VisionIOLimelight(VisionConstants.CAMERA_0_NAME, swerveSubsystem::getRotation)
+                );
 
                 clawSubsystem = new Claw(new ClawIOSpark());
                 break;
@@ -96,22 +100,25 @@ public class RobotContainer {
 
                 SwerveModuleSimulation[] moduleSims = driveSimulation.getModules();
                 swerveSubsystem = new SwerveSim(
-                        new GyroIOSim(driveSimulation.getGyroSimulation()),
-                        new ModuleIO[] {
-                            new ModuleIOSim(moduleSims[0]),
-                            new ModuleIOSim(moduleSims[1]),
-                            new ModuleIOSim(moduleSims[2]),
-                            new ModuleIOSim(moduleSims[3]),
-                        },
-                        driveSimulation);
-                
+                    new GyroIOSim(driveSimulation.getGyroSimulation()),
+                    new ModuleIO[] {
+                        new ModuleIOSim(moduleSims[0]),
+                        new ModuleIOSim(moduleSims[1]),
+                        new ModuleIOSim(moduleSims[2]),
+                        new ModuleIOSim(moduleSims[3]),
+                    },
+                    driveSimulation
+                );
+
                 // Create a simulated vision subsystem
                 visionSubsystem = new Vision(
-                        swerveSubsystem::addVisionMeasurement,
-                        new VisionIOPhotonSim(
-                                VisionConstants.CAMERA_0_NAME,
-                                VisionConstants.TRANSFORM_TO_CAMERA_0,
-                                swerveSubsystem::getActualPose));
+                    swerveSubsystem::addVisionMeasurement,
+                    new VisionIOPhotonSim(
+                        VisionConstants.CAMERA_0_NAME,
+                        VisionConstants.TRANSFORM_TO_CAMERA_0,
+                        swerveSubsystem::getActualPose
+                    )
+                );
 
                 // Create a simulated claw
                 clawSubsystem = new Claw(new ClawIOSim());
@@ -152,18 +159,29 @@ public class RobotContainer {
 
         // Set up SysId routines
         autoChooser.addOption(
-                "Drive Wheel Radius Characterization",
-                SwerveSysidRoutines.wheelRadiusCharacterization(swerveSubsystem));
+            "Drive Wheel Radius Characterization",
+            SwerveSysidRoutines.wheelRadiusCharacterization(swerveSubsystem)
+        );
         autoChooser.addOption(
-                "Drive Simple FF Characterization", SwerveSysidRoutines.feedforwardCharacterization(swerveSubsystem));
+            "Drive Simple FF Characterization",
+            SwerveSysidRoutines.feedforwardCharacterization(swerveSubsystem)
+        );
         autoChooser.addOption(
-                "Drive SysId (Quasistatic Forward)", swerveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+            "Drive SysId (Quasistatic Forward)",
+            swerveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
+        );
         autoChooser.addOption(
-                "Drive SysId (Quasistatic Reverse)", swerveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+            "Drive SysId (Quasistatic Reverse)",
+            swerveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
+        );
         autoChooser.addOption(
-                "Drive SysId (Dynamic Forward)", swerveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward));
+            "Drive SysId (Dynamic Forward)",
+            swerveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward)
+        );
         autoChooser.addOption(
-                "Drive SysId (Dynamic Reverse)", swerveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+            "Drive SysId (Dynamic Reverse)",
+            swerveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse)
+        );
 
         // TODO: Temporary
         autoChooser.addOption("Coral and Go To All Reefs Test", autoRoutines.getCoralAndGoToAllReefsTest());
@@ -181,8 +199,8 @@ public class RobotContainer {
     private void configureButtonBindings() {
         /* Driver Buttons */
         Controls.mainDriveControls
-                .getJoystickButtonOf(Controls.mainDriveControls.zeroGyroButton)
-                .onTrue(new InstantCommand(swerveSubsystem::zeroGyro));
+            .getJoystickButtonOf(Controls.mainDriveControls.zeroGyroButton)
+            .onTrue(new InstantCommand(swerveSubsystem::zeroGyro));
 
         // TODO: Heading lock?
 
@@ -195,8 +213,8 @@ public class RobotContainer {
         Controls.Claw.moveToL4.onTrue(clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.L4ANGLE));
 
         Controls.Claw.resetClawButton.onTrue(
-                clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.RESTING_ANGLE));
-
+            clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.RESTING_ANGLE)
+        );
         // Test
         // Controls.mainDriveControls.goToCoralStation1.whileTrue(autoRoutines.getCoralFromStation(1));
         // Controls.mainDriveControls.goToReef1.whileTrue(autoRoutines.goToReef(1));

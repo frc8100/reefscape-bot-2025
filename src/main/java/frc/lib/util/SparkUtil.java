@@ -25,6 +25,7 @@ import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 
 public class SparkUtil {
+
     /** Stores whether any error was has been detected by other utility methods. */
     public static boolean sparkStickyFault = false;
 
@@ -66,9 +67,7 @@ public class SparkUtil {
     public static double[] getSimulationOdometryTimeStamps() {
         final double[] odometryTimeStamps = new double[SimulatedArena.getSimulationSubTicksIn1Period()];
         for (int i = 0; i < odometryTimeStamps.length; i++) {
-            odometryTimeStamps[i] = Timer.getFPGATimestamp()
-                    - 0.02
-                    + i * SimulatedArena.getSimulationDt().in(Seconds);
+            odometryTimeStamps[i] = Timer.getFPGATimestamp() - 0.02 + i * SimulatedArena.getSimulationDt().in(Seconds);
         }
 
         return odometryTimeStamps;

@@ -13,11 +13,13 @@ import frc.robot.subsystems.swerve.SwerveDrive;
  * Contains the autonomous (and teleop) routines for the robot.
  */
 public class AutoRoutines {
+
     /**
      * Locations of the robot to interact with the field elements.
      * Note: not flipped for the blue side.
      */
     public static class FieldLocations {
+
         public static final Pose2d coralStation1 = new Pose2d(1.1, 1.1, Rotation2d.fromDegrees(55));
         public static final Pose2d coralStation2 = new Pose2d(1.1, 6.8, Rotation2d.fromDegrees(-55));
 
@@ -43,12 +45,16 @@ public class AutoRoutines {
         Command goToCoralStationCommand;
         switch (station) {
             case 1:
-                goToCoralStationCommand =
-                        AutoBuilder.pathfindToPose(FieldLocations.coralStation1, SwerveConfig.pathConstraints);
+                goToCoralStationCommand = AutoBuilder.pathfindToPose(
+                    FieldLocations.coralStation1,
+                    SwerveConfig.pathConstraints
+                );
                 break;
             case 2:
-                goToCoralStationCommand =
-                        AutoBuilder.pathfindToPose(FieldLocations.coralStation2, SwerveConfig.pathConstraints);
+                goToCoralStationCommand = AutoBuilder.pathfindToPose(
+                    FieldLocations.coralStation2,
+                    SwerveConfig.pathConstraints
+                );
                 break;
             default:
                 goToCoralStationCommand = Commands.run(() -> {
@@ -98,17 +104,18 @@ public class AutoRoutines {
      */
     public Command getCoralAndGoToAllReefsTest() {
         return new SequentialCommandGroup(
-                getCoralFromStation(1),
-                goToReef(4),
-                getCoralFromStation(1),
-                goToReef(5),
-                getCoralFromStation(1),
-                goToReef(6),
-                getCoralFromStation(2),
-                goToReef(1),
-                getCoralFromStation(2),
-                goToReef(2),
-                getCoralFromStation(2),
-                goToReef(3));
+            getCoralFromStation(1),
+            goToReef(4),
+            getCoralFromStation(1),
+            goToReef(5),
+            getCoralFromStation(1),
+            goToReef(6),
+            getCoralFromStation(2),
+            goToReef(1),
+            getCoralFromStation(2),
+            goToReef(2),
+            getCoralFromStation(2),
+            goToReef(3)
+        );
     }
 }

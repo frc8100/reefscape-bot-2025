@@ -34,6 +34,7 @@ import org.littletonrobotics.junction.Logger;
 
 /** Swerve subsystem, responsible for controlling the swerve drive. */
 public class Swerve extends SubsystemBase implements SwerveDrive {
+
     /** Lock for the odometry thread. */
     static final Lock odometryLock = new ReentrantLock();
 
@@ -59,7 +60,10 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
     /** The last stored position of the swerve modules for delta tracking */
     private SwerveModulePosition[] lastModulePositions = new SwerveModulePosition[] {
-        new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition()
+        new SwerveModulePosition(),
+        new SwerveModulePosition(),
+        new SwerveModulePosition(),
+        new SwerveModulePosition(),
     };
 
     /** A 2d representation of the field */
@@ -86,25 +90,27 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         SparkOdometryThread.getInstance().start();
 
         poseEstimator = new SwerveDrivePoseEstimator(
-                kinematics,
-                rawGyroRotation,
-                lastModulePositions,
-                new Pose2d(),
-                Constants.PoseEstimator.stateStdDevs,
-                Constants.PoseEstimator.VisionStdDevs);
+            kinematics,
+            rawGyroRotation,
+            lastModulePositions,
+            new Pose2d(),
+            Constants.PoseEstimator.stateStdDevs,
+            Constants.PoseEstimator.VisionStdDevs
+        );
 
         zeroGyro();
 
         configurePathPlannerAutoBuilder();
 
         sysId = new SysIdRoutine(
-                new SysIdRoutine.Config(
-                        null, null, null, (state) -> Logger.recordOutput("Swerve/SysIdState", state.toString())),
-                new SysIdRoutine.Mechanism((voltage) -> runCharacterization(voltage.in(Volt)), null, this));
+            new SysIdRoutine.Config(null, null, null, state ->
+                Logger.recordOutput("Swerve/SysIdState", state.toString())
+            ),
+            new SysIdRoutine.Mechanism(voltage -> runCharacterization(voltage.in(Volt)), null, this)
+        );
 
         // Set up custom logging to add the current path to a field 2d widget
-        PathPlannerLogging.setLogActivePathCallback(
-                (poses) -> field.getObject("path").setPoses(poses));
+        PathPlannerLogging.setLogActivePathCallback(poses -> field.getObject("path").setPoses(poses));
 
         SmartDashboard.putData("Field", field);
     }
@@ -122,25 +128,33 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
         // Calculate the future robot pose based on the original speeds and loop time
         Pose2d futureRobotPose = new Pose2d(
-                originalSpeeds.vxMetersPerSecond * LOOP_TIME_S,
-                originalSpeeds.vyMetersPerSecond * LOOP_TIME_S,
-                Rotation2d.fromRadians(originalSpeeds.omegaRadiansPerSecond * LOOP_TIME_S));
+            originalSpeeds.vxMetersPerSecond * LOOP_TIME_S,
+            originalSpeeds.vyMetersPerSecond * LOOP_TIME_S,
+            Rotation2d.fromRadians(originalSpeeds.omegaRadiansPerSecond * LOOP_TIME_S)
+        );
 
         // Compute the twist (change in pose) required to reach the future pose
         Twist2d twistForPose = GeometryUtils.log(futureRobotPose);
 
         // Update the speeds based on the computed twist
         return new ChassisSpeeds(
-                twistForPose.dx / LOOP_TIME_S, twistForPose.dy / LOOP_TIME_S, twistForPose.dtheta / LOOP_TIME_S);
+            twistForPose.dx / LOOP_TIME_S,
+            twistForPose.dy / LOOP_TIME_S,
+            twistForPose.dtheta / LOOP_TIME_S
+        );
     }
 
     @Override
     public void drive(Translation2d translation, double rotation, boolean fieldRelative) {
         // Determine the desired chassis speeds based on whether the control is field-relative
         ChassisSpeeds desiredChassisSpeeds = fieldRelative
-                ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                        translation.getX(), translation.getY(), rotation, gyroIO.getGyroHeading())
-                : new ChassisSpeeds(translation.getX(), translation.getY(), rotation);
+            ? ChassisSpeeds.fromFieldRelativeSpeeds(
+                translation.getX(),
+                translation.getY(),
+                rotation,
+                gyroIO.getGyroHeading()
+            )
+            : new ChassisSpeeds(translation.getX(), translation.getY(), rotation);
 
         // Correct the chassis speeds for robot dynamics
         desiredChassisSpeeds = correctForDynamics(desiredChassisSpeeds);
@@ -228,7 +242,10 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
     @Override
     public void addVisionMeasurement(
-            Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
+        Pose2d visionRobotPoseMeters,
+        double timestampSeconds,
+        Matrix<N3, N1> visionMeasurementStdDevs
+    ) {
         poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
     }
 
@@ -309,8 +326,9 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
             for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
                 modulePositions[moduleIndex] = swerveModules[moduleIndex].getOdometryPositions()[i];
                 moduleDeltas[moduleIndex] = new SwerveModulePosition(
-                        modulePositions[moduleIndex].distanceMeters - lastModulePositions[moduleIndex].distanceMeters,
-                        modulePositions[moduleIndex].angle);
+                    modulePositions[moduleIndex].distanceMeters - lastModulePositions[moduleIndex].distanceMeters,
+                    modulePositions[moduleIndex].angle
+                );
                 lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
             }
 

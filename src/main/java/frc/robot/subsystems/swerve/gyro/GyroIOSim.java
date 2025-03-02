@@ -11,6 +11,7 @@ import org.ironmaple.simulation.drivesims.GyroSimulation;
  * IO implementation for the gyro simulation.
  */
 public class GyroIOSim implements GyroIO {
+
     /**
      * Use the maplesim gyro simulation. This contains the gyro readings and angular velocity.
      */
@@ -28,7 +29,8 @@ public class GyroIOSim implements GyroIO {
         inputs.connected = true;
         inputs.yawPosition = gyroSimulation.getGyroReading();
         inputs.yawVelocityRadPerSec = Units.degreesToRadians(
-                gyroSimulation.getMeasuredAngularVelocity().in(RadiansPerSecond));
+            gyroSimulation.getMeasuredAngularVelocity().in(RadiansPerSecond)
+        );
 
         inputs.odometryYawTimestamps = SparkUtil.getSimulationOdometryTimeStamps();
         inputs.odometryYawPositions = gyroSimulation.getCachedGyroReadings();

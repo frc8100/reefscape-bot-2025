@@ -72,20 +72,23 @@ public interface SwerveDrive extends Subsystem {
      */
     public default void configurePathPlannerAutoBuilder() {
         AutoBuilder.configure(
-                this::getPose,
-                this::setPose,
-                this::getChassisSpeeds,
-                this::runVelocityChassisSpeeds,
-                new PPHolonomicDriveController(new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
-                SwerveConfig.getRobotConfig(),
-                () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
-                this);
+            this::getPose,
+            this::setPose,
+            this::getChassisSpeeds,
+            this::runVelocityChassisSpeeds,
+            new PPHolonomicDriveController(new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
+            SwerveConfig.getRobotConfig(),
+            () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+            this
+        );
 
         Pathfinding.setPathfinder(new LocalADStar());
-        PathPlannerLogging.setLogActivePathCallback((activePath) ->
-                Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()])));
-        PathPlannerLogging.setLogTargetPoseCallback(
-                (targetPose) -> Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose));
+        PathPlannerLogging.setLogActivePathCallback(activePath ->
+            Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]))
+        );
+        PathPlannerLogging.setLogTargetPoseCallback(targetPose ->
+            Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose)
+        );
     }
 
     /**
@@ -162,7 +165,10 @@ public interface SwerveDrive extends Subsystem {
 
     /** Adds a new timestamped vision measurement. */
     public void addVisionMeasurement(
-            Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs);
+        Pose2d visionRobotPoseMeters,
+        double timestampSeconds,
+        Matrix<N3, N1> visionMeasurementStdDevs
+    );
 
     /**
      * @return The current module states.

@@ -24,6 +24,7 @@ import org.littletonrobotics.urcl.URCL;
  * project.
  */
 public class Robot extends LoggedRobot {
+
     private Command autonomousCommand;
     private RobotContainer robotContainer;
 
@@ -48,8 +49,9 @@ public class Robot extends LoggedRobot {
 
         // Set the current mode automatically if it is not replay
         if (Constants.currentMode != Constants.Mode.REPLAY) {
-            Constants.currentMode =
-                    isReal() ? Constants.Mode.REAL : isSimulation() ? Constants.Mode.SIM : Constants.Mode.REPLAY;
+            Constants.currentMode = isReal()
+                ? Constants.Mode.REAL
+                : isSimulation() ? Constants.Mode.SIM : Constants.Mode.REPLAY;
         }
 
         // Set up data receivers & replay source
@@ -59,12 +61,10 @@ public class Robot extends LoggedRobot {
                 Logger.addDataReceiver(new WPILOGWriter());
                 Logger.addDataReceiver(new NT4Publisher());
                 break;
-
             case SIM:
                 // Running a physics simulator, log to NT
                 Logger.addDataReceiver(new NT4Publisher());
                 break;
-
             case REPLAY:
                 // Replaying a log, set up replay source
                 setUseTiming(false); // Run as fast as possible
@@ -167,9 +167,7 @@ public class Robot extends LoggedRobot {
         Logger.recordOutput("Odometry/OpponentRobotPoses", OpponentRobotSim.getOpponentRobotPoses());
 
         // Log game pieces
-        Logger.recordOutput(
-                "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
-        Logger.recordOutput(
-                "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+        Logger.recordOutput("FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
+        Logger.recordOutput("FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
     }
 }

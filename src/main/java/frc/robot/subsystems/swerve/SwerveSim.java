@@ -10,6 +10,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
  * Simulator implementation of the swerve drive.
  */
 public class SwerveSim extends Swerve {
+
     // private final SelfControlledSwerveDriveSimulation simulatedDrive;
     private final SwerveDriveSimulation driveSimulation;
 

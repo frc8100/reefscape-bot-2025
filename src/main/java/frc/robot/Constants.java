@@ -9,6 +9,7 @@ import edu.wpi.first.math.numbers.N3;
  * Contains constants for the robot. Swerve constants are located in {@link SwerveConstants}.
  */
 public final class Constants {
+
     private Constants() {}
 
     /**
@@ -35,6 +36,7 @@ public final class Constants {
      * Constants for the pose estimator. Includes the state and vision standard deviations.
      */
     public static final class PoseEstimator {
+
         private PoseEstimator() {}
 
         public static final Matrix<N3, N1> stateStdDevs = VecBuilder.fill(0.1, 0.1, 0.1);

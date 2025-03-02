@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 
 /** Declares control key bindings */
 public class Controls {
+
     private Controls() {}
 
     /**
@@ -19,6 +20,7 @@ public class Controls {
 
     /** The drive controls */
     public static class Drive {
+
         private Joystick driverController;
 
         /**
@@ -29,8 +31,9 @@ public class Controls {
             this.driverController = driverController;
 
             // Register toggle modes
-            getJoystickButtonOf(robotCentricButton)
-                    .onTrue(Commands.runOnce(() -> isCurrentlyRobotCentric = !isCurrentlyRobotCentric));
+            getJoystickButtonOf(robotCentricButton).onTrue(
+                Commands.runOnce(() -> isCurrentlyRobotCentric = !isCurrentlyRobotCentric)
+            );
         }
 
         // Toggle modes
@@ -104,8 +107,8 @@ public class Controls {
          */
         public double getTranslationAxis() {
             return invertDriveControls
-                    ? -driverController.getRawAxis(translationAxis)
-                    : driverController.getRawAxis(translationAxis);
+                ? -driverController.getRawAxis(translationAxis)
+                : driverController.getRawAxis(translationAxis);
         }
 
         /**
@@ -113,8 +116,8 @@ public class Controls {
          */
         public double getStrafeAxis() {
             return invertDriveControls
-                    ? -driverController.getRawAxis(strafeAxis)
-                    : driverController.getRawAxis(strafeAxis);
+                ? -driverController.getRawAxis(strafeAxis)
+                : driverController.getRawAxis(strafeAxis);
         }
 
         /**
@@ -122,8 +125,8 @@ public class Controls {
          */
         public double getRotationAxis() {
             return invertDriveControls
-                    ? -driverController.getRawAxis(rotationAxis)
-                    : driverController.getRawAxis(rotationAxis);
+                ? -driverController.getRawAxis(rotationAxis)
+                : driverController.getRawAxis(rotationAxis);
         }
 
         /**
@@ -157,9 +160,9 @@ public class Controls {
      * Drive controls using a joystick
      */
     public static class JoystickDrive extends Drive {
+
         public JoystickDrive(Joystick driverController) {
             super(driverController);
-
             // Override axis values
             translationAxis = Joystick.AxisType.kY.value;
             strafeAxis = Joystick.AxisType.kX.value;
@@ -171,6 +174,7 @@ public class Controls {
      * The controls for the claw.
      */
     public static class Claw {
+
         private Claw() {}
 
         /**
@@ -208,8 +212,10 @@ public class Controls {
         /**
          * The button to make the claw rotated at the resting position. Default is A.
          */
-        public static final JoystickButton resetClawButton =
-                new JoystickButton(armController, XboxController.Button.kA.value);
+        public static final JoystickButton resetClawButton = new JoystickButton(
+            armController,
+            XboxController.Button.kA.value
+        );
 
         /**
          * Returns the intake or outtake input depending on which one is bigger.

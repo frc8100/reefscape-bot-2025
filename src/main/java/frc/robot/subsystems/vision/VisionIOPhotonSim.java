@@ -24,6 +24,7 @@ import org.photonvision.simulation.VisionSystemSim;
 
 /** IO implementation for physics sim using PhotonVision simulator. */
 public class VisionIOPhotonSim extends VisionIOPhotonVision {
+
     private static VisionSystemSim visionSim;
 
     private final Supplier<Pose2d> poseSupplier;

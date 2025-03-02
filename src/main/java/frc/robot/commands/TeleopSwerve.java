@@ -75,14 +75,15 @@ public class TeleopSwerve extends Command {
      * The parameters are members of this class.
      */
     public TeleopSwerve(
-            SwerveDrive swerveSubsystem,
-            DoubleSupplier translationSupplier,
-            DoubleSupplier strafeSupplier,
-            DoubleSupplier rotationSupplier,
-            BooleanSupplier robotCentricSup,
-            BooleanSupplier dampen,
-            DoubleSupplier speedDial,
-            boolean logValues) {
+        SwerveDrive swerveSubsystem,
+        DoubleSupplier translationSupplier,
+        DoubleSupplier strafeSupplier,
+        DoubleSupplier rotationSupplier,
+        BooleanSupplier robotCentricSup,
+        BooleanSupplier dampen,
+        DoubleSupplier speedDial,
+        boolean logValues
+    ) {
         this.swerveSubsystem = swerveSubsystem;
         addRequirements(swerveSubsystem);
 
@@ -106,14 +107,15 @@ public class TeleopSwerve extends Command {
      */
     public TeleopSwerve(SwerveDrive swerveSubsystem, Controls.Drive driveControls, boolean logValues) {
         this(
-                swerveSubsystem,
-                driveControls::getTranslationAxis,
-                driveControls::getStrafeAxis,
-                driveControls::getRotationAxis,
-                driveControls::isRobotCentric,
-                driveControls::isDampen,
-                driveControls::getSpeedMultiplier,
-                logValues);
+            swerveSubsystem,
+            driveControls::getTranslationAxis,
+            driveControls::getStrafeAxis,
+            driveControls::getRotationAxis,
+            driveControls::isRobotCentric,
+            driveControls::isDampen,
+            driveControls::getSpeedMultiplier,
+            logValues
+        );
     }
 
     /**
@@ -132,11 +134,11 @@ public class TeleopSwerve extends Command {
         double dampenAndSpeedConstant = (dampen.getAsBoolean() ? 0.2 : 1) * (speedDial.getAsDouble());
 
         double translationValue =
-                MathUtil.applyDeadband(translationInput, SwerveConfig.DRIVE_STICK_DEADBAND) * dampenAndSpeedConstant;
+            MathUtil.applyDeadband(translationInput, SwerveConfig.DRIVE_STICK_DEADBAND) * dampenAndSpeedConstant;
         double strafeValue =
-                MathUtil.applyDeadband(strafeInput, SwerveConfig.DRIVE_STICK_DEADBAND) * dampenAndSpeedConstant;
+            MathUtil.applyDeadband(strafeInput, SwerveConfig.DRIVE_STICK_DEADBAND) * dampenAndSpeedConstant;
         double rotationValue =
-                MathUtil.applyDeadband(rotationInput, SwerveConfig.DRIVE_STICK_DEADBAND) * dampenAndSpeedConstant;
+            MathUtil.applyDeadband(rotationInput, SwerveConfig.DRIVE_STICK_DEADBAND) * dampenAndSpeedConstant;
 
         // Heading direction state
         double currentGyroYawRadians = swerveSubsystem.getGyroHeading().getRadians();
@@ -163,8 +165,9 @@ public class TeleopSwerve extends Command {
 
         // Drive
         swerveSubsystem.drive(
-                new Translation2d(translationValue, strafeValue).times(SwerveConfig.MAX_SPEED.in(MetersPerSecond)),
-                rotationValue,
-                !robotCentricSupplier.getAsBoolean());
+            new Translation2d(translationValue, strafeValue).times(SwerveConfig.MAX_SPEED.in(MetersPerSecond)),
+            rotationValue,
+            !robotCentricSupplier.getAsBoolean()
+        );
     }
 }

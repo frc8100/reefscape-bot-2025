@@ -26,6 +26,7 @@ import org.ironmaple.simulation.motorsims.SimulatedMotorController;
 
 /** Physics sim implementation of module IO. */
 public class ModuleIOSim implements ModuleIO {
+
     private final SwerveModuleSimulation moduleSimulation;
     private final SimulatedMotorController.GenericMotorController driveMotor;
     private final SimulatedMotorController.GenericMotorController turnMotor;
@@ -41,11 +42,11 @@ public class ModuleIOSim implements ModuleIO {
     public ModuleIOSim(SwerveModuleSimulation moduleSimulation) {
         this.moduleSimulation = moduleSimulation;
         this.driveMotor = moduleSimulation
-                .useGenericMotorControllerForDrive()
-                .withCurrentLimit(SwerveConfig.DRIVE_CONTINUOUS_CURRENT_LIMIT);
+            .useGenericMotorControllerForDrive()
+            .withCurrentLimit(SwerveConfig.DRIVE_CONTINUOUS_CURRENT_LIMIT);
         this.turnMotor = moduleSimulation
-                .useGenericControllerForSteer()
-                .withCurrentLimit(SwerveConfig.ANGLE_CONTINUOUS_CURRENT_LIMIT);
+            .useGenericControllerForSteer()
+            .withCurrentLimit(SwerveConfig.ANGLE_CONTINUOUS_CURRENT_LIMIT);
 
         // Enable wrapping for turn PID
         turnController.enableContinuousInput(-Math.PI, Math.PI);
@@ -55,15 +56,14 @@ public class ModuleIOSim implements ModuleIO {
     public void updateInputs(ModuleIOInputs inputs) {
         // Run closed-loop control
         if (driveClosedLoop) {
-            driveAppliedVolts = driveFFVolts
-                    + driveController.calculate(
-                            moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond));
+            driveAppliedVolts =
+                driveFFVolts +
+                driveController.calculate(moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond));
         } else {
             driveController.reset();
         }
         if (turnClosedLoop) {
-            turnAppliedVolts = turnController.calculate(
-                    moduleSimulation.getSteerAbsoluteFacing().getRadians());
+            turnAppliedVolts = turnController.calculate(moduleSimulation.getSteerAbsoluteFacing().getRadians());
         } else {
             turnController.reset();
         }
@@ -75,34 +75,31 @@ public class ModuleIOSim implements ModuleIO {
         // Update drive inputs
         inputs.driveConnected = true;
         inputs.drivePositionRad = moduleSimulation.getDriveWheelFinalPosition().in(Radians);
-        inputs.driveVelocityRadPerSec =
-                moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond);
+        inputs.driveVelocityRadPerSec = moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond);
         inputs.driveAppliedVolts = driveAppliedVolts;
-        inputs.driveCurrentAmps =
-                Math.abs(moduleSimulation.getDriveMotorStatorCurrent().in(Amps));
+        inputs.driveCurrentAmps = Math.abs(moduleSimulation.getDriveMotorStatorCurrent().in(Amps));
 
         // Update turn inputs
         inputs.turnConnected = true;
         inputs.turnPosition = moduleSimulation.getSteerAbsoluteFacing();
-        inputs.turnVelocityRadPerSec =
-                moduleSimulation.getSteerAbsoluteEncoderSpeed().in(RadiansPerSecond);
+        inputs.turnVelocityRadPerSec = moduleSimulation.getSteerAbsoluteEncoderSpeed().in(RadiansPerSecond);
         inputs.turnAppliedVolts = turnAppliedVolts;
-        inputs.turnCurrentAmps =
-                Math.abs(moduleSimulation.getSteerMotorStatorCurrent().in(Amps));
+        inputs.turnCurrentAmps = Math.abs(moduleSimulation.getSteerMotorStatorCurrent().in(Amps));
 
         // Update odometry inputs
         inputs.odometryTimestamps = SparkUtil.getSimulationOdometryTimeStamps();
         inputs.odometryDrivePositionsRad = Arrays.stream(moduleSimulation.getCachedDriveWheelFinalPositions())
-                .mapToDouble(angle -> angle.in(Radians))
-                .toArray();
+            .mapToDouble(angle -> angle.in(Radians))
+            .toArray();
         inputs.odometryTurnPositions = moduleSimulation.getCachedSteerAbsolutePositions();
     }
 
     @Override
     public SwerveModuleState getState() {
         return new SwerveModuleState(
-                moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond) * SwerveConfig.WHEEL_RADIUS.in(Meters),
-                moduleSimulation.getSteerAbsoluteFacing());
+            moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond) * SwerveConfig.WHEEL_RADIUS.in(Meters),
+            moduleSimulation.getSteerAbsoluteFacing()
+        );
     }
 
     @Override
@@ -129,7 +126,7 @@ public class ModuleIOSim implements ModuleIO {
 
         driveClosedLoop = true;
         driveFFVolts =
-                SwerveConfig.driveSimKs * Math.signum(velocityRadPerSec) + SwerveConfig.driveSimKv * velocityRadPerSec;
+            SwerveConfig.driveSimKs * Math.signum(velocityRadPerSec) + SwerveConfig.driveSimKv * velocityRadPerSec;
         driveController.setSetpoint(velocityRadPerSec);
     }
 

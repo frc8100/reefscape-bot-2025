@@ -30,6 +30,7 @@ import java.util.function.Supplier;
 
 /** IO implementation for real Limelight hardware. */
 public class VisionIOLimelight implements VisionIO {
+
     private final Supplier<Rotation2d> rotationSupplier;
     private final DoubleArrayPublisher orientationPublisher;
 
@@ -48,8 +49,7 @@ public class VisionIOLimelight implements VisionIO {
     public VisionIOLimelight(String name, Supplier<Rotation2d> rotationSupplier) {
         var table = NetworkTableInstance.getDefault().getTable(name);
         this.rotationSupplier = rotationSupplier;
-        orientationPublisher =
-                table.getDoubleArrayTopic("robot_orientation_set").publish();
+        orientationPublisher = table.getDoubleArrayTopic("robot_orientation_set").publish();
         latencySubscriber = table.getDoubleTopic("tl").subscribe(0.0);
         txSubscriber = table.getDoubleTopic("tx").subscribe(0.0);
         tySubscriber = table.getDoubleTopic("ty").subscribe(0.0);
@@ -64,10 +64,12 @@ public class VisionIOLimelight implements VisionIO {
 
         // Update target observation
         inputs.latestTargetObservation = new TargetObservation(
-                Rotation2d.fromDegrees(txSubscriber.get()), Rotation2d.fromDegrees(tySubscriber.get()));
+            Rotation2d.fromDegrees(txSubscriber.get()),
+            Rotation2d.fromDegrees(tySubscriber.get())
+        );
 
         // Update orientation for MegaTag 2
-        orientationPublisher.accept(new double[] {rotationSupplier.get().getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0});
+        orientationPublisher.accept(new double[] { rotationSupplier.get().getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0 });
         NetworkTableInstance.getDefault().flush(); // Increases network traffic but recommended by Limelight
 
         // Read new pose observations from NetworkTables
@@ -78,48 +80,44 @@ public class VisionIOLimelight implements VisionIO {
             for (int i = 11; i < rawSample.value.length; i += 7) {
                 tagIds.add((int) rawSample.value[i]);
             }
-            poseObservations.add(new PoseObservation(
+            poseObservations.add(
+                new PoseObservation(
                     // Timestamp, based on server timestamp of publish and latency
                     rawSample.timestamp * 1.0e-6 - rawSample.value[6] * 1.0e-3,
-
                     // 3D pose estimate
                     parsePose(rawSample.value),
-
                     // Ambiguity, using only the first tag because ambiguity isn't applicable for multitag
                     rawSample.value.length >= 18 ? rawSample.value[17] : 0.0,
-
                     // Tag count
                     (int) rawSample.value[7],
-
                     // Average tag distance
                     rawSample.value[9],
-
                     // Observation type
-                    PoseObservationType.MEGATAG_1));
+                    PoseObservationType.MEGATAG_1
+                )
+            );
         }
         for (var rawSample : megatag2Subscriber.readQueue()) {
             if (rawSample.value.length == 0) continue;
             for (int i = 11; i < rawSample.value.length; i += 7) {
                 tagIds.add((int) rawSample.value[i]);
             }
-            poseObservations.add(new PoseObservation(
+            poseObservations.add(
+                new PoseObservation(
                     // Timestamp, based on server timestamp of publish and latency
                     rawSample.timestamp * 1.0e-6 - rawSample.value[6] * 1.0e-3,
-
                     // 3D pose estimate
                     parsePose(rawSample.value),
-
                     // Ambiguity, zeroed because the pose is already disambiguated
                     0.0,
-
                     // Tag count
                     (int) rawSample.value[7],
-
                     // Average tag distance
                     rawSample.value[9],
-
                     // Observation type
-                    PoseObservationType.MEGATAG_2));
+                    PoseObservationType.MEGATAG_2
+                )
+            );
         }
 
         // Save pose observations to inputs object
@@ -139,12 +137,14 @@ public class VisionIOLimelight implements VisionIO {
     /** Parses the 3D pose from a Limelight botpose array. */
     private static Pose3d parsePose(double[] rawLLArray) {
         return new Pose3d(
-                rawLLArray[0],
-                rawLLArray[1],
-                rawLLArray[2],
-                new Rotation3d(
-                        Units.degreesToRadians(rawLLArray[3]),
-                        Units.degreesToRadians(rawLLArray[4]),
-                        Units.degreesToRadians(rawLLArray[5])));
+            rawLLArray[0],
+            rawLLArray[1],
+            rawLLArray[2],
+            new Rotation3d(
+                Units.degreesToRadians(rawLLArray[3]),
+                Units.degreesToRadians(rawLLArray[4]),
+                Units.degreesToRadians(rawLLArray[5])
+            )
+        );
     }
 }

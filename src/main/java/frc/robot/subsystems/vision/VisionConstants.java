@@ -22,13 +22,15 @@ import edu.wpi.first.math.geometry.Transform3d;
  * Vision constants. Some must be configured in the web UI.
  */
 public class VisionConstants {
+
     private VisionConstants() {}
 
     /**
      * The AprilTag field layout. Note: see TU 12
      */
-    public static final AprilTagFieldLayout aprilTagLayout =
-            AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+    public static final AprilTagFieldLayout aprilTagLayout = AprilTagFieldLayout.loadField(
+        AprilTagFields.k2025ReefscapeWelded
+    );
 
     /**
      * Camera names, must match names configured on coprocessor
@@ -39,8 +41,12 @@ public class VisionConstants {
      * Robot to camera 0 transform
      * (Not used by Limelight, configure in web UI instead)
      */
-    public static final Transform3d TRANSFORM_TO_CAMERA_0 =
-            new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0));
+    public static final Transform3d TRANSFORM_TO_CAMERA_0 = new Transform3d(
+        0.2,
+        0.0,
+        0.2,
+        new Rotation3d(0.0, -0.4, 0.0)
+    );
 
     // Basic filtering thresholds
     public static final double MAX_AMBIGUITY = 0.3;

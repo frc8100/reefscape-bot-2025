@@ -15,6 +15,7 @@ public interface GenericSparkIO<TInputs> {
      * Can be extended to include additional fields, and should include a @AutoLog annotation.
      */
     public static class GenericSparkIOInputs {
+
         /**
          * Whether the motor is connected.
          */
@@ -56,6 +57,7 @@ public interface GenericSparkIO<TInputs> {
      * Used as a parameter for the {@link #getDefaultConfig()} method.
      */
     public static class GenericSparkIOConfig {
+
         /**
          * The behavior of the motor when idle.
          */
@@ -103,23 +105,21 @@ public interface GenericSparkIO<TInputs> {
         outputConfig.idleMode(config.idleMode).inverted(config.inverted).smartCurrentLimit(config.smartCurrentLimit);
 
         // Configure the encoder
-        outputConfig
-                .encoder
-                .positionConversionFactor(config.positionConversionFactor)
-                .velocityConversionFactor(config.positionConversionFactor / 60)
-                .uvwMeasurementPeriod(10)
-                .uvwAverageDepth(2);
+        outputConfig.encoder
+            .positionConversionFactor(config.positionConversionFactor)
+            .velocityConversionFactor(config.positionConversionFactor / 60)
+            .uvwMeasurementPeriod(10)
+            .uvwAverageDepth(2);
 
         // Configure the signals
-        outputConfig
-                .signals
-                .primaryEncoderPositionAlwaysOn(true)
-                .primaryEncoderPositionPeriodMs(20)
-                .primaryEncoderVelocityAlwaysOn(true)
-                .primaryEncoderVelocityPeriodMs(20)
-                .appliedOutputPeriodMs(20)
-                .busVoltagePeriodMs(20)
-                .outputCurrentPeriodMs(20);
+        outputConfig.signals
+            .primaryEncoderPositionAlwaysOn(true)
+            .primaryEncoderPositionPeriodMs(20)
+            .primaryEncoderVelocityAlwaysOn(true)
+            .primaryEncoderVelocityPeriodMs(20)
+            .appliedOutputPeriodMs(20)
+            .busVoltagePeriodMs(20)
+            .outputCurrentPeriodMs(20);
 
         return outputConfig;
     }
@@ -129,7 +129,6 @@ public interface GenericSparkIO<TInputs> {
      * @param inputs - The inputs to update.
      */
     public void updateInputs(TInputs inputs);
-
     /**
      * Runs the motor.
      * @param motorInput - Percent input, from [-1, 1] without deadband.

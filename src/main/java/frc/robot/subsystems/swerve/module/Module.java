@@ -29,6 +29,7 @@ import org.littletonrobotics.junction.Logger;
  * Includes an abstracted IO interface for easy swapping of hardware/sim.
  */
 public class Module {
+
     /**
      * The IO interface for a swerve module.
      * Get inputs from the module and set outputs to the module.
@@ -53,10 +54,14 @@ public class Module {
     public Module(ModuleIO io, int index) {
         this.io = io;
         this.index = index;
-        driveDisconnectedAlert =
-                new Alert("Disconnected drive motor on module " + Integer.toString(index) + ".", AlertType.kError);
-        turnDisconnectedAlert =
-                new Alert("Disconnected turn motor on module " + Integer.toString(index) + ".", AlertType.kError);
+        driveDisconnectedAlert = new Alert(
+            "Disconnected drive motor on module " + Integer.toString(index) + ".",
+            AlertType.kError
+        );
+        turnDisconnectedAlert = new Alert(
+            "Disconnected turn motor on module " + Integer.toString(index) + ".",
+            AlertType.kError
+        );
     }
 
     /** Updates the inputs to the module. */

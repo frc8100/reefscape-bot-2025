@@ -26,6 +26,7 @@ public interface GyroIO {
      */
     @AutoLog
     public static class GyroIOInputs {
+
         /**
          * Whether the gyro is connected or not.
          */

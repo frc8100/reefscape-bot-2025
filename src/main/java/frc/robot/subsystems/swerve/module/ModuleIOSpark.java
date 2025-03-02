@@ -42,6 +42,7 @@ import java.util.function.DoubleSupplier;
  * and duty cycle absolute encoder.
  */
 public class ModuleIOSpark implements ModuleIO {
+
     public int moduleNumber;
 
     /** The angle offset. Used to zero the module to a specific angle. */
@@ -90,25 +91,25 @@ public class ModuleIOSpark implements ModuleIO {
         angleMotor = new SparkMax(moduleConstants.angleMotorID, MotorType.kBrushless);
         relAngleEncoder = angleMotor.getEncoder();
         angleClosedLoopController = angleMotor.getClosedLoopController();
-        SparkUtil.tryUntilOk(
-                angleMotor,
-                5,
-                () -> angleMotor.configure(
-                        SwerveConfig.getAngleMotorConfig(),
-                        ResetMode.kResetSafeParameters,
-                        PersistMode.kPersistParameters));
+        SparkUtil.tryUntilOk(angleMotor, 5, () ->
+            angleMotor.configure(
+                SwerveConfig.getAngleMotorConfig(),
+                ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters
+            )
+        );
 
         // Create and configure the drive motor
         driveMotor = new SparkMax(moduleConstants.driveMotorID, MotorType.kBrushless);
         relDriveEncoder = driveMotor.getEncoder();
         driveClosedLoopController = driveMotor.getClosedLoopController();
-        SparkUtil.tryUntilOk(
-                driveMotor,
-                5,
-                () -> driveMotor.configure(
-                        SwerveConfig.getDriveMotorConfig(),
-                        ResetMode.kResetSafeParameters,
-                        PersistMode.kPersistParameters));
+        SparkUtil.tryUntilOk(driveMotor, 5, () ->
+            driveMotor.configure(
+                SwerveConfig.getDriveMotorConfig(),
+                ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters
+            )
+        );
         SparkUtil.tryUntilOk(driveMotor, 5, () -> relDriveEncoder.setPosition(0.0));
 
         // Create and configure the CANCoder
@@ -123,8 +124,7 @@ public class ModuleIOSpark implements ModuleIO {
         timestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
         drivePositionQueue = SparkOdometryThread.getInstance().registerSignal(driveMotor, relDriveEncoder::getPosition);
         turnPositionQueue = SparkOdometryThread.getInstance()
-                .registerSignal(
-                        angleMotor, () -> angleEncoder.getAbsolutePosition().getValueAsDouble() * 360);
+            .registerSignal(angleMotor, () -> angleEncoder.getAbsolutePosition().getValueAsDouble() * 360);
     }
 
     /**
@@ -166,39 +166,41 @@ public class ModuleIOSpark implements ModuleIO {
     public void updateInputs(ModuleIOInputs inputs) {
         // Update drive inputs
         SparkUtil.sparkStickyFault = false;
-        SparkUtil.ifOk(driveMotor, relDriveEncoder::getPosition, (value) -> inputs.drivePositionRad = value);
-        SparkUtil.ifOk(driveMotor, relDriveEncoder::getVelocity, (value) -> inputs.driveVelocityRadPerSec = value);
+        SparkUtil.ifOk(driveMotor, relDriveEncoder::getPosition, value -> inputs.drivePositionRad = value);
+        SparkUtil.ifOk(driveMotor, relDriveEncoder::getVelocity, value -> inputs.driveVelocityRadPerSec = value);
         SparkUtil.ifOk(
-                driveMotor,
-                new DoubleSupplier[] {driveMotor::getAppliedOutput, driveMotor::getBusVoltage},
-                (values) -> inputs.driveAppliedVolts = values[0] * values[1]);
-        SparkUtil.ifOk(driveMotor, driveMotor::getOutputCurrent, (value) -> inputs.driveCurrentAmps = value);
+            driveMotor,
+            new DoubleSupplier[] { driveMotor::getAppliedOutput, driveMotor::getBusVoltage },
+            values -> inputs.driveAppliedVolts = values[0] * values[1]
+        );
+        SparkUtil.ifOk(driveMotor, driveMotor::getOutputCurrent, value -> inputs.driveCurrentAmps = value);
         inputs.driveConnected = driveConnectedDebounce.calculate(!SparkUtil.sparkStickyFault);
 
         // Update turn inputs
         SparkUtil.sparkStickyFault = false;
         SparkUtil.ifOk(
-                angleMotor,
-                // turnEncoder::getPosition,
-                () -> angleEncoder.getAbsolutePosition().getValueAsDouble() * 360,
-                // (value) -> inputs.turnPosition = new Rotation2d(value).minus(zeroRotation)
-                (value) -> inputs.turnPosition = Rotation2d.fromDegrees(value).minus(angleOffset));
-        SparkUtil.ifOk(angleMotor, relAngleEncoder::getVelocity, (value) -> inputs.turnVelocityRadPerSec = value);
+            angleMotor,
+            // turnEncoder::getPosition,
+            () -> angleEncoder.getAbsolutePosition().getValueAsDouble() * 360,
+            // (value) -> inputs.turnPosition = new Rotation2d(value).minus(zeroRotation)
+            value -> inputs.turnPosition = Rotation2d.fromDegrees(value).minus(angleOffset)
+        );
+        SparkUtil.ifOk(angleMotor, relAngleEncoder::getVelocity, value -> inputs.turnVelocityRadPerSec = value);
         SparkUtil.ifOk(
-                angleMotor,
-                new DoubleSupplier[] {angleMotor::getAppliedOutput, angleMotor::getBusVoltage},
-                (values) -> inputs.turnAppliedVolts = values[0] * values[1]);
-        SparkUtil.ifOk(angleMotor, angleMotor::getOutputCurrent, (value) -> inputs.turnCurrentAmps = value);
+            angleMotor,
+            new DoubleSupplier[] { angleMotor::getAppliedOutput, angleMotor::getBusVoltage },
+            values -> inputs.turnAppliedVolts = values[0] * values[1]
+        );
+        SparkUtil.ifOk(angleMotor, angleMotor::getOutputCurrent, value -> inputs.turnCurrentAmps = value);
         inputs.turnConnected = turnConnectedDebounce.calculate(!SparkUtil.sparkStickyFault);
 
         // Update odometry inputs
-        inputs.odometryTimestamps =
-                timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
-        inputs.odometryDrivePositionsRad =
-                drivePositionQueue.stream().mapToDouble((Double value) -> value).toArray();
-        inputs.odometryTurnPositions = turnPositionQueue.stream()
-                .map((Double value) -> new Rotation2d(value).minus(angleOffset))
-                .toArray(Rotation2d[]::new);
+        inputs.odometryTimestamps = timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
+        inputs.odometryDrivePositionsRad = drivePositionQueue.stream().mapToDouble((Double value) -> value).toArray();
+        inputs.odometryTurnPositions = turnPositionQueue
+            .stream()
+            .map((Double value) -> new Rotation2d(value).minus(angleOffset))
+            .toArray(Rotation2d[]::new);
         timestampQueue.clear();
         drivePositionQueue.clear();
         turnPositionQueue.clear();
@@ -239,7 +241,6 @@ public class ModuleIOSpark implements ModuleIO {
         percentOutput = MathUtil.clamp(percentOutput, -SwerveConfig.MAX_DRIVE_POWER, SwerveConfig.MAX_DRIVE_POWER);
 
         driveMotor.set(percentOutput);
-
         // TODO: set the speed using the PID controller
         // double velocity = desiredState.speedMetersPerSecond;
         // driveClosedLoopController.setReference(velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
