@@ -1,11 +1,18 @@
 package frc.robot.subsystems.superstructure.claw;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.LinearVelocity;
 
 /**
  * Constants for the claw. Includes CAN Ids.
@@ -33,6 +40,27 @@ public final class ClawConstants {
         public static final Rotation2d L3ANGLE = Rotation2d.fromDegrees(35).minus(ANGLE_OFFSET);
         public static final Rotation2d L2ANGLE = Rotation2d.fromDegrees(35).minus(ANGLE_OFFSET);
         public static final Rotation2d L1ANGLE = Rotation2d.fromDegrees(45).minus(ANGLE_OFFSET);
+
+        /**
+         * The translation from the origin of the claw to where the coral is stored.
+         */
+        private static final double CLAW_TO_CORAL_X = 0.3;
+
+        /**
+         * @return The translation (x only) from the origin of the claw to where the coral is stored.
+         * @param angleRadians - The angle of the claw, in radians.
+         */
+        public static Translation2d getClawToCoralX(double angleRadians) {
+            return new Translation2d(CLAW_TO_CORAL_X * Math.sin(angleRadians), 0);
+        }
+
+        /**
+         * @return The z (vertical) translation (in meters) from the origin of the claw to where the coral is stored.
+         * @param angleRadians - The angle of the claw, in radians.
+         */
+        public static double getClawToCoralZ(double angleRadians) {
+            return CLAW_TO_CORAL_X * Math.cos(angleRadians);
+        }
     }
 
     /**
@@ -67,7 +95,7 @@ public final class ClawConstants {
 
     // Outtake motor configs
     public static final int OUTTAKE_MOTOR_ID = 13;
-    public static final double OUTTAKE_GEAR_RATIO = 1.0;
+    public static final double OUTTAKE_GEAR_RATIO = 5;
     public static final boolean IS_OUTTAKE_MOTOR_INVERTED = false;
     public static final Current OUTTAKE_MOTOR_CURRENT_LIMIT = Amps.of(40);
     /** Rotations to radians */
@@ -76,7 +104,7 @@ public final class ClawConstants {
     /**
      * The maximum power for the outtake motor, from 0-1.
      */
-    public static final double MAX_OUTTAKE_POWER = 0.5;
+    public static final double MAX_OUTTAKE_POWER = 0.3;
 
     // Simulator configs
     public static final DCMotor SIM_ANGLE_MOTOR = DCMotor.getNEO(1);
@@ -86,5 +114,14 @@ public final class ClawConstants {
     public static final double SIM_ANGLE_KD = 0.0;
 
     public static final DCMotor SIM_OUTTAKE_MOTOR = DCMotor.getNEO(1);
+    public static final AngularVelocity SIM_OUTTAKE_TARGET_VELOCITY = RadiansPerSecond.of(25);
     public static final double SIM_OUTTAKE_MOI = 0.01;
+    public static final double SIM_OUTTAKE_KP = 0.6;
+    public static final double SIM_OUTTAKE_KI = 0.0;
+    public static final double SIM_OUTTAKE_KD = 0.0;
+
+    /**
+     * The speed that the coral is ejected at.
+     */
+    public static final LinearVelocity SIM_OUTTAKE_EJECT_SPEED = MetersPerSecond.of(1.5);
 }

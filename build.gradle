@@ -134,12 +134,12 @@ tasks.withType(JavaCompile) {
 // Create version file
 project.compileJava.dependsOn(createVersionFile)
 gversion {
-    srcDir       = "src/main/java/"
+    srcDir = "src/main/java/"
     classPackage = "frc.robot"
-    className    = "BuildConstants"
-    dateFormat   = "yyyy-MM-dd HH:mm:ss z"
-    timeZone     = "America/New_York"
-    indent       = "    "
+    className = "BuildConstants"
+    dateFormat = "yyyy-MM-dd HH:mm:ss z"
+    timeZone = "America/New_York"
+    indent = "    "
 }
 
 // Create commit with working changes on event branches
@@ -176,7 +176,7 @@ task(eventDeploy) {
 createVersionFile.dependsOn(eventDeploy)
 
 // Spotless formatting
-project.compileJava.dependsOn(spotlessApply)
+// project.compileJava.dependsOn(spotlessApply)
 spotless {
     // java {
     //     target fileTree(".") {
@@ -199,13 +199,13 @@ spotless {
         trimTrailingWhitespace()
         endWithNewline()
     }
-    json {
-        target fileTree(".") {
-            include "**/*.json"
-            exclude "**/build/**", "**/build-*/**"
-        }
-        gson().indentWithSpaces(2)
-    }
+    // json {
+    //     target fileTree(".") {
+    //         include "**/*.json"
+    //         exclude "**/build/**", "**/build-*/**"
+    //     }
+    //     gson().indentWithSpaces(2)
+    // }
     format "misc", {
         target fileTree(".") {
             include "**/*.md", "**/.gitignore"

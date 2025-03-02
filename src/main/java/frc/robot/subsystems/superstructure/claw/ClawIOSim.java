@@ -1,5 +1,8 @@
 package frc.robot.subsystems.superstructure.claw;
 
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -39,6 +42,13 @@ public class ClawIOSim implements ClawIO {
     );
 
     /**
+     * Whether the angle controller is using PID or not.
+     * If false, the angle motor will not be updated by the PID controller.
+     * The PID controller will still be updated.
+     */
+    private boolean isAngleUsingPID = true;
+
+    /**
      * The simulation model for the claw outtake motor.
      */
     private final DCMotor outtakeMotorGearbox = ClawConstants.SIM_OUTTAKE_MOTOR;
@@ -56,16 +66,26 @@ public class ClawIOSim implements ClawIO {
     );
 
     /**
-     * Whether the angle controller is using PID or not.
-     * If false, the angle motor will not be updated by the PID controller.
+     * The PID outtake controller for the claw.
+     */
+    private final PIDController outtakeController = new PIDController(
+        ClawConstants.SIM_OUTTAKE_KP,
+        ClawConstants.SIM_OUTTAKE_KI,
+        ClawConstants.SIM_OUTTAKE_KD
+    );
+
+    /**
+     * Whether the outtake controller is using PID or not.
+     * If false, the outtake motor will not be updated by the PID controller.
      * The PID controller will still be updated.
      */
-    private boolean isAngleUsingPID = true;
+    private boolean isOuttakeUsingPID = true;
 
     @Override
     public void stop() {
         // Stop the angle motor
         isAngleUsingPID = false;
+        isOuttakeUsingPID = false;
 
         angleMotorSim.setInputVoltage(0);
         outtakeMotorSim.setInputVoltage(0);
@@ -81,10 +101,10 @@ public class ClawIOSim implements ClawIO {
 
     @Override
     public void runOutake(double motorInput) {
-        // Set the output of the outtake motor
-        // TODO: voltage
-        // outtakeMotorSim.setInputVoltage(motorInput * ClawConstants.MAX_OUTTAKE_POWER * 12);
-        outtakeMotorSim.setAngularVelocity(motorInput * ClawConstants.MAX_OUTTAKE_POWER * 200);
+        isOuttakeUsingPID = true;
+
+        // Set the setpoint of the outtake controller
+        outtakeController.setSetpoint(motorInput * ClawConstants.SIM_OUTTAKE_TARGET_VELOCITY.in(RadiansPerSecond));
     }
 
     @Override
@@ -93,11 +113,16 @@ public class ClawIOSim implements ClawIO {
         double angleMotorOutput = angleController.calculate(angleMotorSim.getAngularPositionRad());
 
         if (isAngleUsingPID) {
-            angleMotorSim.setInputVoltage(angleMotorOutput);
+            Logger.recordOutput("ClawSim/AnglePIDOutput", angleMotorOutput);
+            angleMotorSim.setInputVoltage(MathUtil.clamp(angleMotorOutput, -12, 12));
         }
 
-        // Debug
-        Logger.recordOutput("ClawSim/angleMotorOutput", angleMotorOutput);
+        double outtakeMotorOutput = outtakeController.calculate(outtakeMotorSim.getAngularVelocityRadPerSec());
+
+        if (isOuttakeUsingPID) {
+            Logger.recordOutput("ClawSim/OuttakePIDOutput", outtakeMotorOutput);
+            outtakeMotorSim.setInputVoltage(MathUtil.clamp(outtakeMotorOutput, -12, 12));
+        }
 
         // Update the simulation
         angleMotorSim.update(0.02);
@@ -122,5 +147,6 @@ public class ClawIOSim implements ClawIO {
         inputs.outakeAppliedVolts = outtakeMotorSim.getInputVoltage();
         inputs.outakeSupplyCurrentAmps = outtakeMotorSim.getCurrentDrawAmps();
         inputs.outakeTorqueCurrentAmps = outtakeMotorSim.getCurrentDrawAmps();
+        inputs.outakeSetpointVelocityRadPerSec = outtakeController.getSetpoint();
     }
 }

@@ -312,8 +312,8 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
         // Log empty setpoint states when disabled
         if (DriverStation.isDisabled()) {
-            Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[4]);
-            Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[4]);
+            Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[] {});
+            Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
         }
 
         // Update odometry

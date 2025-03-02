@@ -32,6 +32,7 @@ public interface ClawIO extends GenericSparkIO<ClawIO.ClawIOInputs> {
         public double outakeSupplyCurrentAmps = 0.0;
         public double outakeTorqueCurrentAmps = 0.0;
         public double outakeTempCelsius = 0.0;
+        public double outakeSetpointVelocityRadPerSec = 0.0;
     }
 
     /**

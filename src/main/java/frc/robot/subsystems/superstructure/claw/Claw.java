@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
@@ -15,8 +16,8 @@ import org.littletonrobotics.junction.Logger;
  */
 public class Claw extends SubsystemBase {
 
-    private final ClawIO io;
-    private final ClawIOInputsAutoLogged inputs = new ClawIOInputsAutoLogged();
+    protected final ClawIO io;
+    protected final ClawIOInputsAutoLogged inputs = new ClawIOInputsAutoLogged();
 
     public Claw(ClawIO io) {
         this.io = io;
@@ -35,7 +36,7 @@ public class Claw extends SubsystemBase {
      * @param rotationToRotateClawTo - the angle to move to
      */
     public Command getAngleCommand(Rotation2d rotationToRotateClawTo) {
-        return new RunCommand(() -> io.setTurnPosition(rotationToRotateClawTo), this);
+        return new InstantCommand(() -> io.setTurnPosition(rotationToRotateClawTo), this);
     }
 
     @Override
@@ -53,6 +54,6 @@ public class Claw extends SubsystemBase {
     @AutoLogOutput(key = "ComponentPositions/claw")
     public Pose3d getPose() {
         // TODO: Add elevator pose
-        return new Pose3d(0, 0, 0, new Rotation3d(0, inputs.turnPositionRad, 0));
+        return new Pose3d(0, 0, 2, new Rotation3d(0, inputs.turnPositionRad, 0));
     }
 }

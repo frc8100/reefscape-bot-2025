@@ -13,6 +13,7 @@ import frc.robot.subsystems.superstructure.claw.Claw;
 import frc.robot.subsystems.superstructure.claw.ClawConstants;
 import frc.robot.subsystems.superstructure.claw.ClawIOSim;
 import frc.robot.subsystems.superstructure.claw.ClawIOSpark;
+import frc.robot.subsystems.superstructure.claw.ClawSim;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveConstants;
@@ -121,7 +122,7 @@ public class RobotContainer {
                 );
 
                 // Create a simulated claw
-                clawSubsystem = new Claw(new ClawIOSim());
+                clawSubsystem = new ClawSim();
 
                 // TODO: Add behavior chooser
                 // Create an opponent robot simulation
@@ -233,5 +234,19 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         return autoChooser.get();
+    }
+
+    /**
+     * Run in `Robot.simulationPeriodic()` to update the subsystem-specific simulation.
+     * @throws IllegalStateException if the subsystems are not simulated
+     */
+    public void simulationPeriodic() {
+        // Check all the subsystems are simulated
+        if (!(swerveSubsystem instanceof SwerveSim && clawSubsystem instanceof ClawSim)) {
+            throw new IllegalStateException("Subsystems are not simulated");
+        }
+
+        // Update the simulation
+        ((ClawSim) clawSubsystem).simulationPeriodic((SwerveSim) swerveSubsystem);
     }
 }

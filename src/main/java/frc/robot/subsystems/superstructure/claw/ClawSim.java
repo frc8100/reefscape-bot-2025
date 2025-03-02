@@ -1,0 +1,86 @@
+package frc.robot.subsystems.superstructure.claw;
+
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Radians;
+
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.Controls;
+import frc.robot.subsystems.swerve.SwerveDrive;
+import frc.robot.subsystems.swerve.SwerveSim;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly;
+import org.littletonrobotics.junction.Logger;
+
+/**
+ * The simulator implementation of the claw subsystem.
+ * This is independent of the {@link ClawIOSim} class, which is the simulator implementation of the claw IO.
+ */
+public class ClawSim extends Claw {
+
+    /**
+     * Whether or not the claw is currently holding a piece of coral.
+     */
+    private boolean isCoralInClaw = true;
+
+    /**
+     * Creates a new ClawSim. Automatically initializes the claw IO to a new instance of {@link ClawIOSim}.
+     */
+    public ClawSim() {
+        super(new ClawIOSim());
+        // TODO: Temporary
+        // Controls.mainDriverController.
+        new JoystickButton(Controls.mainDriverController, XboxController.Button.kX.value).onTrue(
+            new InstantCommand(() -> isCoralInClaw = true)
+        );
+    }
+
+    @Override
+    public void periodic() {
+        super.periodic();
+
+        Logger.recordOutput("ClawSim/IsCoralInClaw", isCoralInClaw);
+    }
+
+    /**
+     * Called in `Robot.simulationPeriodic()` to update the simulation.
+     */
+    public void simulationPeriodic(SwerveSim swerveSubsystem) {
+        // If the claw is holding a piece of coral and the outtake is running, set the claw to not holding a piece of coral
+        // and create a coral object in the simulator
+        if (isCoralInClaw && super.inputs.outakeVelocityRadPerSec > 10) {
+            isCoralInClaw = false;
+
+            SimulatedArena.getInstance()
+                .addGamePieceProjectile(
+                    new ReefscapeCoralOnFly(
+                        // The position of the robot
+                        swerveSubsystem.getActualPose().getTranslation(),
+                        // Where the claw is positioned
+                        super
+                            .getPose()
+                            .getTranslation()
+                            .toTranslation2d()
+                            .plus(ClawConstants.RotationPositions.getClawToCoralX(super.inputs.turnPositionRad)),
+                        // The speed of the robot
+                        swerveSubsystem.getChassisSpeeds(),
+                        // The rotation of the robot
+                        swerveSubsystem.getActualPose().getRotation(),
+                        // The vertical position of the claw
+                        Meters.of(
+                            super.getPose().getZ() +
+                            ClawConstants.RotationPositions.getClawToCoralZ(super.inputs.turnPositionRad)
+                        ),
+                        // How fast to eject the coral
+                        ClawConstants.SIM_OUTTAKE_EJECT_SPEED,
+                        // The angle of the claw
+                        Radians.of(
+                            -(super.inputs.turnPositionRad + ClawConstants.RotationPositions.ANGLE_OFFSET.getRadians())
+                        )
+                    )
+                );
+        }
+    }
+}
