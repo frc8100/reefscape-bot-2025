@@ -76,6 +76,7 @@
     "DEADBAND",
     "Debouncer",
     "debouncers",
+    "dtheta",
     "hashtable",
     "hashtables",
     "Holonomic",
@@ -88,6 +89,6 @@
     "setpoints",
     "teleop",
     "wpilibj"
-  ],
+],
   "wpilib.skipSelectSimulateExtension": false
 }

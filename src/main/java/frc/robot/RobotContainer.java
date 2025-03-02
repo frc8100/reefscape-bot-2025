@@ -79,23 +79,22 @@ public class RobotContainer {
 
                 clawSubsystem = new Claw(new ClawIOSpark());
                 break;
-
             default:
             case SIM:
                 // Create a reefscape arena
                 var arenaSimulation = new Arena2025Reefscape();
 
+                // Set up the simulated arena by overriding the instance and adding the pieces
                 SimulatedArena.overrideInstance(arenaSimulation);
                 SimulatedArena.getInstance().addCustomSimulation(new ReefscapeReefSimulation(arenaSimulation));
                 SimulatedArena.getInstance().placeGamePiecesOnField();
 
-                // Sim robot, instantiate physics sim IO implementations
+                // Create a simulated drive
                 driveSimulation = new SwerveDriveSimulation(SwerveConfig.mapleSimConfig, SwerveConfig.initialPose);
 
                 SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
 
                 SwerveModuleSimulation[] moduleSims = driveSimulation.getModules();
-
                 swerveSubsystem = new SwerveSim(
                         new GyroIOSim(driveSimulation.getGyroSimulation()),
                         new ModuleIO[] {
@@ -105,7 +104,8 @@ public class RobotContainer {
                             new ModuleIOSim(moduleSims[3]),
                         },
                         driveSimulation);
-
+                
+                // Create a simulated vision subsystem
                 visionSubsystem = new Vision(
                         swerveSubsystem::addVisionMeasurement,
                         new VisionIOPhotonSim(
@@ -113,6 +113,7 @@ public class RobotContainer {
                                 VisionConstants.TRANSFORM_TO_CAMERA_0,
                                 swerveSubsystem::getActualPose));
 
+                // Create a simulated claw
                 clawSubsystem = new Claw(new ClawIOSim());
 
                 // TODO: Add behavior chooser
@@ -137,16 +138,6 @@ public class RobotContainer {
                 //         .getJoystickButtonOf(opponentRobotDriveControls.zeroGyroButton)
                 //         .onTrue(new InstantCommand(() -> opponentRobotSim1.zeroGyro()));
                 break;
-
-                // case REPLAY:
-                // default:
-                //     // Replayed robot, disable IO implementations
-                //     swerveSubsystem = new Swerve(new GyroIO() {}, new ModuleIO[] {
-                //             new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {},
-                //     });
-
-                //     visionSubsystem = new Vision()
-                //     break;
         }
 
         // TODO: add switch for controller and joystick
@@ -189,25 +180,11 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         /* Driver Buttons */
-        // Controls.mainDriveControls.zeroGyro.onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
         Controls.mainDriveControls
                 .getJoystickButtonOf(Controls.mainDriveControls.zeroGyroButton)
-                .onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
+                .onTrue(new InstantCommand(swerveSubsystem::zeroGyro));
 
-        // Heading lock bindings
-        // TODO: Reimplement
-        // Controls.mainDriveControls.up
-        //         .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d90))
-        //         .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
-        // Controls.mainDriveControls.left
-        //         .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d180))
-        //         .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
-        // Controls.mainDriveControls.right
-        //         .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d0))
-        //         .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
-        // Controls.mainDriveControls.down
-        //         .onTrue(new InstantCommand(() -> States.driveState = States.DriveStates.d270))
-        //         .onFalse(new InstantCommand(() -> States.driveState = States.DriveStates.standard));
+        // TODO: Heading lock?
 
         // Claw
         clawSubsystem.setDefaultCommand(clawSubsystem.getRunCommand(Controls.Claw::getIntakeOrOuttake));
@@ -221,7 +198,6 @@ public class RobotContainer {
                 clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.RESTING_ANGLE));
 
         // Test
-
         // Controls.mainDriveControls.goToCoralStation1.whileTrue(autoRoutines.getCoralFromStation(1));
         // Controls.mainDriveControls.goToReef1.whileTrue(autoRoutines.goToReef(1));
         // Controls.mainDriveControls

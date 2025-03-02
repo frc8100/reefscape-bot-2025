@@ -29,6 +29,45 @@ import org.littletonrobotics.junction.Logger;
  */
 public interface SwerveDrive extends Subsystem {
     /**
+     * Possible drive states.
+     * When set to {@link DriveStates#STANDARD}, the robot will drive normally.
+     * When set any other state, the robot will rotate to that angle. (ex. {@link DriveStates#D90} will rotate to 90 degrees)
+     */
+    public enum DriveStates {
+        STANDARD(),
+        D0(0.0),
+        D90(90.0),
+        D180(180.0),
+        D270(270.0);
+
+        /**
+         * The degree measure of the state.
+         */
+        public final double degreeMeasure;
+
+        /**
+         * Whether the state is a standard state.
+         */
+        public final boolean isStandard;
+
+        DriveStates(double degreeMeasure) {
+            this.degreeMeasure = degreeMeasure;
+            this.isStandard = false;
+        }
+
+        DriveStates() {
+            this.degreeMeasure = 0.0;
+            this.isStandard = true;
+        }
+    }
+
+    /**
+     * The current drive state.
+     * See {@link DriveStates} for possible states.
+     */
+    public static DriveStates driveState = DriveStates.STANDARD;
+
+    /**
      * Configures the path planner auto builder and records the path and trajectory setpoint to the logger.
      */
     public default void configurePathPlannerAutoBuilder() {

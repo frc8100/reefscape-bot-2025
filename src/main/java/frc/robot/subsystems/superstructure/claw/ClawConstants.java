@@ -3,6 +3,7 @@ package frc.robot.subsystems.superstructure.claw;
 import static edu.wpi.first.units.Units.Amps;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Current;
 
@@ -20,6 +21,7 @@ public final class ClawConstants {
 
         /**
          * The initial angle of the claw when it is resting (against the mechanical lock).
+         * The lower it is, the more "vertical" the claw is.
          */
         public static final Rotation2d ANGLE_OFFSET = Rotation2d.fromDegrees(45);
 

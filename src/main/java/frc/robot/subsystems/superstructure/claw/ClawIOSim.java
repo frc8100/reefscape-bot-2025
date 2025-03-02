@@ -111,11 +111,4 @@ public class ClawIOSim implements ClawIO {
         inputs.outakeSupplyCurrentAmps = outtakeMotorSim.getCurrentDrawAmps();
         inputs.outakeTorqueCurrentAmps = outtakeMotorSim.getCurrentDrawAmps();
     }
-
-    // Simulation
-    // @AutoLogOutput(key = "ClawSim/anglePosition")
-    // public Pose3d getPose() {
-    //     return new Pose3d(0, 0, 0, new Rotation3d(
-    //             0, 0, angleMotorSim.getAngularPositionRad()));
-    // }
 }

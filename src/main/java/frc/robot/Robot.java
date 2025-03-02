@@ -163,7 +163,7 @@ public class Robot extends LoggedRobot {
     public void simulationPeriodic() {
         SimulatedArena.getInstance().simulationPeriodic();
 
-        // Log output of opponenet robots
+        // Log output of opponent robots
         Logger.recordOutput("Odometry/OpponentRobotPoses", OpponentRobotSim.getOpponentRobotPoses());
 
         // Log game pieces

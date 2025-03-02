@@ -48,7 +48,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
 
-    /** Raw gryo rotation. Used for the pose estimator. */
+    /** Raw gyro rotation. Used for the pose estimator. */
     private Rotation2d rawGyroRotation = new Rotation2d();
 
     /**
@@ -97,7 +97,6 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
         configurePathPlannerAutoBuilder();
 
-        // TODO: Configure SysId
         sysId = new SysIdRoutine(
                 new SysIdRoutine.Config(
                         null, null, null, (state) -> Logger.recordOutput("Swerve/SysIdState", state.toString())),
@@ -163,7 +162,6 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
 
         // Set the desired state for each swerve module
-        // for (Module mod : swerveModules) {
         for (int i = 0; i < 4; i++) {
             Module mod = swerveModules[i];
             mod.runSetpoint(setpointStates[mod.index]);
@@ -176,10 +174,8 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, SwerveConfig.MAX_SPEED);
 
         // Set the desired state for each swerve module
-        // for (Module mod : swerveModules) {
         for (int i = 0; i < 4; i++) {
             Module mod = swerveModules[i];
-            // mod.setDesiredState(desiredStates[mod.getModuleNumber()], false);
             mod.runSetpoint(desiredStates[mod.index]);
         }
     }
@@ -234,16 +230,6 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     public void addVisionMeasurement(
             Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
         poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
-    }
-
-    /**
-     * Resets the odometry of the robot.
-     *
-     * @param pose The new pose of the robot.
-     */
-    private void resetOdometry(Pose2d pose) {
-        poseEstimator.resetPosition(new Rotation2d(), getModulePositions(), pose);
-        zeroGyro(pose.getRotation().getDegrees());
     }
 
     @Override
@@ -309,8 +295,8 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
         // Log empty setpoint states when disabled
         if (DriverStation.isDisabled()) {
-            Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[] {});
-            Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
+            Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[4]);
+            Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[4]);
         }
 
         // Update odometry
@@ -340,13 +326,6 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
             // Apply update
             poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
-
-            // Check for routines
-            // for (RoutineWithCondition routine : routines) {
-            //     if (routine.condition.getAsBoolean()) {
-            //         routine.routine.get().schedule();
-            //     }
-            // }
         }
     }
 }

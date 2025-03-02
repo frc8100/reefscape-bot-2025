@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Controls;
-import frc.robot.States;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import java.util.function.BooleanSupplier;
@@ -48,7 +47,7 @@ public class TeleopSwerve extends Command {
      * Whether the swerve is robot centric.
      * Default is always `false`.
      */
-    private BooleanSupplier robotCentricSup;
+    private BooleanSupplier robotCentricSupplier;
 
     /**
      * Whether to dampen the input.
@@ -96,7 +95,7 @@ public class TeleopSwerve extends Command {
         this.translationSupplier = translationSupplier;
         this.strafeSupplier = strafeSupplier;
         this.rotationSupplier = rotationSupplier;
-        this.robotCentricSup = robotCentricSup;
+        this.robotCentricSupplier = robotCentricSup;
         this.dampen = dampen;
         this.speedDial = speedDial;
         this.logValues = logValues;
@@ -142,27 +141,13 @@ public class TeleopSwerve extends Command {
         // Heading direction state
         double currentGyroYawRadians = swerveSubsystem.getGyroHeading().getRadians();
 
-        switch (States.driveState) {
-            case d0:
-                // heading lock
-                rotationValue = rotationController.calculate(currentGyroYawRadians, Units.degreesToRadians(0));
-                break;
-            case d90:
-                // heading lock
-                rotationValue = rotationController.calculate(currentGyroYawRadians, Units.degreesToRadians(90));
-                break;
-            case d180:
-                // heading lock
-                rotationValue = rotationController.calculate(currentGyroYawRadians, Units.degreesToRadians(180));
-                break;
-            case d270:
-                // heading lock
-                rotationValue = rotationController.calculate(currentGyroYawRadians, Units.degreesToRadians(270));
-                break;
-            case standard:
-                // normal
-                rotationValue = rotationValue * SwerveConfig.MAX_ANGULAR_VELOCITY.in(RadiansPerSecond);
-                break;
+        // Calculate the rotation value based on the drive state
+        if (!SwerveDrive.driveState.isStandard) {
+            // Heading direction state, use the PID controller to set the rotation value
+            rotationValue = rotationController.calculate(currentGyroYawRadians, SwerveDrive.driveState.degreeMeasure);
+        } else {
+            // Normal state, use the rotation value from the controller
+            rotationValue = rotationValue * SwerveConfig.MAX_ANGULAR_VELOCITY.in(RadiansPerSecond);
         }
 
         // Log the values
@@ -180,6 +165,6 @@ public class TeleopSwerve extends Command {
         swerveSubsystem.drive(
                 new Translation2d(translationValue, strafeValue).times(SwerveConfig.MAX_SPEED.in(MetersPerSecond)),
                 rotationValue,
-                !robotCentricSup.getAsBoolean());
+                !robotCentricSupplier.getAsBoolean());
     }
 }
