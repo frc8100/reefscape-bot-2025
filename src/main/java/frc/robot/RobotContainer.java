@@ -14,6 +14,9 @@ import frc.robot.subsystems.superstructure.claw.ClawConstants;
 import frc.robot.subsystems.superstructure.claw.ClawIOSim;
 import frc.robot.subsystems.superstructure.claw.ClawIOSpark;
 import frc.robot.subsystems.superstructure.claw.ClawSim;
+import frc.robot.subsystems.superstructure.elevator.Elevator;
+import frc.robot.subsystems.superstructure.elevator.ElevatorConstants;
+import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveConstants;
@@ -34,6 +37,7 @@ import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.Arena2025Reefscape;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeReefSimulation;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -48,6 +52,7 @@ public class RobotContainer {
     private final Vision visionSubsystem;
     private final SwerveDrive swerveSubsystem;
     private final Claw clawSubsystem;
+    private final Elevator elevatorSubsystem;
 
     private AutoRoutines autoRoutines;
 
@@ -148,6 +153,9 @@ public class RobotContainer {
                 break;
         }
 
+        // TODO: Real elevator IO implementation
+        elevatorSubsystem = new Elevator(new ElevatorIOSim());
+
         // TODO: add switch for controller and joystick
         swerveSubsystem.setDefaultCommand(new TeleopSwerve(swerveSubsystem, Controls.mainDriveControls, true));
         // swerveSubsystem.setDefaultCommand(new TeleopSwerve(swerveSubsystem, new
@@ -216,6 +224,12 @@ public class RobotContainer {
         Controls.Claw.resetClawButton.onTrue(
             clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.RESTING_ANGLE)
         );
+
+        // Elevator
+        Controls.Elevator.moveToL1.onTrue(elevatorSubsystem.getPositionCommand(ElevatorConstants.Position.L1_DISTANCE));
+        Controls.Elevator.moveToL2.onTrue(elevatorSubsystem.getPositionCommand(ElevatorConstants.Position.L2_DISTANCE));
+        Controls.Elevator.moveToL3.onTrue(elevatorSubsystem.getPositionCommand(ElevatorConstants.Position.L3_DISTANCE));
+        Controls.Elevator.moveToL4.onTrue(elevatorSubsystem.getPositionCommand(ElevatorConstants.Position.L4_DISTANCE));
         // Test
         // Controls.mainDriveControls.goToCoralStation1.whileTrue(autoRoutines.getCoralFromStation(1));
         // Controls.mainDriveControls.goToReef1.whileTrue(autoRoutines.goToReef(1));
@@ -247,6 +261,14 @@ public class RobotContainer {
         }
 
         // Update the simulation
-        ((ClawSim) clawSubsystem).simulationPeriodic((SwerveSim) swerveSubsystem);
+        ((ClawSim) clawSubsystem).simulationPeriodic((SwerveSim) swerveSubsystem, elevatorSubsystem);
+    }
+
+    /**
+     * Run in `Robot.periodic()`.
+     */
+    public void periodic() {
+        // Update telemetry for claw position
+        Logger.recordOutput("ComponentPositions/Claw", clawSubsystem.getPose(elevatorSubsystem.getStage2Pose()));
     }
 }

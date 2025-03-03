@@ -100,6 +100,9 @@ public class Robot extends LoggedRobot {
 
         // Return to normal thread priority
         Threads.setCurrentThreadPriority(false, 10);
+
+        // RobotContainer periodic
+        robotContainer.periodic();
     }
 
     /** This function is called once when the robot is disabled. */

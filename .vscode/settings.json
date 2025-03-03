@@ -85,7 +85,8 @@
     "setpoint",
     "setpoints",
     "teleop",
-    "wpilibj"
+    "wpilibj",
+    "feedforward"
   ],
   "wpilib.skipSelectSimulateExtension": false
 }

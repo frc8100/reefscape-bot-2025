@@ -3,12 +3,12 @@ package frc.robot.subsystems.superstructure.claw;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -16,9 +16,20 @@ import org.littletonrobotics.junction.Logger;
  */
 public class Claw extends SubsystemBase {
 
+    /**
+     * The IO interface for the claw.
+     */
     protected final ClawIO io;
+
+    /**
+     * The inputs for the claw.
+     */
     protected final ClawIOInputsAutoLogged inputs = new ClawIOInputsAutoLogged();
 
+    /**
+     * Creates a new Claw subsystem.
+     * @param io - The IO interface for the claw.
+     */
     public Claw(ClawIO io) {
         this.io = io;
     }
@@ -51,9 +62,17 @@ public class Claw extends SubsystemBase {
     /**
      * @return The position of the claw.
      */
-    @AutoLogOutput(key = "ComponentPositions/claw")
+    // @AutoLogOutput(key = "ComponentPositions/Claw")
+    public Pose3d getPose(Pose3d elevatorPose) {
+        return new Pose3d(
+            ClawConstants.RotationPositions.ELEVATOR_TO_CLAW_X,
+            0,
+            ClawConstants.RotationPositions.ELEVATOR_TO_CLAW_Z + elevatorPose.getZ(),
+            new Rotation3d(0, inputs.turnPositionRad, 0)
+        );
+    }
+
     public Pose3d getPose() {
-        // TODO: Add elevator pose
-        return new Pose3d(0, 0, 2, new Rotation3d(0, inputs.turnPositionRad, 0));
+        return getPose(new Pose3d());
     }
 }

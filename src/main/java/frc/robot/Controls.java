@@ -173,7 +173,7 @@ public class Controls {
     /**
      * The controls for the claw.
      */
-    public static class Claw {
+    public static final class Claw {
 
         private Claw() {}
 
@@ -234,5 +234,39 @@ public class Controls {
                 return -outtakeInput;
             }
         }
+    }
+
+    /**
+     * The controls for the elevator.
+     */
+    public static final class Elevator {
+
+        private Elevator() {}
+
+        /**
+         * The controller used for the elevator.
+         * Temporarily the same as the driver controller.
+         */
+        public static final Joystick elevatorController = mainDriverController;
+
+        /**
+         * The button to make the elevator go to L4. Default is up on the D-pad.
+         */
+        public static final POVButton moveToL4 = new POVButton(elevatorController, 90);
+
+        /**
+         * The button to make the elevator go to L3. Default is right on the D-pad.
+         */
+        public static final POVButton moveToL3 = new POVButton(elevatorController, 180);
+
+        /**
+         * The button to make the elevator go to L2. Default is down on the D-pad.
+         */
+        public static final POVButton moveToL2 = new POVButton(elevatorController, 270);
+
+        /**
+         * The button to make the elevator go to L1. Default is left on the D-pad.
+         */
+        public static final POVButton moveToL1 = new POVButton(elevatorController, 0);
     }
 }

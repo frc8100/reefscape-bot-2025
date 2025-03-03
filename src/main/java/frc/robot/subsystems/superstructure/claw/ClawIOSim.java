@@ -1,5 +1,6 @@
 package frc.robot.subsystems.superstructure.claw;
 
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import edu.wpi.first.math.MathUtil;
@@ -26,7 +27,7 @@ public class ClawIOSim implements ClawIO {
     private final DCMotorSim angleMotorSim = new DCMotorSim(
         LinearSystemId.createSingleJointedArmSystem(
             angleMotorGearbox,
-            ClawConstants.SIM_ANGLE_MOI,
+            ClawConstants.SIM_ANGLE_MOI.in(KilogramSquareMeters),
             ClawConstants.ANGLE_GEAR_RATIO
         ),
         angleMotorGearbox
@@ -59,7 +60,7 @@ public class ClawIOSim implements ClawIO {
     private final DCMotorSim outtakeMotorSim = new DCMotorSim(
         LinearSystemId.createSingleJointedArmSystem(
             outtakeMotorGearbox,
-            ClawConstants.SIM_OUTTAKE_MOI,
+            ClawConstants.SIM_OUTTAKE_MOI.in(KilogramSquareMeters),
             ClawConstants.OUTTAKE_GEAR_RATIO
         ),
         outtakeMotorGearbox
