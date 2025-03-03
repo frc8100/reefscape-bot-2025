@@ -32,13 +32,6 @@ public class ClawSim extends Claw {
         );
     }
 
-    @Override
-    public void periodic() {
-        super.periodic();
-
-        Logger.recordOutput("ClawSim/IsCoralInClaw", inputs.isCoralInClaw);
-    }
-
     /**
      * Releases the coral from the claw and creates a new {@link ReefscapeCoralOnFly} object in the simulator.
      * @param swerveSubsystem - The swerve subsystem.
@@ -53,7 +46,8 @@ public class ClawSim extends Claw {
             // The position of the robot
             swerveSubsystem.getActualPose().getTranslation(),
             // Where the claw is positioned
-            super.getPose(elevatorSubsystem.getStage2Pose())
+            super
+                .getPose(elevatorSubsystem.getStage2Pose())
                 .getTranslation()
                 .toTranslation2d()
                 .plus(ClawConstants.RotationPositions.getClawToCoralX(super.inputs.turnPositionRad)),

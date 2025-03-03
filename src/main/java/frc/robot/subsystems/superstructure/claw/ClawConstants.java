@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -15,6 +16,8 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.MomentOfInertia;
+import edu.wpi.first.units.measure.Voltage;
+import org.ironmaple.simulation.motorsims.SimMotorConfigs;
 
 /**
  * Constants for the claw. Includes CAN Ids.
@@ -46,13 +49,11 @@ public final class ClawConstants {
         /**
          * The horizontal, front/back translation of the claw from the origin of the second elevator stage.
          */
-        // public static final double ELEVATOR_TO_CLAW_X = 0.169;
         public static final double ELEVATOR_TO_CLAW_X = 0.27;
 
         /**
          * The vertical, up/down translation of the claw from the origin of the second elevator stage.
          */
-        // public static final double ELEVATOR_TO_CLAW_Z = 0.31;
         public static final double ELEVATOR_TO_CLAW_Z = 0.37;
 
         /**
@@ -123,17 +124,33 @@ public final class ClawConstants {
 
     // Simulator configs
     public static final DCMotor SIM_ANGLE_MOTOR = DCMotor.getNEO(1);
-    public static final MomentOfInertia SIM_ANGLE_MOI = KilogramSquareMeters.of(0.01);
+    public static final MomentOfInertia SIM_ANGLE_MOI = KilogramSquareMeters.of(0.1);
+    public static final Voltage SIM_ANGLE_FRICTION_VOLTAGE = Volts.of(0.1);
     public static final double SIM_ANGLE_KP = 4.0;
     public static final double SIM_ANGLE_KI = 0.0;
     public static final double SIM_ANGLE_KD = 0.0;
 
+    public static final SimMotorConfigs SIM_ANGLE_MOTOR_CONFIG = new SimMotorConfigs(
+        SIM_ANGLE_MOTOR,
+        ANGLE_GEAR_RATIO,
+        SIM_ANGLE_MOI,
+        SIM_ANGLE_FRICTION_VOLTAGE
+    );
+
     public static final DCMotor SIM_OUTTAKE_MOTOR = DCMotor.getNEO(1);
     public static final AngularVelocity SIM_OUTTAKE_TARGET_VELOCITY = RadiansPerSecond.of(25);
-    public static final MomentOfInertia SIM_OUTTAKE_MOI = KilogramSquareMeters.of(0.01);
+    public static final MomentOfInertia SIM_OUTTAKE_MOI = KilogramSquareMeters.of(0.1);
+    public static final Voltage SIM_OUTTAKE_FRICTION_VOLTAGE = Volts.of(0.1);
     public static final double SIM_OUTTAKE_KP = 0.6;
     public static final double SIM_OUTTAKE_KI = 0.0;
     public static final double SIM_OUTTAKE_KD = 0.0;
+
+    public static final SimMotorConfigs SIM_OUTTAKE_MOTOR_CONFIG = new SimMotorConfigs(
+        SIM_OUTTAKE_MOTOR,
+        OUTTAKE_GEAR_RATIO,
+        SIM_OUTTAKE_MOI,
+        SIM_OUTTAKE_FRICTION_VOLTAGE
+    );
 
     /**
      * The speed that the coral is ejected at.

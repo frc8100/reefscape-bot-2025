@@ -1,5 +1,7 @@
 package frc.robot.subsystems.superstructure.claw;
 
+import static edu.wpi.first.units.Units.Radians;
+
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -79,27 +81,40 @@ public class Claw extends SubsystemBase {
     public Pose3d getPose() {
         return getPose(new Pose3d());
     }
+
     /**
      * @return The pose of the coral in the claw.
      * If the claw is not holding coral, return an empty array.
      */
-    // public Pose3d[] getCoralInClawPosition(SwerveDrive swerveSubsystem, Elevator elevatorSubsystem) {
-    //     // If the claw is not holding coral, return an empty array
-    //     if (!inputs.isCoralInClaw) {
-    //         return new Pose3d[] {};
-    //     }
+    public Pose3d[] getCoralInClawPosition(SwerveDrive swerveSubsystem, Elevator elevatorSubsystem) {
+        // If the claw is not holding coral, return an empty array
+        if (!inputs.isCoralInClaw) {
+            return new Pose3d[] {};
+        }
 
-    //     Translation2d twoDPosition = swerveSubsystem.getActualPose().getTranslation().plus(
-    //         getPose(elevatorSubsystem.getStage2Pose())
-    //             .getTranslation()
-    //             .toTranslation2d()
-    //             .plus(ClawConstants.RotationPositions.getClawToCoralX(inputs.turnPositionRad)).rotateBy(swerveSubsystem.getActualPose().getRotation()));
+        Translation2d coral2dPosition = swerveSubsystem
+            .getActualPose()
+            .getTranslation()
+            .plus(
+                getPose(elevatorSubsystem.getStage2Pose())
+                    .getTranslation()
+                    .toTranslation2d()
+                    .plus(ClawConstants.RotationPositions.getClawToCoralX(inputs.turnPositionRad))
+                    .rotateBy(swerveSubsystem.getActualPose().getRotation())
+            );
 
-    //     return new Pose3d[] {
-    //         new Pose3d(
-
-    //             new Rotation3d()
-    //         )
-    //     }
-    // }
+        return new Pose3d[] {
+            new Pose3d(
+                coral2dPosition.getX(),
+                coral2dPosition.getY(),
+                getPose(elevatorSubsystem.getStage2Pose()).getZ() +
+                ClawConstants.RotationPositions.getClawToCoralZ(inputs.turnPositionRad),
+                new Rotation3d(
+                    0,
+                    inputs.turnPositionRad + ClawConstants.RotationPositions.ANGLE_OFFSET.getRadians(),
+                    swerveSubsystem.getActualPose().getRotation().getRadians()
+                )
+            ),
+        };
+    }
 }

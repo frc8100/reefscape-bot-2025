@@ -172,8 +172,8 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, SwerveConfig.MAX_SPEED);
 
         // Log unoptimized setpoints
-        Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
-        Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
+        Logger.recordOutput("Swerve/States/Setpoints", setpointStates);
+        Logger.recordOutput("Swerve/ChassisSpeeds/Setpoints", discreteSpeeds);
 
         // Set the desired state for each swerve module
         for (int i = 0; i < 4; i++) {
@@ -250,7 +250,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     }
 
     @Override
-    @AutoLogOutput(key = "SwerveStates/Measured")
+    @AutoLogOutput(key = "Swerve/States/Measured")
     public SwerveModuleState[] getModuleStates() {
         SwerveModuleState[] states = new SwerveModuleState[4];
 
@@ -276,7 +276,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     }
 
     @Override
-    @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
+    @AutoLogOutput(key = "Swerve/ChassisSpeeds/Measured")
     public ChassisSpeeds getChassisSpeeds() {
         return kinematics.toChassisSpeeds(getModuleStates());
     }
@@ -312,8 +312,8 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
         // Log empty setpoint states when disabled
         if (DriverStation.isDisabled()) {
-            Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[] {});
-            Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
+            Logger.recordOutput("Swerve/States/Setpoints", new SwerveModuleState[] {});
+            Logger.recordOutput("Swerve/States/SetpointsOptimized", new SwerveModuleState[] {});
         }
 
         // Update odometry

@@ -162,8 +162,6 @@ public class ElevatorIOSim implements ElevatorIO {
 
             outputVoltage = pidOutput + feedforwardOutput;
 
-            // debug
-            Logger.recordOutput("ElevatorSim/OutputVoltage", outputVoltage);
             // Set the elevator input
             motorSim.setInputVoltage(MathUtil.clamp(outputVoltage, -12, 12));
         }

@@ -171,7 +171,7 @@ public class Robot extends LoggedRobot {
         Logger.recordOutput("Odometry/OpponentRobotPoses", OpponentRobotSim.getOpponentRobotPoses());
 
         // Log game pieces
-        Logger.recordOutput("FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
-        Logger.recordOutput("FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+        Logger.recordOutput("Simulation/Field/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
+        Logger.recordOutput("Simulation/Field/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
     }
 }

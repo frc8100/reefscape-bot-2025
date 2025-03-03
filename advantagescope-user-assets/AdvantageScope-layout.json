@@ -1,30 +1,27 @@
 {
   "hubs": [
     {
-      "x": 587,
-      "y": 96,
+      "x": 1089,
+      "y": 151,
       "width": 1104,
-      "height": 731,
+      "height": 739,
       "state": {
         "sidebar": {
           "width": 300,
           "expanded": [
             "/AdvantageKit/RealOutputs/Vision/Summary",
-            "/AdvantageKit/Drive/Gyro",
-            "/AdvantageKit/NetworkInputs/SmartDashboard",
             "/SmartDashboard/BatterySim",
             "/AdvantageKit",
             "/AdvantageKit/RealOutputs",
-            "/AdvantageKit/Claw",
-            "/AdvantageKit/RealOutputs/ClawSim",
-            "/AdvantageKit/RealOutputs/ComponentPositions/Claw",
-            "/AdvantageKit/RealOutputs/ComponentPositions/Elevator",
-            "/AdvantageKit/Elevator",
-            "/AdvantageKit/RealOutputs/ElevatorSim"
+            "/AdvantageKit/RealOutputs/Swerve/States",
+            "/AdvantageKit/RealOutputs/Swerve/ChassisSpeeds",
+            "/AdvantageKit/RealOutputs/Simulation",
+            "/AdvantageKit/RealOutputs/Simulation/Claw",
+            "/SmartDashboard"
           ]
         },
         "tabs": {
-          "selected": 4,
+          "selected": 2,
           "tabs": [
             {
               "type": 0,
@@ -48,7 +45,7 @@
                   },
                   {
                     "type": "swerveStates",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/SwerveStates/Measured",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Swerve/States/Measured",
                     "logType": "SwerveModuleState[]",
                     "visible": true,
                     "options": {
@@ -113,82 +110,6 @@
               "controlsHeight": 206
             },
             {
-              "type": 1,
-              "title": "Line Graph",
-              "controller": {
-                "leftSources": [
-                  {
-                    "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Elevator/Setpoint",
-                    "logType": "Number",
-                    "visible": true,
-                    "options": {
-                      "color": "#c0b487",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Elevator/SetpointVelocity",
-                    "logType": "Number",
-                    "visible": true,
-                    "options": {
-                      "color": "#858584",
-                      "size": "normal"
-                    }
-                  }
-                ],
-                "rightSources": [
-                  {
-                    "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Elevator/AppliedVolts",
-                    "logType": "Number",
-                    "visible": true,
-                    "options": {
-                      "color": "#2b66a2",
-                      "size": "normal"
-                    }
-                  }
-                ],
-                "discreteSources": [],
-                "leftLockedRange": [
-                  -4,
-                  4
-                ],
-                "rightLockedRange": [
-                  -120,
-                  120
-                ],
-                "leftUnitConversion": {
-                  "type": null,
-                  "factor": 1
-                },
-                "rightUnitConversion": {
-                  "type": null,
-                  "factor": 1
-                },
-                "leftFilter": 0,
-                "rightFilter": 0
-              },
-              "controllerUUID": "uk19qvrmj7qq9y3z0pwl9x9t8j6493xo",
-              "renderer": null,
-              "controlsHeight": 253
-            },
-            {
-              "type": 6,
-              "title": "Statistics",
-              "controller": {
-                "sources": [],
-                "timeRange": "visible",
-                "rangeMin": 0,
-                "rangeMax": 10,
-                "stepSize": 1
-              },
-              "controllerUUID": "tm44sp8npkqf7x7u63fylewhmf0mkcwz",
-              "renderer": null,
-              "controlsHeight": 200
-            },
-            {
               "type": 3,
               "title": "3D Field",
               "controller": {
@@ -200,16 +121,6 @@
                     "visible": true,
                     "options": {
                       "model": "WCP Competitive Concept 2025"
-                    }
-                  },
-                  {
-                    "type": "swerveStates",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/SwerveStates/Measured",
-                    "logType": "SwerveModuleState[]",
-                    "visible": true,
-                    "options": {
-                      "color": "#ff0000",
-                      "arrangement": "0,1,2,3"
                     }
                   },
                   {
@@ -244,6 +155,16 @@
                     "options": {}
                   },
                   {
+                    "type": "swerveStates",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Swerve/States/Measured",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
                     "type": "trajectory",
                     "logKey": "NT:/PathPlanner/activePath",
                     "logType": "Pose2d[]",
@@ -255,7 +176,7 @@
                   },
                   {
                     "type": "gamePiece",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/FieldSimulation/Coral",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/ComponentPositions/CoralInClaw",
                     "logType": "Pose3d[]",
                     "visible": true,
                     "options": {
@@ -264,7 +185,16 @@
                   },
                   {
                     "type": "gamePiece",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/FieldSimulation/Algae",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Simulation/Field/Coral",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "variant": "Coral"
+                    }
+                  },
+                  {
+                    "type": "gamePiece",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Simulation/Field/Algae",
                     "logType": "Pose3d[]",
                     "visible": true,
                     "options": {
@@ -280,14 +210,14 @@
                 "cameraIndex": -2,
                 "orbitFov": 50,
                 "cameraPosition": [
-                  2.7978682902958893,
-                  2.5240669915669187,
-                  -0.3981178272710929
+                  3.407034005327042,
+                  3.913042206360287,
+                  -0.1486496749927716
                 ],
                 "cameraTarget": [
-                  -0.06862840774007672,
-                  0.9840515259296185,
-                  -0.4061828554872962
+                  -0.467821505718157,
+                  0.5761845158448197,
+                  -0.2108712288217467
                 ]
               },
               "controlsHeight": 245
@@ -298,18 +228,15 @@
               "controller": {
                 "sources": [
                   {
-                    "type": "states",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/SwerveStates/Setpoints",
-                    "logType": "SwerveModuleState[]",
+                    "type": "rotation",
+                    "logKey": "NT:/AdvantageKit/Drive/Gyro/YawPosition",
+                    "logType": "Rotation2d",
                     "visible": true,
-                    "options": {
-                      "color": "#0000ff",
-                      "arrangement": "0,1,2,3"
-                    }
+                    "options": {}
                   },
                   {
                     "type": "states",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/SwerveStates/Measured",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Swerve/States/Measured",
                     "logType": "SwerveModuleState[]",
                     "visible": true,
                     "options": {
@@ -318,28 +245,31 @@
                     }
                   },
                   {
-                    "type": "rotation",
-                    "logKey": "NT:/AdvantageKit/Drive/Gyro/YawPosition",
-                    "logType": "Rotation2d",
-                    "visible": true,
-                    "options": {}
-                  },
-                  {
-                    "type": "chassisSpeeds",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/SwerveChassisSpeeds/Setpoints",
-                    "logType": "ChassisSpeeds",
+                    "type": "states",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Swerve/States/Setpoints",
+                    "logType": "SwerveModuleState[]",
                     "visible": true,
                     "options": {
-                      "color": "#0000ff"
+                      "color": "#0000ff",
+                      "arrangement": "0,1,2,3"
                     }
                   },
                   {
                     "type": "chassisSpeeds",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/SwerveChassisSpeeds/Measured",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Swerve/ChassisSpeeds/Measured",
                     "logType": "ChassisSpeeds",
                     "visible": true,
                     "options": {
                       "color": "#ff0000"
+                    }
+                  },
+                  {
+                    "type": "chassisSpeeds",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Swerve/ChassisSpeeds/Setpoints",
+                    "logType": "ChassisSpeeds",
+                    "visible": true,
+                    "options": {
+                      "color": "#0000ff"
                     }
                   }
                 ],
@@ -349,6 +279,41 @@
                 "orientation": 1
               },
               "controllerUUID": "bsenclt8xkd6jc56q9xx0wdzw1n4rstb",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Line Graph",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Simulation/Claw/AnglePIDOutput",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [],
+                "discreteSources": [],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "x4krsuvrldis0zzhi97c4xgv936wqm0h",
               "renderer": null,
               "controlsHeight": 200
             },

@@ -221,9 +221,9 @@ public class RobotContainer {
         Controls.Claw.moveToL3.onTrue(clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.L3ANGLE));
         Controls.Claw.moveToL4.onTrue(clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.L4ANGLE));
 
-        Controls.Claw.resetClawButton.onTrue(
-            clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.RESTING_ANGLE)
-        );
+        // Controls.Claw.resetClawButton.onTrue(
+        //     clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.RESTING_ANGLE)
+        // );
 
         // Elevator
         Controls.Elevator.moveToL1.onTrue(elevatorSubsystem.getPositionCommand(ElevatorConstants.Position.L1_DISTANCE));
@@ -270,5 +270,9 @@ public class RobotContainer {
     public void periodic() {
         // Update telemetry for claw position
         Logger.recordOutput("ComponentPositions/Claw", clawSubsystem.getPose(elevatorSubsystem.getStage2Pose()));
+        Logger.recordOutput(
+            "ComponentPositions/CoralInClaw",
+            clawSubsystem.getCoralInClawPosition(swerveSubsystem, elevatorSubsystem)
+        );
     }
 }

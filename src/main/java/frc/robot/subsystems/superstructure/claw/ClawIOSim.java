@@ -1,7 +1,11 @@
 package frc.robot.subsystems.superstructure.claw;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -9,7 +13,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import org.ironmaple.simulation.motorsims.MapleMotorSim;
+import org.ironmaple.simulation.motorsims.SimulatedMotorController;
 import org.littletonrobotics.junction.Logger;
+import org.opencv.core.Mat;
 
 /**
  * The simulator implementation for the claw.
@@ -17,21 +24,14 @@ import org.littletonrobotics.junction.Logger;
 public class ClawIOSim implements ClawIO {
 
     /**
-     * The simulation model for the claw angle motor.
-     */
-    private final DCMotor angleMotorGearbox = ClawConstants.SIM_ANGLE_MOTOR;
-
-    /**
      * The simulated angle motor. Controls the angle of the claw.
      */
-    private final DCMotorSim angleMotorSim = new DCMotorSim(
-        LinearSystemId.createSingleJointedArmSystem(
-            angleMotorGearbox,
-            ClawConstants.SIM_ANGLE_MOI.in(KilogramSquareMeters),
-            ClawConstants.ANGLE_GEAR_RATIO
-        ),
-        angleMotorGearbox
-    );
+    private final MapleMotorSim angleMotorSim = new MapleMotorSim(ClawConstants.SIM_ANGLE_MOTOR_CONFIG);
+
+    /**
+     * The simulated angle motor controller.
+     */
+    private final SimulatedMotorController.GenericMotorController angleMotorController;
 
     /**
      * The PID angle controller for the claw.
@@ -50,21 +50,14 @@ public class ClawIOSim implements ClawIO {
     private boolean isAngleUsingPID = true;
 
     /**
-     * The simulation model for the claw outtake motor.
-     */
-    private final DCMotor outtakeMotorGearbox = ClawConstants.SIM_OUTTAKE_MOTOR;
-
-    /**
      * The simulated outtake motor. Controls the outtake of the claw.
      */
-    private final DCMotorSim outtakeMotorSim = new DCMotorSim(
-        LinearSystemId.createSingleJointedArmSystem(
-            outtakeMotorGearbox,
-            ClawConstants.SIM_OUTTAKE_MOI.in(KilogramSquareMeters),
-            ClawConstants.OUTTAKE_GEAR_RATIO
-        ),
-        outtakeMotorGearbox
-    );
+    private final MapleMotorSim outtakeMotorSim = new MapleMotorSim(ClawConstants.SIM_OUTTAKE_MOTOR_CONFIG);
+
+    /**
+     * The simulated outtake motor controller.
+     */
+    private final SimulatedMotorController.GenericMotorController outtakeMotorController;
 
     /**
      * The PID outtake controller for the claw.
@@ -82,14 +75,32 @@ public class ClawIOSim implements ClawIO {
      */
     private boolean isOuttakeUsingPID = true;
 
+    /**
+     * Creates a new ClawIOSim.
+     */
+    public ClawIOSim() {
+        // Assign the motor controllers
+        angleMotorController = angleMotorSim
+            .useSimpleDCMotorController()
+            .withCurrentLimit(ClawConstants.ANGLE_MOTOR_CURRENT_LIMIT);
+
+        outtakeMotorController = outtakeMotorSim
+            .useSimpleDCMotorController()
+            .withCurrentLimit(ClawConstants.OUTTAKE_MOTOR_CURRENT_LIMIT);
+
+        // Reset the controllers
+        angleController.reset();
+        outtakeController.reset();
+    }
+
     @Override
     public void stop() {
         // Stop the angle motor
         isAngleUsingPID = false;
         isOuttakeUsingPID = false;
 
-        angleMotorSim.setInputVoltage(0);
-        outtakeMotorSim.setInputVoltage(0);
+        angleMotorController.requestVoltage(Volts.of(0));
+        outtakeMotorController.requestVoltage(Volts.of(0));
     }
 
     @Override
@@ -111,43 +122,43 @@ public class ClawIOSim implements ClawIO {
     @Override
     public void periodic() {
         // Set the output of the motors based on the PID controller
-        double angleMotorOutput = angleController.calculate(angleMotorSim.getAngularPositionRad());
+        double angleMotorOutput = angleController.calculate(angleMotorSim.getAngularPosition().in(Radians));
 
         if (isAngleUsingPID) {
-            Logger.recordOutput("ClawSim/AnglePIDOutput", angleMotorOutput);
-            angleMotorSim.setInputVoltage(MathUtil.clamp(angleMotorOutput, -12, 12));
+            Logger.recordOutput("Simulation/Claw/AnglePIDOutput", MathUtil.clamp(angleMotorOutput, -12, 12));
+            angleMotorController.requestVoltage(Volts.of(MathUtil.clamp(angleMotorOutput, -12, 12)));
         }
 
-        double outtakeMotorOutput = outtakeController.calculate(outtakeMotorSim.getAngularVelocityRadPerSec());
+        double outtakeMotorOutput = outtakeController.calculate(outtakeMotorSim.getVelocity().in(RadiansPerSecond));
 
         if (isOuttakeUsingPID) {
-            Logger.recordOutput("ClawSim/OuttakePIDOutput", outtakeMotorOutput);
-            outtakeMotorSim.setInputVoltage(MathUtil.clamp(outtakeMotorOutput, -12, 12));
+            Logger.recordOutput("Simulation/Claw/OuttakePIDOutput", MathUtil.clamp(outtakeMotorOutput, -12, 12));
+            outtakeMotorController.requestVoltage(Volts.of(MathUtil.clamp(outtakeMotorOutput, -12, 12)));
         }
 
         // Update the simulation
-        angleMotorSim.update(0.02);
-        outtakeMotorSim.update(0.02);
+        angleMotorSim.update(Seconds.of(0.02));
+        outtakeMotorSim.update(Seconds.of(0.02));
     }
 
     @Override
     public void updateInputs(ClawIOInputs inputs) {
         // Set angle inputs
         inputs.turnConnected = true;
-        inputs.turnPositionRad = angleMotorSim.getAngularPositionRad();
-        inputs.turnVelocityRadPerSec = angleMotorSim.getAngularVelocityRadPerSec();
-        inputs.turnAppliedVolts = angleMotorSim.getInputVoltage();
-        inputs.turnSupplyCurrentAmps = angleMotorSim.getCurrentDrawAmps();
-        inputs.turnTorqueCurrentAmps = angleMotorSim.getCurrentDrawAmps();
+        inputs.turnPositionRad = angleMotorSim.getAngularPosition().in(Radians);
+        inputs.turnVelocityRadPerSec = angleMotorSim.getVelocity().in(RadiansPerSecond);
+        inputs.turnAppliedVolts = angleMotorSim.getAppliedVoltage().in(Volts);
+        inputs.turnSupplyCurrentAmps = angleMotorSim.getSupplyCurrent().in(Amps);
+        inputs.turnTorqueCurrentAmps = angleMotorSim.getStatorCurrent().in(Amps);
         inputs.turnSetpointRad = angleController.getSetpoint();
 
         // Set outtake inputs
         inputs.outakeConnected = true;
-        inputs.outakePositionRad = outtakeMotorSim.getAngularPositionRad();
-        inputs.outakeVelocityRadPerSec = outtakeMotorSim.getAngularVelocityRadPerSec();
-        inputs.outakeAppliedVolts = outtakeMotorSim.getInputVoltage();
-        inputs.outakeSupplyCurrentAmps = outtakeMotorSim.getCurrentDrawAmps();
-        inputs.outakeTorqueCurrentAmps = outtakeMotorSim.getCurrentDrawAmps();
+        inputs.outakePositionRad = outtakeMotorSim.getAngularPosition().in(Radians);
+        inputs.outakeVelocityRadPerSec = outtakeMotorSim.getVelocity().in(RadiansPerSecond);
+        inputs.outakeAppliedVolts = outtakeMotorSim.getAppliedVoltage().in(Volts);
+        inputs.outakeSupplyCurrentAmps = outtakeMotorSim.getSupplyCurrent().in(Amps);
+        inputs.outakeTorqueCurrentAmps = outtakeMotorSim.getStatorCurrent().in(Amps);
         inputs.outakeSetpointVelocityRadPerSec = outtakeController.getSetpoint();
     }
 }

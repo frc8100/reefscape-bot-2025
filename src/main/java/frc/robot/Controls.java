@@ -212,10 +212,10 @@ public class Controls {
         /**
          * The button to make the claw rotated at the resting position. Default is A.
          */
-        public static final JoystickButton resetClawButton = new JoystickButton(
-            armController,
-            XboxController.Button.kA.value
-        );
+        // public static final JoystickButton resetClawButton = new JoystickButton(
+        //     armController,
+        //     XboxController.Button.kA.value
+        // );
 
         /**
          * Returns the intake or outtake input depending on which one is bigger.
