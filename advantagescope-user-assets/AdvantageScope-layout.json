@@ -1,10 +1,10 @@
 {
   "hubs": [
     {
-      "x": 851,
-      "y": 242,
-      "width": 1100,
-      "height": 750,
+      "x": 587,
+      "y": 96,
+      "width": 1104,
+      "height": 731,
       "state": {
         "sidebar": {
           "width": 300,
@@ -15,11 +15,12 @@
             "/SmartDashboard/BatterySim",
             "/AdvantageKit",
             "/AdvantageKit/RealOutputs",
-            "/AdvantageKit/RealOutputs/FieldSimulation",
             "/AdvantageKit/Claw",
             "/AdvantageKit/RealOutputs/ClawSim",
-            "/AdvantageKit/RealOutputs/ComponentPositions",
-            "/AdvantageKit/RealOutputs/Odometry"
+            "/AdvantageKit/RealOutputs/ComponentPositions/Claw",
+            "/AdvantageKit/RealOutputs/ComponentPositions/Elevator",
+            "/AdvantageKit/Elevator",
+            "/AdvantageKit/RealOutputs/ElevatorSim"
           ]
         },
         "tabs": {
@@ -118,21 +119,21 @@
                 "leftSources": [
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Claw/TurnPositionRad",
+                    "logKey": "NT:/AdvantageKit/Elevator/Setpoint",
                     "logType": "Number",
-                    "visible": false,
+                    "visible": true,
                     "options": {
-                      "color": "#2b66a2",
+                      "color": "#c0b487",
                       "size": "normal"
                     }
                   },
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Claw/TurnSetpointRad",
+                    "logKey": "NT:/AdvantageKit/Elevator/SetpointVelocity",
                     "logType": "Number",
-                    "visible": false,
+                    "visible": true,
                     "options": {
-                      "color": "#e5b31b",
+                      "color": "#858584",
                       "size": "normal"
                     }
                   }
@@ -140,21 +141,11 @@
                 "rightSources": [
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Claw/OutakeSetpointVelocityRadPerSec",
+                    "logKey": "NT:/AdvantageKit/Elevator/AppliedVolts",
                     "logType": "Number",
                     "visible": true,
                     "options": {
-                      "color": "#af2437",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Claw/OutakeVelocityRadPerSec",
-                    "logType": "Number",
-                    "visible": true,
-                    "options": {
-                      "color": "#80588e",
+                      "color": "#2b66a2",
                       "size": "normal"
                     }
                   }
@@ -181,7 +172,7 @@
               },
               "controllerUUID": "uk19qvrmj7qq9y3z0pwl9x9t8j6493xo",
               "renderer": null,
-              "controlsHeight": 200
+              "controlsHeight": 253
             },
             {
               "type": 6,
@@ -233,7 +224,21 @@
                   },
                   {
                     "type": "component",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/ComponentPositions/claw",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/ComponentPositions/Claw",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/ComponentPositions/Elevator/Stage1",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/ComponentPositions/Elevator/Stage2",
                     "logType": "Pose3d",
                     "visible": true,
                     "options": {}
@@ -275,14 +280,14 @@
                 "cameraIndex": -2,
                 "orbitFov": 50,
                 "cameraPosition": [
-                  1.084649037227036,
-                  2.1123111357501436,
-                  -2.955668047590052
+                  2.7978682902958893,
+                  2.5240669915669187,
+                  -0.3981178272710929
                 ],
                 "cameraTarget": [
-                  0.08429403052489848,
-                  1.7079823643700376,
-                  -1.482547514417483
+                  -0.06862840774007672,
+                  0.9840515259296185,
+                  -0.4061828554872962
                 ]
               },
               "controlsHeight": 245
