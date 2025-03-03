@@ -22,18 +22,13 @@ import org.littletonrobotics.junction.Logger;
 public class ClawSim extends Claw {
 
     /**
-     * Whether or not the claw is currently holding a piece of coral.
-     */
-    private boolean isCoralInClaw = false;
-
-    /**
      * Creates a new ClawSim. Automatically initializes the claw IO to a new instance of {@link ClawIOSim}.
      */
     public ClawSim() {
         super(new ClawIOSim());
-        // TODO: Temporarily add coral to the claw when the X button is pressed
-        new JoystickButton(Controls.mainDriverController, XboxController.Button.kX.value).onTrue(
-            new InstantCommand(() -> isCoralInClaw = true)
+        // TODO: Temporarily add coral to the claw when the A button is pressed
+        new JoystickButton(Controls.mainDriverController, XboxController.Button.kA.value).onTrue(
+            new InstantCommand(() -> inputs.isCoralInClaw = true)
         );
     }
 
@@ -41,7 +36,7 @@ public class ClawSim extends Claw {
     public void periodic() {
         super.periodic();
 
-        Logger.recordOutput("ClawSim/IsCoralInClaw", isCoralInClaw);
+        Logger.recordOutput("ClawSim/IsCoralInClaw", inputs.isCoralInClaw);
     }
 
     /**
@@ -51,15 +46,14 @@ public class ClawSim extends Claw {
      */
     private void releaseCoral(SwerveSim swerveSubsystem, Elevator elevatorSubsystem) {
         // Set the claw to not holding a piece of coral
-        isCoralInClaw = false;
+        inputs.isCoralInClaw = false;
 
         // Create a new ReefscapeCoralOnFly object in the simulator
         ReefscapeCoralOnFly coralToAdd = new ReefscapeCoralOnFly(
             // The position of the robot
             swerveSubsystem.getActualPose().getTranslation(),
             // Where the claw is positioned
-            super
-                .getPose(elevatorSubsystem.getStage2Pose())
+            super.getPose(elevatorSubsystem.getStage2Pose())
                 .getTranslation()
                 .toTranslation2d()
                 .plus(ClawConstants.RotationPositions.getClawToCoralX(super.inputs.turnPositionRad)),
@@ -87,7 +81,7 @@ public class ClawSim extends Claw {
     public void simulationPeriodic(SwerveSim swerveSubsystem, Elevator elevatorSubsystem) {
         // If the claw is holding a piece of coral and the outtake is running, set the claw to not holding a piece of coral
         // and create a coral object in the simulator
-        if (isCoralInClaw && super.inputs.outakeVelocityRadPerSec > 10) {
+        if (inputs.isCoralInClaw && super.inputs.outakeVelocityRadPerSec < -10) {
             releaseCoral(swerveSubsystem, elevatorSubsystem);
         }
     }

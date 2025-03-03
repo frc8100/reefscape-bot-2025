@@ -16,9 +16,10 @@ public interface ClawIO extends GenericSparkIO<ClawIO.ClawIOInputs> {
 
         /**
          * Whether coral is currently in the claw.
+         * Note: This is currently unused (except in simulator), but should be used to determine
+         * if the claw is holding a piece of coral using a sensor.
          */
-        // TODO: This is currently unused, but should be used to determine if the claw is holding a piece of coral using a sensor
-        // public boolean isCoralInClaw = false;
+        public boolean isCoralInClaw = false;
 
         // Inputs from the turn motor
         public boolean turnConnected = true;

@@ -3,11 +3,15 @@ package frc.robot.subsystems.superstructure.claw;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.superstructure.elevator.Elevator;
+import frc.robot.subsystems.swerve.SwerveDrive;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -75,4 +79,27 @@ public class Claw extends SubsystemBase {
     public Pose3d getPose() {
         return getPose(new Pose3d());
     }
+    /**
+     * @return The pose of the coral in the claw.
+     * If the claw is not holding coral, return an empty array.
+     */
+    // public Pose3d[] getCoralInClawPosition(SwerveDrive swerveSubsystem, Elevator elevatorSubsystem) {
+    //     // If the claw is not holding coral, return an empty array
+    //     if (!inputs.isCoralInClaw) {
+    //         return new Pose3d[] {};
+    //     }
+
+    //     Translation2d twoDPosition = swerveSubsystem.getActualPose().getTranslation().plus(
+    //         getPose(elevatorSubsystem.getStage2Pose())
+    //             .getTranslation()
+    //             .toTranslation2d()
+    //             .plus(ClawConstants.RotationPositions.getClawToCoralX(inputs.turnPositionRad)).rotateBy(swerveSubsystem.getActualPose().getRotation()));
+
+    //     return new Pose3d[] {
+    //         new Pose3d(
+
+    //             new Rotation3d()
+    //         )
+    //     }
+    // }
 }
