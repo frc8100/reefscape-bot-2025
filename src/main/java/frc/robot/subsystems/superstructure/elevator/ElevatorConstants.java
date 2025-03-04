@@ -37,10 +37,35 @@ public final class ElevatorConstants {
         public static final Distance INITIAL_HEIGHT_CLAW = Meters.of(0.5);
 
         // The positions of the elevator in meters
-        public static final Distance L1_DISTANCE = Meters.of(0);
-        public static final Distance L2_DISTANCE = Meters.of(0.9).minus(INITIAL_HEIGHT_CLAW);
-        public static final Distance L3_DISTANCE = Meters.of(1.3).minus(INITIAL_HEIGHT_CLAW);
-        public static final Distance L4_DISTANCE = Meters.of(2.1).minus(INITIAL_HEIGHT_CLAW);
+        // public static final Distance L1_DISTANCE = Meters.of(0);
+        // public static final Distance L2_DISTANCE = Meters.of(0.9).minus(INITIAL_HEIGHT_CLAW);
+        // public static final Distance L3_DISTANCE = Meters.of(1.3).minus(INITIAL_HEIGHT_CLAW);
+        // public static final Distance L4_DISTANCE = Meters.of(2.1).minus(INITIAL_HEIGHT_CLAW);
+
+        /**
+         * The levels of the elevator.
+         */
+        // public enum Level {
+        //     L1(Meters.of(0.0)),
+        //     L2(Meters.of(0.9).minus(INITIAL_HEIGHT_CLAW)),
+        //     L3(Meters.of(1.3).minus(INITIAL_HEIGHT_CLAW)),
+        //     L4(Meters.of(2.1).minus(INITIAL_HEIGHT_CLAW));
+
+        //     /**
+        //      * The distance of the level.
+        //      * Measured from the ground to the top of the elevator.
+        //      */
+        //     private final Distance distance;
+
+        //     public Distance getDistance() {
+        //         return distance;
+
+        //     }
+
+        //     Level(Distance distance) {
+        //         this.distance = distance;
+        //     }
+        // }
 
         public static final Distance MIN_HEIGHT = Meters.of(0);
         public static final Distance MAX_HEIGHT = Meters.of(2.0);
@@ -49,6 +74,11 @@ public final class ElevatorConstants {
         public static final Distance STAGE_1_MAX_HEIGHT = Meters.of(1.0);
         public static final Distance STAGE_2_HEIGHT = Meters.of(0.5);
     }
+
+    /**
+     * The tolerance for the elevator to be considered at the target position.
+     */
+    public static final Distance ELEVATOR_DISTANCE_TOLERANCE = Meters.of(0.05);
 
     // TODO: Tune these values
     // Elevator motor constants

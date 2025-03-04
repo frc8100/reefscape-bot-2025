@@ -5,7 +5,12 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.subsystems.superstructure.SuperstructureConstants;
+import frc.robot.subsystems.superstructure.claw.Claw;
+import frc.robot.subsystems.superstructure.claw.ClawConstants;
+import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveDrive;
 
@@ -16,87 +21,80 @@ public class AutoRoutines {
 
     /**
      * Locations of the robot to interact with the field elements.
-     * Note: not flipped for the blue side.
+     * Note: not flipped for the other side of the field.
      */
-    public static class FieldLocations {
+    public enum FieldLocations {
+        REEF_1L(new Pose2d(3.74, 5, Rotation2d.fromDegrees(-60))),
+        REEF_1R(new Pose2d(4, 5.15, Rotation2d.fromDegrees(-60))),
 
-        public static final Pose2d coralStation1 = new Pose2d(1.1, 1.1, Rotation2d.fromDegrees(55));
-        public static final Pose2d coralStation2 = new Pose2d(1.1, 6.8, Rotation2d.fromDegrees(-55));
+        REEF_2L(new Pose2d(4.95, 5.16, Rotation2d.fromDegrees(-120))),
+        REEF_2R(new Pose2d(5.22, 5, Rotation2d.fromDegrees(-120))),
 
-        public static final Pose2d reef1 = new Pose2d(3.7, 5.2, Rotation2d.fromDegrees(-60));
-        public static final Pose2d reef2 = new Pose2d(5.3, 5.2, Rotation2d.fromDegrees(-120));
-        public static final Pose2d reef3 = new Pose2d(6, 4, Rotation2d.fromDegrees(180));
-        public static final Pose2d reef4 = new Pose2d(5.25, 2.8, Rotation2d.fromDegrees(120));
-        public static final Pose2d reef5 = new Pose2d(3.7, 2.7, Rotation2d.fromDegrees(60));
-        public static final Pose2d reef6 = new Pose2d(3, 4, Rotation2d.fromDegrees(0));
+        REEF_3L(new Pose2d(5.7, 4.2, Rotation2d.fromDegrees(180))),
+        REEF_3R(new Pose2d(5.7, 3.87, Rotation2d.fromDegrees(180))),
+
+        REEF_4L(new Pose2d(5.24, 3.06, Rotation2d.fromDegrees(120))),
+        REEF_4R(new Pose2d(4.96, 2.9, Rotation2d.fromDegrees(120))),
+
+        REEF_5L(new Pose2d(4.03, 2.89, Rotation2d.fromDegrees(60))),
+        REEF_5R(new Pose2d(3.75, 3.06, Rotation2d.fromDegrees(60))),
+
+        REEF_6L(new Pose2d(3.28, 3.85, Rotation2d.fromDegrees(0))),
+        REEF_6R(new Pose2d(3.28, 4.17, Rotation2d.fromDegrees(0))),
+
+        CORAL_STATION_1(new Pose2d(1.1, 1.1, Rotation2d.fromDegrees(55))),
+        CORAL_STATION_2(new Pose2d(1.1, 6.8, Rotation2d.fromDegrees(-55)));
+
+        private Pose2d pose;
+
+        /**
+         * @return The pose of the location.
+         */
+        public Pose2d getPose() {
+            return pose;
+        }
+
+        private FieldLocations(Pose2d pose) {
+            this.pose = pose;
+        }
     }
 
+    // References to subsystems
     private SwerveDrive swerveSubsystem;
+    private Elevator elevatorSubsystem;
+    private Claw clawSubsystem;
 
-    public AutoRoutines(SwerveDrive swerveSubsystem) {
+    /**
+     * Creates a new AutoRoutines object given required subsystems.
+     */
+    public AutoRoutines(SwerveDrive swerveSubsystem, Elevator elevatorSubsystem, Claw clawSubsystem) {
         this.swerveSubsystem = swerveSubsystem;
+        this.elevatorSubsystem = elevatorSubsystem;
+        this.clawSubsystem = clawSubsystem;
     }
 
     /**
-     * @return A command to drive to the coral station 1 and wait for coral from the station.
+     * @return A command to set up the superstructure for a given level by moving the elevator and claw to the correct positions.
      */
-    public Command getCoralFromStation(int station) {
-        // Get the command to go to the coral station
-        Command goToCoralStationCommand;
-        switch (station) {
-            case 1:
-                goToCoralStationCommand = AutoBuilder.pathfindToPose(
-                    FieldLocations.coralStation1,
-                    SwerveConfig.pathConstraints
-                );
-                break;
-            case 2:
-                goToCoralStationCommand = AutoBuilder.pathfindToPose(
-                    FieldLocations.coralStation2,
-                    SwerveConfig.pathConstraints
-                );
-                break;
-            default:
-                goToCoralStationCommand = Commands.run(() -> {
-                    System.out.println("Invalid station number: " + station);
-                });
-        }
-
-        return new SequentialCommandGroup(goToCoralStationCommand, Commands.waitSeconds(0.5));
+    public Command setUpSuperstructure(SuperstructureConstants.Level level) {
+        return Commands.parallel(
+            // TODO: Move claw out of the way first before moving elevator
+            elevatorSubsystem.getPositionCommandAndWait(level.getElevatorDistance()),
+            clawSubsystem.getWaitForAngleCommand(level.getClawAngle())
+        );
     }
 
     /**
-     * @return A command to drive to a reef and wait for the robot to be ready to score.
+     * @return A command to pathfind to a given location.
+     * @param location - The location to pathfind to. See {@link FieldLocations} for possible locations.
      */
-    public Command goToReef(int reef) {
+    public Command pathFindToLocation(FieldLocations location) {
         // Get the command to go to the reef
-        Command goToReefCommand;
-        switch (reef) {
-            case 1:
-                goToReefCommand = AutoBuilder.pathfindToPose(FieldLocations.reef1, SwerveConfig.pathConstraints);
-                break;
-            case 2:
-                goToReefCommand = AutoBuilder.pathfindToPose(FieldLocations.reef2, SwerveConfig.pathConstraints);
-                break;
-            case 3:
-                goToReefCommand = AutoBuilder.pathfindToPose(FieldLocations.reef3, SwerveConfig.pathConstraints);
-                break;
-            case 4:
-                goToReefCommand = AutoBuilder.pathfindToPose(FieldLocations.reef4, SwerveConfig.pathConstraints);
-                break;
-            case 5:
-                goToReefCommand = AutoBuilder.pathfindToPose(FieldLocations.reef5, SwerveConfig.pathConstraints);
-                break;
-            case 6:
-                goToReefCommand = AutoBuilder.pathfindToPose(FieldLocations.reef6, SwerveConfig.pathConstraints);
-                break;
-            default:
-                goToReefCommand = Commands.run(() -> {
-                    System.out.println("Invalid reef number: " + reef);
-                });
-        }
-
-        return new SequentialCommandGroup(goToReefCommand, Commands.waitSeconds(0.5));
+        return AutoBuilder.pathfindToPose(location.getPose(), SwerveConfig.pathConstraints);
+        // return new SequentialCommandGroup(
+        //     AutoBuilder.pathfindToPose(location.getPose(), SwerveConfig.pathConstraints),
+        //     Commands.waitSeconds(0.1)
+        // );
     }
 
     /**
@@ -104,18 +102,34 @@ public class AutoRoutines {
      */
     public Command getCoralAndGoToAllReefsTest() {
         return new SequentialCommandGroup(
-            getCoralFromStation(1),
-            goToReef(4),
-            getCoralFromStation(1),
-            goToReef(5),
-            getCoralFromStation(1),
-            goToReef(6),
-            getCoralFromStation(2),
-            goToReef(1),
-            getCoralFromStation(2),
-            goToReef(2),
-            getCoralFromStation(2),
-            goToReef(3)
+            // Get coral from station 1
+            pathFindToLocation(FieldLocations.CORAL_STATION_1),
+            // Run intake
+            clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.INTAKE),
+            // Simultaneously set up superstructure and pathfind to reef
+            new ParallelCommandGroup(
+                pathFindToLocation(FieldLocations.REEF_4L),
+                Commands.waitSeconds(1.75).andThen(setUpSuperstructure(SuperstructureConstants.Level.L4))
+            ),
+            // Run outtake
+            clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE),
+            // Reset superstructure
+            // Simultaneously set up superstructure and pathfind to coral station
+            new ParallelCommandGroup(
+                pathFindToLocation(FieldLocations.CORAL_STATION_1),
+                setUpSuperstructure(SuperstructureConstants.Level.L1)
+            ),
+            // Run intake
+            clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.INTAKE),
+            // Simultaneously set up superstructure and pathfind to reef
+            new ParallelCommandGroup(
+                pathFindToLocation(FieldLocations.REEF_4R),
+                Commands.waitSeconds(1.75).andThen(setUpSuperstructure(SuperstructureConstants.Level.L4))
+            ),
+            // Run outtake
+            clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE),
+            // Reset superstructure
+            setUpSuperstructure(SuperstructureConstants.Level.L1)
         );
     }
 }

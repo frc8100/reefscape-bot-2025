@@ -74,19 +74,20 @@
     "Debouncer",
     "debouncers",
     "dtheta",
+    "feedforward",
     "hashtable",
     "hashtables",
     "Holonomic",
     "maplesim",
     "odometry",
+    "pathfind",
     "Pathfinding",
     "Quasistatic",
     "Reefscape",
     "setpoint",
     "setpoints",
     "teleop",
-    "wpilibj",
-    "feedforward"
-  ],
+    "wpilibj"
+],
   "wpilib.skipSelectSimulateExtension": false
 }

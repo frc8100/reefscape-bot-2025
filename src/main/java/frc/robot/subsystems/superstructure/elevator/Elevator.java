@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -33,6 +34,28 @@ public class Elevator extends SubsystemBase {
      */
     public Elevator(ElevatorIO io) {
         this.io = io;
+    }
+
+    /**
+     * @return Whether the elevator is at the target position, within a tolerance.
+     */
+    public boolean isElevatorAtTarget() {
+        return MathUtil.isNear(
+            inputs.setpoint,
+            inputs.height,
+            ElevatorConstants.ELEVATOR_DISTANCE_TOLERANCE.in(Meters)
+        );
+    }
+
+    /**
+     * @return Whether the elevator is at the given position, within a tolerance.
+     */
+    public boolean isElevatorAtTarget(Distance targetPosition) {
+        return MathUtil.isNear(
+            targetPosition.in(Meters),
+            inputs.height,
+            ElevatorConstants.ELEVATOR_DISTANCE_TOLERANCE.in(Meters)
+        );
     }
 
     @Override
@@ -67,6 +90,21 @@ public class Elevator extends SubsystemBase {
     }
 
     /**
+     * @return A command that sets the elevator to a specific position and waits until it is at that position.
+     * It will not finish until the elevator is at the target position.
+     */
+    public Command getPositionCommandAndWait(Distance position) {
+        // @formatter:off
+        return (
+            // Set the elevator to the desired position
+            getPositionCommand(position)
+                // Wait until the elevator is at the target position
+                .andThen(Commands.waitUntil(() -> isElevatorAtTarget(position)))
+        );
+        // @formatter:on
+    }
+
+    /**
      * @return The current position of the 1st stage of the elevator.
      */
     @AutoLogOutput(key = "ComponentPositions/Elevator/Stage1")
@@ -88,7 +126,6 @@ public class Elevator extends SubsystemBase {
      */
     @AutoLogOutput(key = "ComponentPositions/Elevator/Stage2")
     public Pose3d getStage2Pose() {
-        // TODO
         return new Pose3d(0.0, 0.0, inputs.height, new Rotation3d());
     }
 }

@@ -2,13 +2,13 @@ package frc.robot.subsystems.superstructure.claw;
 
 import static edu.wpi.first.units.Units.Radians;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -41,6 +41,28 @@ public class Claw extends SubsystemBase {
     }
 
     /**
+     * @return Whether the claw is at the target angle, within a tolerance.
+     */
+    public boolean isClawAtTarget() {
+        return MathUtil.isNear(
+            inputs.turnSetpointRad,
+            inputs.turnPositionRad,
+            ClawConstants.ANGLE_TOLERANCE_RADIANS.in(Radians)
+        );
+    }
+
+    /**
+     * @return Whether the claw is at the given angle, within a tolerance.
+     */
+    public boolean isClawAtTarget(Rotation2d targetAngle) {
+        return MathUtil.isNear(
+            targetAngle.getRadians(),
+            inputs.turnPositionRad,
+            ClawConstants.ANGLE_TOLERANCE_RADIANS.in(Radians)
+        );
+    }
+
+    /**
      * @return A command to run the claw.
      * @param motorInputSupplier - the supplier for the percent motor input.
      */
@@ -54,6 +76,41 @@ public class Claw extends SubsystemBase {
      */
     public Command getAngleCommand(Rotation2d rotationToRotateClawTo) {
         return new InstantCommand(() -> io.setTurnPosition(rotationToRotateClawTo), this);
+    }
+
+    /**
+     * @return A command that sets the claw to a specific angle and waits until it is at that angle.
+     * It will not finish until the claw is at the target angle.
+     */
+    public Command getWaitForAngleCommand(Rotation2d rotationToRotateClawTo) {
+        // @formatter:off
+        return (
+            // First, set the target angle
+            getAngleCommand(rotationToRotateClawTo)
+                // Then, wait until the claw is at the target angle
+                .andThen(Commands.waitUntil(() -> isClawAtTarget(rotationToRotateClawTo)))
+        );
+        // @formatter:on
+    }
+
+    /**
+     * @return A command to run the claw intake or outtake for {@link ClawConstants.INTAKE_OUTTAKE_TIME}.
+     * @param direction - The direction to run the intake or outtake. See {@link ClawConstants.IntakeOuttakeDirection} for the possible directions.
+     */
+    public Command runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection direction) {
+        return Commands.deadline(
+            // Stop after a certain amount of time
+            Commands.waitTime(
+                direction == ClawConstants.IntakeOuttakeDirection.INTAKE
+                    ? ClawConstants.INTAKE_TIME
+                    : ClawConstants.OUTTAKE_TIME
+            ),
+            // Run the outtake
+            new RunCommand(() -> io.runOutake(direction.getDirection()), this)
+        ).andThen(
+            // Stop the outtake
+            new InstantCommand(() -> io.runOutake(0), this)
+        );
     }
 
     @Override
@@ -111,7 +168,7 @@ public class Claw extends SubsystemBase {
                 ClawConstants.RotationPositions.getClawToCoralZ(inputs.turnPositionRad),
                 new Rotation3d(
                     0,
-                    inputs.turnPositionRad + ClawConstants.RotationPositions.ANGLE_OFFSET.getRadians(),
+                    inputs.turnPositionRad + ClawConstants.RotationPositions.CLAW_ANGLE_OFFSET.getRadians(),
                     swerveSubsystem.getActualPose().getRotation().getRadians()
                 )
             ),

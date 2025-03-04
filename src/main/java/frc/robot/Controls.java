@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
+import frc.robot.subsystems.superstructure.claw.ClawConstants;
 
 /** Declares control key bindings */
 public class Controls {
@@ -61,21 +62,15 @@ public class Controls {
          * When pressed, zeroes the gyro. Default is {@link XboxController.Button#kY} (top button).
          * Press when robot is facing towards the drive station to align the robot's forward direction with the field.
          */
-        // public JoystickButton zeroGyro =
-        //         new JoystickButton(driverController, XboxController.Button.kY.value);
         public int zeroGyroButton = XboxController.Button.kY.value;
 
         /**
          * When held, dampens the robot movement. This will decrease the robot's speed a lot.
          */
-        // public JoystickButton dampen =
-        //         new JoystickButton(driverController, XboxController.Button.kRightBumper.value);
         public int dampenButton = XboxController.Button.kRightBumper.value;
         /**
          * When held, slows the robot down to {@link #slowMultiplier}
          */
-        // public JoystickButton slowButton =
-        //         new JoystickButton(driverController, XboxController.Button.kLeftBumper.value);
         public int slowButton = XboxController.Button.kLeftBumper.value;
 
         public double slowMultiplier = 0.5;
@@ -83,8 +78,6 @@ public class Controls {
         /**
          * When held, makes the robot move robot centric.
          */
-        // public JoystickButton robotCentric =
-        //         new JoystickButton(driverController, XboxController.Button.kB.value);
         public int robotCentricButton = XboxController.Button.kX.value;
 
         // Direction buttons
@@ -92,15 +85,6 @@ public class Controls {
         // public POVButton down = new POVButton(driverController, 270);
         // public POVButton right = new POVButton(driverController, 180);
         // public POVButton left = new POVButton(driverController, 0);
-
-        // ! Test
-        // public JoystickButton goToCoralStation1 =
-        //         new JoystickButton(driverController, XboxController.Button.kA.value);
-        // public int goToCoralStation1Button = XboxController.Button.kA.value;
-
-        // public JoystickButton goToReef1 =
-        //         new JoystickButton(driverController, XboxController.Button.kB.value);
-        // public int goToReef1Button = XboxController.Button.kB.value;
 
         /**
          * @return The translation (x)
@@ -133,9 +117,6 @@ public class Controls {
          * @return Whether the controls are robot centric. Default is `false`.
          */
         public boolean isRobotCentric() {
-            // return false;
-            // return robotCentric.getAsBoolean();
-            // return driverController.getRawButton(robotCentricButton);
             return isCurrentlyRobotCentric;
         }
 
@@ -143,7 +124,6 @@ public class Controls {
          * @return Whether the robot movement is dampened.
          */
         public boolean isDampen() {
-            // return dampen.getAsBoolean();
             return driverController.getRawButton(dampenButton);
         }
 
@@ -151,7 +131,6 @@ public class Controls {
          * @return The speed multiplier.
          */
         public double getSpeedMultiplier() {
-            // return slowButton.getAsBoolean() ? slowMultiplier : 1;
             return driverController.getRawButton(slowButton) ? slowMultiplier : 1;
         }
     }
@@ -190,34 +169,6 @@ public class Controls {
         private static final int outtakeAxis = XboxController.Axis.kRightTrigger.value;
 
         /**
-         * The button to make the claw rotated at L4. Default is up on the D-pad.
-         */
-        public static final POVButton moveToL4 = new POVButton(armController, 90);
-
-        /**
-         * The button to make the claw rotated at L3. Default is right on the D-pad.
-         */
-        public static final POVButton moveToL3 = new POVButton(armController, 180);
-
-        /**
-         * The button to make the claw rotated at L2. Default is down on the D-pad.
-         */
-        public static final POVButton moveToL2 = new POVButton(armController, 270);
-
-        /**
-         * The button to make the claw rotated at L1. Default is left on the D-pad.
-         */
-        public static final POVButton moveToL1 = new POVButton(armController, 0);
-
-        /**
-         * The button to make the claw rotated at the resting position. Default is A.
-         */
-        // public static final JoystickButton resetClawButton = new JoystickButton(
-        //     armController,
-        //     XboxController.Button.kA.value
-        // );
-
-        /**
          * Returns the intake or outtake input depending on which one is bigger.
          * This does not include deadband.
          * @return A double from [-1, 1]. If it is outtake, it will be negative, otherwise it will be positive.
@@ -229,9 +180,9 @@ public class Controls {
 
             // Get the larger of them
             if (intakeInput >= outtakeInput) {
-                return intakeInput;
+                return ClawConstants.IntakeOuttakeDirection.INTAKE.getDirection() * intakeInput;
             } else {
-                return -outtakeInput;
+                return ClawConstants.IntakeOuttakeDirection.OUTTAKE.getDirection() * outtakeInput;
             }
         }
     }
@@ -248,25 +199,39 @@ public class Controls {
          * Temporarily the same as the driver controller.
          */
         public static final Joystick elevatorController = mainDriverController;
+    }
+
+    /**
+     * The controls for the superstructure.
+     */
+    public static final class Superstructure {
+
+        private Superstructure() {}
 
         /**
-         * The button to make the elevator go to L4. Default is up on the D-pad.
+         * The controller used for the superstructure.
+         * Temporarily the same as the driver controller.
          */
-        public static final POVButton moveToL4 = new POVButton(elevatorController, 90);
+        public static final Joystick superstructureController = mainDriverController;
 
         /**
-         * The button to make the elevator go to L3. Default is right on the D-pad.
+         * The button to make the superstructure go to L4. Default is up on the D-pad.
          */
-        public static final POVButton moveToL3 = new POVButton(elevatorController, 180);
+        public static final POVButton moveToL4 = new POVButton(superstructureController, 90);
 
         /**
-         * The button to make the elevator go to L2. Default is down on the D-pad.
+         * The button to make the superstructure go to L3. Default is right on the D-pad.
          */
-        public static final POVButton moveToL2 = new POVButton(elevatorController, 270);
+        public static final POVButton moveToL3 = new POVButton(superstructureController, 180);
 
         /**
-         * The button to make the elevator go to L1. Default is left on the D-pad.
+         * The button to make the superstructure go to L2. Default is down on the D-pad.
          */
-        public static final POVButton moveToL1 = new POVButton(elevatorController, 0);
+        public static final POVButton moveToL2 = new POVButton(superstructureController, 270);
+
+        /**
+         * The button to make the superstructure go to L1. Default is left on the D-pad.
+         */
+        public static final POVButton moveToL1 = new POVButton(superstructureController, 0);
     }
 }

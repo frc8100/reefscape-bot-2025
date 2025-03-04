@@ -7,15 +7,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.SwerveSysidRoutines;
-// import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.TeleopSwerve;
+import frc.robot.subsystems.superstructure.SuperstructureConstants;
 import frc.robot.subsystems.superstructure.claw.Claw;
-import frc.robot.subsystems.superstructure.claw.ClawConstants;
-import frc.robot.subsystems.superstructure.claw.ClawIOSim;
 import frc.robot.subsystems.superstructure.claw.ClawIOSpark;
 import frc.robot.subsystems.superstructure.claw.ClawSim;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
-import frc.robot.subsystems.superstructure.elevator.ElevatorConstants;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveConfig;
@@ -162,7 +159,7 @@ public class RobotContainer {
         // Controls.JoystickDrive(Controls.mainDriverController)));
 
         // Set up auto routines
-        autoRoutines = new AutoRoutines(swerveSubsystem);
+        autoRoutines = new AutoRoutines(swerveSubsystem, elevatorSubsystem, clawSubsystem);
 
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -193,7 +190,7 @@ public class RobotContainer {
         );
 
         // TODO: Temporary
-        autoChooser.addOption("Coral and Go To All Reefs Test", autoRoutines.getCoralAndGoToAllReefsTest());
+        autoChooser.addDefaultOption("Coral and Go To All Reefs Test", autoRoutines.getCoralAndGoToAllReefsTest());
 
         // Configure the button bindings
         configureButtonBindings();
@@ -216,29 +213,11 @@ public class RobotContainer {
         // Claw
         clawSubsystem.setDefaultCommand(clawSubsystem.getRunCommand(Controls.Claw::getIntakeOrOuttake));
 
-        Controls.Claw.moveToL1.onTrue(clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.L1ANGLE));
-        Controls.Claw.moveToL2.onTrue(clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.L2ANGLE));
-        Controls.Claw.moveToL3.onTrue(clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.L3ANGLE));
-        Controls.Claw.moveToL4.onTrue(clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.L4ANGLE));
-
-        // Controls.Claw.resetClawButton.onTrue(
-        //     clawSubsystem.getAngleCommand(ClawConstants.RotationPositions.RESTING_ANGLE)
-        // );
-
-        // Elevator
-        Controls.Elevator.moveToL1.onTrue(elevatorSubsystem.getPositionCommand(ElevatorConstants.Position.L1_DISTANCE));
-        Controls.Elevator.moveToL2.onTrue(elevatorSubsystem.getPositionCommand(ElevatorConstants.Position.L2_DISTANCE));
-        Controls.Elevator.moveToL3.onTrue(elevatorSubsystem.getPositionCommand(ElevatorConstants.Position.L3_DISTANCE));
-        Controls.Elevator.moveToL4.onTrue(elevatorSubsystem.getPositionCommand(ElevatorConstants.Position.L4_DISTANCE));
-        // Test
-        // Controls.mainDriveControls.goToCoralStation1.whileTrue(autoRoutines.getCoralFromStation(1));
-        // Controls.mainDriveControls.goToReef1.whileTrue(autoRoutines.goToReef(1));
-        // Controls.mainDriveControls
-        //         .getJoystickButtonOf(Controls.mainDriveControls.goToCoralStation1Button)
-        //         .whileTrue(autoRoutines.getCoralFromStation(1));
-        // Controls.mainDriveControls
-        //         .getJoystickButtonOf(Controls.mainDriveControls.goToReef1Button)
-        //         .whileTrue(autoRoutines.goToReef(1));
+        // Superstructure
+        Controls.Superstructure.moveToL1.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L1));
+        Controls.Superstructure.moveToL2.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L2));
+        Controls.Superstructure.moveToL3.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L3));
+        Controls.Superstructure.moveToL4.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L4));
     }
 
     /**

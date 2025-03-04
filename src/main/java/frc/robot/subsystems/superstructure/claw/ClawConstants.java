@@ -1,9 +1,11 @@
 package frc.robot.subsystems.superstructure.claw;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -12,10 +14,12 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.MomentOfInertia;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
 import org.ironmaple.simulation.motorsims.SimMotorConfigs;
 
@@ -37,14 +41,9 @@ public final class ClawConstants {
          * The initial angle of the claw when it is resting (against the mechanical lock).
          * The lower it is, the more "vertical" the claw is.
          */
-        public static final Rotation2d ANGLE_OFFSET = Rotation2d.fromDegrees(45);
+        public static final Rotation2d CLAW_ANGLE_OFFSET = Rotation2d.fromDegrees(45);
 
         public static final Rotation2d RESTING_ANGLE = Rotation2d.fromDegrees(0);
-
-        public static final Rotation2d L4ANGLE = Rotation2d.fromDegrees(80).minus(ANGLE_OFFSET);
-        public static final Rotation2d L3ANGLE = Rotation2d.fromDegrees(35).minus(ANGLE_OFFSET);
-        public static final Rotation2d L2ANGLE = Rotation2d.fromDegrees(35).minus(ANGLE_OFFSET);
-        public static final Rotation2d L1ANGLE = Rotation2d.fromDegrees(45).minus(ANGLE_OFFSET);
 
         /**
          * The horizontal, front/back translation of the claw from the origin of the second elevator stage.
@@ -78,6 +77,51 @@ public final class ClawConstants {
             return CLAW_TO_CORAL * Math.cos(angleRadians);
         }
     }
+
+    /**
+     * The direction of the intake/outtake.
+     */
+    public enum IntakeOuttakeDirection {
+        INTAKE(1),
+        OUTTAKE(-1);
+
+        /**
+         * The direction of the intake/outtake.
+         * If the direction is 1, the intake/outtake is in.
+         * If the direction is -1, the intake/outtake is out.
+         */
+        private final int direction;
+
+        /**
+         * @return The direction of the intake/outtake.
+         */
+        public int getDirection() {
+            return direction;
+        }
+
+        /**
+         * Creates a new IntakeOuttakeDirection based on the given direction.
+         */
+        IntakeOuttakeDirection(int direction) {
+            this.direction = direction;
+        }
+    }
+
+    /**
+     * How long to run the intake for.
+     */
+    public static final Time INTAKE_TIME = Seconds.of(0.4);
+
+    /**
+     * How long to run the outtake for.
+     */
+    public static final Time OUTTAKE_TIME = Seconds.of(0.8);
+
+    /**
+     * How much the claw can be off from the desired angle before it is considered "in position".
+     * This is in radians.
+     */
+    public static final Angle ANGLE_TOLERANCE_RADIANS = Degrees.of(2);
 
     /**
      * Deadband for the claw (controller input).
@@ -139,7 +183,7 @@ public final class ClawConstants {
 
     public static final DCMotor SIM_OUTTAKE_MOTOR = DCMotor.getNEO(1);
     public static final AngularVelocity SIM_OUTTAKE_TARGET_VELOCITY = RadiansPerSecond.of(25);
-    public static final MomentOfInertia SIM_OUTTAKE_MOI = KilogramSquareMeters.of(0.1);
+    public static final MomentOfInertia SIM_OUTTAKE_MOI = KilogramSquareMeters.of(0.05);
     public static final Voltage SIM_OUTTAKE_FRICTION_VOLTAGE = Volts.of(0.1);
     public static final double SIM_OUTTAKE_KP = 0.6;
     public static final double SIM_OUTTAKE_KI = 0.0;
@@ -155,5 +199,5 @@ public final class ClawConstants {
     /**
      * The speed that the coral is ejected at.
      */
-    public static final LinearVelocity SIM_OUTTAKE_EJECT_SPEED = MetersPerSecond.of(1.5);
+    public static final LinearVelocity SIM_OUTTAKE_EJECT_SPEED = MetersPerSecond.of(1.75);
 }

@@ -1,7 +1,6 @@
 package frc.robot.subsystems.superstructure.claw;
 
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.wpilibj.XboxController;
@@ -9,11 +8,9 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Controls;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
-import frc.robot.subsystems.swerve.SwerveDrive;
 import frc.robot.subsystems.swerve.SwerveSim;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly;
-import org.littletonrobotics.junction.Logger;
 
 /**
  * The simulator implementation of the claw subsystem.
@@ -63,7 +60,7 @@ public class ClawSim extends Claw {
             // How fast to eject the coral
             ClawConstants.SIM_OUTTAKE_EJECT_SPEED,
             // The angle of the claw
-            Radians.of(-(super.inputs.turnPositionRad + ClawConstants.RotationPositions.ANGLE_OFFSET.getRadians()))
+            Radians.of(-(super.inputs.turnPositionRad + ClawConstants.RotationPositions.CLAW_ANGLE_OFFSET.getRadians()))
         );
 
         SimulatedArena.getInstance().addGamePieceProjectile(coralToAdd);
@@ -75,8 +72,18 @@ public class ClawSim extends Claw {
     public void simulationPeriodic(SwerveSim swerveSubsystem, Elevator elevatorSubsystem) {
         // If the claw is holding a piece of coral and the outtake is running, set the claw to not holding a piece of coral
         // and create a coral object in the simulator
-        if (inputs.isCoralInClaw && super.inputs.outakeVelocityRadPerSec < -10) {
+
+        // TODO: Flip < or > depending on the direction of the outtake
+        if (
+            inputs.isCoralInClaw &&
+            super.inputs.outakeVelocityRadPerSec < ClawConstants.IntakeOuttakeDirection.OUTTAKE.getDirection() * 10
+        ) {
             releaseCoral(swerveSubsystem, elevatorSubsystem);
+        }
+
+        // If the claw is intaking, assume that the claw is holding a piece of coral
+        if (super.inputs.outakeVelocityRadPerSec > ClawConstants.IntakeOuttakeDirection.INTAKE.getDirection() * 10) {
+            inputs.isCoralInClaw = true;
         }
     }
 }
