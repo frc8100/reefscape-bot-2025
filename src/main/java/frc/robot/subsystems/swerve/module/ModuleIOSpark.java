@@ -13,6 +13,7 @@
 
 package frc.robot.subsystems.swerve.module;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
@@ -44,29 +45,29 @@ import java.util.function.DoubleSupplier;
  */
 public class ModuleIOSpark implements ModuleIO {
 
-    public int moduleNumber;
+    public final int moduleNumber;
 
     /** The angle offset. Used to zero the module to a specific angle. */
-    private Rotation2d angleOffset;
+    private final Rotation2d angleOffset;
 
     /**
      * The angle motor. This motor is used to control the angle of the module.
      * Includes the integrated encoder {@link #relAngleEncoder} and an absolute CANcoder {@link #angleEncoder}.
      */
-    private SparkMax angleMotor;
+    private final SparkMax angleMotor;
 
-    private CANcoder angleEncoder;
-    private RelativeEncoder relAngleEncoder;
-    private SparkClosedLoopController angleClosedLoopController;
+    private final CANcoder angleEncoder;
+    private final RelativeEncoder relAngleEncoder;
+    private final SparkClosedLoopController angleClosedLoopController;
 
     /**
      * The drive motor. This motor is used to control the speed of the module.
      * Includes an integrated encoder {@link #relDriveEncoder}.
      */
-    private SparkMax driveMotor;
+    private final SparkMax driveMotor;
 
-    private RelativeEncoder relDriveEncoder;
-    private SparkClosedLoopController driveClosedLoopController;
+    private final RelativeEncoder relDriveEncoder;
+    private final SparkClosedLoopController driveClosedLoopController;
 
     // Queue inputs from odometry thread
     private final Queue<Double> timestampQueue;
@@ -76,6 +77,12 @@ public class ModuleIOSpark implements ModuleIO {
     // Connection debouncers
     private final Debouncer driveConnectedDebounce = new Debouncer(0.5);
     private final Debouncer turnConnectedDebounce = new Debouncer(0.5);
+
+    /**
+     * The current setpoint angle for overrides
+     */
+    // TODO: make this configurable
+    private Rotation2d currentAngleSetpoint = new Rotation2d();
 
     /**
      * Creates a new Swerve Module.
@@ -125,7 +132,15 @@ public class ModuleIOSpark implements ModuleIO {
         timestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
         drivePositionQueue = SparkOdometryThread.getInstance().registerSignal(driveMotor, relDriveEncoder::getPosition);
         turnPositionQueue = SparkOdometryThread.getInstance()
-            .registerSignal(angleMotor, () -> angleEncoder.getAbsolutePosition().getValueAsDouble() * 360);
+            .registerSignal(
+                angleMotor,
+                // TODO: override
+                () -> angleEncoder.getAbsolutePosition().getValue().in(Degrees)
+                // () ->
+                //     moduleNumber == 1
+                //         ? currentAngleSetpoint.getDegrees()
+                //         : angleEncoder.getAbsolutePosition().getValue().in(Degrees)
+            );
     }
 
     /**
@@ -139,7 +154,7 @@ public class ModuleIOSpark implements ModuleIO {
      * @return The CANCoder angle of the module.
      */
     public Rotation2d getCanCoder() {
-        return Rotation2d.fromDegrees(angleEncoder.getAbsolutePosition().getValueAsDouble() * 360);
+        return new Rotation2d(angleEncoder.getAbsolutePosition().getValue().in(Radians));
     }
 
     @Override
@@ -183,8 +198,12 @@ public class ModuleIOSpark implements ModuleIO {
             angleMotor,
             // turnEncoder::getPosition,
             () -> angleEncoder.getAbsolutePosition().getValue().in(Radians),
-            // (value) -> inputs.turnPosition = new Rotation2d(value).minus(zeroRotation)
             value -> inputs.turnPosition = new Rotation2d(value).minus(angleOffset)
+            // TODO: override
+            // value ->
+            //     inputs.turnPosition = moduleNumber == 1
+            //         ? currentAngleSetpoint
+            //         : new Rotation2d(value).minus(angleOffset)
         );
         SparkUtil.ifOk(
             angleMotor,
@@ -274,5 +293,8 @@ public class ModuleIOSpark implements ModuleIO {
         double degReference = angle.getDegrees();
 
         angleClosedLoopController.setReference(degReference, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+
+        // Set the target
+        currentAngleSetpoint = angle;
     }
 }
