@@ -4,6 +4,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.SwerveSysidRoutines;
@@ -13,7 +14,9 @@ import frc.robot.subsystems.superstructure.claw.Claw;
 import frc.robot.subsystems.superstructure.claw.ClawIOSpark;
 import frc.robot.subsystems.superstructure.claw.ClawSim;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
+import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
+import frc.robot.subsystems.superstructure.elevator.ElevatorIOSpark;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveConstants;
@@ -84,7 +87,10 @@ public class RobotContainer {
                     new VisionIOLimelight(VisionConstants.CAMERA_0_NAME, swerveSubsystem::getRotation)
                 );
 
-                clawSubsystem = new Claw(new ClawIOSpark());
+                // clawSubsystem = new Claw(new ClawIOSpark());
+                clawSubsystem = new ClawSim();
+
+                elevatorSubsystem = new Elevator(new ElevatorIOSpark());
                 break;
             default:
             case SIM:
@@ -126,6 +132,8 @@ public class RobotContainer {
                 // Create a simulated claw
                 clawSubsystem = new ClawSim();
 
+                elevatorSubsystem = new Elevator(new ElevatorIOSim());
+
                 // TODO: Add behavior chooser
                 // Create an opponent robot simulation
                 // OpponentRobotSim opponentRobotSim1 =
@@ -150,11 +158,9 @@ public class RobotContainer {
                 break;
         }
 
-        // TODO: Real elevator IO implementation
-        elevatorSubsystem = new Elevator(new ElevatorIOSim());
-
         // TODO: add switch for controller and joystick
-        swerveSubsystem.setDefaultCommand(new TeleopSwerve(swerveSubsystem, Controls.mainDriveControls, true));
+        // TODO: add back
+        // swerveSubsystem.setDefaultCommand(new TeleopSwerve(swerveSubsystem, Controls.mainDriveControls, true));
         // swerveSubsystem.setDefaultCommand(new TeleopSwerve(swerveSubsystem, new
         // Controls.JoystickDrive(Controls.mainDriverController)));
 
@@ -207,17 +213,25 @@ public class RobotContainer {
         Controls.mainDriveControls
             .getJoystickButtonOf(Controls.mainDriveControls.zeroGyroButton)
             .onTrue(new InstantCommand(swerveSubsystem::zeroGyro));
-
         // TODO: Heading lock?
 
         // Claw
-        clawSubsystem.setDefaultCommand(clawSubsystem.getRunCommand(Controls.Claw::getIntakeOrOuttake));
+        // clawSubsystem.setDefaultCommand(clawSubsystem.getRunCommand(Controls.Claw::getIntakeOrOuttake));
 
         // Superstructure
-        Controls.Superstructure.moveToL1.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L1));
-        Controls.Superstructure.moveToL2.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L2));
-        Controls.Superstructure.moveToL3.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L3));
-        Controls.Superstructure.moveToL4.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L4));
+        // TODO:
+        // Controls.Superstructure.moveToL1.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L1));
+        // Controls.Superstructure.moveToL2.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L2));
+        // Controls.Superstructure.moveToL3.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L3));
+        // Controls.Superstructure.moveToL4.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L4));
+
+        // TODO: Elevator
+        Controls.mainDriveControls
+            .getJoystickButtonOf(Controls.Elevator.upButton)
+            .whileTrue(Commands.runOnce(() -> elevatorSubsystem.runMotor(1), elevatorSubsystem));
+        Controls.mainDriveControls
+            .getJoystickButtonOf(Controls.Elevator.downButton)
+            .whileTrue(Commands.runOnce(() -> elevatorSubsystem.runMotor(-1), elevatorSubsystem));
     }
 
     /**

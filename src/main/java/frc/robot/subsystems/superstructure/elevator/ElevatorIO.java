@@ -56,4 +56,6 @@ public interface ElevatorIO extends GenericSparkIO<ElevatorIO.ElevatorIOInputs> 
      * Optional, do not update the IO here.
      */
     public default void periodic() {}
+
+    public default void runMotor(double motorInput) {}
 }

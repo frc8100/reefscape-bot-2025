@@ -82,6 +82,11 @@ public class Elevator extends SubsystemBase {
         io.setPosition(position);
     }
 
+    // TODO:
+    public void runMotor(double motorInput) {
+        io.runMotor(motorInput);
+    }
+
     /**
      * @return A command to set the elevator to a certain position.
      */

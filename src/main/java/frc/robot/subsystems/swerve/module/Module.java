@@ -95,7 +95,8 @@ public class Module {
         // Optimize velocity setpoint
 
         // CTREModuleState functions for any motor type
-        state = CTREModuleState.optimize(state, inputs.turnPosition);
+        // state = CTREModuleState.optimize(state, inputs.turnPosition);
+        state.optimize(inputs.turnPosition);
 
         // Apply setpoints
         // io.setDriveVelocity(state.speedMetersPerSecond / wheelRadiusMeters);

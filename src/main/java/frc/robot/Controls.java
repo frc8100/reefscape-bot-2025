@@ -199,6 +199,11 @@ public class Controls {
          * Temporarily the same as the driver controller.
          */
         public static final Joystick elevatorController = mainDriverController;
+
+        // TODO: temporary
+
+        public static final int upButton = XboxController.Button.kRightBumper.value;
+        public static final int downButton = XboxController.Button.kLeftBumper.value;
     }
 
     /**
