@@ -2,7 +2,10 @@ package frc.robot.subsystems.swerve;
 
 import static edu.wpi.first.units.Units.Volt;
 
+import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
+import com.pathplanner.lib.util.swerve.SwerveSetpoint;
+import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -37,6 +40,16 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
     /** Lock for the odometry thread. */
     static final Lock odometryLock = new ReentrantLock();
+
+    /**
+     * SwerveState setpoint generator
+     */
+    private final SwerveSetpointGenerator setpointGenerator;
+
+    /**
+     * Previous setpoints
+     */
+    private SwerveSetpoint previousSetpoint;
 
     /**
      * The swerve modules. These are the four swerve modules on the robot. Each module has a drive
@@ -112,6 +125,21 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         // Set up custom logging to add the current path to a field 2d widget
         PathPlannerLogging.setLogActivePathCallback(poses -> field.getObject("path").setPoses(poses));
 
+        // Configure setpoint generator
+        setpointGenerator = new SwerveSetpointGenerator(
+            SwerveConfig.getRobotConfig(),
+            SwerveConfig.MAX_ANGULAR_VELOCITY
+        );
+
+        // Initialize the previous setpoint to the robot's current speeds & module states
+        ChassisSpeeds currentSpeeds = getChassisSpeeds(); // Method to get current robot-relative chassis speeds
+        SwerveModuleState[] currentStates = getModuleStates(); // Method to get the current swerve module states
+        previousSetpoint = new SwerveSetpoint(
+            currentSpeeds,
+            currentStates,
+            DriveFeedforwards.zeros(SwerveConfig.NUMBER_OF_SWERVE_MODULES)
+        );
+
         SmartDashboard.putData("Field", field);
     }
 
@@ -157,7 +185,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
             : new ChassisSpeeds(translation.getX(), translation.getY(), rotation);
 
         // Correct the chassis speeds for robot dynamics
-        desiredChassisSpeeds = correctForDynamics(desiredChassisSpeeds);
+        // desiredChassisSpeeds = correctForDynamics(desiredChassisSpeeds);
 
         runVelocityChassisSpeeds(desiredChassisSpeeds);
     }
@@ -168,18 +196,22 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speed, 0.02);
         SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
 
-        // Ensure the wheel speeds are within the allowable range
-        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, SwerveConfig.MAX_SPEED);
+        // Note: it is important to not discretize speeds before or after
+        // using the setpoint generator, as it will discretize them for you
+        // previousSetpoint = setpointGenerator.generateSetpoint(
+        //     previousSetpoint, // The previous setpoint
+        //     speed, // The desired target speeds
+        //     0.02 // The loop time of the robot code, in seconds
+        // );
+
+        // SwerveModuleState[] setpointStates = previousSetpoint.moduleStates();
 
         // Log unoptimized setpoints
         Logger.recordOutput("Swerve/States/Setpoints", setpointStates);
-        Logger.recordOutput("Swerve/ChassisSpeeds/Setpoints", discreteSpeeds);
+        Logger.recordOutput("Swerve/ChassisSpeeds/Setpoints", speed);
 
         // Set the desired state for each swerve module
-        for (int i = 0; i < 4; i++) {
-            Module mod = swerveModules[i];
-            mod.runSetpoint(setpointStates[mod.index]);
-        }
+        setModuleStates(setpointStates);
     }
 
     @Override

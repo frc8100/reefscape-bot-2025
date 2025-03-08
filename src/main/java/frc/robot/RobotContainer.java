@@ -90,7 +90,8 @@ public class RobotContainer {
                 // clawSubsystem = new Claw(new ClawIOSpark());
                 clawSubsystem = new ClawSim();
 
-                elevatorSubsystem = new Elevator(new ElevatorIOSpark());
+                // elevatorSubsystem = new Elevator(new ElevatorIOSpark());
+                elevatorSubsystem = new Elevator(new ElevatorIOSim());
                 break;
             default:
             case SIM:
@@ -158,11 +159,13 @@ public class RobotContainer {
                 break;
         }
 
-        // TODO: add switch for controller and joystick
-        // TODO: add back
-        // swerveSubsystem.setDefaultCommand(new TeleopSwerve(swerveSubsystem, Controls.mainDriveControls, true));
-        // swerveSubsystem.setDefaultCommand(new TeleopSwerve(swerveSubsystem, new
-        // Controls.JoystickDrive(Controls.mainDriverController)));
+        swerveSubsystem.setDefaultCommand(
+            new TeleopSwerve(
+                swerveSubsystem,
+                Controls.isUsingJoystickDrive ? Controls.joystickDriveControls : Controls.mainDriveControls,
+                true
+            )
+        );
 
         // Set up auto routines
         autoRoutines = new AutoRoutines(swerveSubsystem, elevatorSubsystem, clawSubsystem);
@@ -226,18 +229,17 @@ public class RobotContainer {
         // Controls.Superstructure.moveToL4.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L4));
 
         // TODO: Elevator
-        Controls.mainDriveControls
-            .getJoystickButtonOf(Controls.Elevator.upButton)
-            .whileTrue(Commands.runOnce(() -> elevatorSubsystem.runMotor(1), elevatorSubsystem));
-        Controls.mainDriveControls
-            .getJoystickButtonOf(Controls.Elevator.downButton)
-            .whileTrue(Commands.runOnce(() -> elevatorSubsystem.runMotor(-1), elevatorSubsystem));
+        // Controls.mainDriveControls
+        //     .getJoystickButtonOf(Controls.Elevator.upButton)
+        //     .whileTrue(Commands.runOnce(() -> elevatorSubsystem.runMotor(1), elevatorSubsystem));
+        // Controls.mainDriveControls
+        //     .getJoystickButtonOf(Controls.Elevator.downButton)
+        //     .whileTrue(Commands.runOnce(() -> elevatorSubsystem.runMotor(-1), elevatorSubsystem));
     }
 
     /**
      * Use this to pass the autonomous command to the main {@link Robot} class.
-     *
-     * @return the command to run in autonomous
+     * @return The command to run in autonomous
      */
     public Command getAutonomousCommand() {
         return autoChooser.get();

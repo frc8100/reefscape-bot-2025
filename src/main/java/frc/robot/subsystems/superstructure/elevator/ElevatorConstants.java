@@ -92,9 +92,10 @@ public final class ElevatorConstants {
     public static final Current ELEVATOR_MOTOR_CURRENT_LIMIT = Amps.of(40);
     /** Rotations to radians */
     public static final double ELEVATOR_MOTOR_POSITION_FACTOR = (2 * Math.PI) / ELEVATOR_GEAR_RATIO;
+    public static final Distance ELEVATOR_DRUM_RADIUS = Inches.of(0.75);
 
     /** Radians to meters */
-    public static final double ELEVATOR_RADIANS_TO_METERS = 0.75;
+    public static final double ELEVATOR_RADIANS_TO_METERS = ELEVATOR_DRUM_RADIUS.in(Meters);
 
     public static final LinearVelocity ELEVATOR_MAX_VELOCITY = MetersPerSecond.of(2.5);
     public static final LinearAcceleration ELEVATOR_MAX_ACCELERATION = MetersPerSecondPerSecond.of(3);
@@ -116,8 +117,6 @@ public final class ElevatorConstants {
     public static final double SIM_KI = 0.0;
     public static final double SIM_KD = 0.0;
     public static final double SIM_KF = 1.0;
-
-    public static final Distance ELEVATOR_DRUM_RADIUS = Inches.of(2);
 
     public static final double SIM_KS = 0.0; // volts (V)
     public static final double SIM_KG = 0.762; // volts (V)

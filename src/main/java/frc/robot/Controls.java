@@ -18,6 +18,12 @@ public class Controls {
     public static final Joystick mainDriverController = new Joystick(0);
 
     public static final Drive mainDriveControls = new Drive(mainDriverController);
+    public static final Drive joystickDriveControls = new JoystickDrive(Controls.mainDriverController);
+
+    /**
+     * Whether or not to use the joystick drive.
+     */
+    public static final boolean isUsingJoystickDrive = false;
 
     /** The drive controls */
     public static class Drive {

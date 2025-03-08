@@ -34,6 +34,11 @@ public class SwerveConfig {
 
     private SwerveConfig() {}
 
+    /**
+     * The number of swerve modules
+     */
+    public static final int NUMBER_OF_SWERVE_MODULES = 4;
+
     /** How often the odometry is updated (in Hz). This is independent of the robot's. */
     public static final double ODOMETRY_FREQUENCY_HZ = 100;
 

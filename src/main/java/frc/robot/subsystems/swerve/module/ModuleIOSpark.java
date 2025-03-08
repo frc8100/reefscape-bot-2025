@@ -14,6 +14,7 @@
 package frc.robot.subsystems.swerve.module;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Radians;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -181,9 +182,14 @@ public class ModuleIOSpark implements ModuleIO {
         SparkUtil.ifOk(
             angleMotor,
             // turnEncoder::getPosition,
-            () -> angleEncoder.getAbsolutePosition().getValueAsDouble() * 360,
+            () -> angleEncoder.getAbsolutePosition().getValue().in(Radians),
             // (value) -> inputs.turnPosition = new Rotation2d(value).minus(zeroRotation)
-            value -> inputs.turnPosition = Rotation2d.fromDegrees(value).minus(angleOffset)
+            value -> inputs.turnPosition = new Rotation2d(value).minus(angleOffset)
+        );
+        SparkUtil.ifOk(
+            angleMotor,
+            () -> angleEncoder.getAbsolutePosition().getValue().in(Radians),
+            value -> inputs.turnPositionRaw = value
         );
         SparkUtil.ifOk(angleMotor, relAngleEncoder::getVelocity, value -> inputs.turnVelocityRadPerSec = value);
         SparkUtil.ifOk(

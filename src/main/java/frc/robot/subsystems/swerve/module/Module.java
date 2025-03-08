@@ -92,17 +92,11 @@ public class Module {
 
     /** Runs the module with the specified setpoint state. Mutates the state to optimize it. */
     public void runSetpoint(SwerveModuleState state) {
-        // Optimize velocity setpoint
-
-        // CTREModuleState functions for any motor type
+        // Optimize setpoint
         // state = CTREModuleState.optimize(state, inputs.turnPosition);
         state.optimize(inputs.turnPosition);
 
         // Apply setpoints
-        // io.setDriveVelocity(state.speedMetersPerSecond / wheelRadiusMeters);
-        // io.setTurnPosition(state.angle);
-        // io.setDriveVelocity(state);
-        // io.setTurnPosition(state);
         io.setDesiredState(state);
     }
 

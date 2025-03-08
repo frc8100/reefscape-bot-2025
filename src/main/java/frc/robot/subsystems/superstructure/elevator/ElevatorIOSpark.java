@@ -68,10 +68,10 @@ public class ElevatorIOSpark implements ElevatorIO {
         encoder = motor.getEncoder();
         closedLoopController = motor.getClosedLoopController();
 
-        SparkMaxConfig angleConfig = new MotorConfig().getConfig();
+        SparkMaxConfig motorConfig = new MotorConfig().getConfig();
 
         // TODO: Apply PID config for the angle motor
-        angleConfig.closedLoop
+        motorConfig.closedLoop
             .pidf(
                 ElevatorConstants.ELEVATOR_KP,
                 ElevatorConstants.ELEVATOR_KI,
@@ -83,7 +83,7 @@ public class ElevatorIOSpark implements ElevatorIO {
         // Apply the config
         tryUntilOk(motor, 5, () ->
             motor.configure(
-                angleConfig,
+                motorConfig,
                 SparkBase.ResetMode.kResetSafeParameters,
                 SparkBase.PersistMode.kPersistParameters
             )
