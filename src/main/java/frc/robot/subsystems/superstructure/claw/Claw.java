@@ -67,7 +67,7 @@ public class Claw extends SubsystemBase {
      * @param motorInputSupplier - the supplier for the percent motor input.
      */
     public Command getRunCommand(DoubleSupplier motorInputSupplier) {
-        return new RunCommand(() -> io.runOutake(motorInputSupplier.getAsDouble()), this);
+        return new RunCommand(() -> io.runOuttake(motorInputSupplier.getAsDouble()), this);
     }
 
     /**
@@ -106,10 +106,10 @@ public class Claw extends SubsystemBase {
                     : ClawConstants.OUTTAKE_TIME
             ),
             // Run the outtake
-            new RunCommand(() -> io.runOutake(direction.getDirection()), this)
+            new RunCommand(() -> io.runOuttake(direction.getDirection()), this)
         ).andThen(
             // Stop the outtake
-            new InstantCommand(() -> io.runOutake(0), this)
+            new InstantCommand(() -> io.runOuttake(0), this)
         );
     }
 

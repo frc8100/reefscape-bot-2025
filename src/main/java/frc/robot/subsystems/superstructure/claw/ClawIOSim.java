@@ -112,7 +112,7 @@ public class ClawIOSim implements ClawIO {
     }
 
     @Override
-    public void runOutake(double motorInput) {
+    public void runOuttake(double motorInput) {
         isOuttakeUsingPID = true;
 
         // Set the setpoint of the outtake controller
@@ -153,12 +153,12 @@ public class ClawIOSim implements ClawIO {
         inputs.turnSetpointRad = angleController.getSetpoint();
 
         // Set outtake inputs
-        inputs.outakeConnected = true;
-        inputs.outakePositionRad = outtakeMotorSim.getAngularPosition().in(Radians);
-        inputs.outakeVelocityRadPerSec = outtakeMotorSim.getVelocity().in(RadiansPerSecond);
-        inputs.outakeAppliedVolts = outtakeMotorSim.getAppliedVoltage().in(Volts);
-        inputs.outakeSupplyCurrentAmps = outtakeMotorSim.getSupplyCurrent().in(Amps);
-        inputs.outakeTorqueCurrentAmps = outtakeMotorSim.getStatorCurrent().in(Amps);
-        inputs.outakeSetpointVelocityRadPerSec = outtakeController.getSetpoint();
+        inputs.outtakeConnected = true;
+        inputs.outtakePositionRad = outtakeMotorSim.getAngularPosition().in(Radians);
+        inputs.outtakeVelocityRadPerSec = outtakeMotorSim.getVelocity().in(RadiansPerSecond);
+        inputs.outtakeAppliedVolts = outtakeMotorSim.getAppliedVoltage().in(Volts);
+        inputs.outtakeSupplyCurrentAmps = outtakeMotorSim.getSupplyCurrent().in(Amps);
+        inputs.outtakeTorqueCurrentAmps = outtakeMotorSim.getStatorCurrent().in(Amps);
+        inputs.outtakeSetpointVelocityRadPerSec = outtakeController.getSetpoint();
     }
 }

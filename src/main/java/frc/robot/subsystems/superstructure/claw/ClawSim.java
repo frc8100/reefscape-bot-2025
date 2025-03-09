@@ -76,13 +76,13 @@ public class ClawSim extends Claw {
         // TODO: Flip < or > depending on the direction of the outtake
         if (
             inputs.isCoralInClaw &&
-            super.inputs.outakeVelocityRadPerSec < ClawConstants.IntakeOuttakeDirection.OUTTAKE.getDirection() * 10
+            super.inputs.outtakeVelocityRadPerSec < ClawConstants.IntakeOuttakeDirection.OUTTAKE.getDirection() * 10
         ) {
             releaseCoral(swerveSubsystem, elevatorSubsystem);
         }
 
         // If the claw is intaking, assume that the claw is holding a piece of coral
-        if (super.inputs.outakeVelocityRadPerSec > ClawConstants.IntakeOuttakeDirection.INTAKE.getDirection() * 10) {
+        if (super.inputs.outtakeVelocityRadPerSec > ClawConstants.IntakeOuttakeDirection.INTAKE.getDirection() * 10) {
             inputs.isCoralInClaw = true;
         }
     }

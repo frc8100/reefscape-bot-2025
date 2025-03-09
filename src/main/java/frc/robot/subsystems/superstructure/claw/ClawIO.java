@@ -31,15 +31,15 @@ public interface ClawIO extends GenericSparkIO<ClawIO.ClawIOInputs> {
         public double turnTempCelsius = 0.0;
         public double turnSetpointRad = 0.0;
 
-        // Inputs from the outake motor
-        public boolean outakeConnected = true;
-        public double outakePositionRad = 0.0;
-        public double outakeVelocityRadPerSec = 0.0;
-        public double outakeAppliedVolts = 0.0;
-        public double outakeSupplyCurrentAmps = 0.0;
-        public double outakeTorqueCurrentAmps = 0.0;
-        public double outakeTempCelsius = 0.0;
-        public double outakeSetpointVelocityRadPerSec = 0.0;
+        // Inputs from the outtake motor
+        public boolean outtakeConnected = true;
+        public double outtakePositionRad = 0.0;
+        public double outtakeVelocityRadPerSec = 0.0;
+        public double outtakeAppliedVolts = 0.0;
+        public double outtakeSupplyCurrentAmps = 0.0;
+        public double outtakeTorqueCurrentAmps = 0.0;
+        public double outtakeTempCelsius = 0.0;
+        public double outtakeSetpointVelocityRadPerSec = 0.0;
     }
 
     /**
@@ -54,10 +54,10 @@ public interface ClawIO extends GenericSparkIO<ClawIO.ClawIOInputs> {
     public void setTurnPosition(Rotation2d rotation);
 
     /**
-     * Runs the outake motor at the specified percent output.
+     * Runs the outtake motor at the specified percent output.
      * @param motorInput - The percent output to run the motor at, from [-1, 1] without deadband.
      */
-    public void runOutake(double motorInput);
+    public void runOuttake(double motorInput);
 
     /**
      * Periodic function to be called by the subsystem.
