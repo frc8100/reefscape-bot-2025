@@ -226,10 +226,10 @@ public class RobotContainer {
 
         // Superstructure
         // TODO:
-        // Controls.Superstructure.moveToL1.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L1));
-        // Controls.Superstructure.moveToL2.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L2));
-        // Controls.Superstructure.moveToL3.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L3));
-        // Controls.Superstructure.moveToL4.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L4));
+        Controls.Superstructure.moveToL1.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L1));
+        Controls.Superstructure.moveToL2.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L2));
+        Controls.Superstructure.moveToL3.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L3));
+        Controls.Superstructure.moveToL4.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L4));
 
         // TODO: Elevator
         Controls.mainDriveControls

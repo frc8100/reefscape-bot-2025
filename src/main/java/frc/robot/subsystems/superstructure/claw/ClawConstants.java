@@ -39,9 +39,9 @@ public final class ClawConstants {
 
         /**
          * The initial angle of the claw when it is resting (against the mechanical lock).
-         * The lower it is, the more "vertical" the claw is.
+         * The lower it is, the more "horizontal" the claw is.
          */
-        public static final Rotation2d CLAW_ANGLE_OFFSET = Rotation2d.fromDegrees(45);
+        public static final Rotation2d CLAW_ANGLE_OFFSET = Rotation2d.fromDegrees(35);
 
         public static final Rotation2d RESTING_ANGLE = Rotation2d.fromDegrees(0);
 
@@ -65,8 +65,10 @@ public final class ClawConstants {
          * @param angleRadians - The angle of the claw, in radians, with the offset applied.
          */
         public static Translation2d getClawToCoralX(double angleRadians) {
-            // TODO: Implement angle offset
-            return new Translation2d(CLAW_TO_CORAL * Math.sin(angleRadians), 0);
+            // Undo the offset
+            angleRadians = angleRadians + CLAW_ANGLE_OFFSET.getRadians();
+
+            return new Translation2d(CLAW_TO_CORAL * Math.sin(angleRadians - (Math.PI / 4)), 0);
         }
 
         /**
@@ -74,7 +76,10 @@ public final class ClawConstants {
          * @param angleRadians - The angle of the claw, in radians, with the offset applied.
          */
         public static double getClawToCoralZ(double angleRadians) {
-            return CLAW_TO_CORAL * Math.cos(angleRadians);
+            // Undo the offset
+            angleRadians = angleRadians + CLAW_ANGLE_OFFSET.getRadians();
+
+            return CLAW_TO_CORAL * Math.cos(angleRadians - (Math.PI / 4));
         }
     }
 
@@ -153,8 +158,10 @@ public final class ClawConstants {
     public static final double ANGLE_KD = 0.0;
     public static final double ANGLE_KF = 0.0;
 
+    // -0.16
+
     // Outtake motor configs
-    public static final int OUTTAKE_MOTOR_ID = 13;
+    public static final int OUTTAKE_MOTOR_ID = 15;
     public static final double OUTTAKE_GEAR_RATIO = 5;
     public static final boolean IS_OUTTAKE_MOTOR_INVERTED = false;
     public static final Current OUTTAKE_MOTOR_CURRENT_LIMIT = Amps.of(40);

@@ -117,11 +117,13 @@ public class Elevator extends SubsystemBase {
         return new Pose3d(
             0.0,
             0.0,
-            MathUtil.clamp(
-                inputs.height - ElevatorConstants.Position.STAGE_1_HEIGHT.in(Meters),
-                0,
-                ElevatorConstants.Position.STAGE_1_MAX_HEIGHT.in(Meters)
-            ),
+            // MathUtil.clamp(
+            //     inputs.height - ElevatorConstants.Position.STAGE_1_HEIGHT.in(Meters),
+            //     0,
+            //     ElevatorConstants.Position.STAGE_1_MAX_HEIGHT.in(Meters)
+            // ),
+            (inputs.height / ElevatorConstants.Position.MAX_HEIGHT.in(Meters)) *
+            ElevatorConstants.Position.STAGE_1_MAX_HEIGHT.in(Meters),
             new Rotation3d()
         );
     }
