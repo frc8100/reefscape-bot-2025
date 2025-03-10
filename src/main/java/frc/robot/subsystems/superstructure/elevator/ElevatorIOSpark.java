@@ -116,6 +116,9 @@ public class ElevatorIOSpark implements ElevatorIO {
     public void setPosition(Distance position) {
         // TODO
         // Set the position of the turn motor
+        double setPointRadians = ElevatorConstants.getMotorPositionFromHeight(position);
+
+        Logger.recordOutput("Elevator/SetPoint", setPointRadians);
         // angleClosedLoopController.setReference(rotation.getRadians(), ControlType.kPosition, ClosedLoopSlot.kSlot0);
     }
 

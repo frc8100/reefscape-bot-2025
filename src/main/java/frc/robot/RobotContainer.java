@@ -159,9 +159,11 @@ public class RobotContainer {
                 break;
         }
 
+        // Set up teleop swerve command
         swerveSubsystem.setDefaultCommand(
             new TeleopSwerve(
                 swerveSubsystem,
+                // Switch between joystick and main drive controls depending on the mode
                 Controls.isUsingJoystickDrive ? Controls.joystickDriveControls : Controls.mainDriveControls,
                 true
             )
@@ -219,7 +221,8 @@ public class RobotContainer {
         // TODO: Heading lock?
 
         // Claw
-        // clawSubsystem.setDefaultCommand(clawSubsystem.getRunCommand(Controls.Claw::getIntakeOrOuttake));
+        // Run the intake/outtake command when the button is pressed
+        clawSubsystem.setDefaultCommand(clawSubsystem.getRunCommand(Controls.Claw::getIntakeOrOuttake));
 
         // Superstructure
         // TODO:
@@ -229,12 +232,12 @@ public class RobotContainer {
         // Controls.Superstructure.moveToL4.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L4));
 
         // TODO: Elevator
-        // Controls.mainDriveControls
-        //     .getJoystickButtonOf(Controls.Elevator.upButton)
-        //     .whileTrue(Commands.runOnce(() -> elevatorSubsystem.runMotor(1), elevatorSubsystem));
-        // Controls.mainDriveControls
-        //     .getJoystickButtonOf(Controls.Elevator.downButton)
-        //     .whileTrue(Commands.runOnce(() -> elevatorSubsystem.runMotor(-1), elevatorSubsystem));
+        Controls.mainDriveControls
+            .getJoystickButtonOf(Controls.Elevator.upButton)
+            .whileTrue(Commands.runOnce(() -> elevatorSubsystem.runMotor(1), elevatorSubsystem));
+        Controls.mainDriveControls
+            .getJoystickButtonOf(Controls.Elevator.downButton)
+            .whileTrue(Commands.runOnce(() -> elevatorSubsystem.runMotor(-1), elevatorSubsystem));
     }
 
     /**
