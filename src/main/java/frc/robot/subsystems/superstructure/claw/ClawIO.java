@@ -71,4 +71,6 @@ public interface ClawIO extends GenericSparkIO<ClawIO.ClawIOInputs> {
      * Optional, do not update the IO here.
      */
     public default void periodic() {}
+
+    public default void zeroEncoder(double value) {}
 }

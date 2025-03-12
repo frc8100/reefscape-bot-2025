@@ -21,7 +21,8 @@ public class Elevator extends SubsystemBase {
     /**
      * The IO interface for the elevator.
      */
-    protected final ElevatorIO io;
+    // todo: protect
+    public final ElevatorIO io;
 
     /**
      * The inputs for the elevator.

@@ -58,4 +58,6 @@ public interface ElevatorIO extends GenericSparkIO<ElevatorIO.ElevatorIOInputs> 
     public default void periodic() {}
 
     public default void runMotor(double motorInput) {}
+
+    public default void zeroEncoder(double value) {}
 }

@@ -173,6 +173,12 @@ public class ClawIOSpark implements ClawIO {
     }
 
     @Override
+    public void zeroEncoder(double value) {
+        angleEncoder.setPosition(value);
+        radianSetpoint = 0.0;
+    }
+
+    @Override
     public void updateInputs(ClawIOInputs inputs) {
         // Set the position of the turn motor
         angleClosedLoopController.setReference(radianSetpoint, ControlType.kPosition, ClosedLoopSlot.kSlot0);

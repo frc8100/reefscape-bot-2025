@@ -153,7 +153,7 @@ public final class ClawConstants {
     public static final double ANGLE_ENCODER_POSITION_FACTOR = (2 * Math.PI) / ANGLE_GEAR_RATIO;
 
     // PID configs
-    public static final double ANGLE_KP = 0.1;
+    public static final double ANGLE_KP = 1;
     public static final double ANGLE_KI = 0.0;
     public static final double ANGLE_KD = 0.0;
     public static final double ANGLE_KF = 0.0;

@@ -13,6 +13,8 @@
 
 package frc.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.Inches;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -42,10 +44,10 @@ public class VisionConstants {
      * (Not used by Limelight, configure in web UI instead)
      */
     public static final Transform3d TRANSFORM_TO_CAMERA_0 = new Transform3d(
-        0.2,
-        0.0,
-        0.2,
-        new Rotation3d(0.0, -0.4, 0.0)
+        Inches.of(10),
+        Inches.of(12),
+        Inches.of(2),
+        new Rotation3d(0.0, 0.0, 0.0)
     );
 
     // Basic filtering thresholds

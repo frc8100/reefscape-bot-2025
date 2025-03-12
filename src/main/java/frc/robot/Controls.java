@@ -92,6 +92,10 @@ public class Controls {
         // public POVButton right = new POVButton(driverController, 180);
         // public POVButton left = new POVButton(driverController, 0);
 
+        // TODO
+        public int alignLeft = XboxController.Button.kA.value;
+        public int alignRight = XboxController.Button.kB.value;
+
         /**
          * @return The translation (x)
          */
@@ -205,7 +209,8 @@ public class Controls {
         // } else {
         //     return ClawConstants.IntakeOuttakeDirection.OUTTAKE.getDirection() * outtakeInput;
         // }
-        // }
+
+        public static final int zeroEncoder = XboxController.Button.kRightBumper.value;
     }
 
     /**
@@ -219,11 +224,12 @@ public class Controls {
          * The controller used for the elevator.
          * Temporarily the same as the driver controller.
          */
-        public static final Joystick elevatorController = mainDriverController;
+        public static final Joystick elevatorController = Claw.armController;
 
         // TODO: temporary
-        public static final int upButton = XboxController.Button.kB.value;
-        public static final int downButton = XboxController.Button.kA.value;
+        public static final int upButton = XboxController.Button.kY.value;
+        public static final int downButton = XboxController.Button.kX.value;
+        public static final int zeroEncoder = XboxController.Button.kLeftBumper.value;
     }
 
     /**
@@ -237,7 +243,7 @@ public class Controls {
          * The controller used for the superstructure.
          * Temporarily the same as the driver controller.
          */
-        public static final Joystick superstructureController = mainDriverController;
+        public static final Joystick superstructureController = Claw.armController;
 
         /**
          * The button to make the superstructure go to L4. Default is up on the D-pad.

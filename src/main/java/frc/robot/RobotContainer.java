@@ -29,6 +29,7 @@ import frc.robot.subsystems.swerve.module.ModuleIO;
 import frc.robot.subsystems.swerve.module.ModuleIOSim;
 import frc.robot.subsystems.swerve.module.ModuleIOSpark;
 import frc.robot.subsystems.swerve.path.AutoRoutines;
+import frc.robot.subsystems.swerve.path.AutoRoutines.FieldLocations;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -215,10 +216,18 @@ public class RobotContainer {
      * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
-        /* Driver Buttons */
         Controls.mainDriveControls
             .getJoystickButtonOf(Controls.mainDriveControls.zeroGyroButton)
             .onTrue(new InstantCommand(swerveSubsystem::zeroGyro));
+
+        Controls.mainDriveControls
+            .getJoystickButtonOf(Controls.mainDriveControls.alignLeft)
+            .onTrue(new InstantCommand(() -> autoRoutines.pathFindToLocation(FieldLocations.REEF_5L)));
+
+        Controls.mainDriveControls
+            .getJoystickButtonOf(Controls.mainDriveControls.alignRight)
+            .onTrue(new InstantCommand(() -> autoRoutines.pathFindToLocation(FieldLocations.REEF_5R)));
+
         // TODO: Heading lock?
 
         // Claw
@@ -232,6 +241,14 @@ public class RobotContainer {
 
         new JoystickButton(Controls.Claw.armController, Controls.Claw.downButton).whileTrue(
             Commands.run(() -> clawSubsystem.io.increaseTurnPosition(-0.01))
+        );
+
+        new JoystickButton(Controls.Claw.armController, Controls.Claw.zeroEncoder).onTrue(
+            Commands.run(() -> clawSubsystem.io.zeroEncoder(0))
+        );
+
+        new JoystickButton(Controls.Elevator.elevatorController, Controls.Elevator.zeroEncoder).onTrue(
+            Commands.run(() -> elevatorSubsystem.io.zeroEncoder(0))
         );
 
         // Superstructure
@@ -261,12 +278,14 @@ public class RobotContainer {
         //     .onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.ALGAE_L1));
 
         // TODO: Elevator
-        Controls.mainDriveControls
-            .getJoystickButtonOf(Controls.Elevator.upButton)
+        // Controls.mainDriveControls
+        //     .getJoystickButtonOf(Controls.Elevator.upButton)
+        new JoystickButton(Controls.Elevator.elevatorController, Controls.Elevator.upButton)
             .onTrue(Commands.runOnce(() -> elevatorSubsystem.runMotor(1), elevatorSubsystem))
             .onFalse(Commands.runOnce(() -> elevatorSubsystem.runMotor(0), elevatorSubsystem));
-        Controls.mainDriveControls
-            .getJoystickButtonOf(Controls.Elevator.downButton)
+        // Controls.mainDriveControls
+        //     .getJoystickButtonOf(Controls.Elevator.downButton)
+        new JoystickButton(Controls.Elevator.elevatorController, Controls.Elevator.downButton)
             .onTrue(Commands.runOnce(() -> elevatorSubsystem.runMotor(-1), elevatorSubsystem))
             .onFalse(Commands.runOnce(() -> elevatorSubsystem.runMotor(0), elevatorSubsystem));
     }

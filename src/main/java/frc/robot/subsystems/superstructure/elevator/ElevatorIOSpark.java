@@ -47,6 +47,8 @@ public class ElevatorIOSpark implements ElevatorIO {
      */
     private final Debouncer connectedDebouncer = new Debouncer(0.5);
 
+    private double radianSetpoint = 0.0;
+
     /**
      * The config for the outtake motor.
      */
@@ -113,6 +115,12 @@ public class ElevatorIOSpark implements ElevatorIO {
     @Override
     public void stop() {
         motor.stopMotor();
+    }
+
+    @Override
+    public void zeroEncoder(double value) {
+        encoder.setPosition(value);
+        radianSetpoint = 0.0;
     }
 
     @Override

@@ -19,12 +19,13 @@ public final class SuperstructureConstants {
         /**
          * Also the initial position of the elevator and claw.
          */
-        L1(Meters.of(0.0), CLAW_ANGLE_OFFSET),
-        L2(Meters.of(0.9).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(60)),
-        L3(Meters.of(1.25).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(60)),
-        L4(Meters.of(2.1).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(95)),
+        L1(Meters.of(0.0), CLAW_ANGLE_OFFSET, 0),
+        L2(Meters.of(0.9).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(60), 4.8),
+        L3(Meters.of(1.25).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(60), 12.35),
+        // TODO: uh dont do this
+        L4(Meters.of(2.1).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(95), 15),
 
-        ALGAE_L1(Meters.of(0), Rotation2d.fromDegrees(160));
+        ALGAE_L1(Meters.of(0), Rotation2d.fromDegrees(160), 0);
 
         private final Distance elevatorDistance;
 
@@ -45,14 +46,24 @@ public final class SuperstructureConstants {
             return clawAngle;
         }
 
+        private final double elevatorRadian;
+
+        /**
+         * @return The radian of the elevator.
+         */
+        public double getElevatorRadian() {
+            return elevatorRadian;
+        }
+
         /**
          * Creates a new level.
          * @param elevatorDistance - The distance to run the elevator.
          * @param clawAngle - The angle to run the claw, without the offset.
          */
-        private Level(Distance elevatorDistance, Rotation2d clawAngle) {
+        private Level(Distance elevatorDistance, Rotation2d clawAngle, double elevatorRadian) {
             this.elevatorDistance = elevatorDistance;
             this.clawAngle = clawAngle.minus(CLAW_ANGLE_OFFSET);
+            this.elevatorRadian = elevatorRadian;
         }
     }
 }
