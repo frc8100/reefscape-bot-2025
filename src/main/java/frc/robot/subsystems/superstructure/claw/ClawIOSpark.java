@@ -60,6 +60,8 @@ public class ClawIOSpark implements ClawIO {
      */
     // private final SparkClosedLoopController outtakeClosedLoopController;
 
+    private double radianSetpoint = 0.0;
+
     /**
      * A debouncer for the connected state, to prevent flickering.
      */
@@ -162,12 +164,19 @@ public class ClawIOSpark implements ClawIO {
 
     @Override
     public void setTurnPosition(Rotation2d rotation) {
-        // Set the position of the turn motor
-        angleClosedLoopController.setReference(rotation.getRadians(), ControlType.kPosition, ClosedLoopSlot.kSlot0);
+        radianSetpoint = rotation.getRadians();
+    }
+
+    @Override
+    public void increaseTurnPosition(double valueToIncreaseBy) {
+        radianSetpoint += valueToIncreaseBy;
     }
 
     @Override
     public void updateInputs(ClawIOInputs inputs) {
+        // Set the position of the turn motor
+        angleClosedLoopController.setReference(radianSetpoint, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+
         // Reset spark sticky fault
         sparkStickyFault = false;
 

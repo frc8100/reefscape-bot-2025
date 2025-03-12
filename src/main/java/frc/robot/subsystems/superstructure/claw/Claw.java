@@ -25,7 +25,8 @@ public class Claw extends SubsystemBase {
     /**
      * The IO interface for the claw.
      */
-    protected final ClawIO io;
+    // TODO: protect
+    public final ClawIO io;
 
     /**
      * The inputs for the claw.

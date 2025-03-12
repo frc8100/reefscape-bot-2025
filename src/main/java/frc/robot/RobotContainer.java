@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.SwerveSysidRoutines;
 import frc.robot.commands.TeleopSwerve;
@@ -160,14 +161,14 @@ public class RobotContainer {
         }
 
         // Set up teleop swerve command
-        // swerveSubsystem.setDefaultCommand(
-        //     new TeleopSwerve(
-        //         swerveSubsystem,
-        //         // Switch between joystick and main drive controls depending on the mode
-        //         Controls.isUsingJoystickDrive ? Controls.joystickDriveControls : Controls.mainDriveControls,
-        //         true
-        //     )
-        // );
+        swerveSubsystem.setDefaultCommand(
+            new TeleopSwerve(
+                swerveSubsystem,
+                // Switch between joystick and main drive controls depending on the mode
+                Controls.isUsingJoystickDrive ? Controls.joystickDriveControls : Controls.mainDriveControls,
+                true
+            )
+        );
 
         // Set up auto routines
         autoRoutines = new AutoRoutines(swerveSubsystem, elevatorSubsystem, clawSubsystem);
@@ -223,6 +224,15 @@ public class RobotContainer {
         // Claw
         // Run the intake/outtake command when the button is pressed
         clawSubsystem.setDefaultCommand(clawSubsystem.getRunCommand(Controls.Claw::getIntakeOrOuttake));
+
+        // TODO
+        new JoystickButton(Controls.Claw.armController, Controls.Claw.upButton).whileTrue(
+            Commands.run(() -> clawSubsystem.io.increaseTurnPosition(0.01))
+        );
+
+        new JoystickButton(Controls.Claw.armController, Controls.Claw.downButton).whileTrue(
+            Commands.run(() -> clawSubsystem.io.increaseTurnPosition(-0.01))
+        );
 
         // Superstructure
         // TODO:

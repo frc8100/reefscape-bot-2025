@@ -54,6 +54,13 @@ public interface ClawIO extends GenericSparkIO<ClawIO.ClawIOInputs> {
     public void setTurnPosition(Rotation2d rotation);
 
     /**
+     * Increases the desired turn position.
+     * @param rotation - The desired turn position.
+     */
+    // TODO: doc
+    public default void increaseTurnPosition(double valueToIncreaseBy) {}
+
+    /**
      * Runs the outtake motor at the specified percent output.
      * @param motorInput - The percent output to run the motor at, from [-1, 1] without deadband.
      */

@@ -166,7 +166,7 @@ public class Controls {
          * The controller used for the claw.
          * Temporarily the same as the driver controller.
          */
-        public static final Joystick armController = mainDriverController;
+        public static final Joystick armController = new Joystick(1);
 
         // public static final JoystickButton
 
@@ -191,6 +191,21 @@ public class Controls {
                 return ClawConstants.IntakeOuttakeDirection.OUTTAKE.getDirection() * outtakeInput;
             }
         }
+
+        public static final int upButton = XboxController.Button.kB.value;
+        public static final int downButton = XboxController.Button.kA.value;
+        // public static final double getUpOrDown() {
+        // Get controller input
+        // double intakeInput = armController.getRawAxis(intakeAxis);
+        // double outtakeInput = armController.getRawAxis(outtakeAxis);
+
+        // Get the larger of them
+        // if (intakeInput >= outtakeInput) {
+        //     return ClawConstants.IntakeOuttakeDirection.INTAKE.getDirection() * intakeInput;
+        // } else {
+        //     return ClawConstants.IntakeOuttakeDirection.OUTTAKE.getDirection() * outtakeInput;
+        // }
+        // }
     }
 
     /**
