@@ -268,6 +268,12 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     }
 
     @Override
+    @AutoLogOutput(key = "Odometry/Field")
+    public Pose2d getActualPose() {
+        return getPose();
+    }
+
+    @Override
     public void setPose(Pose2d pose) {
         poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
     }

@@ -148,7 +148,6 @@ public interface SwerveDrive extends Subsystem {
      * @return The actual pose of the robot. When in simulation mode, this will return the pose of the robot in the simulation world.
      * When in real mode, this will return the same as {@link #getPose}.
      */
-    @AutoLogOutput(key = "Odometry/Field")
     public default Pose2d getActualPose() {
         return getPose();
     }

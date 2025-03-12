@@ -87,11 +87,11 @@ public class RobotContainer {
                     new VisionIOLimelight(VisionConstants.CAMERA_0_NAME, swerveSubsystem::getRotation)
                 );
 
-                // clawSubsystem = new Claw(new ClawIOSpark());
-                clawSubsystem = new ClawSim();
+                clawSubsystem = new Claw(new ClawIOSpark());
+                // clawSubsystem = new ClawSim();
 
-                // elevatorSubsystem = new Elevator(new ElevatorIOSpark());
-                elevatorSubsystem = new Elevator(new ElevatorIOSim());
+                elevatorSubsystem = new Elevator(new ElevatorIOSpark());
+                // elevatorSubsystem = new Elevator(new ElevatorIOSim());
                 break;
             default:
             case SIM:
@@ -226,18 +226,39 @@ public class RobotContainer {
 
         // Superstructure
         // TODO:
-        Controls.Superstructure.moveToL1.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L1));
-        Controls.Superstructure.moveToL2.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L2));
-        Controls.Superstructure.moveToL3.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L3));
-        Controls.Superstructure.moveToL4.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L4));
+        // Controls.Superstructure.moveToL1.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L1));
+        // Controls.Superstructure.moveToL2.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L2));
+        // Controls.Superstructure.moveToL3.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L3));
+        // Controls.Superstructure.moveToL4.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L4));
+
+        Controls.Superstructure.moveToL1.onTrue(
+            clawSubsystem.getWaitForAngleCommand(SuperstructureConstants.Level.L1.getClawAngle())
+        );
+        Controls.Superstructure.moveToL2.onTrue(
+            clawSubsystem.getWaitForAngleCommand(SuperstructureConstants.Level.L2.getClawAngle())
+        );
+        Controls.Superstructure.moveToL3.onTrue(
+            clawSubsystem.getWaitForAngleCommand(SuperstructureConstants.Level.L3.getClawAngle())
+        );
+        Controls.Superstructure.moveToL4.onTrue(
+            clawSubsystem.getWaitForAngleCommand(SuperstructureConstants.Level.L4.getClawAngle())
+        );
+
+        // TODO: algae
+
+        // Controls.mainDriveControls
+        //     .getJoystickButtonOf(Controls.Superstructure.algaeButton)
+        //     .onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.ALGAE_L1));
 
         // TODO: Elevator
         Controls.mainDriveControls
             .getJoystickButtonOf(Controls.Elevator.upButton)
-            .whileTrue(Commands.runOnce(() -> elevatorSubsystem.runMotor(1), elevatorSubsystem));
+            .onTrue(Commands.runOnce(() -> elevatorSubsystem.runMotor(1), elevatorSubsystem))
+            .onFalse(Commands.runOnce(() -> elevatorSubsystem.runMotor(0), elevatorSubsystem));
         Controls.mainDriveControls
             .getJoystickButtonOf(Controls.Elevator.downButton)
-            .whileTrue(Commands.runOnce(() -> elevatorSubsystem.runMotor(-1), elevatorSubsystem));
+            .onTrue(Commands.runOnce(() -> elevatorSubsystem.runMotor(-1), elevatorSubsystem))
+            .onFalse(Commands.runOnce(() -> elevatorSubsystem.runMotor(0), elevatorSubsystem));
     }
 
     /**

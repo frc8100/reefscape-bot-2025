@@ -63,17 +63,18 @@ public final class ElevatorConstants {
     /**
      * The CAN ID of the elevator motor.
      */
-    public static final int ELEVATOR_MOTOR_ID = 20;
+    public static final int ELEVATOR_MOTOR_ID = 15;
     public static final double ELEVATOR_MAX_OUTPUT = 0.1;
     public static final double ELEVATOR_GEAR_RATIO = 48.0;
-    public static final boolean ELEVATOR_MOTOR_INVERTED = true;
+    public static final boolean ELEVATOR_MOTOR_INVERTED = false;
     public static final Current ELEVATOR_MOTOR_CURRENT_LIMIT = Amps.of(40);
     /** Rotations to radians */
     public static final double ELEVATOR_MOTOR_POSITION_FACTOR = (2 * Math.PI) / ELEVATOR_GEAR_RATIO;
     public static final Distance ELEVATOR_DRUM_RADIUS = Inches.of(0.75);
 
     /** Radians to meters */
-    public static final double ELEVATOR_RADIANS_TO_METERS = ELEVATOR_DRUM_RADIUS.in(Meters);
+    // public static final double ELEVATOR_RADIANS_TO_METERS = ELEVATOR_DRUM_RADIUS.in(Meters);
+    public static final double ELEVATOR_RADIANS_TO_METERS = Inches.of(56).in(Meters) / 12;
 
     public static final LinearVelocity ELEVATOR_MAX_VELOCITY = MetersPerSecond.of(2.5);
     public static final LinearAcceleration ELEVATOR_MAX_ACCELERATION = MetersPerSecondPerSecond.of(3);

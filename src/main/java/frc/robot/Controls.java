@@ -207,9 +207,8 @@ public class Controls {
         public static final Joystick elevatorController = mainDriverController;
 
         // TODO: temporary
-
-        public static final int upButton = XboxController.Button.kRightBumper.value;
-        public static final int downButton = XboxController.Button.kLeftBumper.value;
+        public static final int upButton = XboxController.Button.kB.value;
+        public static final int downButton = XboxController.Button.kA.value;
     }
 
     /**
@@ -244,5 +243,11 @@ public class Controls {
          * The button to make the superstructure go to L1. Default is left on the D-pad.
          */
         public static final POVButton moveToL1 = new POVButton(superstructureController, 0);
+
+        /**
+         * The button to intake algae
+         */
+        // TODO:
+        public static final int algaeButton = XboxController.Button.kA.value;
     }
 }

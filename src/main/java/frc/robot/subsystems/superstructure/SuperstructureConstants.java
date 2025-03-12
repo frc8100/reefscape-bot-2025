@@ -19,10 +19,12 @@ public final class SuperstructureConstants {
         /**
          * Also the initial position of the elevator and claw.
          */
-        L1(Meters.of(0.0), new Rotation2d(0)),
-        L2(Meters.of(0.9).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(37.5).minus(CLAW_ANGLE_OFFSET)),
-        L3(Meters.of(1.25).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(37.5).minus(CLAW_ANGLE_OFFSET)),
-        L4(Meters.of(2.1).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(90).minus(CLAW_ANGLE_OFFSET));
+        L1(Meters.of(0.0), CLAW_ANGLE_OFFSET),
+        L2(Meters.of(0.9).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(60)),
+        L3(Meters.of(1.25).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(60)),
+        L4(Meters.of(2.1).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(95)),
+
+        ALGAE_L1(Meters.of(0), Rotation2d.fromDegrees(160));
 
         private final Distance elevatorDistance;
 
@@ -43,9 +45,14 @@ public final class SuperstructureConstants {
             return clawAngle;
         }
 
+        /**
+         * Creates a new level.
+         * @param elevatorDistance - The distance to run the elevator.
+         * @param clawAngle - The angle to run the claw, without the offset.
+         */
         private Level(Distance elevatorDistance, Rotation2d clawAngle) {
             this.elevatorDistance = elevatorDistance;
-            this.clawAngle = clawAngle;
+            this.clawAngle = clawAngle.minus(CLAW_ANGLE_OFFSET);
         }
     }
 }

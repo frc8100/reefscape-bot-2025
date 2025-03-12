@@ -144,7 +144,7 @@ public final class ClawConstants {
      * The maximum power for the angle motor, from 0-1.
      */
     // TODO: Tune
-    public static final double MAX_ANGLE_POWER = 0.08;
+    public static final double MAX_ANGLE_POWER = 0.1;
 
     public static final double ANGLE_GEAR_RATIO = 30;
     public static final boolean IS_ANGLE_MOTOR_INVERTED = true;
@@ -158,10 +158,8 @@ public final class ClawConstants {
     public static final double ANGLE_KD = 0.0;
     public static final double ANGLE_KF = 0.0;
 
-    // -0.16
-
     // Outtake motor configs
-    public static final int OUTTAKE_MOTOR_ID = 15;
+    public static final int OUTTAKE_MOTOR_ID = 6;
     public static final double OUTTAKE_GEAR_RATIO = 5;
     public static final boolean IS_OUTTAKE_MOTOR_INVERTED = false;
     public static final Current OUTTAKE_MOTOR_CURRENT_LIMIT = Amps.of(40);
