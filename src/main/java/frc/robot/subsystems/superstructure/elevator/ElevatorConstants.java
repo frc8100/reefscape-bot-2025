@@ -8,9 +8,11 @@ import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
@@ -66,7 +68,7 @@ public final class ElevatorConstants {
     public static final int ELEVATOR_MOTOR_ID = 15;
     public static final double ELEVATOR_MAX_OUTPUT = 0.1;
     public static final double ELEVATOR_GEAR_RATIO = 48.0;
-    public static final boolean ELEVATOR_MOTOR_INVERTED = false;
+    public static final boolean ELEVATOR_MOTOR_INVERTED = true;
     public static final Current ELEVATOR_MOTOR_CURRENT_LIMIT = Amps.of(40);
     /** Rotations to radians */
     public static final double ELEVATOR_MOTOR_POSITION_FACTOR = (2 * Math.PI) / ELEVATOR_GEAR_RATIO;
@@ -74,10 +76,11 @@ public final class ElevatorConstants {
 
     /** Radians to meters */
     // public static final double ELEVATOR_RADIANS_TO_METERS = ELEVATOR_DRUM_RADIUS.in(Meters);
-    public static final double ELEVATOR_RADIANS_TO_METERS = Inches.of(56).in(Meters) / 12;
+    public static final double ELEVATOR_RADIANS_TO_METERS = 10 / Inches.of(52).in(Meters);
+    // public static final AngularVelocity ELEVATOR_MAX_VELOCITY = RadiansPerSecond.of();
 
-    public static final LinearVelocity ELEVATOR_MAX_VELOCITY = MetersPerSecond.of(2.5);
-    public static final LinearAcceleration ELEVATOR_MAX_ACCELERATION = MetersPerSecondPerSecond.of(3);
+    public static final LinearVelocity ELEVATOR_MAX_VELOCITY = MetersPerSecond.of(0.5);
+    public static final LinearAcceleration ELEVATOR_MAX_ACCELERATION = MetersPerSecondPerSecond.of(0.2);
 
     // PID constants
     public static final double ELEVATOR_KP = 0.1;

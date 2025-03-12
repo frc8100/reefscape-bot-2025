@@ -70,7 +70,6 @@ public class ElevatorIOSpark implements ElevatorIO {
 
         SparkMaxConfig motorConfig = new MotorConfig().getConfig();
 
-        // TODO: Apply PID config for the angle motor
         motorConfig.closedLoop
             .pidf(
                 ElevatorConstants.ELEVATOR_KP,
@@ -79,6 +78,10 @@ public class ElevatorIOSpark implements ElevatorIO {
                 ElevatorConstants.ELEVATOR_KF
             )
             .outputRange(-ElevatorConstants.ELEVATOR_MAX_OUTPUT, ElevatorConstants.ELEVATOR_MAX_OUTPUT);
+
+        // motorConfig.closedLoop.maxMotion
+        //         .maxVelocity(1)
+        //         .maxAcceleration(0);
 
         // Apply the config
         tryUntilOk(motor, 5, () ->
