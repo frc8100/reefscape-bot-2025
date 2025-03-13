@@ -214,6 +214,8 @@ public class ClawIOSpark implements ClawIO {
 
     @Override
     public void updateInputs(ClawIOInputs inputs) {
+        // TODO: Log empty setpoints when disabled
+
         inputs.turnSetpointRad = radianSetpoint;
 
         // Set the position of the turn motor

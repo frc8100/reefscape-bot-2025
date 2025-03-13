@@ -170,4 +170,12 @@ public class TeleopSwerve extends Command {
             !robotCentricSupplier.getAsBoolean()
         );
     }
+
+    @Override
+    public void end(boolean interrupted) {
+        // Drive empty values
+        if (interrupted) {
+            swerveSubsystem.drive(new Translation2d(), 0, false);
+        }
+    }
 }

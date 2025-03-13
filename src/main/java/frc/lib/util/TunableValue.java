@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -81,21 +82,39 @@ public class TunableValue implements DoubleSupplier {
     private Map<Integer, Double> lastHasChangedValues = new HashMap<>();
 
     /**
-     * Create a new LoggedTunableNumber
-     * @param dashboardKey Key on dashboard
+     * A consumer to run when the value is refreshed.
+     */
+    // private DoubleConsumer onRefresh;
+
+    /**
+     * Create a new TunableValue
+     * @param dashboardKey - Key on dashboard
      */
     public TunableValue(String dashboardKey) {
         this.key = BASE_TABLE_KEY + "/" + dashboardKey;
     }
 
     /**
-     * Create a new LoggedTunableNumber with the default value
-     * @param dashboardKey Key on dashboard
-     * @param defaultValue Default value
+     * Create a new TunableValue with the default value
+     * @param dashboardKey - Key on dashboard
+     * @param defaultValue - Default value
      */
     public TunableValue(String dashboardKey, double defaultValue) {
         this(dashboardKey);
         initDefault(defaultValue);
+    }
+
+    /**
+     * Create a new TunableValue with the default value
+     * @param dashboardKey - Key on dashboard
+     * @param defaultValue - Default value
+     * @param onRefresh - The consumer to run when it is refreshed
+     */
+    public TunableValue(String dashboardKey, double defaultValue, DoubleConsumer onRefresh) {
+        this(dashboardKey, defaultValue);
+        // this.onRefresh = onRefresh;
+
+        // TunableValue.addRefreshConfigConsumer(onRefresh);
     }
 
     /**

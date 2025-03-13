@@ -168,7 +168,7 @@ public class SwerveConfig {
     public static final double driveSimKv = 0.0789;
 
     // Swerve Profiling Values
-    public static final LinearVelocity MAX_SPEED = MetersPerSecond.of(5.0);
+    public static final LinearVelocity MAX_SPEED = MetersPerSecond.of(4.0);
     public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(2.0);
     public static final AngularVelocity MAX_ANGULAR_VELOCITY = RadiansPerSecond.of(5.0);
 

@@ -13,7 +13,9 @@
 
 package frc.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -45,9 +47,9 @@ public class VisionConstants {
      */
     public static final Transform3d TRANSFORM_TO_CAMERA_0 = new Transform3d(
         Inches.of(10),
-        Inches.of(12),
+        Inches.of(-12),
         Inches.of(2),
-        new Rotation3d(0.0, 0.0, 0.0)
+        new Rotation3d(0.0, 0.0, Degrees.of(30).in(Radians))
     );
 
     // Basic filtering thresholds

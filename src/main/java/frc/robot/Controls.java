@@ -92,9 +92,21 @@ public class Controls {
         // public POVButton right = new POVButton(driverController, 180);
         // public POVButton left = new POVButton(driverController, 0);
 
-        // TODO
+        // TODO: doc
+        /**
+         * Aligns the robot to the 6R reef, for testing purposes.
+         */
         public int alignLeft = XboxController.Button.kA.value;
-        public int alignRight = XboxController.Button.kB.value;
+
+        /**
+         * Aligns the robot to the nearest left reef.
+         */
+        public int alignToNearestLeftReef = XboxController.Button.kB.value;
+
+        /**
+         * Aligns the robot to the nearest right reef.
+         */
+        public int alignToNearestRightReef = XboxController.Button.kA.value;
 
         /**
          * @return The translation (x)

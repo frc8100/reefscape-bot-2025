@@ -1,12 +1,15 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.util.TunableValue;
@@ -36,6 +39,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonSim;
+import java.util.Set;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
@@ -59,6 +63,10 @@ public class RobotContainer {
     private final Elevator elevatorSubsystem;
 
     private AutoRoutines autoRoutines;
+
+    // Alignment
+    private Pose2d nearestLeftReef = new Pose2d();
+    private Pose2d nearestRightReef = new Pose2d();
 
     /**
      * The simulation of the robot's drive. Set to null if not in simulation mode.
@@ -227,11 +235,22 @@ public class RobotContainer {
 
         Controls.mainDriveControls
             .getJoystickButtonOf(Controls.mainDriveControls.alignLeft)
-            .onTrue(new InstantCommand(() -> autoRoutines.pathFindToLocation(FieldLocations.REEF_5L)));
+            .whileTrue(autoRoutines.pathFindToLocation(FieldLocations.REEF_1L));
 
         Controls.mainDriveControls
-            .getJoystickButtonOf(Controls.mainDriveControls.alignRight)
-            .onTrue(new InstantCommand(() -> autoRoutines.pathFindToLocation(FieldLocations.REEF_5R)));
+            .getJoystickButtonOf(Controls.mainDriveControls.alignToNearestLeftReef)
+            .whileTrue(
+                new DeferredCommand(() -> autoRoutines.pathFindToLocation(nearestLeftReef), Set.of(swerveSubsystem))
+            );
+
+        // Controls.mainDriveControls
+        //     .getJoystickButtonOf(Controls.mainDriveControls.alignToNearestRightReef)
+        //     .whileTrue(
+        //         new DeferredCommand(
+        //             () -> autoRoutines.pathFindToLocation(nearestRightReef),
+        //             Set.of(swerveSubsystem)
+        //         )
+        //     );
 
         // TODO: Heading lock?
 
@@ -327,5 +346,12 @@ public class RobotContainer {
             "ComponentPositions/CoralInClaw",
             clawSubsystem.getCoralInClawPosition(swerveSubsystem, elevatorSubsystem)
         );
+
+        // TODO: Log nearest reef position
+        nearestLeftReef = autoRoutines.getNearestLeftReef();
+        nearestRightReef = autoRoutines.getNearestRightReef();
+
+        Logger.recordOutput("Odometry/NearestLeftReef", nearestLeftReef);
+        Logger.recordOutput("Odometry/NearestRightReef", nearestRightReef);
     }
 }

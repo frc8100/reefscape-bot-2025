@@ -193,20 +193,18 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     @Override
     public void runVelocityChassisSpeeds(ChassisSpeeds speed) {
         // Convert the chassis speeds to swerve module states
-        ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speed, 0.02);
-        SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
 
         // Note: it is important to not discretize speeds before or after
         // using the setpoint generator, as it will discretize them for you
-        // previousSetpoint = setpointGenerator.generateSetpoint(
-        //     previousSetpoint, // The previous setpoint
-        //     speed, // The desired target speeds
-        //     0.02 // The loop time of the robot code, in seconds
-        // );
+        previousSetpoint = setpointGenerator.generateSetpoint(
+            previousSetpoint, // The previous setpoint
+            speed, // The desired target speeds
+            0.02 // The loop time of the robot code, in seconds
+        );
 
-        // SwerveModuleState[] setpointStates = previousSetpoint.moduleStates();
+        SwerveModuleState[] setpointStates = previousSetpoint.moduleStates();
 
-        // Log unoptimized setpoints
+        // Log setpoints
         Logger.recordOutput("Swerve/States/Setpoints", setpointStates);
         Logger.recordOutput("Swerve/ChassisSpeeds/Setpoints", speed);
 
