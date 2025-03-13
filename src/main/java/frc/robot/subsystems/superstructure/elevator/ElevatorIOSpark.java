@@ -146,24 +146,22 @@ public class ElevatorIOSpark implements ElevatorIO {
 
     @Override
     public void setPosition(Distance position) {
-        // TODO
         // Set the position of the turn motor
-        double setPointRadians = ElevatorConstants.getMotorPositionFromHeight(position);
-
-        Logger.recordOutput("Elevator/SetPoint", setPointRadians);
-        // angleClosedLoopController.setReference(rotation.getRadians(), ControlType.kPosition, ClosedLoopSlot.kSlot0);
+        radianSetpoint = ElevatorConstants.getMotorPositionFromHeight(position);
     }
 
     @Override
     public void setPosition(SuperstructureConstants.Level level) {
-        double setPointRadians = level.getElevatorRadian();
-
-        Logger.recordOutput("Elevator/SetPoint", setPointRadians);
-        // angleClosedLoopController.setReference(rotation.getRadians(), ControlType.kPosition, ClosedLoopSlot.kSlot0);
+        radianSetpoint = level.getElevatorRadian();
     }
 
     @Override
     public void updateInputs(ElevatorIOInputs inputs) {
+        inputs.setpoint = radianSetpoint;
+
+        // TODO: PID
+        // angleClosedLoopController.setReference(radianSetpoint, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+
         // Reset spark sticky fault
         sparkStickyFault = false;
 
