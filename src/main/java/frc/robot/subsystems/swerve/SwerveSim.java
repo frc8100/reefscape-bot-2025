@@ -11,9 +11,18 @@ import org.littletonrobotics.junction.AutoLogOutput;
  */
 public class SwerveSim extends Swerve {
 
-    // private final SelfControlledSwerveDriveSimulation simulatedDrive;
+    /**
+     * The simulation object for the swerve drive.
+     * Contains the simulated drivetrain pose and other simulation-specific methods.
+     */
     private final SwerveDriveSimulation driveSimulation;
 
+    /**
+     * Creates a new SwerveSim object.
+     * @param gyroIO The gyro IO object.
+     * @param moduleIOs The array of module IO objects.
+     * @param driveSimulation The simulation object for the swerve drive.
+     */
     public SwerveSim(GyroIO gyroIO, ModuleIO[] moduleIOs, SwerveDriveSimulation driveSimulation) {
         super(gyroIO, moduleIOs);
         this.driveSimulation = driveSimulation;

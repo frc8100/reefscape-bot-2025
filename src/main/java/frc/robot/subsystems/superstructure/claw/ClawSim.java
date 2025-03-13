@@ -23,10 +23,6 @@ public class ClawSim extends Claw {
      */
     public ClawSim() {
         super(new ClawIOSim());
-        // TODO: Temporarily add coral to the claw when the A button is pressed
-        new JoystickButton(Controls.mainDriverController, XboxController.Button.kA.value).onTrue(
-            new InstantCommand(() -> inputs.isCoralInClaw = true)
-        );
     }
 
     /**

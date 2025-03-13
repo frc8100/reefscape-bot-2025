@@ -15,6 +15,8 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
+import frc.lib.util.TunableValue;
+import frc.robot.subsystems.superstructure.elevator.ElevatorConstants;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -68,6 +70,12 @@ public class ClawIOSpark implements ClawIO {
     private final Debouncer outtakeConnectedDebouncer = new Debouncer(0.5);
 
     /**
+     * The configuration for the angle motor.
+     */
+    // TODO: Combine into generic spark config
+    private SparkMaxConfig angleConfig;
+
+    /**
      * The config for the turn motor.
      */
     private static class AngleConfig extends GenericSparkIOConfig {
@@ -103,11 +111,16 @@ public class ClawIOSpark implements ClawIO {
         angleEncoder = angleMotor.getEncoder();
         angleClosedLoopController = angleMotor.getClosedLoopController();
 
-        SparkMaxConfig angleConfig = new AngleConfig().getConfig();
+        angleConfig = new AngleConfig().getConfig();
 
         // Apply PID config for the angle motor
         angleConfig.closedLoop
-            .pidf(ClawConstants.ANGLE_KP, ClawConstants.ANGLE_KI, ClawConstants.ANGLE_KD, ClawConstants.ANGLE_KF)
+            .pidf(
+                ClawConstants.ANGLE_KP.get(),
+                ClawConstants.ANGLE_KI.get(),
+                ClawConstants.ANGLE_KD.get(),
+                ClawConstants.ANGLE_KF.get()
+            )
             .outputRange(-ClawConstants.MAX_ANGLE_POWER, ClawConstants.MAX_ANGLE_POWER);
 
         // Apply the config
@@ -140,6 +153,27 @@ public class ClawIOSpark implements ClawIO {
 
         // Reset the encoder
         tryUntilOk(outtakeMotor, 5, () -> outtakeEncoder.setPosition(0.0));
+
+        TunableValue.addRefreshConfigConsumer(this::refreshConfig);
+    }
+
+    @Override
+    public void refreshConfig() {
+        // Refresh the config for the motor
+        angleConfig.closedLoop.pidf(
+            ClawConstants.ANGLE_KP.get(),
+            ClawConstants.ANGLE_KI.get(),
+            ClawConstants.ANGLE_KD.get(),
+            ClawConstants.ANGLE_KF.get()
+        );
+
+        tryUntilOk(angleMotor, 5, () ->
+            angleMotor.configure(
+                angleConfig,
+                SparkBase.ResetMode.kResetSafeParameters,
+                SparkBase.PersistMode.kPersistParameters
+            )
+        );
     }
 
     @Override

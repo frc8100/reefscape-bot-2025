@@ -36,7 +36,6 @@ public class GyroIOSim implements GyroIO {
         inputs.odometryYawPositions = gyroSimulation.getCachedGyroReadings();
     }
 
-    // TODO: remove these in favor of IO
     @Override
     public Rotation2d getYaw() {
         return gyroSimulation.getGyroReading();

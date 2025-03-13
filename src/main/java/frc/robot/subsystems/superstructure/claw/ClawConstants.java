@@ -21,6 +21,7 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
+import frc.lib.util.TunableValue;
 import org.ironmaple.simulation.motorsims.SimMotorConfigs;
 
 /**
@@ -153,10 +154,15 @@ public final class ClawConstants {
     public static final double ANGLE_ENCODER_POSITION_FACTOR = (2 * Math.PI) / ANGLE_GEAR_RATIO;
 
     // PID configs
-    public static final double ANGLE_KP = 1;
-    public static final double ANGLE_KI = 0.0;
-    public static final double ANGLE_KD = 0.0;
-    public static final double ANGLE_KF = 0.0;
+    // public static final double ANGLE_KP = 1;
+    // public static final double ANGLE_KI = 0.0;
+    // public static final double ANGLE_KD = 0.0;
+    // public static final double ANGLE_KF = 0.0;
+
+    public static final TunableValue ANGLE_KP = new TunableValue("Claw/KP", 1);
+    public static final TunableValue ANGLE_KI = new TunableValue("Claw/KI", 0.0);
+    public static final TunableValue ANGLE_KD = new TunableValue("Claw/KD", 0.0);
+    public static final TunableValue ANGLE_KF = new TunableValue("Claw/KF", 0.0);
 
     // Outtake motor configs
     public static final int OUTTAKE_MOTOR_ID = 6;

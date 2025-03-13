@@ -19,6 +19,18 @@ public final class Constants {
     public static Mode currentMode = Mode.REAL;
 
     /**
+     * Whether or not to enable tuning mode.
+     * Tuning mode enables the use of the dashboard to change values.
+     */
+    public static final boolean tuningMode = true;
+
+    /**
+     * Whether or not to disable HAL (Hardware Abstraction Layer) calls.
+     * This is useful for testing without hardware.
+     */
+    public static final boolean disableHAL = false;
+
+    /**
      * An enum of modes for the robot.
      */
     public enum Mode {

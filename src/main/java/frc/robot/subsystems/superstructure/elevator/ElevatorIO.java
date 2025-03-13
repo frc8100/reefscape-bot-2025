@@ -3,6 +3,7 @@ package frc.robot.subsystems.superstructure.elevator;
 import edu.wpi.first.units.measure.Distance;
 import frc.lib.util.GenericSparkIO;
 import frc.lib.util.GenericSparkIO.GenericSparkIOInputs;
+import frc.robot.subsystems.superstructure.SuperstructureConstants;
 import org.littletonrobotics.junction.AutoLog;
 
 /**
@@ -52,12 +53,28 @@ public interface ElevatorIO extends GenericSparkIO<ElevatorIO.ElevatorIOInputs> 
     public void setPosition(Distance position);
 
     /**
+     * Sets the desired elevator position given a level. Can be used to get the radian position for SPARK io.
+     * @param level - The level to set the elevator to. See {@link SuperstructureConstants.Level} for available levels.
+     */
+    public default void setPosition(SuperstructureConstants.Level level) {
+        setPosition(level.getElevatorDistance());
+    }
+
+    /**
      * Periodic function to be called by the subsystem.
      * Optional, do not update the IO here.
      */
     public default void periodic() {}
 
+    /**
+     * Runs the elevator motor at the given input.
+     * @param motorInput - The input to the motor from -1 to 1.
+     */
     public default void runMotor(double motorInput) {}
 
+    /**
+     * Zeros the elevator encoder.
+     * @param value - The value to set the encoder to.
+     */
     public default void zeroEncoder(double value) {}
 }

@@ -127,8 +127,8 @@ public interface SwerveDrive extends Subsystem {
     }
 
     /**
-     * Drives the swerve modules given a provided chassis speeds.
-     * @param speed The desired chasssis speeds
+     * Drives the swerve modules given a provided robot-relative chassis speeds.
+     * @param speed The desired chassis speeds
      */
     public void runVelocityChassisSpeeds(ChassisSpeeds speed);
 

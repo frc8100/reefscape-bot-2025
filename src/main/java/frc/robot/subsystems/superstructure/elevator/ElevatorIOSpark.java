@@ -19,6 +19,8 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Distance;
 import frc.lib.util.GenericSparkIO.GenericSparkIOConfig;
+import frc.lib.util.TunableValue;
+import frc.robot.subsystems.superstructure.SuperstructureConstants;
 import frc.robot.subsystems.superstructure.claw.ClawConstants;
 import frc.robot.subsystems.superstructure.claw.ClawIO.ClawIOInputs;
 import java.util.function.DoubleSupplier;
@@ -47,7 +49,15 @@ public class ElevatorIOSpark implements ElevatorIO {
      */
     private final Debouncer connectedDebouncer = new Debouncer(0.5);
 
+    /**
+     * The setpoint of the elevator in radians.
+     */
     private double radianSetpoint = 0.0;
+
+    /**
+     * The configuration for the elevator motor.
+     */
+    private SparkMaxConfig config;
 
     /**
      * The config for the outtake motor.
@@ -70,14 +80,14 @@ public class ElevatorIOSpark implements ElevatorIO {
         encoder = motor.getEncoder();
         closedLoopController = motor.getClosedLoopController();
 
-        SparkMaxConfig motorConfig = new MotorConfig().getConfig();
+        config = new MotorConfig().getConfig();
 
-        motorConfig.closedLoop
+        config.closedLoop
             .pidf(
-                ElevatorConstants.ELEVATOR_KP,
-                ElevatorConstants.ELEVATOR_KI,
-                ElevatorConstants.ELEVATOR_KD,
-                ElevatorConstants.ELEVATOR_KF
+                ElevatorConstants.ELEVATOR_KP.get(),
+                ElevatorConstants.ELEVATOR_KI.get(),
+                ElevatorConstants.ELEVATOR_KD.get(),
+                ElevatorConstants.ELEVATOR_KF.get()
             )
             .outputRange(-ElevatorConstants.ELEVATOR_MAX_OUTPUT, ElevatorConstants.ELEVATOR_MAX_OUTPUT);
 
@@ -87,22 +97,33 @@ public class ElevatorIOSpark implements ElevatorIO {
 
         // Apply the config
         tryUntilOk(motor, 5, () ->
-            motor.configure(
-                motorConfig,
-                SparkBase.ResetMode.kResetSafeParameters,
-                SparkBase.PersistMode.kPersistParameters
-            )
+            motor.configure(config, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters)
         );
 
         // Reset the encoder
         tryUntilOk(motor, 5, () -> encoder.setPosition(0.0));
+
+        TunableValue.addRefreshConfigConsumer(this::refreshConfig);
+    }
+
+    @Override
+    public void refreshConfig() {
+        // Refresh the config for the motor
+        config.closedLoop.pidf(
+            ElevatorConstants.ELEVATOR_KP.get(),
+            ElevatorConstants.ELEVATOR_KI.get(),
+            ElevatorConstants.ELEVATOR_KD.get(),
+            ElevatorConstants.ELEVATOR_KF.get()
+        );
+        // .outputRange(-ElevatorConstants.ELEVATOR_MAX_OUTPUT, ElevatorConstants.ELEVATOR_MAX_OUTPUT);
+
+        tryUntilOk(motor, 5, () ->
+            motor.configure(config, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters)
+        );
     }
 
     @Override
     public void runMotor(double motorInput) {
-        // Apply deadband
-        // motorInput = MathUtil.applyDeadband(motorInput, ClawConstants.ARM_CONTROLLER_DEADBAND);
-
         // Run the motor
         double percentOutput = ElevatorConstants.ELEVATOR_MAX_OUTPUT * motorInput;
         motor.set(percentOutput);
@@ -128,6 +149,14 @@ public class ElevatorIOSpark implements ElevatorIO {
         // TODO
         // Set the position of the turn motor
         double setPointRadians = ElevatorConstants.getMotorPositionFromHeight(position);
+
+        Logger.recordOutput("Elevator/SetPoint", setPointRadians);
+        // angleClosedLoopController.setReference(rotation.getRadians(), ControlType.kPosition, ClosedLoopSlot.kSlot0);
+    }
+
+    @Override
+    public void setPosition(SuperstructureConstants.Level level) {
+        double setPointRadians = level.getElevatorRadian();
 
         Logger.recordOutput("Elevator/SetPoint", setPointRadians);
         // angleClosedLoopController.setReference(rotation.getRadians(), ControlType.kPosition, ClosedLoopSlot.kSlot0);

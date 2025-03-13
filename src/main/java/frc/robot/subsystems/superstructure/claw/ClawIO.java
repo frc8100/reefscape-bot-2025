@@ -57,7 +57,6 @@ public interface ClawIO extends GenericSparkIO<ClawIO.ClawIOInputs> {
      * Increases the desired turn position.
      * @param rotation - The desired turn position.
      */
-    // TODO: doc
     public default void increaseTurnPosition(double valueToIncreaseBy) {}
 
     /**
@@ -72,5 +71,9 @@ public interface ClawIO extends GenericSparkIO<ClawIO.ClawIOInputs> {
      */
     public default void periodic() {}
 
+    /**
+     * Zeros the encoder to the given value.
+     * @param value - The value to set the encoder to.
+     */
     public default void zeroEncoder(double value) {}
 }

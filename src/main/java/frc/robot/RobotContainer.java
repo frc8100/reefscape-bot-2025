@@ -3,11 +3,13 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.lib.util.TunableValue;
 import frc.robot.commands.SwerveSysidRoutines;
 import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
@@ -204,6 +206,9 @@ public class RobotContainer {
 
         // TODO: Temporary
         autoChooser.addDefaultOption("Coral and Go To All Reefs Test", autoRoutines.getCoralAndGoToAllReefsTest());
+
+        // Command to refresh the config
+        SmartDashboard.putData("Refresh Tunable Config", TunableValue.refreshConfig);
 
         // Configure the button bindings
         configureButtonBindings();

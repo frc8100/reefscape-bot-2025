@@ -79,7 +79,8 @@ public class AutoRoutines {
     public Command setUpSuperstructure(SuperstructureConstants.Level level) {
         return Commands.parallel(
             // TODO: Move claw out of the way first before moving elevator
-            elevatorSubsystem.getPositionCommandAndWait(level.getElevatorDistance()),
+            // elevatorSubsystem.getPositionCommandAndWait(level.getElevatorDistance()),
+            elevatorSubsystem.getPositionCommandAndWait(level),
             clawSubsystem.getWaitForAngleCommand(level.getClawAngle())
         );
     }

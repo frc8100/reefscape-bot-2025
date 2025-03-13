@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.superstructure.SuperstructureConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -83,7 +84,14 @@ public class Elevator extends SubsystemBase {
         io.setPosition(position);
     }
 
-    // TODO:
+    public void setPosition(SuperstructureConstants.Level level) {
+        io.setPosition(level);
+    }
+
+    /**
+     * Runs the elevator motor at the given input.
+     * @param motorInput - The input to the motor from -1 to 1.
+     */
     public void runMotor(double motorInput) {
         io.runMotor(motorInput);
     }
@@ -93,6 +101,10 @@ public class Elevator extends SubsystemBase {
      */
     public Command getPositionCommand(Distance position) {
         return new InstantCommand(() -> setPosition(position), this);
+    }
+
+    public Command getPositionCommand(SuperstructureConstants.Level level) {
+        return new InstantCommand(() -> setPosition(level), this);
     }
 
     /**
@@ -106,6 +118,15 @@ public class Elevator extends SubsystemBase {
             getPositionCommand(position)
                 // Wait until the elevator is at the target position
                 .andThen(Commands.waitUntil(() -> isElevatorAtTarget(position)))
+        );
+        // @formatter:on
+    }
+
+    public Command getPositionCommandAndWait(SuperstructureConstants.Level level) {
+        // @formatter:off
+        return (
+            getPositionCommand(level)
+                .andThen(Commands.waitUntil(this::isElevatorAtTarget))
         );
         // @formatter:on
     }

@@ -2,23 +2,20 @@ package frc.robot.subsystems.superstructure.elevator;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Kilogram;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
+import frc.lib.util.TunableValue;
 
 /**
  * Constants for the elevator.
@@ -60,7 +57,6 @@ public final class ElevatorConstants {
      */
     public static final Distance ELEVATOR_DISTANCE_TOLERANCE = Meters.of(0.05);
 
-    // TODO: Tune these values
     // Elevator motor constants
     /**
      * The CAN ID of the elevator motor.
@@ -75,8 +71,6 @@ public final class ElevatorConstants {
     public static final Distance ELEVATOR_DRUM_RADIUS = Inches.of(0.75);
 
     /** Radians to meters */
-    // public static final double ELEVATOR_RADIANS_TO_METERS = ELEVATOR_DRUM_RADIUS.in(Meters);
-    // 1.75 in
     public static final double ELEVATOR_RADIANS_TO_METERS = Inches.of(8.6 / (16 - 1.75)).in(Meters);
     // public static final AngularVelocity ELEVATOR_MAX_VELOCITY = RadiansPerSecond.of();
 
@@ -84,10 +78,15 @@ public final class ElevatorConstants {
     public static final LinearAcceleration ELEVATOR_MAX_ACCELERATION = MetersPerSecondPerSecond.of(0.2);
 
     // PID constants
-    public static final double ELEVATOR_KP = 0.1;
-    public static final double ELEVATOR_KI = 0.0;
-    public static final double ELEVATOR_KD = 0.0;
-    public static final double ELEVATOR_KF = 0.0;
+    // public static final double ELEVATOR_KP = 0.1;
+    // public static final double ELEVATOR_KI = 0.0;
+    // public static final double ELEVATOR_KD = 0.0;
+    // public static final double ELEVATOR_KF = 0.0;
+
+    public static final TunableValue ELEVATOR_KP = new TunableValue("Elevator/KP", 0.1);
+    public static final TunableValue ELEVATOR_KI = new TunableValue("Elevator/KI", 0.0);
+    public static final TunableValue ELEVATOR_KD = new TunableValue("Elevator/KD", 0.0);
+    public static final TunableValue ELEVATOR_KF = new TunableValue("Elevator/KF", 0.0);
 
     // TODO: Tune these values
     public static final Mass ELEVATOR_MASS = Kilograms.of(5.0);

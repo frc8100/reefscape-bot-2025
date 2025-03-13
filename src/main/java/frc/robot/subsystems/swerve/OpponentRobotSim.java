@@ -35,18 +35,18 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
      * Determines the behavior of opponent robots.
      * ! Note: this does not automatically set any commands.
      */
-    public static enum OpponentRobotBehavior {
+    public enum OpponentRobotBehavior {
         /**
          * Follows a path.
          * The default behavior.
          */
-        FollowPath,
+        FOLLOW_PATH,
 
         /**
          * Use teleop swerve.
          * Enables more resource-intensive
          */
-        TeleopSwerve,
+        TELEOP_SWERVE,
     }
 
     /** List of opponent robot poses */
@@ -67,7 +67,7 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
         new Pose2d(-2, 0, new Rotation2d()),
     };
 
-    public OpponentRobotBehavior behavior = OpponentRobotBehavior.FollowPath;
+    public OpponentRobotBehavior behavior = OpponentRobotBehavior.FOLLOW_PATH;
 
     /** PathPlanner configuration */
     // private static final RobotConfig PP_CONFIG = new RobotConfig(
@@ -78,6 +78,7 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
     // module config
     //         0.6 // Track length and width
     // );
+
     private static final RobotConfig PP_CONFIG = SwerveConfig.getRobotConfig();
 
     private static final PathConstraints PATH_CONSTRAINTS = SwerveConfig.pathConstraints;
@@ -171,9 +172,7 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
             // Create a new command to recursively pathfind to the next pose every 1 second
             .withTimeout(1)
             .finallyDo(() -> {
-                // System.out.println("OpponentRobotSim: Pathfinding complete");
                 Command nextCommand = opponentRobotPathfindToPoseSupplier(poseSupplier);
-                // nextCommand.schedule();
                 setDefaultCommand(nextCommand);
             });
     }
@@ -208,10 +207,10 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
     public ChassisSpeeds getChassisSpeeds() {
         switch (behavior) {
             default:
-            case FollowPath:
+            case FOLLOW_PATH:
                 // Return actual pose to save resources
                 return simulatedDrive.getActualSpeedsFieldRelative();
-            case TeleopSwerve:
+            case TELEOP_SWERVE:
                 // Return accurate odometry pose
                 return simulatedDrive.getMeasuredSpeedsFieldRelative(true);
         }
@@ -228,10 +227,10 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
     public Pose2d getPose() {
         switch (behavior) {
             default:
-            case FollowPath:
+            case FOLLOW_PATH:
                 // Return actual pose to save resources
                 return simulatedDrive.getActualPoseInSimulationWorld();
-            case TeleopSwerve:
+            case TELEOP_SWERVE:
                 // Return accurate odometry pose
                 return simulatedDrive.getOdometryEstimatedPose();
         }
@@ -267,7 +266,7 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
     @Override
     public void periodic() {
         // Only update if teleop swerve is on
-        if (behavior == OpponentRobotBehavior.TeleopSwerve) {
+        if (behavior == OpponentRobotBehavior.TELEOP_SWERVE) {
             simulatedDrive.periodic();
         }
     }
