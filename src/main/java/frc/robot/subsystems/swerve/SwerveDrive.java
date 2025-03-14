@@ -100,7 +100,6 @@ public interface SwerveDrive extends Subsystem {
      * @param rotation The desired rotation speed.
      * @param fieldRelative Whether the speeds are field-relative.
      */
-    // TODO: Add isOpenLoop parameter
     public void drive(Translation2d translation, double rotation, boolean fieldRelative);
 
     /** Runs the drive in a straight line with the specified drive output. By default, this does nothing. */

@@ -1,9 +1,14 @@
 package frc.robot.subsystems.superstructure.elevator;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 import static frc.lib.util.SparkUtil.ifOk;
 import static frc.lib.util.SparkUtil.sparkStickyFault;
 import static frc.lib.util.SparkUtil.tryUntilOk;
+
+// import static frc.robot.subsystems.superstructure.elevator.ElevatorConstants.*;
 
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
@@ -91,9 +96,9 @@ public class ElevatorIOSpark implements ElevatorIO {
             )
             .outputRange(-ElevatorConstants.ELEVATOR_MAX_OUTPUT, ElevatorConstants.ELEVATOR_MAX_OUTPUT);
 
-        // motorConfig.closedLoop.maxMotion
-        //         .maxVelocity(1)
-        //         .maxAcceleration(0);
+        config.closedLoop.maxMotion
+            .maxVelocity(ElevatorConstants.ELEVATOR_MAX_ANGULAR_VELOCITY.in(RadiansPerSecond))
+            .maxAcceleration(ElevatorConstants.ELEVATOR_MAX_ANGULAR_ACCELERATION.in(RadiansPerSecondPerSecond));
 
         // Apply the config
         tryUntilOk(motor, 5, () ->
@@ -124,8 +129,22 @@ public class ElevatorIOSpark implements ElevatorIO {
 
     @Override
     public void runMotor(double motorInput) {
-        // Run the motor
-        double percentOutput = ElevatorConstants.ELEVATOR_MAX_OUTPUT * motorInput;
+        double positionCurrent = encoder.getPosition();
+
+        // If the position is above the max, stop
+
+        double percentOutput = motorInput;
+
+        // TODO:
+        // If it is at the top, slow
+        if (positionCurrent > ElevatorConstants.ELEVATOR_MAX_POSITION.in(Radians)) {
+            percentOutput *= 0.05;
+        } else if (positionCurrent > ElevatorConstants.ELEVATOR_TOP_THRESHOLD.in(Radians)) {
+            percentOutput *= ElevatorConstants.ELEVATOR_TOP_INPUT;
+        } else {
+            percentOutput *= ElevatorConstants.ELEVATOR_MAX_OUTPUT;
+        }
+
         motor.set(percentOutput);
 
         // Log
@@ -157,10 +176,17 @@ public class ElevatorIOSpark implements ElevatorIO {
 
     @Override
     public void updateInputs(ElevatorIOInputs inputs) {
+        // Clamp
+        radianSetpoint = MathUtil.clamp(
+            radianSetpoint,
+            ElevatorConstants.ELEVATOR_MIN_POSITION.in(Radians),
+            ElevatorConstants.ELEVATOR_MAX_POSITION.in(Radians)
+        );
+
         inputs.setpoint = radianSetpoint;
 
         // TODO: PID
-        // angleClosedLoopController.setReference(radianSetpoint, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+        // closedLoopController.setReference(radianSetpoint, ControlType.kPosition, ClosedLoopSlot.kSlot0);
 
         // Reset spark sticky fault
         sparkStickyFault = false;

@@ -145,12 +145,11 @@ public class AutoRoutines {
      * @return A command to set up the superstructure for a given level by moving the elevator and claw to the correct positions.
      */
     public Command setUpSuperstructure(SuperstructureConstants.Level level) {
-        return Commands.parallel(
+        return clawSubsystem
             // TODO: Move claw out of the way first before moving elevator
-            // elevatorSubsystem.getPositionCommandAndWait(level.getElevatorDistance()),
-            elevatorSubsystem.getPositionCommandAndWait(level),
-            clawSubsystem.getWaitForAngleCommand(level.getClawAngle())
-        );
+            .getWaitForAngleCommand(Rotation2d.fromDegrees(90))
+            .andThen(elevatorSubsystem.getPositionCommandAndWait(level))
+            .andThen(clawSubsystem.getWaitForAngleCommand(level.getClawAngle()));
     }
 
     /**
@@ -178,7 +177,7 @@ public class AutoRoutines {
             // Get coral from station 1
             pathFindToLocation(FieldLocations.CORAL_STATION_1),
             // Run intake
-            clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.INTAKE),
+            clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.BACK),
             // Simultaneously set up superstructure and pathfind to reef
             new ParallelCommandGroup(
                 pathFindToLocation(FieldLocations.REEF_4L),
@@ -193,7 +192,7 @@ public class AutoRoutines {
                 setUpSuperstructure(SuperstructureConstants.Level.L1)
             ),
             // Run intake
-            clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.INTAKE),
+            clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.BACK),
             // Simultaneously set up superstructure and pathfind to reef
             new ParallelCommandGroup(
                 pathFindToLocation(FieldLocations.REEF_4R),

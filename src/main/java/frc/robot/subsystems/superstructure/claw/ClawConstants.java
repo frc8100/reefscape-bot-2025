@@ -88,7 +88,7 @@ public final class ClawConstants {
      * The direction of the intake/outtake.
      */
     public enum IntakeOuttakeDirection {
-        INTAKE(1),
+        BACK(1),
         OUTTAKE(-1);
 
         /**
@@ -132,20 +132,14 @@ public final class ClawConstants {
     /**
      * Deadband for the claw (controller input).
      */
-    public static final double ARM_CONTROLLER_DEADBAND = 0.1;
-
-    /**
-     * The percent power (from 0-1) to run the intake/outtake
-     */
-    public static final double ARM_MAX_OUTPUT = 0.15;
+    public static final double CONTROLLER_DEADBAND = 0.1;
 
     // Turn motor configs
     public static final int ANGLE_MOTOR_ID = 9;
     /**
      * The maximum power for the angle motor, from 0-1.
      */
-    // TODO: Tune
-    public static final double MAX_ANGLE_POWER = 0.1;
+    public static final double MAX_ANGLE_POWER = 0.4;
 
     public static final double ANGLE_GEAR_RATIO = 30;
     public static final boolean IS_ANGLE_MOTOR_INVERTED = true;
@@ -173,9 +167,9 @@ public final class ClawConstants {
     public static final double OUTTAKE_ENCODER_POSITION_FACTOR = (2 * Math.PI) / OUTTAKE_GEAR_RATIO;
 
     /**
-     * The maximum power for the outtake motor, from 0-1.
+     * The percent power (from 0-1) to run the intake/outtake
      */
-    public static final double MAX_OUTTAKE_POWER = 0.3;
+    public static final double OUTTAKE_MAX_OUTPUT = 0.15;
 
     // Simulator configs
     public static final DCMotor SIM_ANGLE_MOTOR = DCMotor.getNEO(1);

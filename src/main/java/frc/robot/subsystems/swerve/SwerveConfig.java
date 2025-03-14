@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.path.PathConstraints;
 import com.revrobotics.spark.config.SparkBaseConfig;
@@ -21,6 +22,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Time;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
@@ -99,12 +101,12 @@ public class SwerveConfig {
     public static final double DRIVE_ENCODER_VELOCITY_FACTOR = DRIVE_ENCODER_POSITION_FACTOR / 60;
 
     /**
-     * Factor to convert the angle encoder position from rotations to degrees
+     * Factor to convert the angle encoder position from rotations to radians
      */
-    public static final double ANGLE_ENCODER_POSITION_FACTOR = 360 / ANGLE_GEAR_RATIO;
+    public static final double ANGLE_ENCODER_POSITION_FACTOR = (2 * Math.PI) / ANGLE_GEAR_RATIO;
 
     /**
-     * Factor to convert the angle encoder position from RPM to degrees/sec
+     * Factor to convert the angle encoder position from RPM to rad/sec
      */
     public static final double ANGLE_ENCODER_VELOCITY_FACTOR = ANGLE_ENCODER_POSITION_FACTOR / 60;
 
@@ -168,15 +170,16 @@ public class SwerveConfig {
     public static final double driveSimKv = 0.0789;
 
     // Swerve Profiling Values
-    public static final LinearVelocity MAX_SPEED = MetersPerSecond.of(4.0);
-    public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(2.0);
+    public static final LinearVelocity MAX_SPEED = MetersPerSecond.of(3.5);
+    public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(3.0);
     public static final AngularVelocity MAX_ANGULAR_VELOCITY = RadiansPerSecond.of(5.0);
 
     public static final AngularAcceleration MAX_ANGULAR_ACCELERATION = RadiansPerSecondPerSecond.of(2.0);
 
     // Path Planner Values
-    public static final Mass ROBOT_MASS = Kilogram.of(40.0);
+    public static final Mass ROBOT_MASS = Pounds.of(90);
     public static final double WHEEL_COF = 1.2;
+    public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(3.9506340342);
 
     public static final Pose2d initialPose = new Pose2d(3, 3, new Rotation2d());
     public static final PathConstraints pathConstraints = new PathConstraints(
@@ -190,6 +193,21 @@ public class SwerveConfig {
     public static final DCMotor driveGearbox = DCMotor.getNEO(1);
     public static final DCMotor turnGearbox = DCMotor.getNEO(1);
 
+    private static RobotConfig pathPlannerConfig = new RobotConfig(
+        ROBOT_MASS,
+        ROBOT_MOI,
+        new ModuleConfig(
+            WHEEL_RADIUS,
+            MAX_SPEED,
+            WHEEL_COF,
+            driveGearbox,
+            DRIVE_GEAR_RATIO,
+            DRIVE_CONTINUOUS_CURRENT_LIMIT,
+            NUMBER_OF_SWERVE_MODULES
+        ),
+        MODULE_TRANSLATIONS
+    );
+
     /**
      * Maplesim configuration for the swerve drive.
      */
@@ -201,9 +219,7 @@ public class SwerveConfig {
             new SwerveModuleSimulationConfig(
                 driveGearbox,
                 turnGearbox,
-                // driveMotorReduction,
                 DRIVE_GEAR_RATIO,
-                // turnMotorReduction,
                 ANGLE_GEAR_RATIO,
                 Volts.of(0.1),
                 Volts.of(0.1),
@@ -216,20 +232,20 @@ public class SwerveConfig {
     /**
      * @return The PathPlanner RobotConfig
      */
-    // TODO: instead of loading from GUI, declare explicitly
     public static RobotConfig getRobotConfig() {
+        return pathPlannerConfig;
         // Load the RobotConfig from the GUI settings.
-        RobotConfig config;
+        // RobotConfig config;
 
-        try {
-            config = RobotConfig.fromGUISettings();
-        } catch (Exception e) {
-            // Handle exception as needed
-            e.printStackTrace();
-            config = null;
-        }
+        // try {
+        //     config = RobotConfig.fromGUISettings();
+        // } catch (Exception e) {
+        //     // Handle exception as needed
+        //     e.printStackTrace();
+        //     config = null;
+        // }
 
-        return config;
+        // return config;
     }
 
     /**

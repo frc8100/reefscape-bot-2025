@@ -102,7 +102,7 @@ public class Claw extends SubsystemBase {
         return Commands.deadline(
             // Stop after a certain amount of time
             Commands.waitTime(
-                direction == ClawConstants.IntakeOuttakeDirection.INTAKE
+                direction == ClawConstants.IntakeOuttakeDirection.BACK
                     ? ClawConstants.INTAKE_TIME
                     : ClawConstants.OUTTAKE_TIME
             ),

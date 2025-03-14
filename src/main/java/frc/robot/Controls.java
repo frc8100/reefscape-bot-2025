@@ -182,13 +182,13 @@ public class Controls {
          * The controller used for the claw.
          * Temporarily the same as the driver controller.
          */
-        public static final Joystick armController = new Joystick(1);
+        public static final Joystick clawController = new Joystick(1);
 
         // public static final JoystickButton
 
         // Buttons for the intake/outtake
-        private static final int intakeAxis = XboxController.Axis.kLeftTrigger.value;
-        private static final int outtakeAxis = XboxController.Axis.kRightTrigger.value;
+        private static final int intakeBackAxis = XboxController.Axis.kLeftTrigger.value;
+        private static final int intakeOutAxis = XboxController.Axis.kRightTrigger.value;
 
         /**
          * Returns the intake or outtake input depending on which one is bigger.
@@ -197,12 +197,12 @@ public class Controls {
          */
         public static final double getIntakeOrOuttake() {
             // Get controller input
-            double intakeInput = armController.getRawAxis(intakeAxis);
-            double outtakeInput = armController.getRawAxis(outtakeAxis);
+            double intakeInput = clawController.getRawAxis(intakeBackAxis);
+            double outtakeInput = clawController.getRawAxis(intakeOutAxis);
 
             // Get the larger of them
             if (intakeInput >= outtakeInput) {
-                return ClawConstants.IntakeOuttakeDirection.INTAKE.getDirection() * intakeInput;
+                return ClawConstants.IntakeOuttakeDirection.BACK.getDirection() * intakeInput;
             } else {
                 return ClawConstants.IntakeOuttakeDirection.OUTTAKE.getDirection() * outtakeInput;
             }
@@ -236,7 +236,7 @@ public class Controls {
          * The controller used for the elevator.
          * Temporarily the same as the driver controller.
          */
-        public static final Joystick elevatorController = Claw.armController;
+        public static final Joystick elevatorController = Claw.clawController;
 
         // TODO: temporary
         public static final int upButton = XboxController.Button.kY.value;
@@ -255,7 +255,7 @@ public class Controls {
          * The controller used for the superstructure.
          * Temporarily the same as the driver controller.
          */
-        public static final Joystick superstructureController = Claw.armController;
+        public static final Joystick superstructureController = Claw.clawController;
 
         /**
          * The button to make the superstructure go to L4. Default is up on the D-pad.

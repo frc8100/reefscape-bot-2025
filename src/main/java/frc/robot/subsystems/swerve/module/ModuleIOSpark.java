@@ -14,6 +14,7 @@
 package frc.robot.subsystems.swerve.module;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
@@ -260,15 +261,17 @@ public class ModuleIOSpark implements ModuleIO {
      */
     private void setSpeed(SwerveModuleState desiredState) {
         // Calculate the percent output and set the speed
-        double percentOutput = desiredState.speedMetersPerSecond / SwerveConfig.MAX_SPEED.in(MetersPerSecond);
+        // double percentOutput = desiredState.speedMetersPerSecond / SwerveConfig.MAX_SPEED.in(MetersPerSecond);
 
         // Clamp the percent output to the max speed
-        percentOutput = MathUtil.clamp(percentOutput, -SwerveConfig.MAX_DRIVE_POWER, SwerveConfig.MAX_DRIVE_POWER);
+        // percentOutput = MathUtil.clamp(percentOutput, -SwerveConfig.MAX_DRIVE_POWER, SwerveConfig.MAX_DRIVE_POWER);
 
-        driveMotor.set(percentOutput);
+        // driveMotor.set(percentOutput);
+
         // TODO: set the speed using the PID controller
-        // double velocity = desiredState.speedMetersPerSecond;
-        // driveClosedLoopController.setReference(velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
+        double velocity = desiredState.speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters);
+
+        driveClosedLoopController.setReference(velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
     }
 
     @Override
@@ -290,7 +293,7 @@ public class ModuleIOSpark implements ModuleIO {
 
         // Set the angle using the PID controller
         Rotation2d angle = desiredState.angle;
-        double degReference = angle.getDegrees();
+        double degReference = angle.getRadians();
 
         angleClosedLoopController.setReference(degReference, ControlType.kPosition, ClosedLoopSlot.kSlot0);
 

@@ -23,7 +23,7 @@ public final class SuperstructureConstants {
         L2(Meters.of(0.9).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(60), 4.8),
         L3(Meters.of(1.25).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(60), 12.35),
         // TODO: uh dont do this
-        L4(Meters.of(2.1).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(95), 15),
+        L4(Meters.of(2.1).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(95), 20),
 
         ALGAE_L1(Meters.of(0), Rotation2d.fromDegrees(160), 0);
 

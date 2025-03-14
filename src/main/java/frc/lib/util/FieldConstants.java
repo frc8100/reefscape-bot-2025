@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
 import frc.robot.subsystems.vision.VisionConstants;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Contains various field dimensions and useful reference points. All units are in meters and poses
@@ -25,6 +26,11 @@ public class FieldConstants {
      * The width of the field, from one side to the other.
      */
     public static final Distance fieldWidth = Meters.of(VisionConstants.aprilTagLayout.getFieldWidth());
+
+    static {
+        Logger.recordOutput("Test/FieldLength", fieldLength);
+        Logger.recordOutput("Test/fieldWidth", fieldWidth);
+    }
 
     /**
      * Where the starting line is on the field, measured from the inside of the starting line.

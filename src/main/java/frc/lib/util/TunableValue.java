@@ -34,6 +34,8 @@ public class TunableValue implements DoubleSupplier {
      */
     private static final List<RefreshConfigConsumer> refreshConfigConsumers = new ArrayList<>();
 
+    private static final List<TunableValue> tunableValuesWithConsumers = new ArrayList<>();
+
     /**
      * Adds a consumer to the list of consumers that need to be refreshed when the config is updated.
      * @param consumer The consumer to add
@@ -47,6 +49,7 @@ public class TunableValue implements DoubleSupplier {
      */
     public static final Command refreshConfig = Commands.runOnce(() -> {
         refreshConfigConsumers.forEach(RefreshConfigConsumer::accept);
+        tunableValuesWithConsumers.forEach(tunableValue -> tunableValue.onRefresh.accept(tunableValue.get()));
         refreshConfigConsumers.clear();
     });
 
@@ -84,7 +87,7 @@ public class TunableValue implements DoubleSupplier {
     /**
      * A consumer to run when the value is refreshed.
      */
-    // private DoubleConsumer onRefresh;
+    public DoubleConsumer onRefresh = (double value) -> {};
 
     /**
      * Create a new TunableValue
@@ -112,9 +115,7 @@ public class TunableValue implements DoubleSupplier {
      */
     public TunableValue(String dashboardKey, double defaultValue, DoubleConsumer onRefresh) {
         this(dashboardKey, defaultValue);
-        // this.onRefresh = onRefresh;
-
-        // TunableValue.addRefreshConfigConsumer(onRefresh);
+        this.onRefresh = onRefresh;
     }
 
     /**

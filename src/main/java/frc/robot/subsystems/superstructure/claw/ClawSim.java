@@ -39,8 +39,7 @@ public class ClawSim extends Claw {
             // The position of the robot
             swerveSubsystem.getActualPose().getTranslation(),
             // Where the claw is positioned
-            super
-                .getPose(elevatorSubsystem.getStage2Pose())
+            super.getPose(elevatorSubsystem.getStage2Pose())
                 .getTranslation()
                 .toTranslation2d()
                 .plus(ClawConstants.RotationPositions.getClawToCoralX(super.inputs.turnPositionRad)),
@@ -78,7 +77,7 @@ public class ClawSim extends Claw {
         }
 
         // If the claw is intaking, assume that the claw is holding a piece of coral
-        if (super.inputs.outtakeVelocityRadPerSec > ClawConstants.IntakeOuttakeDirection.INTAKE.getDirection() * 10) {
+        if (super.inputs.outtakeVelocityRadPerSec > ClawConstants.IntakeOuttakeDirection.BACK.getDirection() * 10) {
             inputs.isCoralInClaw = true;
         }
     }

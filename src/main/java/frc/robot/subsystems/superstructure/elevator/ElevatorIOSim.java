@@ -47,8 +47,8 @@ public class ElevatorIOSim implements ElevatorIO {
         ElevatorConstants.SIM_KI,
         ElevatorConstants.SIM_KD,
         new TrapezoidProfile.Constraints(
-            ElevatorConstants.ELEVATOR_MAX_VELOCITY.in(MetersPerSecond),
-            ElevatorConstants.ELEVATOR_MAX_ACCELERATION.in(MetersPerSecondPerSecond)
+            ElevatorConstants.ELEVATOR_SIM_MAX_VELOCITY.in(MetersPerSecond),
+            ElevatorConstants.ELEVATOR_SIM_MAX_ACCELERATION.in(MetersPerSecondPerSecond)
         )
     );
 

@@ -179,10 +179,10 @@ public class ClawIOSpark implements ClawIO {
     @Override
     public void runOuttake(double motorInput) {
         // Apply deadband
-        motorInput = MathUtil.applyDeadband(motorInput, ClawConstants.ARM_CONTROLLER_DEADBAND);
+        motorInput = MathUtil.applyDeadband(motorInput, ClawConstants.CONTROLLER_DEADBAND);
 
         // Run the motor
-        double percentOutput = ClawConstants.ARM_MAX_OUTPUT * motorInput;
+        double percentOutput = ClawConstants.OUTTAKE_MAX_OUTPUT * motorInput;
         outtakeMotor.set(percentOutput);
 
         // Log

@@ -237,11 +237,12 @@ public class RobotContainer {
             .getJoystickButtonOf(Controls.mainDriveControls.alignLeft)
             .whileTrue(autoRoutines.pathFindToLocation(FieldLocations.REEF_1L));
 
-        Controls.mainDriveControls
-            .getJoystickButtonOf(Controls.mainDriveControls.alignToNearestLeftReef)
-            .whileTrue(
-                new DeferredCommand(() -> autoRoutines.pathFindToLocation(nearestLeftReef), Set.of(swerveSubsystem))
-            );
+        // Align
+        // Controls.mainDriveControls
+        //     .getJoystickButtonOf(Controls.mainDriveControls.alignToNearestLeftReef)
+        //     .whileTrue(
+        //         new DeferredCommand(() -> autoRoutines.pathFindToLocation(nearestLeftReef), Set.of(swerveSubsystem))
+        //     );
 
         // Controls.mainDriveControls
         //     .getJoystickButtonOf(Controls.mainDriveControls.alignToNearestRightReef)
@@ -259,41 +260,41 @@ public class RobotContainer {
         clawSubsystem.setDefaultCommand(clawSubsystem.getRunCommand(Controls.Claw::getIntakeOrOuttake));
 
         // TODO
-        new JoystickButton(Controls.Claw.armController, Controls.Claw.upButton).whileTrue(
-            Commands.run(() -> clawSubsystem.io.increaseTurnPosition(0.01))
+        new JoystickButton(Controls.Claw.clawController, Controls.Claw.upButton).whileTrue(
+            Commands.run(() -> clawSubsystem.io.increaseTurnPosition(0.02))
         );
 
-        new JoystickButton(Controls.Claw.armController, Controls.Claw.downButton).whileTrue(
-            Commands.run(() -> clawSubsystem.io.increaseTurnPosition(-0.01))
+        new JoystickButton(Controls.Claw.clawController, Controls.Claw.downButton).whileTrue(
+            Commands.run(() -> clawSubsystem.io.increaseTurnPosition(-0.02))
         );
 
-        new JoystickButton(Controls.Claw.armController, Controls.Claw.zeroEncoder).onTrue(
-            Commands.run(() -> clawSubsystem.io.zeroEncoder(0))
+        new JoystickButton(Controls.Claw.clawController, Controls.Claw.zeroEncoder).onTrue(
+            Commands.runOnce(() -> clawSubsystem.io.zeroEncoder(0))
         );
 
         new JoystickButton(Controls.Elevator.elevatorController, Controls.Elevator.zeroEncoder).onTrue(
-            Commands.run(() -> elevatorSubsystem.io.zeroEncoder(0))
+            Commands.runOnce(() -> elevatorSubsystem.io.zeroEncoder(0))
         );
 
         // Superstructure
         // TODO:
-        // Controls.Superstructure.moveToL1.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L1));
-        // Controls.Superstructure.moveToL2.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L2));
-        // Controls.Superstructure.moveToL3.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L3));
+        Controls.Superstructure.moveToL1.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L1));
+        Controls.Superstructure.moveToL2.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L2));
+        Controls.Superstructure.moveToL3.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L3));
         // Controls.Superstructure.moveToL4.onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L4));
 
-        Controls.Superstructure.moveToL1.onTrue(
-            clawSubsystem.getWaitForAngleCommand(SuperstructureConstants.Level.L1.getClawAngle())
-        );
-        Controls.Superstructure.moveToL2.onTrue(
-            clawSubsystem.getWaitForAngleCommand(SuperstructureConstants.Level.L2.getClawAngle())
-        );
-        Controls.Superstructure.moveToL3.onTrue(
-            clawSubsystem.getWaitForAngleCommand(SuperstructureConstants.Level.L3.getClawAngle())
-        );
-        Controls.Superstructure.moveToL4.onTrue(
-            clawSubsystem.getWaitForAngleCommand(SuperstructureConstants.Level.L4.getClawAngle())
-        );
+        // Controls.Superstructure.moveToL1.onTrue(
+        //     clawSubsystem.getWaitForAngleCommand(SuperstructureConstants.Level.L1.getClawAngle())
+        // );
+        // Controls.Superstructure.moveToL2.onTrue(
+        //     clawSubsystem.getWaitForAngleCommand(SuperstructureConstants.Level.L2.getClawAngle())
+        // );
+        // Controls.Superstructure.moveToL3.onTrue(
+        //     clawSubsystem.getWaitForAngleCommand(SuperstructureConstants.Level.L3.getClawAngle())
+        // );
+        // Controls.Superstructure.moveToL4.onTrue(
+        //     clawSubsystem.getWaitForAngleCommand(SuperstructureConstants.Level.L4.getClawAngle())
+        // );
 
         // TODO: algae
 
@@ -346,12 +347,11 @@ public class RobotContainer {
             "ComponentPositions/CoralInClaw",
             clawSubsystem.getCoralInClawPosition(swerveSubsystem, elevatorSubsystem)
         );
-
         // TODO: Log nearest reef position
-        nearestLeftReef = autoRoutines.getNearestLeftReef();
-        nearestRightReef = autoRoutines.getNearestRightReef();
+        // nearestLeftReef = autoRoutines.getNearestLeftReef();
+        // nearestRightReef = autoRoutines.getNearestRightReef();
 
-        Logger.recordOutput("Odometry/NearestLeftReef", nearestLeftReef);
-        Logger.recordOutput("Odometry/NearestRightReef", nearestRightReef);
+        // Logger.recordOutput("Odometry/NearestLeftReef", nearestLeftReef);
+        // Logger.recordOutput("Odometry/NearestRightReef", nearestRightReef);
     }
 }
