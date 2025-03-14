@@ -46,10 +46,10 @@ public class VisionConstants {
      * (Not used by Limelight, configure in web UI instead)
      */
     public static final Transform3d TRANSFORM_TO_CAMERA_0 = new Transform3d(
-        Inches.of(10),
-        Inches.of(-12),
-        Inches.of(2),
-        new Rotation3d(0.0, 0.0, Degrees.of(30).in(Radians))
+        Inches.of(5.5),
+        Inches.of(-6),
+        Inches.of(7.5),
+        new Rotation3d()
     );
 
     // Basic filtering thresholds

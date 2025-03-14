@@ -213,7 +213,7 @@ public class RobotContainer {
         );
 
         // TODO: Temporary
-        autoChooser.addDefaultOption("Coral and Go To All Reefs Test", autoRoutines.getCoralAndGoToAllReefsTest());
+        autoChooser.addOption("Coral and Go To All Reefs Test", autoRoutines.getCoralAndGoToAllReefsTest());
 
         // Command to refresh the config
         SmartDashboard.putData("Refresh Tunable Config", TunableValue.refreshConfig);
@@ -237,7 +237,7 @@ public class RobotContainer {
             .getJoystickButtonOf(Controls.mainDriveControls.alignLeft)
             .whileTrue(autoRoutines.pathFindToLocation(FieldLocations.REEF_1L));
 
-        // Align
+        // Align (old)
         // Controls.mainDriveControls
         //     .getJoystickButtonOf(Controls.mainDriveControls.alignToNearestLeftReef)
         //     .whileTrue(
@@ -247,11 +247,16 @@ public class RobotContainer {
         // Controls.mainDriveControls
         //     .getJoystickButtonOf(Controls.mainDriveControls.alignToNearestRightReef)
         //     .whileTrue(
-        //         new DeferredCommand(
-        //             () -> autoRoutines.pathFindToLocation(nearestRightReef),
-        //             Set.of(swerveSubsystem)
-        //         )
+        //         new DeferredCommand(() -> autoRoutines.pathFindToLocation(nearestRightReef), Set.of(swerveSubsystem))
         //     );
+
+        // Align (new)
+        Controls.mainDriveControls
+            .getJoystickButtonOf(Controls.mainDriveControls.alignToNearestRightReef)
+            .whileTrue(
+                // new DeferredCommand(() -> autoRoutines.pathFindToLocation(nearestRightReef), Set.of(swerveSubsystem))
+                autoRoutines.continuouslyPathFindToLocation(() -> nearestRightReef)
+            );
 
         // TODO: Heading lock?
 
@@ -303,13 +308,10 @@ public class RobotContainer {
         //     .onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.ALGAE_L1));
 
         // TODO: Elevator
-        // Controls.mainDriveControls
-        //     .getJoystickButtonOf(Controls.Elevator.upButton)
         new JoystickButton(Controls.Elevator.elevatorController, Controls.Elevator.upButton)
             .onTrue(Commands.runOnce(() -> elevatorSubsystem.runMotor(1), elevatorSubsystem))
             .onFalse(Commands.runOnce(() -> elevatorSubsystem.runMotor(0), elevatorSubsystem));
-        // Controls.mainDriveControls
-        //     .getJoystickButtonOf(Controls.Elevator.downButton)
+
         new JoystickButton(Controls.Elevator.elevatorController, Controls.Elevator.downButton)
             .onTrue(Commands.runOnce(() -> elevatorSubsystem.runMotor(-1), elevatorSubsystem))
             .onFalse(Commands.runOnce(() -> elevatorSubsystem.runMotor(0), elevatorSubsystem));
@@ -348,10 +350,10 @@ public class RobotContainer {
             clawSubsystem.getCoralInClawPosition(swerveSubsystem, elevatorSubsystem)
         );
         // TODO: Log nearest reef position
-        // nearestLeftReef = autoRoutines.getNearestLeftReef();
-        // nearestRightReef = autoRoutines.getNearestRightReef();
+        nearestLeftReef = autoRoutines.getNearestLeftReef();
+        nearestRightReef = autoRoutines.getNearestRightReef();
 
-        // Logger.recordOutput("Odometry/NearestLeftReef", nearestLeftReef);
-        // Logger.recordOutput("Odometry/NearestRightReef", nearestRightReef);
+        Logger.recordOutput("Odometry/NearestLeftReef", nearestLeftReef);
+        Logger.recordOutput("Odometry/NearestRightReef", nearestRightReef);
     }
 }

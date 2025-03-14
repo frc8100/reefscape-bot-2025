@@ -13,6 +13,7 @@
 
 package frc.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import edu.wpi.first.math.Matrix;
@@ -25,6 +26,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.util.FieldConstants;
 import frc.robot.subsystems.vision.VisionIO.PoseObservation;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import java.util.LinkedList;
@@ -130,9 +132,9 @@ public class Vision extends SubsystemBase {
                     // Must be within the field boundaries
                     observation.pose().getX() <
                     0.0 ||
-                    observation.pose().getX() > aprilTagLayout.getFieldLength() ||
+                    observation.pose().getX() > FieldConstants.fieldLength.in(Meters) ||
                     observation.pose().getY() < 0.0 ||
-                    observation.pose().getY() > aprilTagLayout.getFieldWidth();
+                    observation.pose().getY() > FieldConstants.fieldWidth.in(Meters);
 
                 // Add pose to log
                 robotPoses.add(observation.pose());

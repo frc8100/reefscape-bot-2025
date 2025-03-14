@@ -320,8 +320,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     @Override
     public void zeroGyro(double deg) {
         gyroIO.zeroGyro(deg);
-
-        poseEstimator.update(gyroIO.getGyroHeading(), getModulePositions());
+        // poseEstimator.update(gyroIO.getGyroHeading(), getModulePositions());
     }
 
     @Override

@@ -41,7 +41,9 @@ public class SwerveConfig {
      */
     public static final int NUMBER_OF_SWERVE_MODULES = 4;
 
-    /** How often the odometry is updated (in Hz). This is independent of the robot's. */
+    /**
+     * How often the odometry is updated (in Hz). This is independent of the robot's.
+     */
     public static final double ODOMETRY_FREQUENCY_HZ = 100;
 
     /**
@@ -67,8 +69,8 @@ public class SwerveConfig {
 
     // Drivetrain constants
     // TODO: precise track/base measurement
-    public static final Distance TRACK_WIDTH = Inches.of(27);
-    public static final Distance WHEEL_BASE = Inches.of(27);
+    public static final Distance TRACK_WIDTH = Inches.of(22.5);
+    public static final Distance WHEEL_BASE = Inches.of(22.5);
     public static final Distance DRIVE_BASE_RADIUS = Meters.of(
         Math.hypot(TRACK_WIDTH.in(Meters) / 2.0, WHEEL_BASE.in(Meters) / 2.0)
     );
@@ -101,12 +103,12 @@ public class SwerveConfig {
     public static final double DRIVE_ENCODER_VELOCITY_FACTOR = DRIVE_ENCODER_POSITION_FACTOR / 60;
 
     /**
-     * Factor to convert the angle encoder position from rotations to radians
+     * Factor to convert the angle encoder position from rotations to degrees
      */
-    public static final double ANGLE_ENCODER_POSITION_FACTOR = (2 * Math.PI) / ANGLE_GEAR_RATIO;
+    public static final double ANGLE_ENCODER_POSITION_FACTOR = 360 / ANGLE_GEAR_RATIO;
 
     /**
-     * Factor to convert the angle encoder position from RPM to rad/sec
+     * Factor to convert the angle encoder position from RPM to deg/sec
      */
     public static final double ANGLE_ENCODER_VELOCITY_FACTOR = ANGLE_ENCODER_POSITION_FACTOR / 60;
 
@@ -126,14 +128,14 @@ public class SwerveConfig {
 
     // Swerve Current Limiting
     public static final Current ANGLE_CONTINUOUS_CURRENT_LIMIT = Amps.of(20);
-    public static final Current ANGLE_PEAK_CURRENT_LIMIT = Amps.of(40);
-    public static final Time ANGLE_PEAK_CURRENT_DURATION = Seconds.of(0.1);
-    public static final boolean IS_ANGLE_CURRENT_LIMIT_ACTIVE = true;
+    public static final Current ANGLE_PEAK_CURRENT_LIMIT = Amps.of(40); // unused
+    public static final Time ANGLE_PEAK_CURRENT_DURATION = Seconds.of(0.1); // unused
+    public static final boolean IS_ANGLE_CURRENT_LIMIT_ACTIVE = true; // unused
 
-    public static final Current DRIVE_CONTINUOUS_CURRENT_LIMIT = Amps.of(35);
-    public static final Current DRIVE_PEAK_CURRENT_LIMIT = Amps.of(60);
-    public static final Time DRIVE_PEAK_CURRENT_DURATION = Seconds.of(0.1);
-    public static final boolean IS_DRIVE_CURRENT_LIMIT_ACTIVE = true;
+    public static final Current DRIVE_CONTINUOUS_CURRENT_LIMIT = Amps.of(30);
+    public static final Current DRIVE_PEAK_CURRENT_LIMIT = Amps.of(60); // unused
+    public static final Time DRIVE_PEAK_CURRENT_DURATION = Seconds.of(0.1); // unused
+    public static final boolean IS_DRIVE_CURRENT_LIMIT_ACTIVE = true; // unused
 
     // These values are used by the drive falcon to ramp in open loop and closed loop driving.
     // We found a small open loop ramp (0.25) helps with tread wear, tipping, etc
@@ -171,7 +173,7 @@ public class SwerveConfig {
 
     // Swerve Profiling Values
     public static final LinearVelocity MAX_SPEED = MetersPerSecond.of(3.5);
-    public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(3.0);
+    public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(2.0);
     public static final AngularVelocity MAX_ANGULAR_VELOCITY = RadiansPerSecond.of(5.0);
 
     public static final AngularAcceleration MAX_ANGULAR_ACCELERATION = RadiansPerSecondPerSecond.of(2.0);
@@ -319,7 +321,6 @@ public class SwerveConfig {
         driveConfig.encoder
             .positionConversionFactor(SwerveConfig.DRIVE_ENCODER_POSITION_FACTOR)
             .velocityConversionFactor(SwerveConfig.DRIVE_ENCODER_VELOCITY_FACTOR)
-            // ! experimental
             .uvwMeasurementPeriod(10)
             .uvwAverageDepth(2);
 

@@ -39,6 +39,7 @@ import frc.robot.subsystems.swerve.SparkOdometryThread;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Module IO implementation for Spark Flex drive motor controller, Spark Max turn motor controller,
@@ -255,23 +256,22 @@ public class ModuleIOSpark implements ModuleIO {
 
     /**
      * Sets the speed of the module.
-     *
      * @param desiredState The desired state.
      * @param isOpenLoop Whether the module is in open loop.
      */
     private void setSpeed(SwerveModuleState desiredState) {
         // Calculate the percent output and set the speed
-        // double percentOutput = desiredState.speedMetersPerSecond / SwerveConfig.MAX_SPEED.in(MetersPerSecond);
+        double percentOutput = desiredState.speedMetersPerSecond / SwerveConfig.MAX_SPEED.in(MetersPerSecond);
 
         // Clamp the percent output to the max speed
-        // percentOutput = MathUtil.clamp(percentOutput, -SwerveConfig.MAX_DRIVE_POWER, SwerveConfig.MAX_DRIVE_POWER);
+        percentOutput = MathUtil.clamp(percentOutput, -SwerveConfig.MAX_DRIVE_POWER, SwerveConfig.MAX_DRIVE_POWER);
 
-        // driveMotor.set(percentOutput);
-
+        driveMotor.set(percentOutput);
         // TODO: set the speed using the PID controller
         double velocity = desiredState.speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters);
 
-        driveClosedLoopController.setReference(velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
+        Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "DrivePID", velocity);
+        // driveClosedLoopController.setReference(velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
     }
 
     @Override
@@ -281,7 +281,6 @@ public class ModuleIOSpark implements ModuleIO {
 
     /**
      * Sets the angle of the module.
-     *
      * @param desiredState The desired state.
      */
     private void setAngle(SwerveModuleState desiredState) {
@@ -293,7 +292,7 @@ public class ModuleIOSpark implements ModuleIO {
 
         // Set the angle using the PID controller
         Rotation2d angle = desiredState.angle;
-        double degReference = angle.getRadians();
+        double degReference = angle.getDegrees();
 
         angleClosedLoopController.setReference(degReference, ControlType.kPosition, ClosedLoopSlot.kSlot0);
 

@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.lib.util.PoseUtil;
@@ -15,6 +16,8 @@ import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * Contains the autonomous (and teleop) routines for the robot.
@@ -167,6 +170,26 @@ public class AutoRoutines {
 
     public Command pathFindToLocation(Pose2d pose) {
         return AutoBuilder.pathfindToPose(pose, SwerveConfig.pathConstraints);
+    }
+
+    public Command continuouslyPathFindToLocation(Supplier<Pose2d> pose) {
+        // Command firstPathfind = AutoBuilder.pathfindToPose(pose, SwerveConfig.pathConstraints);
+
+        // firstPathfind.withTimeout(1)
+        // .finallyDo(() -> {
+        //     Command nextCommand = opponentRobotPathfindToPoseSupplier(poseSupplier);
+        //     setDefaultCommand(nextCommand);
+        // });
+
+        // return firstPathfind;
+
+        return new DeferredCommand(
+            () ->
+                pathFindToLocation(pose.get())
+                    .andThen(Commands.waitSeconds(0.1))
+                    .andThen(continuouslyPathFindToLocation(pose)),
+            Set.of(swerveSubsystem)
+        );
     }
 
     /**
