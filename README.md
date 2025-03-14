@@ -21,10 +21,19 @@ The code for the 2025 season game REEFSCAPE.
 | Left Axis | Translation/strafe |
 | Right Axis | Rotation |
 | Y | Zero gyro |
-| B | Enable robot centric (hold) |
-| Z | (Test) go to coral station 1 (hold) |
+| B | Enable robot centric (press) |
 | Left Bumper (L1) | Slow movement |
 | Right Bumper (R1) | Very slow movement |
-| Left Trigger (L2) | Claw intake |
-| Right Trigger (R2) | Claw outtake |
-| Up/left/down/right | Direction/heading lock buttons |
+
+### Operator Controller (Port 1)
+
+| Key | Control |
+| --- | ------- |
+| X | Elevator down |
+| Y | Elevator up |
+| A | Claw down (toward switch) |
+| B | Claw up (away from switch) |
+| Right Trigger (R2) | Claw intake coral, also the same direction as outtake |
+| Left Trigger (L2) | Claw intake algae. |
+
+**Must hold L2 to keep hold of algae**
