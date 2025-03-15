@@ -215,6 +215,8 @@ public class RobotContainer {
         // TODO: Temporary
         autoChooser.addOption("Coral and Go To All Reefs Test", autoRoutines.getCoralAndGoToAllReefsTest());
 
+        autoChooser.addDefaultOption("Actually move forward", autoRoutines.actuallyMoveForward());
+
         // Command to refresh the config
         SmartDashboard.putData("Refresh Tunable Config", TunableValue.refreshConfig);
 
@@ -286,7 +288,7 @@ public class RobotContainer {
         Controls.Superstructure.moveToL1.whileTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L1));
         Controls.Superstructure.moveToL2.whileTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L2));
         Controls.Superstructure.moveToL3.whileTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L3));
-        // Controls.Superstructure.moveToL4.whileTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L4));
+        Controls.Superstructure.moveToL4.whileTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L4));
 
         // Controls.Superstructure.moveToL1.onTrue(
         //     clawSubsystem.getWaitForAngleCommand(SuperstructureConstants.Level.L1.getClawAngle())

@@ -3,6 +3,7 @@ package frc.robot.subsystems.swerve.path;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
@@ -189,6 +190,13 @@ public class AutoRoutines {
                     .andThen(Commands.waitSeconds(0.1))
                     .andThen(continuouslyPathFindToLocation(pose)),
             Set.of(swerveSubsystem)
+        );
+    }
+
+    public Command actuallyMoveForward() {
+        return Commands.deadline(
+            Commands.waitSeconds(2),
+            Commands.run(() -> swerveSubsystem.runVelocityChassisSpeeds(new ChassisSpeeds(1.5, 0, 0)), swerveSubsystem)
         );
     }
 

@@ -177,10 +177,10 @@ public class SwerveConfig {
 
     // Swerve Profiling Values
     public static final LinearVelocity MAX_SPEED = MetersPerSecond.of(3.5);
-    public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(2.0);
-    public static final AngularVelocity MAX_ANGULAR_VELOCITY = RadiansPerSecond.of(5.0);
+    public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(6.0);
+    public static final AngularVelocity MAX_ANGULAR_VELOCITY = RadiansPerSecond.of(6.0);
 
-    public static final AngularAcceleration MAX_ANGULAR_ACCELERATION = RadiansPerSecondPerSecond.of(2.0);
+    public static final AngularAcceleration MAX_ANGULAR_ACCELERATION = RadiansPerSecondPerSecond.of(3.0);
 
     // Path Planner Values
     public static final Mass ROBOT_MASS = Pounds.of(90);
