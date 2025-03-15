@@ -1,6 +1,7 @@
 package frc.robot.subsystems.superstructure.elevator;
 
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -42,23 +43,30 @@ public class Elevator extends SubsystemBase {
      * @return Whether the elevator is at the target position, within a tolerance.
      */
     public boolean isElevatorAtTarget() {
+        // return MathUtil.isNear(
+        //     inputs.setpoint,
+        //     inputs.height,
+        //     ElevatorConstants.ELEVATOR_DISTANCE_TOLERANCE.in(Meters)
+        // );
+
         return MathUtil.isNear(
+            inputs.positionRad,
             inputs.setpoint,
-            inputs.height,
-            ElevatorConstants.ELEVATOR_DISTANCE_TOLERANCE.in(Meters)
+            ElevatorConstants.ELEVATOR_RAD_TOLERANCE.in(Radians)
         );
     }
 
     /**
      * @return Whether the elevator is at the given position, within a tolerance.
      */
-    public boolean isElevatorAtTarget(Distance targetPosition) {
-        return MathUtil.isNear(
-            targetPosition.in(Meters),
-            inputs.height,
-            ElevatorConstants.ELEVATOR_DISTANCE_TOLERANCE.in(Meters)
-        );
-    }
+    // public boolean isElevatorAtTarget(Distance targetPosition) {
+    // TODO:
+    // return MathUtil.isNear(
+    //     targetPosition.in(Meters),
+    //     inputs.height,
+    //     ElevatorConstants.ELEVATOR_DISTANCE_TOLERANCE.in(Meters)
+    // );
+    // }
 
     @Override
     public void periodic() {
@@ -117,7 +125,7 @@ public class Elevator extends SubsystemBase {
             // Set the elevator to the desired position
             getPositionCommand(position)
                 // Wait until the elevator is at the target position
-                .andThen(Commands.waitUntil(() -> isElevatorAtTarget(position)))
+                .andThen(Commands.waitUntil(() -> isElevatorAtTarget()))
         );
         // @formatter:on
     }

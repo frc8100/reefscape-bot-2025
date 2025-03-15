@@ -34,6 +34,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.lib.util.SparkUtil;
+import frc.lib.util.TunableValue;
 import frc.lib.util.swerveUtil.RevSwerveModuleConstants;
 import frc.robot.subsystems.swerve.SparkOdometryThread;
 import frc.robot.subsystems.swerve.SwerveConfig;
@@ -143,6 +144,17 @@ public class ModuleIOSpark implements ModuleIO {
                 //         ? currentAngleSetpoint.getDegrees()
                 //         : angleEncoder.getAbsolutePosition().getValue().in(Degrees)
             );
+
+        TunableValue.addRefreshConfigConsumer(this::onRefresh);
+    }
+
+    private void onRefresh() {
+        var newConfig = SwerveConfig.getDriveMotorConfig();
+
+        newConfig.closedLoop.p(SwerveConfig.driveKPTunable.get());
+        newConfig.closedLoop.d(SwerveConfig.driveKDTunable.get());
+
+        driveMotor.configure(newConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     /**
@@ -261,17 +273,17 @@ public class ModuleIOSpark implements ModuleIO {
      */
     private void setSpeed(SwerveModuleState desiredState) {
         // Calculate the percent output and set the speed
-        double percentOutput = desiredState.speedMetersPerSecond / SwerveConfig.MAX_SPEED.in(MetersPerSecond);
+        // double percentOutput = desiredState.speedMetersPerSecond / SwerveConfig.MAX_SPEED.in(MetersPerSecond);
 
         // Clamp the percent output to the max speed
-        percentOutput = MathUtil.clamp(percentOutput, -SwerveConfig.MAX_DRIVE_POWER, SwerveConfig.MAX_DRIVE_POWER);
+        // percentOutput = MathUtil.clamp(percentOutput, -SwerveConfig.MAX_DRIVE_POWER, SwerveConfig.MAX_DRIVE_POWER);
 
-        driveMotor.set(percentOutput);
+        // driveMotor.set(percentOutput);
         // TODO: set the speed using the PID controller
         double velocity = desiredState.speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters);
 
         Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "DrivePID", velocity);
-        // driveClosedLoopController.setReference(velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
+        driveClosedLoopController.setReference(velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
     }
 
     @Override

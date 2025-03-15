@@ -24,6 +24,7 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Time;
+import frc.lib.util.TunableValue;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
@@ -56,7 +57,7 @@ public class SwerveConfig {
     public static final SparkBaseConfig.IdleMode angleIdleMode = SparkBaseConfig.IdleMode.kBrake;
 
     // Percent output value limit for angle and drive motors
-    public static final double MAX_DRIVE_POWER = 0.7;
+    public static final double MAX_DRIVE_POWER = 0.85;
     public static final double MAX_ANGLE_POWER = 0.9;
 
     public static final boolean IS_GYRO_INVERTED = false; // Always ensure Gyro is CCW+ CW-
@@ -154,10 +155,13 @@ public class SwerveConfig {
     public static final double angleSimKD = 0.0;
 
     // Drive Motor PID Values
-    public static final double driveKP = 0.1;
+    public static final double driveKP = 0.08;
     public static final double driveKI = 0.0;
     public static final double driveKD = 0.0;
     public static final double driveKF = 0.0;
+
+    public static final TunableValue driveKPTunable = new TunableValue("Drive/kP", driveKP);
+    public static final TunableValue driveKDTunable = new TunableValue("Drive/kD", driveKD);
 
     // Drive Motor Characterization Values
     // Divide SYSID values by 12 to convert from volts to percent output for CTRE

@@ -63,13 +63,15 @@ public final class ElevatorConstants {
      */
     public static final Distance ELEVATOR_DISTANCE_TOLERANCE = Meters.of(0.05);
 
+    public static final Angle ELEVATOR_RAD_TOLERANCE = Radians.of(0.2);
+
     /**
      * The CAN ID of the elevator motor.
      */
     public static final int ELEVATOR_MOTOR_ID = 15;
 
     public static final double ELEVATOR_MAX_OUTPUT = 0.4;
-    public static final double ELEVATOR_TOP_INPUT = 0.2;
+    public static final double ELEVATOR_TOP_INPUT = 0.1;
     public static final Angle ELEVATOR_TOP_THRESHOLD = Radians.of(20);
 
     public static final double ELEVATOR_GEAR_RATIO = 48.0;
@@ -97,7 +99,7 @@ public final class ElevatorConstants {
     // public static final double ELEVATOR_KD = 0.0;
     // public static final double ELEVATOR_KF = 0.0;
 
-    public static final TunableValue ELEVATOR_KP = new TunableValue("Elevator/KP", 0.1);
+    public static final TunableValue ELEVATOR_KP = new TunableValue("Elevator/KP", 0.6);
     public static final TunableValue ELEVATOR_KI = new TunableValue("Elevator/KI", 0.0);
     public static final TunableValue ELEVATOR_KD = new TunableValue("Elevator/KD", 0.0);
     public static final TunableValue ELEVATOR_KF = new TunableValue("Elevator/KF", 0.0);

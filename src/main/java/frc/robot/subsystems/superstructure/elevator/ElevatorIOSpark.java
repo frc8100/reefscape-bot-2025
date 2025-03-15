@@ -64,6 +64,8 @@ public class ElevatorIOSpark implements ElevatorIO {
      */
     private SparkMaxConfig config;
 
+    private boolean isUsingPID = true;
+
     /**
      * The config for the outtake motor.
      */
@@ -129,6 +131,7 @@ public class ElevatorIOSpark implements ElevatorIO {
 
     @Override
     public void runMotor(double motorInput) {
+        isUsingPID = false;
         double positionCurrent = encoder.getPosition();
 
         // If the position is above the max, stop
@@ -167,11 +170,15 @@ public class ElevatorIOSpark implements ElevatorIO {
     public void setPosition(Distance position) {
         // Set the position of the turn motor
         radianSetpoint = ElevatorConstants.getMotorPositionFromHeight(position);
+
+        isUsingPID = true;
     }
 
     @Override
     public void setPosition(SuperstructureConstants.Level level) {
         radianSetpoint = level.getElevatorRadian();
+
+        isUsingPID = true;
     }
 
     @Override
@@ -185,8 +192,9 @@ public class ElevatorIOSpark implements ElevatorIO {
 
         inputs.setpoint = radianSetpoint;
 
-        // TODO: PID
-        // closedLoopController.setReference(radianSetpoint, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+        if (isUsingPID) {
+            closedLoopController.setReference(radianSetpoint, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+        }
 
         // Reset spark sticky fault
         sparkStickyFault = false;
