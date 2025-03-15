@@ -155,13 +155,15 @@ public class SwerveConfig {
     public static final double angleSimKD = 0.0;
 
     // Drive Motor PID Values
-    public static final double driveKP = 0.03;
+    // public static final double driveKP = 0.01;
+    public static final double driveKP = 0.02;
     public static final double driveKI = 0.0;
-    public static final double driveKD = 0.0;
+    // public static final double driveKD = 0.0;
+    public static final double driveKD = 0.05;
     public static final double driveKF = 0.0;
 
     public static final TunableValue driveKPTunable = new TunableValue("Drive/kP", driveKP);
-    // public static final TunableValue driveKDTunable = new TunableValue("Drive/kD", driveKD);
+    public static final TunableValue driveKDTunable = new TunableValue("Drive/kD", driveKD);
 
     // Drive Motor Characterization Values
     // Divide SYSID values by 12 to convert from volts to percent output for CTRE
@@ -176,8 +178,8 @@ public class SwerveConfig {
     public static final double driveSimKv = 0.0789;
 
     // Swerve Profiling Values
-    public static final LinearVelocity MAX_SPEED = MetersPerSecond.of(3.5);
-    public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(6.0);
+    public static final LinearVelocity MAX_SPEED = MetersPerSecond.of(4);
+    public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(7);
     public static final AngularVelocity MAX_ANGULAR_VELOCITY = RadiansPerSecond.of(6.0);
 
     public static final AngularAcceleration MAX_ANGULAR_ACCELERATION = RadiansPerSecondPerSecond.of(3.0);
@@ -187,7 +189,7 @@ public class SwerveConfig {
     public static final double WHEEL_COF = 1.2;
     public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(3.9506340342);
 
-    public static final Pose2d initialPose = new Pose2d(3, 3, new Rotation2d());
+    public static final Pose2d initialPose = new Pose2d(7.75, 3.75, Rotation2d.fromDegrees(180));
     public static final PathConstraints pathConstraints = new PathConstraints(
         MAX_SPEED,
         MAX_ACCELERATION,

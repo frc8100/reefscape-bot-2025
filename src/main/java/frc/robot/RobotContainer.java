@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.util.TunableValue;
+import frc.robot.commands.AlignToReefTagRelative;
 import frc.robot.commands.SwerveSysidRoutines;
 import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
@@ -215,7 +216,7 @@ public class RobotContainer {
         // TODO: Temporary
         autoChooser.addOption("Coral and Go To All Reefs Test", autoRoutines.getCoralAndGoToAllReefsTest());
 
-        autoChooser.addDefaultOption("Actually move forward", autoRoutines.actuallyMoveForward());
+        autoChooser.addOption("Actually move forward", autoRoutines.actuallyMoveForward());
 
         // Command to refresh the config
         SmartDashboard.putData("Refresh Tunable Config", TunableValue.refreshConfig);
@@ -237,7 +238,8 @@ public class RobotContainer {
 
         Controls.mainDriveControls
             .getJoystickButtonOf(Controls.mainDriveControls.alignLeft)
-            .whileTrue(autoRoutines.pathFindToLocation(FieldLocations.REEF_1L));
+            // .whileTrue(autoRoutines.pathFindToLocation(FieldLocations.REEF_1L));
+            .whileTrue(new AlignToReefTagRelative(false, swerveSubsystem));
 
         // Align (old)
         // Controls.mainDriveControls
@@ -268,11 +270,11 @@ public class RobotContainer {
 
         // TODO
         new JoystickButton(Controls.Claw.clawController, Controls.Claw.upButton).whileTrue(
-            Commands.run(() -> clawSubsystem.io.increaseTurnPosition(0.02))
+            Commands.run(() -> clawSubsystem.io.increaseTurnPosition(0.03))
         );
 
         new JoystickButton(Controls.Claw.clawController, Controls.Claw.downButton).whileTrue(
-            Commands.run(() -> clawSubsystem.io.increaseTurnPosition(-0.02))
+            Commands.run(() -> clawSubsystem.io.increaseTurnPosition(-0.03))
         );
 
         new JoystickButton(Controls.Claw.clawController, Controls.Claw.zeroEncoder).onTrue(

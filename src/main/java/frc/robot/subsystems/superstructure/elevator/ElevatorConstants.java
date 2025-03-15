@@ -70,7 +70,7 @@ public final class ElevatorConstants {
      */
     public static final int ELEVATOR_MOTOR_ID = 15;
 
-    public static final double ELEVATOR_MAX_OUTPUT = 0.4;
+    public static final double ELEVATOR_MAX_OUTPUT = 0.50;
     public static final double ELEVATOR_TOP_INPUT = 0.1;
     public static final Angle ELEVATOR_TOP_THRESHOLD = Radians.of(20);
 

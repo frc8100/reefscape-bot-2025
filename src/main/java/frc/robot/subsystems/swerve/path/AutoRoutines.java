@@ -193,11 +193,20 @@ public class AutoRoutines {
         );
     }
 
-    public Command actuallyMoveForward() {
+    private Command driveForwardWithSpeedFor(double vxMetersPerSecond, double timeSeconds) {
         return Commands.deadline(
-            Commands.waitSeconds(2),
-            Commands.run(() -> swerveSubsystem.runVelocityChassisSpeeds(new ChassisSpeeds(1.5, 0, 0)), swerveSubsystem)
+            Commands.waitSeconds(timeSeconds),
+            Commands.run(
+                () -> swerveSubsystem.runVelocityChassisSpeeds(new ChassisSpeeds(vxMetersPerSecond, 0, 0)),
+                swerveSubsystem
+            )
         );
+    }
+
+    public Command actuallyMoveForward() {
+        return driveForwardWithSpeedFor(2, 3);
+        // .alongWith(setUpSuperstructure(SuperstructureConstants.Level.L4))
+        // .andThen(clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.BACK));
     }
 
     /**

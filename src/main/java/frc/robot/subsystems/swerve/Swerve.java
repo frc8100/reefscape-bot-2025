@@ -111,7 +111,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
             Constants.PoseEstimator.VisionStdDevs
         );
 
-        zeroGyro();
+        zeroGyro(180);
 
         configurePathPlannerAutoBuilder();
 
