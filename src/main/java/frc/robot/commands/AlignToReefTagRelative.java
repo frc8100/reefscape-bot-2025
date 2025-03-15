@@ -16,13 +16,13 @@ import frc.robot.subsystems.swerve.SwerveDrive;
 public class AlignToReefTagRelative extends Command {
 
     // TODO: refactor
-    public static final double X_REEF_ALIGNMENT_P = 1;
-    public static final double Y_REEF_ALIGNMENT_P = 1;
+    public static final double X_REEF_ALIGNMENT_P = 0.1;
+    public static final double Y_REEF_ALIGNMENT_P = 0.1;
     public static final double ROT_REEF_ALIGNMENT_P = 0.1;
 
     public static final double ROT_SETPOINT_REEF_ALIGNMENT = 0; // Rotation
     public static final double ROT_TOLERANCE_REEF_ALIGNMENT = 1;
-    public static final double X_SETPOINT_REEF_ALIGNMENT = -0.34; // Vertical pose
+    public static final double X_SETPOINT_REEF_ALIGNMENT = -0.05; // Vertical pose
     public static final double X_TOLERANCE_REEF_ALIGNMENT = 0.04;
     public static final double Y_SETPOINT_REEF_ALIGNMENT = 0.16; // Horizontal pose
     public static final double Y_TOLERANCE_REEF_ALIGNMENT = 0.04;

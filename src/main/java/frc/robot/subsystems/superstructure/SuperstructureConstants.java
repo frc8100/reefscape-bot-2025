@@ -21,10 +21,12 @@ public final class SuperstructureConstants {
          */
         L1(Meters.of(0.0), CLAW_ANGLE_OFFSET, 0),
         L2(Meters.of(0.9).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(60), 4.8),
-        L3(Meters.of(1.25).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(60), 12.5),
+        L3(Meters.of(1.25).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(60), 14.9),
         L4(Meters.of(2.1).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(95), 22),
 
-        ALGAE_L1(Meters.of(0), Rotation2d.fromDegrees(160), 0);
+        L1_AUTO(Meters.of(0.4).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(180), 3.5),
+
+        ALGAE_L2(Meters.of(0), Rotation2d.fromDegrees(180), 4.8);
 
         private final Distance elevatorDistance;
 

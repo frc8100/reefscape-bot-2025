@@ -96,7 +96,7 @@ public class Controls {
         /**
          * Aligns the robot to the 6R reef, for testing purposes.
          */
-        public int alignLeft = XboxController.Button.kA.value;
+        public int alignLeft = XboxController.Button.kB.value;
 
         /**
          * Aligns the robot to the nearest left reef.
@@ -258,22 +258,22 @@ public class Controls {
         public static final Joystick superstructureController = Claw.clawController;
 
         /**
-         * The button to make the superstructure go to L4. Default is up on the D-pad.
+         * The button to make the superstructure go to L4. Default is right on the D-pad.
          */
         public static final POVButton moveToL4 = new POVButton(superstructureController, 90);
 
         /**
-         * The button to make the superstructure go to L3. Default is right on the D-pad.
+         * The button to make the superstructure go to L3. Default is down on the D-pad.
          */
         public static final POVButton moveToL3 = new POVButton(superstructureController, 180);
 
         /**
-         * The button to make the superstructure go to L2. Default is down on the D-pad.
+         * The button to make the superstructure go to L2. Default is left on the D-pad.
          */
         public static final POVButton moveToL2 = new POVButton(superstructureController, 270);
 
         /**
-         * The button to make the superstructure go to L1. Default is left on the D-pad.
+         * The button to make the superstructure go to L1. Default is up on the D-pad.
          */
         public static final POVButton moveToL1 = new POVButton(superstructureController, 0);
 

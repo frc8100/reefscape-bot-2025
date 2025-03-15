@@ -204,9 +204,13 @@ public class AutoRoutines {
     }
 
     public Command actuallyMoveForward() {
-        return driveForwardWithSpeedFor(2, 3);
-        // .alongWith(setUpSuperstructure(SuperstructureConstants.Level.L4))
-        // .andThen(clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.BACK));
+        return driveForwardWithSpeedFor(1, 2.25);
+    }
+
+    public Command moveForwardAndCoral() {
+        return driveForwardWithSpeedFor(0.75, 2.25)
+            .alongWith(setUpSuperstructure(SuperstructureConstants.Level.L1_AUTO))
+            .andThen(clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.BACK));
     }
 
     /**

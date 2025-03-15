@@ -2,6 +2,8 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -218,6 +220,8 @@ public class RobotContainer {
 
         autoChooser.addOption("Actually move forward", autoRoutines.actuallyMoveForward());
 
+        autoChooser.addOption("L1 Auto", autoRoutines.moveForwardAndCoral());
+
         // Command to refresh the config
         SmartDashboard.putData("Refresh Tunable Config", TunableValue.refreshConfig);
 
@@ -236,10 +240,10 @@ public class RobotContainer {
             .getJoystickButtonOf(Controls.mainDriveControls.zeroGyroButton)
             .onTrue(new InstantCommand(swerveSubsystem::zeroGyro));
 
-        Controls.mainDriveControls
-            .getJoystickButtonOf(Controls.mainDriveControls.alignLeft)
-            // .whileTrue(autoRoutines.pathFindToLocation(FieldLocations.REEF_1L));
-            .whileTrue(new AlignToReefTagRelative(false, swerveSubsystem));
+        // Controls.mainDriveControls
+        //     .getJoystickButtonOf(Controls.mainDriveControls.alignLeft)
+        //     // .whileTrue(autoRoutines.pathFindToLocation(FieldLocations.REEF_1L));
+        //     .whileTrue(new AlignToReefTagRelative(false, swerveSubsystem));
 
         // Align (old)
         // Controls.mainDriveControls
@@ -255,12 +259,21 @@ public class RobotContainer {
         //     );
 
         // Align (new)
-        Controls.mainDriveControls
-            .getJoystickButtonOf(Controls.mainDriveControls.alignToNearestRightReef)
-            .whileTrue(
-                // new DeferredCommand(() -> autoRoutines.pathFindToLocation(nearestRightReef), Set.of(swerveSubsystem))
-                autoRoutines.continuouslyPathFindToLocation(() -> nearestRightReef)
-            );
+        // Controls.mainDriveControls
+        //     .getJoystickButtonOf(Controls.mainDriveControls.alignToNearestRightReef)
+        //     .whileTrue(
+        //         // new DeferredCommand(() -> autoRoutines.pathFindToLocation(nearestRightReef), Set.of(swerveSubsystem))
+        //         autoRoutines.continuouslyPathFindToLocation(() -> nearestRightReef)
+        //     );
+
+        // Controls.mainDriveControls
+        //     .getJoystickButtonOf(Controls.mainDriveControls.alignToNearestRightReef)
+        //     .whileTrue(
+        //         // new DeferredCommand(() -> autoRoutines.pathFindToLocation(nearestRightReef), Set.of(swerveSubsystem))
+        //         autoRoutines.continuouslyPathFindToLocation(() ->
+        //             new Pose2d(new Translation2d(13.43, 2.98), Rotation2d.fromDegrees(116))
+        //         )
+        //     );
 
         // TODO: Heading lock?
 
@@ -270,11 +283,11 @@ public class RobotContainer {
 
         // TODO
         new JoystickButton(Controls.Claw.clawController, Controls.Claw.upButton).whileTrue(
-            Commands.run(() -> clawSubsystem.io.increaseTurnPosition(0.03))
+            Commands.run(() -> clawSubsystem.io.increaseTurnPosition(0.035))
         );
 
         new JoystickButton(Controls.Claw.clawController, Controls.Claw.downButton).whileTrue(
-            Commands.run(() -> clawSubsystem.io.increaseTurnPosition(-0.03))
+            Commands.run(() -> clawSubsystem.io.increaseTurnPosition(-0.035))
         );
 
         new JoystickButton(Controls.Claw.clawController, Controls.Claw.zeroEncoder).onTrue(
@@ -290,7 +303,11 @@ public class RobotContainer {
         Controls.Superstructure.moveToL1.whileTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L1));
         Controls.Superstructure.moveToL2.whileTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L2));
         Controls.Superstructure.moveToL3.whileTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L3));
-        Controls.Superstructure.moveToL4.whileTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L4));
+
+        // TODO:
+        Controls.Superstructure.moveToL4.whileTrue(
+            autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.ALGAE_L2)
+        );
 
         // Controls.Superstructure.moveToL1.onTrue(
         //     clawSubsystem.getWaitForAngleCommand(SuperstructureConstants.Level.L1.getClawAngle())

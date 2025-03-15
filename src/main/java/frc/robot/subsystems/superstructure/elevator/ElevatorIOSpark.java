@@ -141,7 +141,7 @@ public class ElevatorIOSpark implements ElevatorIO {
         // TODO:
         // If it is at the top, slow
         if (positionCurrent > ElevatorConstants.ELEVATOR_MAX_POSITION.in(Radians)) {
-            percentOutput *= 0.05;
+            percentOutput *= 0.075;
         } else if (positionCurrent > ElevatorConstants.ELEVATOR_TOP_THRESHOLD.in(Radians)) {
             percentOutput *= ElevatorConstants.ELEVATOR_TOP_INPUT;
         } else {
