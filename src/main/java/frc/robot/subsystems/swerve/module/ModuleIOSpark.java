@@ -152,7 +152,7 @@ public class ModuleIOSpark implements ModuleIO {
         var newConfig = SwerveConfig.getDriveMotorConfig();
 
         newConfig.closedLoop.p(SwerveConfig.driveKPTunable.get());
-        newConfig.closedLoop.d(SwerveConfig.driveKDTunable.get());
+        // newConfig.closedLoop.d(SwerveConfig.driveKDTunable.get());
 
         driveMotor.configure(newConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }

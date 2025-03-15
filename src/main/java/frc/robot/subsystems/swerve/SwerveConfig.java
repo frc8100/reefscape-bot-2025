@@ -155,13 +155,13 @@ public class SwerveConfig {
     public static final double angleSimKD = 0.0;
 
     // Drive Motor PID Values
-    public static final double driveKP = 0.08;
+    public static final double driveKP = 0.03;
     public static final double driveKI = 0.0;
     public static final double driveKD = 0.0;
     public static final double driveKF = 0.0;
 
     public static final TunableValue driveKPTunable = new TunableValue("Drive/kP", driveKP);
-    public static final TunableValue driveKDTunable = new TunableValue("Drive/kD", driveKD);
+    // public static final TunableValue driveKDTunable = new TunableValue("Drive/kD", driveKD);
 
     // Drive Motor Characterization Values
     // Divide SYSID values by 12 to convert from volts to percent output for CTRE
