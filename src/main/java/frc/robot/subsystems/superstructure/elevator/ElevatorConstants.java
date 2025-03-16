@@ -89,7 +89,7 @@ public final class ElevatorConstants {
     public static final double ELEVATOR_RADIANS_TO_METERS = (8.6 / (16 - 1.75)) / Inches.of(1).in(Meters);
     public static final AngularVelocity ELEVATOR_MAX_ANGULAR_VELOCITY = RadiansPerSecond.of(6.5);
     public static final AngularAcceleration ELEVATOR_MAX_ANGULAR_ACCELERATION = RadiansPerSecondPerSecond.of(5);
-    public static final double AMOUNT_PER_FRAME = 0.25;
+    public static final double AMOUNT_PER_FRAME = 0.335;
 
     public static final LinearVelocity ELEVATOR_SIM_MAX_VELOCITY = MetersPerSecond.of(0.5);
     public static final LinearAcceleration ELEVATOR_SIM_MAX_ACCELERATION = MetersPerSecondPerSecond.of(0.2);
