@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.lib.util.PoseUtil;
+import frc.robot.commands.AlignToReefTagRelative;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
 import frc.robot.subsystems.superstructure.claw.Claw;
 import frc.robot.subsystems.superstructure.claw.ClawConstants;
@@ -153,7 +154,10 @@ public class AutoRoutines {
             // TODO: Move claw out of the way first before moving elevator
             .getWaitForAngleCommand(Rotation2d.fromDegrees(90))
             .andThen(elevatorSubsystem.getPositionCommandAndWait(level))
-            .andThen(clawSubsystem.getWaitForAngleCommand(level.getClawAngle()));
+            .andThen(clawSubsystem.getWaitForAngleCommand(level.getClawAngle()))
+            .handleInterrupt(() -> {
+                elevatorSubsystem.io.resetSetpointToCurrentPosition();
+            });
     }
 
     /**
@@ -207,10 +211,17 @@ public class AutoRoutines {
         return driveForwardWithSpeedFor(1, 2.25);
     }
 
-    public Command moveForwardAndCoral() {
+    public Command moveForwardAndL1() {
         return driveForwardWithSpeedFor(0.75, 2.25)
             .alongWith(setUpSuperstructure(SuperstructureConstants.Level.L1_AUTO))
             .andThen(clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.BACK));
+    }
+
+    public Command moveForwardAndL2() {
+        return driveForwardWithSpeedFor(0.75, 1)
+            .alongWith(setUpSuperstructure(SuperstructureConstants.Level.L2))
+            .andThen(new AlignToReefTagRelative(false, swerveSubsystem))
+            .andThen(clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE));
     }
 
     /**
@@ -233,7 +244,7 @@ public class AutoRoutines {
             // Simultaneously set up superstructure and pathfind to coral station
             new ParallelCommandGroup(
                 pathFindToLocation(FieldLocations.CORAL_STATION_1),
-                setUpSuperstructure(SuperstructureConstants.Level.L1)
+                setUpSuperstructure(SuperstructureConstants.Level.INITIAL_POSITION)
             ),
             // Run intake
             clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.BACK),
@@ -245,7 +256,7 @@ public class AutoRoutines {
             // Run outtake
             clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE),
             // Reset superstructure
-            setUpSuperstructure(SuperstructureConstants.Level.L1)
+            setUpSuperstructure(SuperstructureConstants.Level.INITIAL_POSITION)
         );
     }
 }

@@ -131,12 +131,10 @@ public class ElevatorIOSpark implements ElevatorIO {
 
     @Override
     public void runMotor(double motorInput) {
-        isUsingPID = false;
+        // Use PID
         double positionCurrent = encoder.getPosition();
 
-        // If the position is above the max, stop
-
-        double percentOutput = motorInput;
+        double percentOutput = motorInput * ElevatorConstants.AMOUNT_PER_FRAME;
 
         // TODO:
         // If it is at the top, slow
@@ -148,11 +146,16 @@ public class ElevatorIOSpark implements ElevatorIO {
             percentOutput *= ElevatorConstants.ELEVATOR_MAX_OUTPUT;
         }
 
-        motor.set(percentOutput);
+        // TODO: constant
+        radianSetpoint += percentOutput;
+        // isUsingPID = false;
+        // double positionCurrent = encoder.getPosition();
+
+        // motor.set(percentOutput);
 
         // Log
-        Logger.recordOutput("Elevator/motorInput", motorInput);
-        Logger.recordOutput("Elevator/percentOutput", percentOutput);
+        // Logger.recordOutput("Elevator/motorInput", motorInput);
+        // Logger.recordOutput("Elevator/percentOutput", percentOutput);
     }
 
     @Override
@@ -161,9 +164,14 @@ public class ElevatorIOSpark implements ElevatorIO {
     }
 
     @Override
+    public void resetSetpointToCurrentPosition() {
+        radianSetpoint = encoder.getPosition();
+    }
+
+    @Override
     public void zeroEncoder(double value) {
         encoder.setPosition(value);
-        radianSetpoint = 0.0;
+        radianSetpoint = value;
     }
 
     @Override

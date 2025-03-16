@@ -60,6 +60,8 @@ public interface ElevatorIO extends GenericSparkIO<ElevatorIO.ElevatorIOInputs> 
         setPosition(level.getElevatorDistance());
     }
 
+    public default void resetSetpointToCurrentPosition() {}
+
     /**
      * Periodic function to be called by the subsystem.
      * Optional, do not update the IO here.
