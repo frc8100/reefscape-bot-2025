@@ -8,7 +8,7 @@
         "layouts": [
           {
             "title": "Electrical",
-            "x": 0.0,
+            "x": 1152.0,
             "y": 256.0,
             "width": 384.0,
             "height": 256.0,
@@ -59,8 +59,8 @@
         "containers": [
           {
             "title": "FMSInfo",
-            "x": 768.0,
-            "y": 256.0,
+            "x": 1152.0,
+            "y": 128.0,
             "width": 384.0,
             "height": 128.0,
             "type": "FMSInfo",
@@ -71,9 +71,9 @@
           },
           {
             "title": "Match Time",
-            "x": 384.0,
+            "x": 0.0,
             "y": 256.0,
-            "width": 384.0,
+            "width": 512.0,
             "height": 256.0,
             "type": "Match Time",
             "properties": {
@@ -87,9 +87,9 @@
           },
           {
             "title": "Auto Choices",
-            "x": 768.0,
-            "y": 384.0,
-            "width": 256.0,
+            "x": 1152.0,
+            "y": 0.0,
+            "width": 384.0,
             "height": 128.0,
             "type": "ComboBox Chooser",
             "properties": {
@@ -107,8 +107,8 @@
         "layouts": [
           {
             "title": "Claw",
-            "x": 640.0,
-            "y": 128.0,
+            "x": 512.0,
+            "y": 0.0,
             "width": 256.0,
             "height": 256.0,
             "type": "List Layout",
@@ -176,8 +176,8 @@
           },
           {
             "title": "Elevator",
-            "x": 896.0,
-            "y": 128.0,
+            "x": 768.0,
+            "y": 0.0,
             "width": 256.0,
             "height": 256.0,
             "type": "List Layout",
@@ -242,15 +242,292 @@
                 }
               }
             ]
+          },
+          {
+            "title": "Align",
+            "x": 256.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 512.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "RD",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/Align/RD",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "RP",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/Align/RP",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "RotationSetpoint",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/Align/RotationSetpoint",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "XD",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/Align/XD",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "XP",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/Align/XP",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "XSetpoint",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/Align/XSetpoint",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "YD",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/Align/YD",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "YP",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/Align/YP",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "YSetpoint",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/Align/YSetpoint",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "SSLevels",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 512.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "L1",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/SSLevels/L1",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "L1Auto",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/SSLevels/L1Auto",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "L2",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/SSLevels/L2",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "L2Algae",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/SSLevels/L2Algae",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "L3",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/SSLevels/L3",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "L4",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/SSLevels/L4",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "Drive",
+            "x": 1024.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "kD",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/Drive/kD",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "kP",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/Drive/kP",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
           }
         ],
         "containers": [
           {
             "title": "Refresh Tunable Config",
-            "x": 640.0,
-            "y": 0.0,
-            "width": 256.0,
-            "height": 128.0,
+            "x": 512.0,
+            "y": 256.0,
+            "width": 512.0,
+            "height": 256.0,
             "type": "Command",
             "properties": {
               "topic": "/SmartDashboard/Refresh Tunable Config",
