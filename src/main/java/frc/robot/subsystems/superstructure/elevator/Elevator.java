@@ -10,8 +10,11 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
+import frc.robot.subsystems.superstructure.claw.ClawConstants;
+import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -53,6 +56,14 @@ public class Elevator extends SubsystemBase {
             inputs.positionRad,
             inputs.setpoint,
             ElevatorConstants.ELEVATOR_RAD_TOLERANCE.in(Radians)
+        );
+    }
+
+    // TODO: refactor
+    public Command getUpOrDown(DoubleSupplier valueSupplier) {
+        return new RunCommand(
+            () -> runMotor(MathUtil.applyDeadband(valueSupplier.getAsDouble(), ClawConstants.CONTROLLER_DEADBAND)),
+            this
         );
     }
 

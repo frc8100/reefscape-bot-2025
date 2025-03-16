@@ -220,7 +220,7 @@ public class RobotContainer {
 
         autoChooser.addOption("Actually move forward", autoRoutines.actuallyMoveForward());
 
-        autoChooser.addOption("L1 Auto", autoRoutines.moveForwardAndCoral());
+        autoChooser.addOption("L1 Auto", autoRoutines.moveForwardAndL1());
 
         // Command to refresh the config
         SmartDashboard.putData("Refresh Tunable Config", TunableValue.refreshConfig);
@@ -240,10 +240,10 @@ public class RobotContainer {
             .getJoystickButtonOf(Controls.mainDriveControls.zeroGyroButton)
             .onTrue(new InstantCommand(swerveSubsystem::zeroGyro));
 
-        // Controls.mainDriveControls
-        //     .getJoystickButtonOf(Controls.mainDriveControls.alignLeft)
-        //     // .whileTrue(autoRoutines.pathFindToLocation(FieldLocations.REEF_1L));
-        //     .whileTrue(new AlignToReefTagRelative(false, swerveSubsystem));
+        Controls.mainDriveControls
+            .getJoystickButtonOf(Controls.mainDriveControls.alignLeft)
+            // .whileTrue(autoRoutines.pathFindToLocation(FieldLocations.REEF_1L));
+            .whileTrue(new AlignToReefTagRelative(false, swerveSubsystem));
 
         // Align (old)
         // Controls.mainDriveControls
@@ -281,13 +281,17 @@ public class RobotContainer {
         // Run the intake/outtake command when the button is pressed
         clawSubsystem.setDefaultCommand(clawSubsystem.getRunCommand(Controls.Claw::getIntakeOrOuttake));
 
-        // TODO
+        clawSubsystem.setDefaultCommand(
+            clawSubsystem.getRunAndAngleCommand(Controls.Claw::getIntakeOrOuttake, Controls.Claw::getUpOrDown)
+        );
+
+        // TODO: remove
         new JoystickButton(Controls.Claw.clawController, Controls.Claw.upButton).whileTrue(
-            Commands.run(() -> clawSubsystem.io.increaseTurnPosition(0.035))
+            Commands.run(() -> clawSubsystem.io.increaseTurnPosition(0.035), clawSubsystem)
         );
 
         new JoystickButton(Controls.Claw.clawController, Controls.Claw.downButton).whileTrue(
-            Commands.run(() -> clawSubsystem.io.increaseTurnPosition(-0.035))
+            Commands.run(() -> clawSubsystem.io.increaseTurnPosition(-0.035), clawSubsystem)
         );
 
         new JoystickButton(Controls.Claw.clawController, Controls.Claw.zeroEncoder).onTrue(
@@ -300,7 +304,9 @@ public class RobotContainer {
 
         // Superstructure
         // TODO:
-        Controls.Superstructure.moveToL1.whileTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L1));
+        Controls.Superstructure.moveToL1.whileTrue(
+            autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.INITIAL_POSITION)
+        );
         Controls.Superstructure.moveToL2.whileTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L2));
         Controls.Superstructure.moveToL3.whileTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L3));
 
@@ -308,7 +314,6 @@ public class RobotContainer {
         Controls.Superstructure.moveToL4.whileTrue(
             autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.ALGAE_L2)
         );
-
         // Controls.Superstructure.moveToL1.onTrue(
         //     clawSubsystem.getWaitForAngleCommand(SuperstructureConstants.Level.L1.getClawAngle())
         // );
@@ -329,13 +334,17 @@ public class RobotContainer {
         //     .onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.ALGAE_L1));
 
         // TODO: Elevator
-        new JoystickButton(Controls.Elevator.elevatorController, Controls.Elevator.upButton)
-            .onTrue(Commands.runOnce(() -> elevatorSubsystem.runMotor(1), elevatorSubsystem))
-            .onFalse(Commands.runOnce(() -> elevatorSubsystem.runMotor(0), elevatorSubsystem));
+        elevatorSubsystem.setDefaultCommand(elevatorSubsystem.getUpOrDown(Controls.Elevator::getUpOrDown));
 
-        new JoystickButton(Controls.Elevator.elevatorController, Controls.Elevator.downButton)
-            .onTrue(Commands.runOnce(() -> elevatorSubsystem.runMotor(-1), elevatorSubsystem))
-            .onFalse(Commands.runOnce(() -> elevatorSubsystem.runMotor(0), elevatorSubsystem));
+        new JoystickButton(Controls.Elevator.elevatorController, Controls.Elevator.upButton).whileTrue(
+            Commands.run(() -> elevatorSubsystem.runMotor(1), elevatorSubsystem)
+        );
+        // .onFalse(Commands.runOnce(() -> elevatorSubsystem.runMotor(0), elevatorSubsystem));
+
+        new JoystickButton(Controls.Elevator.elevatorController, Controls.Elevator.downButton).whileTrue(
+            Commands.run(() -> elevatorSubsystem.runMotor(-1), elevatorSubsystem)
+        );
+        // .onFalse(Commands.runOnce(() -> elevatorSubsystem.runMotor(0), elevatorSubsystem));
     }
 
     /**

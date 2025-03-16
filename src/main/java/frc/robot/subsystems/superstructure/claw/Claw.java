@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Controls;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import java.util.function.DoubleSupplier;
@@ -60,6 +61,19 @@ public class Claw extends SubsystemBase {
             targetAngle.getRadians(),
             inputs.turnPositionRad,
             ClawConstants.ANGLE_TOLERANCE_RADIANS.in(Radians)
+        );
+    }
+
+    public Command getRunAndAngleCommand(DoubleSupplier motorInputSupplier, DoubleSupplier angleInputSupplier) {
+        return new RunCommand(
+            () -> {
+                io.runOuttake(motorInputSupplier.getAsDouble());
+                io.increaseTurnPosition(
+                    MathUtil.applyDeadband(angleInputSupplier.getAsDouble(), ClawConstants.CONTROLLER_DEADBAND) *
+                    Controls.Claw.clawIncreaseAmount
+                );
+            },
+            this
         );
     }
 

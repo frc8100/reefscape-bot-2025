@@ -210,17 +210,27 @@ public class Controls {
 
         public static final int upButton = XboxController.Button.kB.value;
         public static final int downButton = XboxController.Button.kA.value;
-        // public static final double getUpOrDown() {
-        // Get controller input
-        // double intakeInput = armController.getRawAxis(intakeAxis);
-        // double outtakeInput = armController.getRawAxis(outtakeAxis);
 
-        // Get the larger of them
-        // if (intakeInput >= outtakeInput) {
-        //     return ClawConstants.IntakeOuttakeDirection.INTAKE.getDirection() * intakeInput;
-        // } else {
-        //     return ClawConstants.IntakeOuttakeDirection.OUTTAKE.getDirection() * outtakeInput;
-        // }
+        public static final int upDownAxis = XboxController.Axis.kRightY.value;
+
+        /**
+         * Amount to increase by per frame
+         */
+        public static final double clawIncreaseAmount = 0.0325;
+
+        public static final double getUpOrDown() {
+            return -clawController.getRawAxis(upDownAxis);
+            // Get controller input
+            // double intakeInput = clawController.getRawAxis(upDownAxis);
+            // double outtakeInput = clawController.getRawAxis(outtakeAxis);
+
+            // // Get the larger of them
+            // if (intakeInput >= outtakeInput) {
+            //     return 1;
+            // } else {
+            //     return -1;
+            // }
+        }
 
         public static final int zeroEncoder = XboxController.Button.kRightBumper.value;
     }
@@ -242,6 +252,22 @@ public class Controls {
         public static final int upButton = XboxController.Button.kY.value;
         public static final int downButton = XboxController.Button.kX.value;
         public static final int zeroEncoder = XboxController.Button.kLeftBumper.value;
+
+        private static final int upDownAxis = XboxController.Axis.kLeftY.value;
+
+        public static final double getUpOrDown() {
+            return -elevatorController.getRawAxis(upDownAxis);
+            // Get controller input
+            // double intakeInput = clawController.getRawAxis(upDownAxis);
+            // double outtakeInput = clawController.getRawAxis(outtakeAxis);
+
+            // // Get the larger of them
+            // if (intakeInput >= outtakeInput) {
+            //     return 1;
+            // } else {
+            //     return -1;
+            // }
+        }
     }
 
     /**
