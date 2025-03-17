@@ -218,8 +218,10 @@ public class Controls {
          */
         public static final double clawIncreaseAmount = 0.0325;
 
+        public static final double slowAmount = 0.4;
+
         public static final double getUpOrDown() {
-            return -clawController.getRawAxis(upDownAxis);
+            return -clawController.getRawAxis(upDownAxis) * (clawController.getRawButton(slowButton) ? slowAmount : 1);
             // Get controller input
             // double intakeInput = clawController.getRawAxis(upDownAxis);
             // double outtakeInput = clawController.getRawAxis(outtakeAxis);
@@ -232,7 +234,8 @@ public class Controls {
             // }
         }
 
-        public static final int zeroEncoder = XboxController.Button.kRightBumper.value;
+        public static final int zeroEncoder = XboxController.Button.kLeftBumper.value;
+        public static final int slowButton = XboxController.Button.kRightBumper.value;
     }
 
     /**
@@ -253,10 +256,16 @@ public class Controls {
         public static final int downButton = XboxController.Button.kX.value;
         public static final int zeroEncoder = XboxController.Button.kLeftBumper.value;
 
+        public static final int slowButton = XboxController.Button.kRightBumper.value;
+        public static final double slowAmount = 0.4;
+
         private static final int upDownAxis = XboxController.Axis.kLeftY.value;
 
         public static final double getUpOrDown() {
-            return -elevatorController.getRawAxis(upDownAxis);
+            return (
+                -elevatorController.getRawAxis(upDownAxis) *
+                (elevatorController.getRawButton(slowButton) ? slowAmount : 1)
+            );
             // Get controller input
             // double intakeInput = clawController.getRawAxis(upDownAxis);
             // double outtakeInput = clawController.getRawAxis(outtakeAxis);

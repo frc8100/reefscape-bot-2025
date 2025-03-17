@@ -26,6 +26,7 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.MathUtil;
@@ -279,10 +280,16 @@ public class ModuleIOSpark implements ModuleIO {
 
         driveMotor.set(percentOutput);
         // TODO: set the speed using the PID controller
-        double velocity = desiredState.speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters);
+        double velocityRadiansPerSecond = desiredState.speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters);
 
-        Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "DrivePID", velocity);
-        // driveClosedLoopController.setReference(velocity, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
+        double ffVolts =
+            SwerveConfig.driveKS * Math.signum(velocityRadiansPerSecond) +
+            SwerveConfig.driveKV * velocityRadiansPerSecond;
+
+        Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "DrivePID", velocityRadiansPerSecond);
+        Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "FF", ffVolts);
+        // driveClosedLoopController.setReference(velocityRadiansPerSecond, ControlType.kVelocity, ClosedLoopSlot.kSlot0, ffVolts,
+        // ArbFFUnits.kVoltage);
     }
 
     @Override

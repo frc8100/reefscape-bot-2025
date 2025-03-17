@@ -77,10 +77,11 @@ public final class ElevatorConstants {
     public static final double ELEVATOR_GEAR_RATIO = 48.0;
 
     public static final Angle ELEVATOR_MIN_POSITION = Radians.of(-3);
-    public static final Angle ELEVATOR_MAX_POSITION = Radians.of(24);
+    public static final Angle ELEVATOR_MAX_POSITION = Radians.of(28.5);
 
     public static final boolean ELEVATOR_MOTOR_INVERTED = false;
     public static final Current ELEVATOR_MOTOR_CURRENT_LIMIT = Amps.of(40);
+
     /** Rotations to radians */
     public static final double ELEVATOR_MOTOR_POSITION_FACTOR = (2 * Math.PI) / ELEVATOR_GEAR_RATIO;
     public static final Distance ELEVATOR_DRUM_RADIUS = Inches.of(0.75);
