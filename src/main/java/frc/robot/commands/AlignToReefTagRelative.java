@@ -55,14 +55,14 @@ public class AlignToReefTagRelative extends Command {
         (double value) -> Y_SETPOINT_REEF_ALIGNMENT = value
     );
 
-    public static double X_P = 0.25;
-    public static double X_D = 0.02;
+    public static double X_P = 1;
+    public static double X_D = 0.005;
 
-    public static double Y_P = 0.25;
-    public static double Y_D = 0.2;
+    public static double Y_P = 0.75;
+    public static double Y_D = 0.005;
 
-    public static double R_P = 0.025;
-    public static double R_D = 0.02;
+    public static double R_P = 0.04;
+    public static double R_D = 0.002;
 
     public static final TunableValue X_P_TUNABLE = new TunableValue("Align/XP", X_P, (double value) -> X_P = value);
     public static final TunableValue X_D_TUNABLE = new TunableValue("Align/XD", X_D, (double value) -> X_D = value);
@@ -111,9 +111,9 @@ public class AlignToReefTagRelative extends Command {
         this.driveSubsystem = driveSubsystem;
         addRequirements(driveSubsystem);
 
-        xController = new PIDController(X_P, 0.0, X_D);
-        yController = new PIDController(Y_P, 0.0, Y_D);
-        rotController = new PIDController(R_P, 0.0, R_D);
+        xController = new PIDController(X_P_TUNABLE.get(), 0.0, X_D_TUNABLE.get());
+        yController = new PIDController(Y_P_TUNABLE.get(), 0.0, Y_D_TUNABLE.get());
+        rotController = new PIDController(R_P_TUNABLE.get(), 0.0, R_D_TUNABLE.get());
     }
 
     @Override
