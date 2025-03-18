@@ -71,6 +71,9 @@ public interface ClawIO extends GenericSparkIO<ClawIO.ClawIOInputs> {
      */
     public default void periodic() {}
 
+    // TODO: doc
+    public default void resetSetpointToCurrentPosition() {}
+
     /**
      * Zeros the encoder to the given value.
      * @param value - The value to set the encoder to.

@@ -278,7 +278,7 @@ public class ModuleIOSpark implements ModuleIO {
         // Clamp the percent output to the max speed
         percentOutput = MathUtil.clamp(percentOutput, -SwerveConfig.MAX_DRIVE_POWER, SwerveConfig.MAX_DRIVE_POWER);
 
-        driveMotor.set(percentOutput);
+        // driveMotor.set(percentOutput);
         // TODO: set the speed using the PID controller
         double velocityRadiansPerSecond = desiredState.speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters);
 
@@ -286,10 +286,16 @@ public class ModuleIOSpark implements ModuleIO {
             SwerveConfig.driveKS * Math.signum(velocityRadiansPerSecond) +
             SwerveConfig.driveKV * velocityRadiansPerSecond;
 
+        Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "Percent", percentOutput);
         Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "DrivePID", velocityRadiansPerSecond);
         Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "FF", ffVolts);
-        // driveClosedLoopController.setReference(velocityRadiansPerSecond, ControlType.kVelocity, ClosedLoopSlot.kSlot0, ffVolts,
-        // ArbFFUnits.kVoltage);
+        driveClosedLoopController.setReference(
+            velocityRadiansPerSecond,
+            ControlType.kVelocity,
+            ClosedLoopSlot.kSlot0,
+            ffVolts,
+            ArbFFUnits.kVoltage
+        );
     }
 
     @Override

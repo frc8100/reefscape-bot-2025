@@ -47,6 +47,11 @@ public final class ClawConstants {
         public static final Rotation2d RESTING_ANGLE = Rotation2d.fromDegrees(0);
 
         /**
+         * Amount to rotate the claw to when moving the elevator up.
+         */
+        public static final Rotation2d CLAW_HOLDING_POSITION = Rotation2d.fromDegrees(125).minus(CLAW_ANGLE_OFFSET);
+
+        /**
          * The horizontal, front/back translation of the claw from the origin of the second elevator stage.
          */
         public static final double ELEVATOR_TO_CLAW_X = 0.27;

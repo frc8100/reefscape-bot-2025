@@ -156,10 +156,10 @@ public class SwerveConfig {
 
     // Drive Motor PID Values
     // public static final double driveKP = 0.01;
-    public static final double driveKP = 0.02;
+    public static final double driveKP = 0.01;
     public static final double driveKI = 0.0;
     // public static final double driveKD = 0.0;
-    public static final double driveKD = 0.05;
+    public static final double driveKD = 0.005;
     public static final double driveKF = 0.0;
 
     public static final TunableValue driveKPTunable = new TunableValue("Drive/kP", driveKP);

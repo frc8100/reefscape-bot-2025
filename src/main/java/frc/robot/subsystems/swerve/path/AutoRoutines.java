@@ -26,6 +26,10 @@ import java.util.function.Supplier;
  */
 public class AutoRoutines {
 
+    // public enum FieldLocationType {
+
+    // }
+
     /**
      * Locations of the robot to interact with the field elements.
      * Note: not flipped for the other side of the field.
@@ -151,12 +155,16 @@ public class AutoRoutines {
      */
     public Command setUpSuperstructure(SuperstructureConstants.Level level) {
         return clawSubsystem
-            // TODO: Move claw out of the way first before moving elevator
-            .getWaitForAngleCommand(Rotation2d.fromDegrees(90))
+            // Move claw out of way
+            .getWaitForAngleCommand(ClawConstants.RotationPositions.CLAW_HOLDING_POSITION)
+            // Raise elevator
             .andThen(elevatorSubsystem.getPositionCommandAndWait(level))
+            // Move claw to level angle
             .andThen(clawSubsystem.getWaitForAngleCommand(level.getClawAngle()))
+            // Stop when interrupted
             .handleInterrupt(() -> {
                 elevatorSubsystem.io.resetSetpointToCurrentPosition();
+                clawSubsystem.io.resetSetpointToCurrentPosition();
             });
     }
 

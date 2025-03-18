@@ -207,6 +207,11 @@ public class ClawIOSpark implements ClawIO {
     }
 
     @Override
+    public void resetSetpointToCurrentPosition() {
+        radianSetpoint = angleEncoder.getPosition();
+    }
+
+    @Override
     public void zeroEncoder(double value) {
         angleEncoder.setPosition(value);
         radianSetpoint = 0.0;
