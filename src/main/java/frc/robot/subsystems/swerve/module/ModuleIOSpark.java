@@ -18,6 +18,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.RelativeEncoder;
@@ -34,6 +35,7 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.units.measure.Angle;
 import frc.lib.util.SparkUtil;
 import frc.lib.util.TunableValue;
 import frc.lib.util.swerveUtil.RevSwerveModuleConstants;
@@ -56,11 +58,11 @@ public class ModuleIOSpark implements ModuleIO {
 
     /**
      * The angle motor. This motor is used to control the angle of the module.
-     * Includes the integrated encoder {@link #relAngleEncoder} and an absolute CANcoder {@link #angleEncoder}.
+     * Includes the integrated encoder {@link #relAngleEncoder} and an absolute CANcoder {@link #angleCANcoder}.
      */
     private final SparkMax angleMotor;
 
-    private final CANcoder angleEncoder;
+    private final CANcoder angleCANcoder;
     private final RelativeEncoder relAngleEncoder;
     private final SparkClosedLoopController angleClosedLoopController;
 
@@ -72,6 +74,11 @@ public class ModuleIOSpark implements ModuleIO {
 
     private final RelativeEncoder relDriveEncoder;
     private final SparkClosedLoopController driveClosedLoopController;
+
+    /**
+     * Status signal queue from CANcoder
+     */
+    private final StatusSignal<Angle> turnAbsolutePosition;
 
     // Queue inputs from odometry thread
     private final Queue<Double> timestampQueue;
@@ -125,9 +132,13 @@ public class ModuleIOSpark implements ModuleIO {
         SparkUtil.tryUntilOk(driveMotor, 5, () -> relDriveEncoder.setPosition(0.0));
 
         // Create and configure the CANCoder
-        angleEncoder = new CANcoder(moduleConstants.cancoderID);
-        angleEncoder.getConfigurator().refresh(new CANcoderConfiguration());
-        angleEncoder.getConfigurator().apply(SwerveConfig.getCANcoderConfig());
+        angleCANcoder = new CANcoder(moduleConstants.cancoderID);
+        angleCANcoder.getConfigurator().refresh(new CANcoderConfiguration());
+        angleCANcoder.getConfigurator().apply(SwerveConfig.getCANcoderConfig());
+
+        turnAbsolutePosition = angleCANcoder.getAbsolutePosition();
+        turnAbsolutePosition.setUpdateFrequency(50.0);
+        angleCANcoder.optimizeBusUtilization();
 
         // Reset the module to absolute position
         resetToAbsolute();
@@ -139,11 +150,7 @@ public class ModuleIOSpark implements ModuleIO {
             .registerSignal(
                 angleMotor,
                 // TODO: override
-                () -> angleEncoder.getAbsolutePosition().getValue().in(Degrees)
-                // () ->
-                //     moduleNumber == 1
-                //         ? currentAngleSetpoint.getDegrees()
-                //         : angleEncoder.getAbsolutePosition().getValue().in(Degrees)
+                () -> turnAbsolutePosition.getValue().in(Radians)
             );
 
         TunableValue.addRefreshConfigConsumer(this::onRefresh);
@@ -168,7 +175,7 @@ public class ModuleIOSpark implements ModuleIO {
      * @return The CANCoder angle of the module.
      */
     public Rotation2d getCanCoder() {
-        return new Rotation2d(angleEncoder.getAbsolutePosition().getValue().in(Radians));
+        return new Rotation2d(angleCANcoder.getAbsolutePosition().getValue().in(Radians));
     }
 
     @Override
@@ -207,21 +214,20 @@ public class ModuleIOSpark implements ModuleIO {
         inputs.driveConnected = driveConnectedDebounce.calculate(!SparkUtil.sparkStickyFault);
 
         // Update turn inputs
+
+        // Refresh
+        turnAbsolutePosition.refresh();
+
         SparkUtil.sparkStickyFault = false;
         SparkUtil.ifOk(
             angleMotor,
             // turnEncoder::getPosition,
-            () -> angleEncoder.getAbsolutePosition().getValue().in(Radians),
+            () -> turnAbsolutePosition.getValue().in(Radians),
             value -> inputs.turnPosition = new Rotation2d(value).minus(angleOffset)
-            // TODO: override
-            // value ->
-            //     inputs.turnPosition = moduleNumber == 1
-            //         ? currentAngleSetpoint
-            //         : new Rotation2d(value).minus(angleOffset)
         );
         SparkUtil.ifOk(
             angleMotor,
-            () -> angleEncoder.getAbsolutePosition().getValue().in(Radians),
+            () -> turnAbsolutePosition.getValue().in(Radians),
             value -> inputs.turnPositionRaw = value
         );
         SparkUtil.ifOk(angleMotor, relAngleEncoder::getVelocity, value -> inputs.turnVelocityRadPerSec = value);
@@ -286,9 +292,9 @@ public class ModuleIOSpark implements ModuleIO {
             SwerveConfig.driveKS * Math.signum(velocityRadiansPerSecond) +
             SwerveConfig.driveKV * velocityRadiansPerSecond;
 
-        Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "Percent", percentOutput);
-        Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "DrivePID", velocityRadiansPerSecond);
-        Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "FF", ffVolts);
+        // Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "Percent", percentOutput);
+        // Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "DrivePID", velocityRadiansPerSecond);
+        // Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "FF", ffVolts);
         driveClosedLoopController.setReference(
             velocityRadiansPerSecond,
             ControlType.kVelocity,
@@ -322,5 +328,9 @@ public class ModuleIOSpark implements ModuleIO {
 
         // Set the target
         currentAngleSetpoint = angle;
+
+        // debug
+        Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "/Setpoint", degReference);
+        Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "/Current", relAngleEncoder.getPosition());
     }
 }
