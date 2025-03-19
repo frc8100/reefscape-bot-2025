@@ -1,10 +1,10 @@
 {
   "hubs": [
     {
-      "x": -8,
-      "y": -8,
-      "width": 1552,
-      "height": 832,
+      "x": 207,
+      "y": 99,
+      "width": 1119,
+      "height": 641,
       "state": {
         "sidebar": {
           "width": 300,
@@ -13,7 +13,6 @@
             "/SmartDashboard/BatterySim",
             "/AdvantageKit/RealOutputs",
             "/AdvantageKit/RealOutputs/Swerve/States",
-            "/AdvantageKit/RealOutputs/Swerve/ChassisSpeeds",
             "/AdvantageKit/Drive/Module1/TurnPosition",
             "/SmartDashboard/Auto Choices",
             "/Tuning/Claw",
@@ -27,7 +26,6 @@
             "/AdvantageKit/RealOutputs/Swerve/States/Measured/0",
             "/AdvantageKit/RealOutputs/Swerve/States/Setpoints",
             "/AdvantageKit/RealOutputs/Swerve/States/Setpoints/0",
-            "/AdvantageKit/Drive/Module0",
             "/AdvantageKit/Drive/Module0/TurnPosition",
             "/AdvantageKit/RealOutputs/Swerve/ChassisSpeeds/Measured",
             "/Tuning/Drive",
@@ -35,11 +33,20 @@
             "/AdvantageKit/RealOutputs/Align",
             "/AdvantageKit/RealOutputs/Align/positions",
             "/AdvantageKit/RealOutputs/Align/Positions",
-            "/AdvantageKit/RealOutputs/Align/Speeds"
+            "/AdvantageKit/RealOutputs/Align/Speeds",
+            "/AdvantageKit/RealOutputs/Swerve",
+            "/Tuning",
+            "/Tuning/Align",
+            "/AdvantageKit/Drive",
+            "/AdvantageKit/Drive/Module1",
+            "/AdvantageKit/RealOutputs/Swerve/Mod1",
+            "/AdvantageKit/Drive/Module1/OdometryTurnPositions",
+            "/AdvantageKit/Drive/Module1/OdometryTurnPositions/0",
+            "/AdvantageKit/Drive/Module1/OdometryTurnPositions/1"
           ]
         },
         "tabs": {
-          "selected": 3,
+          "selected": 1,
           "tabs": [
             {
               "type": 0,
@@ -249,7 +256,7 @@
                 "cameraPosition": [
                   4.1844590779152115,
                   3.2839757884866767,
-                  -2.5409407223439318
+                  -2.540940722343932
                 ],
                 "cameraTarget": [
                   3.2105320127031276,
@@ -316,6 +323,51 @@
                 "orientation": 1
               },
               "controllerUUID": "bsenclt8xkd6jc56q9xx0wdzw1n4rstb",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Line Graph",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Swerve/Mod1/Current",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Swerve/Mod1/Setpoint",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [],
+                "discreteSources": [],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "vvam7qw24uu06i7nh7qynduo482rz3uf",
               "renderer": null,
               "controlsHeight": 200
             },
@@ -403,7 +455,7 @@
                   "factor": 1
                 },
                 "leftFilter": 0,
-                "rightFilter": 0
+                "rightFilter": 1
               },
               "controllerUUID": "dof0zzvjpgufkiz0t57aihmqnt4d737h",
               "renderer": null,

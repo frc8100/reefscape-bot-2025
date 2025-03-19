@@ -175,7 +175,7 @@ public class ModuleIOSpark implements ModuleIO {
      * @return The CANCoder angle of the module.
      */
     public Rotation2d getCanCoder() {
-        return new Rotation2d(angleCANcoder.getAbsolutePosition().getValue().in(Radians));
+        return new Rotation2d(turnAbsolutePosition.getValue().in(Radians));
     }
 
     @Override
