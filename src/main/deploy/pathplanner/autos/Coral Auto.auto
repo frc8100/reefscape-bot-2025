@@ -7,25 +7,31 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Move to reef"
+            "pathName": "1. To R"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "CR1"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 3.0
+            "name": "SetupSuperstructureL3"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Reef to processor"
+            "pathName": "2. R to CS1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "SetupSuperstructureL3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "3. CS1 to R"
           }
         }
       ]
