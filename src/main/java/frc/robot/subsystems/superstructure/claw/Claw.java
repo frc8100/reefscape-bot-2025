@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -111,20 +112,26 @@ public class Claw extends SubsystemBase {
     /**
      * @return A command to run the claw intake or outtake for {@link ClawConstants.INTAKE_OUTTAKE_TIME}.
      * @param direction - The direction to run the intake or outtake. See {@link ClawConstants.IntakeOuttakeDirection} for the possible directions.
+     * @param timeout - The amount of time to run the intake or outtake for.
      */
-    public Command runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection direction) {
+    public Command runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection direction, Time timeout) {
         return Commands.deadline(
             // Stop after a certain amount of time
-            Commands.waitTime(
-                direction == ClawConstants.IntakeOuttakeDirection.BACK
-                    ? ClawConstants.INTAKE_TIME
-                    : ClawConstants.OUTTAKE_TIME
-            ),
+            Commands.waitTime(timeout),
             // Run the outtake
             new RunCommand(() -> io.runOuttake(direction.getDirection()), this)
         ).andThen(
             // Stop the outtake
             new InstantCommand(() -> io.runOuttake(0), this)
+        );
+    }
+
+    public Command runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection direction) {
+        return runIntakeOrOuttake(
+            direction,
+            direction == ClawConstants.IntakeOuttakeDirection.BACK
+                ? ClawConstants.INTAKE_TIME
+                : ClawConstants.OUTTAKE_TIME
         );
     }
 

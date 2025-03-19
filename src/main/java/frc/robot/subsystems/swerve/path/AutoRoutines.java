@@ -1,9 +1,11 @@
 package frc.robot.subsystems.swerve.path;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
@@ -26,59 +28,51 @@ import java.util.function.Supplier;
  */
 public class AutoRoutines {
 
-    // public enum FieldLocationType {
-
-    // }
+    /**
+     * The types of field locations.
+     */
+    public enum FieldLocationType {
+        LEFT_REEF,
+        RIGHT_REEF,
+        CORAL_STATION,
+        PROCESSOR,
+    }
 
     /**
      * Locations of the robot to interact with the field elements.
-     * Note: not flipped for the other side of the field.
+     * Pose is relative to the blue alliance.
      */
     public enum FieldLocations {
-        REEF_1L(new Pose2d(3.74, 5, Rotation2d.fromDegrees(-60))),
-        REEF_1R(new Pose2d(4, 5.15, Rotation2d.fromDegrees(-60))),
+        REEF_1L(new Pose2d(3.74, 5, Rotation2d.fromDegrees(-60)), FieldLocationType.LEFT_REEF),
+        REEF_1R(new Pose2d(4, 5.15, Rotation2d.fromDegrees(-60)), FieldLocationType.RIGHT_REEF),
 
-        REEF_2L(new Pose2d(4.95, 5.16, Rotation2d.fromDegrees(-120))),
-        REEF_2R(new Pose2d(5.22, 5, Rotation2d.fromDegrees(-120))),
+        REEF_2L(new Pose2d(4.95, 5.16, Rotation2d.fromDegrees(-120)), FieldLocationType.LEFT_REEF),
+        REEF_2R(new Pose2d(5.22, 5, Rotation2d.fromDegrees(-120)), FieldLocationType.RIGHT_REEF),
 
-        REEF_3L(new Pose2d(5.7, 4.2, Rotation2d.fromDegrees(180))),
-        REEF_3R(new Pose2d(5.7, 3.87, Rotation2d.fromDegrees(180))),
+        REEF_3L(new Pose2d(5.7, 4.2, Rotation2d.fromDegrees(180)), FieldLocationType.LEFT_REEF),
+        REEF_3R(new Pose2d(5.7, 3.87, Rotation2d.fromDegrees(180)), FieldLocationType.RIGHT_REEF),
 
-        REEF_4L(new Pose2d(5.24, 3.06, Rotation2d.fromDegrees(120))),
-        REEF_4R(new Pose2d(4.96, 2.9, Rotation2d.fromDegrees(120))),
+        REEF_4L(new Pose2d(5.24, 3.06, Rotation2d.fromDegrees(120)), FieldLocationType.LEFT_REEF),
+        REEF_4R(new Pose2d(4.96, 2.9, Rotation2d.fromDegrees(120)), FieldLocationType.RIGHT_REEF),
 
-        REEF_5L(new Pose2d(4.03, 2.89, Rotation2d.fromDegrees(60))),
-        REEF_5R(new Pose2d(3.75, 3.06, Rotation2d.fromDegrees(60))),
+        REEF_5L(new Pose2d(4.03, 2.89, Rotation2d.fromDegrees(60)), FieldLocationType.LEFT_REEF),
+        REEF_5R(new Pose2d(3.75, 3.06, Rotation2d.fromDegrees(60)), FieldLocationType.RIGHT_REEF),
 
-        REEF_6L(new Pose2d(3.28, 3.85, Rotation2d.fromDegrees(0))),
-        REEF_6R(new Pose2d(3.28, 4.17, Rotation2d.fromDegrees(0))),
+        REEF_6L(new Pose2d(3.28, 3.85, Rotation2d.fromDegrees(0)), FieldLocationType.LEFT_REEF),
+        REEF_6R(new Pose2d(3.28, 4.17, Rotation2d.fromDegrees(0)), FieldLocationType.RIGHT_REEF),
 
-        CORAL_STATION_1(new Pose2d(1.1, 1.1, Rotation2d.fromDegrees(55))),
-        CORAL_STATION_2(new Pose2d(1.1, 6.8, Rotation2d.fromDegrees(-55)));
+        CORAL_STATION_1(new Pose2d(1.1, 1.1, Rotation2d.fromDegrees(55)), FieldLocationType.CORAL_STATION),
+        CORAL_STATION_2(new Pose2d(1.1, 6.8, Rotation2d.fromDegrees(-55)), FieldLocationType.CORAL_STATION),
 
-        /**
-         * @return An array of all reef poses.
-         */
-        // TODO: optimize
-        // public static List<Pose2d> getReefPoses() {
-        //     return List.of(
-        //         REEF_1L.getPose(),
-        //         REEF_1R.getPose(),
-        //         REEF_2L.getPose(),
-        //         REEF_2R.getPose(),
-        //         REEF_3L.getPose(),
-        //         REEF_3R.getPose(),
-        //         REEF_4L.getPose(),
-        //         REEF_4R.getPose(),
-        //         REEF_5L.getPose(),
-        //         REEF_5R.getPose(),
-        //         REEF_6L.getPose(),
-        //         REEF_6R.getPose()
-        //     );
-        // }
+        PROCESSOR(new Pose2d(6.732, 0.652, Rotation2d.fromDegrees(-90)), FieldLocationType.PROCESSOR);
 
-        public static List<Pose2d> getLeftReefPoses() {
-            return List.of(
+        // A list of all the left reef poses and right reef poses, for easy access
+        private static final List<Pose2d> leftReefPoses;
+        private static final List<Pose2d> rightReefPoses;
+
+        // Initialize the lists of reef poses
+        static {
+            leftReefPoses = List.of(
                 REEF_1L.getPose(),
                 REEF_2L.getPose(),
                 REEF_3L.getPose(),
@@ -86,10 +80,8 @@ public class AutoRoutines {
                 REEF_5L.getPose(),
                 REEF_6L.getPose()
             );
-        }
 
-        public static List<Pose2d> getRightReefPoses() {
-            return List.of(
+            rightReefPoses = List.of(
                 REEF_1R.getPose(),
                 REEF_2R.getPose(),
                 REEF_3R.getPose(),
@@ -99,17 +91,40 @@ public class AutoRoutines {
             );
         }
 
-        private Pose2d pose;
-
-        /**
-         * @return The pose of the location. Automatically flips if necessary
-         */
-        public Pose2d getPose() {
-            return PoseUtil.apply(pose);
+        public static List<Pose2d> getLeftReefPoses() {
+            return leftReefPoses;
         }
 
-        private FieldLocations(Pose2d pose) {
+        public static List<Pose2d> getRightReefPoses() {
+            return rightReefPoses;
+        }
+
+        private Pose2d pose;
+        private FieldLocationType type;
+
+        /**
+         * @return The pose of the location. Automatically flips if necessary.
+         * @param shouldFlip - Whether or not to flip the pose. Defaults to true.
+         * Also takes into account the current alliance color.
+         */
+        public Pose2d getPose(boolean shouldFlip) {
+            return (shouldFlip && PoseUtil.shouldFlip()) ? FlippingUtil.flipFieldPose(pose) : pose;
+        }
+
+        public Pose2d getPose() {
+            return getPose(true);
+        }
+
+        /**
+         * @return The type of the location.
+         */
+        public FieldLocationType getType() {
+            return type;
+        }
+
+        private FieldLocations(Pose2d pose, FieldLocationType type) {
             this.pose = pose;
+            this.type = type;
         }
     }
 
@@ -138,14 +153,16 @@ public class AutoRoutines {
         this.clawSubsystem = clawSubsystem;
     }
 
-    // public Pose2d getNearestReef() {
-    //     return getNearestReefGivenPosition(swerveSubsystem.getPose());
-    // }
-
+    /**
+     * @return The pose of the nearest left reef to the robot's current location.
+     */
     public Pose2d getNearestLeftReef() {
         return getNearestLeftReefGivenPosition(swerveSubsystem.getPose());
     }
 
+    /**
+     * @return The pose of the nearest right reef to the robot's current location.
+     */
     public Pose2d getNearestRightReef() {
         return getNearestRightReefGivenPosition(swerveSubsystem.getPose());
     }
@@ -171,14 +188,31 @@ public class AutoRoutines {
     /**
      * @return A command to pathfind to a given location.
      * @param location - The location to pathfind to. See {@link FieldLocations} for possible locations.
+     * @param shouldAlignToReef - Whether or not to align to the reef tag after pathfinding.
      */
-    public Command pathFindToLocation(FieldLocations location) {
+    public Command pathFindToLocation(FieldLocations location, boolean shouldAlignToReef) {
         // Get the command to go to the reef
-        return AutoBuilder.pathfindToPose(location.getPose(), SwerveConfig.pathConstraints);
-        // return new SequentialCommandGroup(
-        //     AutoBuilder.pathfindToPose(location.getPose(), SwerveConfig.pathConstraints),
-        //     Commands.waitSeconds(0.1)
-        // );
+        Command initialPathfindCommand = AutoBuilder.pathfindToPose(
+            // Do not flip the pose, as it is already flipped
+            location.getPose(false),
+            SwerveConfig.pathConstraints
+        );
+
+        // If the location is a reef, do the final alignment
+        if (
+            shouldAlignToReef &&
+            (location.getType() == FieldLocationType.LEFT_REEF || location.getType() == FieldLocationType.RIGHT_REEF)
+        ) {
+            return initialPathfindCommand.andThen(
+                new AlignToReefTagRelative(location.getType() == FieldLocationType.RIGHT_REEF, swerveSubsystem)
+            );
+        }
+
+        return initialPathfindCommand;
+    }
+
+    public Command pathFindToLocation(FieldLocations location) {
+        return pathFindToLocation(location, true);
     }
 
     public Command pathFindToLocation(Pose2d pose) {
@@ -205,6 +239,11 @@ public class AutoRoutines {
         );
     }
 
+    /**
+     * @return A command to move forward for a given amount of time at a given speed.
+     * @param vxMetersPerSecond - The speed to move forward at in meters per second.
+     * @param timeSeconds - The amount of time to move forward for in seconds.
+     */
     private Command driveForwardWithSpeedFor(double vxMetersPerSecond, double timeSeconds) {
         return Commands.deadline(
             Commands.waitSeconds(timeSeconds),
@@ -215,6 +254,10 @@ public class AutoRoutines {
         );
     }
 
+    /**
+     * @return A command that can be used in auto to move forward for a set amount of time.
+     * More reliable than pathfinding.
+     */
     public Command actuallyMoveForward() {
         return driveForwardWithSpeedFor(1, 2.25);
     }

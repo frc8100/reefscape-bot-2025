@@ -94,19 +94,19 @@ public class Controls {
 
         // TODO: doc
         /**
-         * Aligns the robot to the 6R reef, for testing purposes.
+         * Aligns the robot to the reeF.
          */
-        public int alignLeft = XboxController.Button.kB.value;
+        public int alignToLeftReefUsingVision = XboxController.Button.kB.value;
 
         /**
          * Aligns the robot to the nearest left reef.
          */
-        public int alignToNearestLeftReef = XboxController.Button.kB.value;
+        public int pathfindToNearestLeftReef = XboxController.Button.kB.value;
 
         /**
          * Aligns the robot to the nearest right reef.
          */
-        public int alignToNearestRightReef = XboxController.Button.kA.value;
+        public int pathfindToNearestRightReef = XboxController.Button.kA.value;
 
         /**
          * @return The translation (x)

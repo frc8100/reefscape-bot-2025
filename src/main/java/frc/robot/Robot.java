@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -53,6 +54,9 @@ public class Robot extends LoggedRobot {
                 ? Constants.Mode.REAL
                 : isSimulation() ? Constants.Mode.SIM : Constants.Mode.REPLAY;
         }
+
+        // joystickUnpluggedWarning
+        DriverStation.silenceJoystickConnectionWarning(Constants.silenceJoystickUnpluggedWarning);
 
         // Set up data receivers & replay source
         switch (Constants.currentMode) {

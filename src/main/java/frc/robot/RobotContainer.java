@@ -1,6 +1,9 @@
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -20,6 +23,7 @@ import frc.robot.commands.SwerveSysidRoutines;
 import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
 import frc.robot.subsystems.superstructure.claw.Claw;
+import frc.robot.subsystems.superstructure.claw.ClawConstants;
 import frc.robot.subsystems.superstructure.claw.ClawIOSpark;
 import frc.robot.subsystems.superstructure.claw.ClawSim;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
@@ -187,6 +191,34 @@ public class RobotContainer {
         // Set up auto routines
         autoRoutines = new AutoRoutines(swerveSubsystem, elevatorSubsystem, clawSubsystem);
 
+        // TODO: Register named commands
+        // NamedCommands.registerCommand(
+        //     "SetupSuperstructureL1",
+        //     autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L1_AUTO)
+        // );
+        // NamedCommands.registerCommand(
+        //     "SetupSuperstructureL2",
+        //     autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L2)
+        // );
+        // NamedCommands.registerCommand(
+        //     "SetupSuperstructureL3",
+        //     autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L3)
+        // );
+        // NamedCommands.registerCommand(
+        //     "SetupSuperstructureAlgaeL2",
+        //     autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.ALGAE_L2)
+        // );
+
+        // NamedCommands.registerCommand(
+        //     "ClawOut",
+        //     clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE)
+        // );
+
+        // NamedCommands.registerCommand(
+        //     "ClawHoldAlgae",
+        //     clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.BACK, Seconds.of(10))
+        // );
+
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
         // Set up SysId routines
@@ -241,8 +273,7 @@ public class RobotContainer {
             .onTrue(new InstantCommand(swerveSubsystem::zeroGyro));
 
         Controls.mainDriveControls
-            .getJoystickButtonOf(Controls.mainDriveControls.alignLeft)
-            // .whileTrue(autoRoutines.pathFindToLocation(FieldLocations.REEF_1L));
+            .getJoystickButtonOf(Controls.mainDriveControls.alignToLeftReefUsingVision)
             .whileTrue(new AlignToReefTagRelative(false, swerveSubsystem));
 
         // Align (old)
@@ -259,12 +290,12 @@ public class RobotContainer {
         //     );
 
         // Align (new)
-        // Controls.mainDriveControls
-        //     .getJoystickButtonOf(Controls.mainDriveControls.alignToNearestRightReef)
-        //     .whileTrue(
-        //         // new DeferredCommand(() -> autoRoutines.pathFindToLocation(nearestRightReef), Set.of(swerveSubsystem))
-        //         autoRoutines.continuouslyPathFindToLocation(() -> nearestRightReef)
-        //     );
+        Controls.mainDriveControls
+            .getJoystickButtonOf(Controls.mainDriveControls.pathfindToNearestRightReef)
+            .whileTrue(
+                new DeferredCommand(() -> autoRoutines.pathFindToLocation(nearestRightReef), Set.of(swerveSubsystem))
+                // autoRoutines.continuouslyPathFindToLocation(() -> nearestRightReef)
+            );
 
         // Controls.mainDriveControls
         //     .getJoystickButtonOf(Controls.mainDriveControls.alignToNearestRightReef)

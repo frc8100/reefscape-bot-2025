@@ -2,6 +2,8 @@ package frc.lib.util;
 
 import static edu.wpi.first.units.Units.Meters;
 
+import com.pathplanner.lib.util.FlippingUtil;
+import com.pathplanner.lib.util.GeometryUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -9,11 +11,14 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.lib.math.GeometryUtils;
 import java.util.Optional;
 
 /**
  * A utility class for working with poses.
+ * Note: Use {@link FlippingUtil instead}.
  */
+@Deprecated(forRemoval = true)
 public final class PoseUtil {
 
     private PoseUtil() {}

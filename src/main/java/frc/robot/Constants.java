@@ -19,6 +19,12 @@ public final class Constants {
     public static Mode currentMode = Mode.REAL;
 
     /**
+     * Whether or not to silence the reportJoystickUnpluggedWarning warning.
+     */
+    // ! IMPORTANT: Remember to set this to false before competition!
+    public static final boolean silenceJoystickUnpluggedWarning = true;
+
+    /**
      * Whether or not to enable tuning mode.
      * Tuning mode enables the use of the dashboard to change values.
      */

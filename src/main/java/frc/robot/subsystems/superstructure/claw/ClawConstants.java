@@ -93,7 +93,14 @@ public final class ClawConstants {
      * The direction of the intake/outtake.
      */
     public enum IntakeOuttakeDirection {
+        /**
+         * Runs the intake/outtake back in. This is also used to intake algae.
+         */
         BACK(1),
+
+        /**
+         * Runs the intake/outtake out. This moves the coral from the ramp to the claw and is also the same direction as the outtake (move the coral out of the claw).
+         */
         OUTTAKE(-1);
 
         /**
