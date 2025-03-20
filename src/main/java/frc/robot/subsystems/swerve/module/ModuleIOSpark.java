@@ -337,11 +337,14 @@ public class ModuleIOSpark implements ModuleIO {
                 debugAnglePidController.calculate(
                     angleCANcoder.getPosition().getValue().in(Degrees) - angleOffset.getDegrees()
                 ),
-                -10,
-                10
+                -9,
+                9
             );
 
             angleMotor.setVoltage(requestedVoltage);
+
+            Logger.recordOutput("Swerve/Mod1/RequestedVoltage", requestedVoltage);
+            Logger.recordOutput("Swerve/Mod1/PIDSetpoint", debugAnglePidController.getSetpoint());
         } else {
             angleClosedLoopController.setReference(degReference, ControlType.kPosition, ClosedLoopSlot.kSlot0);
         }

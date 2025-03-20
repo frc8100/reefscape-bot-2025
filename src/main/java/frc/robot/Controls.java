@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.subsystems.superstructure.claw.ClawConstants;
+import frc.robot.subsystems.swerve.SwerveDrive;
 
 /** Declares control key bindings */
 public class Controls {
@@ -41,6 +42,8 @@ public class Controls {
             getJoystickButtonOf(robotCentricButton).onTrue(
                 Commands.runOnce(() -> isCurrentlyRobotCentric = !isCurrentlyRobotCentric)
             );
+
+            robotRelativeMoveForward = new POVButton(driverController, 0);
         }
 
         // Toggle modes
@@ -94,7 +97,7 @@ public class Controls {
 
         // TODO: doc
         /**
-         * Aligns the robot to the reeF.
+         * Aligns the robot to the reef.
          */
         public int alignToLeftReefUsingVision = XboxController.Button.kB.value;
 
@@ -110,7 +113,13 @@ public class Controls {
 
         public int pathfindToNearestCoralStation = XboxController.Button.kX.value;
 
-        // public int pathfindTo
+        public POVButton robotRelativeMoveForward;
+
+        public SwerveDrive.DriveStates getDriveState() {
+            return robotRelativeMoveForward.getAsBoolean()
+                ? SwerveDrive.DriveStates.D0
+                : SwerveDrive.DriveStates.STANDARD;
+        }
 
         /**
          * @return The translation (x)

@@ -154,37 +154,39 @@ public class AlignToReefTagRelative extends Command {
 
     @Override
     public void execute() {
-        if (LimelightHelpers.getTV("") && LimelightHelpers.getFiducialID("") == tagID) {
-            this.dontSeeTagTimer.reset();
-
-            double[] positions = LimelightHelpers.getBotPose_TargetSpace("");
-
-            Logger.recordOutput("Align/Positions", positions);
-
-            Logger.recordOutput("Align/XSetpoint", xController.getSetpoint());
-            Logger.recordOutput("Align/XCurrent", positions[2]);
-
-            Logger.recordOutput("Align/YSetpoint", yController.getSetpoint());
-            Logger.recordOutput("Align/YCurrent", positions[0]);
-
-            Logger.recordOutput("Align/RSetpoint", rotController.getSetpoint());
-            Logger.recordOutput("Align/RCurrent", positions[4]);
-
-            double xSpeed = xController.calculate(positions[2]);
-            double ySpeed = -yController.calculate(positions[0]);
-            double rotValue = -rotController.calculate(positions[4]);
-
-            Logger.recordOutput("Align/Speeds", new double[] { xSpeed, ySpeed, rotValue });
-
-            driveSubsystem.drive(new Translation2d(xSpeed, ySpeed), rotValue, false);
-
-            // driveController.calculateRobotRelativeSpeeds(driveSubsystem.getPose(), new PathPlannerTrajectoryState())
-
-            if (!rotController.atSetpoint() || !yController.atSetpoint() || !xController.atSetpoint()) {
-                stopTimer.reset();
-            }
-        } else {
+        // If the tag is not found, drive empty
+        if (!(LimelightHelpers.getTV("") && LimelightHelpers.getFiducialID("") == tagID)) {
             driveSubsystem.drive(new Translation2d(), 0, false);
+            return;
+        }
+
+        this.dontSeeTagTimer.reset();
+
+        double[] positions = LimelightHelpers.getBotPose_TargetSpace("");
+
+        Logger.recordOutput("Align/Positions", positions);
+
+        Logger.recordOutput("Align/XSetpoint", xController.getSetpoint());
+        Logger.recordOutput("Align/XCurrent", positions[2]);
+
+        Logger.recordOutput("Align/YSetpoint", yController.getSetpoint());
+        Logger.recordOutput("Align/YCurrent", positions[0]);
+
+        Logger.recordOutput("Align/RSetpoint", rotController.getSetpoint());
+        Logger.recordOutput("Align/RCurrent", positions[4]);
+
+        double xSpeed = xController.calculate(positions[2]);
+        double ySpeed = -yController.calculate(positions[0]);
+        double rotValue = -rotController.calculate(positions[4]);
+
+        Logger.recordOutput("Align/Speeds", new double[] { xSpeed, ySpeed, rotValue });
+
+        driveSubsystem.drive(new Translation2d(xSpeed, ySpeed), rotValue, false);
+
+        // driveController.calculateRobotRelativeSpeeds(driveSubsystem.getPose(), new PathPlannerTrajectoryState())
+
+        if (!rotController.atSetpoint() || !yController.atSetpoint() || !xController.atSetpoint()) {
+            stopTimer.reset();
         }
         // SmartDashboard.putNumber("poseValidTimer", stopTimer.get());
     }

@@ -13,6 +13,7 @@ import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -60,6 +61,8 @@ public class TeleopSwerve extends Command {
      */
     private DoubleSupplier speedDial;
 
+    private Supplier<SwerveDrive.DriveStates> driveStateSupplier;
+
     /**
      * The PID controller to correct using PID.
      */
@@ -79,9 +82,10 @@ public class TeleopSwerve extends Command {
         DoubleSupplier translationSupplier,
         DoubleSupplier strafeSupplier,
         DoubleSupplier rotationSupplier,
-        BooleanSupplier robotCentricSup,
+        BooleanSupplier robotCentricSupplier,
         BooleanSupplier dampen,
         DoubleSupplier speedDial,
+        Supplier<SwerveDrive.DriveStates> driveStateSupplier,
         boolean logValues
     ) {
         this.swerveSubsystem = swerveSubsystem;
@@ -96,9 +100,10 @@ public class TeleopSwerve extends Command {
         this.translationSupplier = translationSupplier;
         this.strafeSupplier = strafeSupplier;
         this.rotationSupplier = rotationSupplier;
-        this.robotCentricSupplier = robotCentricSup;
+        this.robotCentricSupplier = robotCentricSupplier;
         this.dampen = dampen;
         this.speedDial = speedDial;
+        this.driveStateSupplier = driveStateSupplier;
         this.logValues = logValues;
     }
 
@@ -114,6 +119,7 @@ public class TeleopSwerve extends Command {
             driveControls::isRobotCentric,
             driveControls::isDampen,
             driveControls::getSpeedMultiplier,
+            driveControls::getDriveState,
             logValues
         );
     }
@@ -161,6 +167,16 @@ public class TeleopSwerve extends Command {
             Logger.recordOutput("Swerve/TranslationValue", translationValue);
             Logger.recordOutput("Swerve/StrafeValue", strafeValue);
             Logger.recordOutput("Swerve/RotationValue", rotationValue);
+        }
+
+        // Drive robot relative forward
+        if (driveStateSupplier.get() == SwerveDrive.DriveStates.D0) {
+            swerveSubsystem.drive(
+                new Translation2d(translationValue, 0).times(SwerveConfig.MAX_SPEED.in(MetersPerSecond)),
+                0.0,
+                false
+            );
+            return;
         }
 
         // Drive

@@ -35,9 +35,25 @@ public interface SwerveDrive extends Subsystem {
      */
     public enum DriveStates {
         STANDARD(),
+
+        /**
+         * Forward
+         */
         D0(0.0),
+
+        /**
+         * Left
+         */
         D90(90.0),
+
+        /**
+         * Back
+         */
         D180(180.0),
+
+        /**
+         * Right
+         */
         D270(270.0);
 
         /**
