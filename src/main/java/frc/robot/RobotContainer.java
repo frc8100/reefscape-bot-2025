@@ -74,6 +74,7 @@ public class RobotContainer {
     // Alignment
     private Pose2d nearestLeftReef = new Pose2d();
     private Pose2d nearestRightReef = new Pose2d();
+    private Pose2d nearestCoralStation = new Pose2d();
 
     /**
      * The simulation of the robot's drive. Set to null if not in simulation mode.
@@ -254,6 +255,9 @@ public class RobotContainer {
 
         autoChooser.addOption("L1 Auto", autoRoutines.moveForwardAndL1());
 
+        autoChooser.addOption("runIntakeUntilCoralIsInClaw", clawSubsystem.runIntakeUntilCoralIsInClaw());
+        autoChooser.addOption("runOuttakeUntilCoralIsNotInClaw", clawSubsystem.runOuttakeUntilCoralIsNotInClaw());
+
         // Command to refresh the config
         SmartDashboard.putData("Refresh Tunable Config", TunableValue.refreshConfig);
 
@@ -274,7 +278,9 @@ public class RobotContainer {
 
         Controls.mainDriveControls
             .getJoystickButtonOf(Controls.mainDriveControls.alignToLeftReefUsingVision)
-            .whileTrue(new AlignToReefTagRelative(false, swerveSubsystem));
+            // TODO
+            // .whileTrue(new AlignToReefTagRelative(false, swerveSubsystem));
+            .whileTrue(new AlignToReefTagRelative(true, swerveSubsystem));
 
         // Align (old)
         // Controls.mainDriveControls
@@ -305,6 +311,13 @@ public class RobotContainer {
         //             new Pose2d(new Translation2d(13.43, 2.98), Rotation2d.fromDegrees(116))
         //         )
         //     );
+
+        Controls.mainDriveControls
+            .getJoystickButtonOf(Controls.mainDriveControls.pathfindToNearestCoralStation)
+            .whileTrue(
+                new DeferredCommand(() -> autoRoutines.pathFindToLocation(nearestRightReef), Set.of(swerveSubsystem))
+                // autoRoutines.continuouslyPathFindToLocation(() -> nearestRightReef)
+            );
 
         // TODO: Heading lock?
 
@@ -343,7 +356,8 @@ public class RobotContainer {
 
         // TODO:
         Controls.Superstructure.moveToL4.whileTrue(
-            autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.ALGAE_L2)
+            // autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.ALGAE_L2)
+            autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L4)
         );
         // Controls.Superstructure.moveToL1.onTrue(
         //     clawSubsystem.getWaitForAngleCommand(SuperstructureConstants.Level.L1.getClawAngle())
@@ -413,8 +427,10 @@ public class RobotContainer {
         // TODO: Log nearest reef position
         nearestLeftReef = autoRoutines.getNearestLeftReef();
         nearestRightReef = autoRoutines.getNearestRightReef();
+        nearestCoralStation = autoRoutines.getNearestCoralStation();
 
         Logger.recordOutput("Odometry/NearestLeftReef", nearestLeftReef);
         Logger.recordOutput("Odometry/NearestRightReef", nearestRightReef);
+        Logger.recordOutput("Odometry/NearestCoralStation", nearestCoralStation);
     }
 }

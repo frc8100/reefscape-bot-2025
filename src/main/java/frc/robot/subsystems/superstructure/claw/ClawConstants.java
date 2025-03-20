@@ -4,7 +4,9 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -15,6 +17,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -135,6 +138,8 @@ public final class ClawConstants {
      */
     public static final Time OUTTAKE_TIME = Seconds.of(0.8);
 
+    public static final Time TIMEOUT_TIME = Seconds.of(10);
+
     /**
      * How much the claw can be off from the desired angle before it is considered "in position".
      * This is in radians.
@@ -158,6 +163,14 @@ public final class ClawConstants {
     public static final Current ANGLE_MOTOR_CURRENT_LIMIT = Amps.of(40);
     /** Rotations to radians */
     public static final double ANGLE_ENCODER_POSITION_FACTOR = (2 * Math.PI) / ANGLE_GEAR_RATIO;
+
+    // TODO:
+    public static final Angle MAX_WHEN_AT_BOTTOM = Radians.of(2.698);
+    public static final Angle MAX_CLAW_ANGLE = Radians.of(4);
+    public static final Angle MIN_CLAW_ANGLE = Radians.of(-0.2);
+
+    public static final AngularVelocity MAX_ANGLE_SPEED = RadiansPerSecond.of(5);
+    public static final AngularAcceleration MAX_ANGLE_ACCELERATION = RadiansPerSecondPerSecond.of(10);
 
     // PID configs
     // public static final double ANGLE_KP = 1;

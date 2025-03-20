@@ -46,9 +46,9 @@ public class VisionConstants {
      * (Not used by Limelight, configure in web UI instead)
      */
     public static final Transform3d TRANSFORM_TO_CAMERA_0 = new Transform3d(
-        Inches.of(5.5),
-        Inches.of(-6),
-        Inches.of(7.5),
+        Inches.of(9.5), // (28 - 4.5) - 14 or 0.2413 m
+        Inches.of(-5.5), // -((28 - 8.5) - 14) or 0.1397 m
+        Inches.of(11.25), // 0.28575 m
         new Rotation3d()
     );
 

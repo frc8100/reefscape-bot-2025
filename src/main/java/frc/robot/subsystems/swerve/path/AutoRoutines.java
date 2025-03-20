@@ -69,6 +69,7 @@ public class AutoRoutines {
         // A list of all the left reef poses and right reef poses, for easy access
         private static final List<Pose2d> leftReefPoses;
         private static final List<Pose2d> rightReefPoses;
+        private static final List<Pose2d> coralStationPoses;
 
         // Initialize the lists of reef poses
         static {
@@ -89,6 +90,8 @@ public class AutoRoutines {
                 REEF_5R.getPose(),
                 REEF_6R.getPose()
             );
+
+            coralStationPoses = List.of(CORAL_STATION_1.getPose(), CORAL_STATION_2.getPose());
         }
 
         public static List<Pose2d> getLeftReefPoses() {
@@ -97,6 +100,10 @@ public class AutoRoutines {
 
         public static List<Pose2d> getRightReefPoses() {
             return rightReefPoses;
+        }
+
+        public static List<Pose2d> getCoralStationPoses() {
+            return coralStationPoses;
         }
 
         private Pose2d pose;
@@ -139,6 +146,10 @@ public class AutoRoutines {
         return currentPose.nearest(FieldLocations.getRightReefPoses());
     }
 
+    private static Pose2d getNearestCoralStationGivenPosition(Pose2d currentPose) {
+        return currentPose.nearest(FieldLocations.getCoralStationPoses());
+    }
+
     // References to subsystems
     private SwerveDrive swerveSubsystem;
     private Elevator elevatorSubsystem;
@@ -165,6 +176,10 @@ public class AutoRoutines {
      */
     public Pose2d getNearestRightReef() {
         return getNearestRightReefGivenPosition(swerveSubsystem.getPose());
+    }
+
+    public Pose2d getNearestCoralStation() {
+        return getNearestCoralStationGivenPosition(swerveSubsystem.getPose());
     }
 
     /**

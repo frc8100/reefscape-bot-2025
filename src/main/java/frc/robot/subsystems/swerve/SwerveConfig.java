@@ -167,8 +167,9 @@ public class SwerveConfig {
 
     // Drive Motor Characterization Values
     // Divide SYSID values by 12 to convert from volts to percent output for CTRE
-    public static final double driveKS = 0.0;
-    public static final double driveKV = 0.1;
+    public static final double driveKS = 0.17388;
+    public static final double driveKV = 0.13632;
+
     // public static final double driveKA = (0.27);
 
     public static final double driveSimKP = 0.05;

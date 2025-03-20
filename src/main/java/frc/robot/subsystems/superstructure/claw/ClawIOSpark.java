@@ -1,6 +1,9 @@
 package frc.robot.subsystems.superstructure.claw;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 import static frc.lib.util.SparkUtil.*;
 
 import com.revrobotics.RelativeEncoder;
@@ -8,8 +11,10 @@ import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkLimitSwitch;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.LimitSwitchConfig.Type;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
@@ -51,6 +56,8 @@ public class ClawIOSpark implements ClawIO {
      * The motor for the outtake of the claw.
      */
     private final SparkMax outtakeMotor;
+
+    private final SparkLimitSwitch outtakeLimitSwitch;
 
     /**
      * The relative encoder for the outtake motor.
@@ -123,6 +130,10 @@ public class ClawIOSpark implements ClawIO {
             )
             .outputRange(-ClawConstants.MAX_ANGLE_POWER, ClawConstants.MAX_ANGLE_POWER);
 
+        angleConfig.closedLoop.maxMotion
+            .maxVelocity(ClawConstants.MAX_ANGLE_SPEED.in(RadiansPerSecond))
+            .maxAcceleration(ClawConstants.MAX_ANGLE_ACCELERATION.in(RadiansPerSecondPerSecond));
+
         // Apply the config
         tryUntilOk(angleMotor, 5, () ->
             angleMotor.configure(
@@ -138,9 +149,16 @@ public class ClawIOSpark implements ClawIO {
         // Create the outtake motor and configure it
         outtakeMotor = new SparkMax(ClawConstants.OUTTAKE_MOTOR_ID, MotorType.kBrushless);
         outtakeEncoder = outtakeMotor.getEncoder();
+        outtakeLimitSwitch = outtakeMotor.getReverseLimitSwitch();
         // outtakeClosedLoopController = outtakeMotor.getClosedLoopController();
 
         SparkMaxConfig outtakeConfig = new OuttakeConfig().getConfig();
+
+        outtakeConfig.limitSwitch
+            .forwardLimitSwitchType(Type.kNormallyOpen)
+            .forwardLimitSwitchEnabled(false)
+            .reverseLimitSwitchType(Type.kNormallyOpen)
+            .reverseLimitSwitchEnabled(false);
 
         // Apply the config
         tryUntilOk(outtakeMotor, 5, () ->
@@ -221,6 +239,12 @@ public class ClawIOSpark implements ClawIO {
     public void updateInputs(ClawIOInputs inputs) {
         // TODO: Log empty setpoints when disabled
 
+        radianSetpoint = MathUtil.clamp(
+            radianSetpoint,
+            ClawConstants.MIN_CLAW_ANGLE.in(Radians),
+            ClawConstants.MAX_CLAW_ANGLE.in(Radians)
+        );
+
         inputs.turnSetpointRad = radianSetpoint;
 
         // Set the position of the turn motor
@@ -265,5 +289,7 @@ public class ClawIOSpark implements ClawIO {
 
         // Set the connected state with a debouncer
         inputs.outtakeConnected = outtakeConnectedDebouncer.calculate(!sparkStickyFault);
+
+        inputs.isCoralInClaw = outtakeLimitSwitch.isPressed();
     }
 }

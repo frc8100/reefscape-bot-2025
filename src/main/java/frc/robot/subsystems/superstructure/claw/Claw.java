@@ -1,6 +1,7 @@
 package frc.robot.subsystems.superstructure.claw;
 
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -132,6 +133,18 @@ public class Claw extends SubsystemBase {
             direction == ClawConstants.IntakeOuttakeDirection.BACK
                 ? ClawConstants.INTAKE_TIME
                 : ClawConstants.OUTTAKE_TIME
+        );
+    }
+
+    public Command runIntakeUntilCoralIsInClaw() {
+        return runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE, ClawConstants.TIMEOUT_TIME).until(() ->
+            inputs.isCoralInClaw
+        );
+    }
+
+    public Command runOuttakeUntilCoralIsNotInClaw() {
+        return runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE, ClawConstants.TIMEOUT_TIME).until(() ->
+            !inputs.isCoralInClaw
         );
     }
 

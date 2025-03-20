@@ -33,10 +33,16 @@ import org.littletonrobotics.junction.Logger;
 public class AlignToReefTagRelative extends Command {
 
     public static double ROT_SETPOINT_REEF_ALIGNMENT = 0; // Rotation
+    public static double ar = 0.7; // TODO: rename
+    // 0.7
     public static double ROT_TOLERANCE_REEF_ALIGNMENT = 1;
     public static double X_SETPOINT_REEF_ALIGNMENT = -0.16; // Vertical pose
+    public static double ax = -0.17;
+    // -0.17
     public static double X_TOLERANCE_REEF_ALIGNMENT = 0.04;
     public static double Y_SETPOINT_REEF_ALIGNMENT = 0.21; // Horizontal pose
+    public static double ay = 1;
+    // 1
     public static double Y_TOLERANCE_REEF_ALIGNMENT = 0.04;
 
     public static final TunableValue ROT_SETPOINT_REEF_ALIGNMENT_TUNABLE = new TunableValue(
@@ -134,13 +140,13 @@ public class AlignToReefTagRelative extends Command {
 
         // driveController.calculate(driveSubsystem.getPose(), new Trajectory.State(), null);
 
-        rotController.setSetpoint(ROT_SETPOINT_REEF_ALIGNMENT);
+        rotController.setSetpoint(!isRightScore ? ROT_SETPOINT_REEF_ALIGNMENT : ar);
         rotController.setTolerance(ROT_TOLERANCE_REEF_ALIGNMENT);
 
-        xController.setSetpoint(X_SETPOINT_REEF_ALIGNMENT);
+        xController.setSetpoint(!isRightScore ? X_SETPOINT_REEF_ALIGNMENT : ax);
         xController.setTolerance(X_TOLERANCE_REEF_ALIGNMENT);
 
-        yController.setSetpoint(isRightScore ? Y_SETPOINT_REEF_ALIGNMENT : -Y_SETPOINT_REEF_ALIGNMENT);
+        yController.setSetpoint(!isRightScore ? Y_SETPOINT_REEF_ALIGNMENT : ay);
         yController.setTolerance(Y_TOLERANCE_REEF_ALIGNMENT);
 
         tagID = LimelightHelpers.getFiducialID("");

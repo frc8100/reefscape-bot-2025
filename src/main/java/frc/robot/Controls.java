@@ -108,6 +108,10 @@ public class Controls {
          */
         public int pathfindToNearestRightReef = XboxController.Button.kA.value;
 
+        public int pathfindToNearestCoralStation = XboxController.Button.kX.value;
+
+        // public int pathfindTo
+
         /**
          * @return The translation (x)
          */
@@ -139,7 +143,9 @@ public class Controls {
          * @return Whether the controls are robot centric. Default is `false`.
          */
         public boolean isRobotCentric() {
-            return isCurrentlyRobotCentric;
+            // TODO
+            // return isCurrentlyRobotCentric;
+            return false;
         }
 
         /**
