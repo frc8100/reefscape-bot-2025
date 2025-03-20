@@ -278,22 +278,7 @@ public class RobotContainer {
 
         Controls.mainDriveControls
             .getJoystickButtonOf(Controls.mainDriveControls.alignToLeftReefUsingVision)
-            // TODO
-            // .whileTrue(new AlignToReefTagRelative(false, swerveSubsystem));
             .whileTrue(new AlignToReefTagRelative(true, swerveSubsystem));
-
-        // Align (old)
-        // Controls.mainDriveControls
-        //     .getJoystickButtonOf(Controls.mainDriveControls.alignToNearestLeftReef)
-        //     .whileTrue(
-        //         new DeferredCommand(() -> autoRoutines.pathFindToLocation(nearestLeftReef), Set.of(swerveSubsystem))
-        //     );
-
-        // Controls.mainDriveControls
-        //     .getJoystickButtonOf(Controls.mainDriveControls.alignToNearestRightReef)
-        //     .whileTrue(
-        //         new DeferredCommand(() -> autoRoutines.pathFindToLocation(nearestRightReef), Set.of(swerveSubsystem))
-        //     );
 
         // Align (new)
         Controls.mainDriveControls
@@ -303,39 +288,17 @@ public class RobotContainer {
                 // autoRoutines.continuouslyPathFindToLocation(() -> nearestRightReef)
             );
 
-        // Controls.mainDriveControls
-        //     .getJoystickButtonOf(Controls.mainDriveControls.alignToNearestRightReef)
-        //     .whileTrue(
-        //         // new DeferredCommand(() -> autoRoutines.pathFindToLocation(nearestRightReef), Set.of(swerveSubsystem))
-        //         autoRoutines.continuouslyPathFindToLocation(() ->
-        //             new Pose2d(new Translation2d(13.43, 2.98), Rotation2d.fromDegrees(116))
-        //         )
-        //     );
-
         Controls.mainDriveControls
             .getJoystickButtonOf(Controls.mainDriveControls.pathfindToNearestCoralStation)
             .whileTrue(
                 new DeferredCommand(() -> autoRoutines.pathFindToLocation(nearestRightReef), Set.of(swerveSubsystem))
-                // autoRoutines.continuouslyPathFindToLocation(() -> nearestRightReef)
             );
 
-        // TODO: Heading lock?
-
         // Claw
-        // Run the intake/outtake command when the button is pressed
         clawSubsystem.setDefaultCommand(clawSubsystem.getRunCommand(Controls.Claw::getIntakeOrOuttake));
 
         clawSubsystem.setDefaultCommand(
             clawSubsystem.getRunAndAngleCommand(Controls.Claw::getIntakeOrOuttake, Controls.Claw::getUpOrDown)
-        );
-
-        // TODO: remove
-        new JoystickButton(Controls.Claw.clawController, Controls.Claw.upButton).whileTrue(
-            Commands.run(() -> clawSubsystem.io.increaseTurnPosition(0.035), clawSubsystem)
-        );
-
-        new JoystickButton(Controls.Claw.clawController, Controls.Claw.downButton).whileTrue(
-            Commands.run(() -> clawSubsystem.io.increaseTurnPosition(-0.035), clawSubsystem)
         );
 
         new JoystickButton(Controls.Claw.clawController, Controls.Claw.zeroEncoder).onTrue(
@@ -347,49 +310,31 @@ public class RobotContainer {
         );
 
         // Superstructure
-        // TODO:
-        Controls.Superstructure.moveToL1.whileTrue(
-            autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.INITIAL_POSITION)
-        );
+        // @formatter:off
+        Controls.Superstructure.moveToL1.whileTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.INITIAL_POSITION));
         Controls.Superstructure.moveToL2.whileTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L2));
         Controls.Superstructure.moveToL3.whileTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L3));
+        Controls.Superstructure.moveToL4.whileTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L4));
+        // @formatter:on
 
-        // TODO:
-        Controls.Superstructure.moveToL4.whileTrue(
-            // autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.ALGAE_L2)
-            autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L4)
-        );
-        // Controls.Superstructure.moveToL1.onTrue(
-        //     clawSubsystem.getWaitForAngleCommand(SuperstructureConstants.Level.L1.getClawAngle())
-        // );
-        // Controls.Superstructure.moveToL2.onTrue(
-        //     clawSubsystem.getWaitForAngleCommand(SuperstructureConstants.Level.L2.getClawAngle())
-        // );
-        // Controls.Superstructure.moveToL3.onTrue(
-        //     clawSubsystem.getWaitForAngleCommand(SuperstructureConstants.Level.L3.getClawAngle())
-        // );
-        // Controls.Superstructure.moveToL4.onTrue(
-        //     clawSubsystem.getWaitForAngleCommand(SuperstructureConstants.Level.L4.getClawAngle())
-        // );
+        // Intake algae
+        new JoystickButton(
+            Controls.Superstructure.superstructureController,
+            Controls.Superstructure.intakeAlgaeFromL2
+        ).whileTrue(autoRoutines.intakeAlgae(SuperstructureConstants.Level.ALGAE_L2));
 
-        // TODO: algae
+        new JoystickButton(
+            Controls.Superstructure.superstructureController,
+            Controls.Superstructure.intakeAlgaeFromL3
+        ).whileTrue(autoRoutines.intakeAlgae(SuperstructureConstants.Level.ALGAE_L3));
 
-        // Controls.mainDriveControls
-        //     .getJoystickButtonOf(Controls.Superstructure.algaeButton)
-        //     .onTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.ALGAE_L1));
+        new JoystickButton(
+            Controls.Superstructure.superstructureController,
+            Controls.Superstructure.clawOuttakeForL4
+        ).whileTrue(autoRoutines.scoreL4());
 
-        // TODO: Elevator
+        // Elevator
         elevatorSubsystem.setDefaultCommand(elevatorSubsystem.getUpOrDown(Controls.Elevator::getUpOrDown));
-
-        new JoystickButton(Controls.Elevator.elevatorController, Controls.Elevator.upButton).whileTrue(
-            Commands.run(() -> elevatorSubsystem.runMotor(1), elevatorSubsystem)
-        );
-        // .onFalse(Commands.runOnce(() -> elevatorSubsystem.runMotor(0), elevatorSubsystem));
-
-        new JoystickButton(Controls.Elevator.elevatorController, Controls.Elevator.downButton).whileTrue(
-            Commands.run(() -> elevatorSubsystem.runMotor(-1), elevatorSubsystem)
-        );
-        // .onFalse(Commands.runOnce(() -> elevatorSubsystem.runMotor(0), elevatorSubsystem));
     }
 
     /**

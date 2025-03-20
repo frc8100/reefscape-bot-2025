@@ -21,13 +21,14 @@ public final class SuperstructureConstants {
          * Also the initial position of the elevator and claw.
          */
         INITIAL_POSITION("L1", Meters.of(0.0), CLAW_ANGLE_OFFSET, 0),
-        L2("L2", Meters.of(0.9).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(60), 5.3),
+        L2("L2", Meters.of(1).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(60), 5.3),
         L3("L3", Meters.of(1.25).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(60), 14.9),
         L4("L4", Meters.of(2.1).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(60), 28.2),
 
         L1_AUTO("L1Auto", Meters.of(0.4).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(180), 3.5),
 
-        ALGAE_L2("L2Algae", Meters.of(0), Rotation2d.fromDegrees(180), 4.8);
+        ALGAE_L2("L2Algae", Meters.of(0.9), Rotation2d.fromDegrees(180), 4.8),
+        ALGAE_L3("L3Algae", Meters.of(1.2), Rotation2d.fromDegrees(180), 10);
 
         private final Distance elevatorDistance;
 

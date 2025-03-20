@@ -328,9 +328,11 @@ public class Controls {
         public static final POVButton moveToL1 = new POVButton(superstructureController, 0);
 
         /**
-         * The button to intake algae
+         * The button to intake algae from L2
          */
-        // TODO:
-        public static final int algaeButton = XboxController.Button.kA.value;
+        public static final int intakeAlgaeFromL2 = XboxController.Button.kA.value;
+        public static final int intakeAlgaeFromL3 = XboxController.Button.kB.value;
+
+        public static final int clawOuttakeForL4 = XboxController.Button.kY.value;
     }
 }

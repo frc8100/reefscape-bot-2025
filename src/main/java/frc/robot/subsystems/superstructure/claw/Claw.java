@@ -121,9 +121,10 @@ public class Claw extends SubsystemBase {
             Commands.waitTime(timeout),
             // Run the outtake
             new RunCommand(() -> io.runOuttake(direction.getDirection()), this)
-        ).andThen(
+        ).finallyDo(
             // Stop the outtake
-            new InstantCommand(() -> io.runOuttake(0), this)
+            // new InstantCommand(() -> io.runOuttake(0), this)
+            () -> io.runOuttake(0)
         );
     }
 
@@ -136,16 +137,24 @@ public class Claw extends SubsystemBase {
         );
     }
 
-    public Command runIntakeUntilCoralIsInClaw() {
-        return runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE, ClawConstants.TIMEOUT_TIME).until(() ->
+    public Command runIntakeUntilCoralIsInClaw(Time timeout) {
+        return runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE, timeout).until(() ->
             inputs.isCoralInClaw
         );
     }
 
-    public Command runOuttakeUntilCoralIsNotInClaw() {
-        return runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE, ClawConstants.TIMEOUT_TIME).until(() ->
+    public Command runIntakeUntilCoralIsInClaw() {
+        return runOuttakeUntilCoralIsNotInClaw(ClawConstants.OUTTAKE_TIME);
+    }
+
+    public Command runOuttakeUntilCoralIsNotInClaw(Time timeout) {
+        return runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE, timeout).until(() ->
             !inputs.isCoralInClaw
         );
+    }
+
+    public Command runOuttakeUntilCoralIsNotInClaw() {
+        return runOuttakeUntilCoralIsNotInClaw(ClawConstants.OUTTAKE_TIME);
     }
 
     @Override

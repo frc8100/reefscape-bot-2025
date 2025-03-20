@@ -1,10 +1,13 @@
 package frc.robot.subsystems.swerve.path;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -16,6 +19,7 @@ import frc.robot.commands.AlignToReefTagRelative;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
 import frc.robot.subsystems.superstructure.claw.Claw;
 import frc.robot.subsystems.superstructure.claw.ClawConstants;
+import frc.robot.subsystems.superstructure.claw.ClawConstants.IntakeOuttakeDirection;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveDrive;
@@ -197,6 +201,47 @@ public class AutoRoutines {
             .handleInterrupt(() -> {
                 elevatorSubsystem.io.resetSetpointToCurrentPosition();
                 clawSubsystem.io.resetSetpointToCurrentPosition();
+            });
+    }
+
+    /**
+     * @return A command to do the elevator and claw movements for the intake of algae from L2.
+     */
+    public Command intakeAlgae(SuperstructureConstants.Level algaeLevel) {
+        // Move superstructure up
+        return setUpSuperstructure(algaeLevel)
+            .andThen(
+                new ParallelCommandGroup(
+                    // Intake and hold algae
+                    clawSubsystem.runIntakeOrOuttake(IntakeOuttakeDirection.BACK, ClawConstants.ALGAE_TIMEOUT_TIME),
+                    // Raise elevator a bit
+                    Commands.run(() -> elevatorSubsystem.runMotor(1))
+                        .withTimeout(Seconds.of(0.5))
+                        // Lower elevator
+                        .andThen(
+                            elevatorSubsystem.getPositionCommandAndWait(SuperstructureConstants.Level.INITIAL_POSITION)
+                        )
+                )
+            )
+            // Stop when interrupted
+            .handleInterrupt(() -> {
+                elevatorSubsystem.io.resetSetpointToCurrentPosition();
+                clawSubsystem.io.resetSetpointToCurrentPosition();
+            });
+    }
+
+    /**
+     * @return A command to do only the claw movements for L4.
+     */
+    public Command scoreL4() {
+        return clawSubsystem
+            .getWaitForAngleCommand(ClawConstants.RotationPositions.CLAW_L4_SCORING_POSITION)
+            .andThen(clawSubsystem.runOuttakeUntilCoralIsNotInClaw())
+            .andThen(clawSubsystem.getWaitForAngleCommand(SuperstructureConstants.Level.L4.getClawAngle()))
+            // Stop when interrupted
+            .handleInterrupt(() -> {
+                clawSubsystem.io.resetSetpointToCurrentPosition();
+                clawSubsystem.io.runOuttake(0);
             });
     }
 

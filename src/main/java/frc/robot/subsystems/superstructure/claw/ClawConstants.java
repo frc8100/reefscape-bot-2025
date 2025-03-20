@@ -54,6 +54,8 @@ public final class ClawConstants {
          */
         public static final Rotation2d CLAW_HOLDING_POSITION = Rotation2d.fromDegrees(125).minus(CLAW_ANGLE_OFFSET);
 
+        public static final Rotation2d CLAW_L4_SCORING_POSITION = Rotation2d.fromDegrees(95).minus(CLAW_ANGLE_OFFSET);
+
         /**
          * The horizontal, front/back translation of the claw from the origin of the second elevator stage.
          */
@@ -128,17 +130,9 @@ public final class ClawConstants {
         }
     }
 
-    /**
-     * How long to run the intake for.
-     */
-    public static final Time INTAKE_TIME = Seconds.of(0.4);
-
-    /**
-     * How long to run the outtake for.
-     */
-    public static final Time OUTTAKE_TIME = Seconds.of(0.8);
-
-    public static final Time TIMEOUT_TIME = Seconds.of(10);
+    public static final Time INTAKE_TIME = Seconds.of(1.5);
+    public static final Time OUTTAKE_TIME = Seconds.of(1.5);
+    public static final Time ALGAE_TIMEOUT_TIME = Seconds.of(10);
 
     /**
      * How much the claw can be off from the desired angle before it is considered "in position".
