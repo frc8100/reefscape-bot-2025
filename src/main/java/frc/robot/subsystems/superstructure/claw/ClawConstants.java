@@ -169,6 +169,7 @@ public final class ClawConstants {
     public static final Angle MAX_CLAW_ANGLE = Radians.of(4);
     public static final Angle MIN_CLAW_ANGLE = Radians.of(-0.2);
 
+    // unused
     public static final AngularVelocity MAX_ANGLE_SPEED = RadiansPerSecond.of(5);
     public static final AngularAcceleration MAX_ANGLE_ACCELERATION = RadiansPerSecondPerSecond.of(10);
 
@@ -178,9 +179,9 @@ public final class ClawConstants {
     // public static final double ANGLE_KD = 0.0;
     // public static final double ANGLE_KF = 0.0;
 
-    public static final TunableValue ANGLE_KP = new TunableValue("Claw/KP", 1);
+    public static final TunableValue ANGLE_KP = new TunableValue("Claw/KP", 0.75);
     public static final TunableValue ANGLE_KI = new TunableValue("Claw/KI", 0.0);
-    public static final TunableValue ANGLE_KD = new TunableValue("Claw/KD", 0.0);
+    public static final TunableValue ANGLE_KD = new TunableValue("Claw/KD", 0.1);
     public static final TunableValue ANGLE_KF = new TunableValue("Claw/KF", 0.0);
 
     // Outtake motor configs
