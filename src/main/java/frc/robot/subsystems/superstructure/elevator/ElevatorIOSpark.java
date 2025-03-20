@@ -15,8 +15,10 @@ import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkLimitSwitch;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.LimitSwitchConfig.Type;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
@@ -48,6 +50,11 @@ public class ElevatorIOSpark implements ElevatorIO {
      * The closed loop controller.
      */
     private final SparkClosedLoopController closedLoopController;
+
+    /**
+     * The limit swtich.
+     */
+    private final SparkLimitSwitch limitSwitch;
 
     /**
      * A debouncer for the connected state, to prevent flickering.
@@ -86,6 +93,7 @@ public class ElevatorIOSpark implements ElevatorIO {
         motor = new SparkMax(ElevatorConstants.ELEVATOR_MOTOR_ID, MotorType.kBrushless);
         encoder = motor.getEncoder();
         closedLoopController = motor.getClosedLoopController();
+        limitSwitch = motor.getReverseLimitSwitch();
 
         config = new MotorConfig().getConfig();
 
@@ -101,6 +109,8 @@ public class ElevatorIOSpark implements ElevatorIO {
         config.closedLoop.maxMotion
             .maxVelocity(ElevatorConstants.ELEVATOR_MAX_ANGULAR_VELOCITY.in(RadiansPerSecond))
             .maxAcceleration(ElevatorConstants.ELEVATOR_MAX_ANGULAR_ACCELERATION.in(RadiansPerSecondPerSecond));
+
+        config.limitSwitch.reverseLimitSwitchEnabled(true).reverseLimitSwitchType(Type.kNormallyOpen);
 
         // Apply the config
         tryUntilOk(motor, 5, () ->
@@ -229,5 +239,7 @@ public class ElevatorIOSpark implements ElevatorIO {
 
         // Set the temperature
         ifOk(motor, motor::getMotorTemperature, temp -> inputs.tempCelsius = temp);
+
+        inputs.isAtBottom = limitSwitch.isPressed();
     }
 }

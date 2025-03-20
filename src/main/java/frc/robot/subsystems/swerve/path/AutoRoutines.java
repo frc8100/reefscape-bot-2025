@@ -235,16 +235,6 @@ public class AutoRoutines {
     }
 
     public Command continuouslyPathFindToLocation(Supplier<Pose2d> pose) {
-        // Command firstPathfind = AutoBuilder.pathfindToPose(pose, SwerveConfig.pathConstraints);
-
-        // firstPathfind.withTimeout(1)
-        // .finallyDo(() -> {
-        //     Command nextCommand = opponentRobotPathfindToPoseSupplier(poseSupplier);
-        //     setDefaultCommand(nextCommand);
-        // });
-
-        // return firstPathfind;
-
         return new DeferredCommand(
             () ->
                 pathFindToLocation(pose.get())

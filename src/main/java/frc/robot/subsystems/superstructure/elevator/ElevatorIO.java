@@ -16,7 +16,11 @@ public interface ElevatorIO extends GenericSparkIO<ElevatorIO.ElevatorIOInputs> 
     @AutoLog
     public static class ElevatorIOInputs extends GenericSparkIOInputs {
 
-        // public boolean isAtBottom = false;
+        /**
+         * Whether or not the elevator is at the bottom
+         */
+        public boolean isAtBottom = false;
+
         // public boolean isAtTop = false;
         // public double positionMeters = 0.0;
 
