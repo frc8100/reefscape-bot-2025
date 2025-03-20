@@ -56,9 +56,8 @@ public class ModuleIOSim implements ModuleIO {
     public void updateInputs(ModuleIOInputs inputs) {
         // Run closed-loop control
         if (driveClosedLoop) {
-            driveAppliedVolts =
-                driveFFVolts +
-                driveController.calculate(moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond));
+            driveAppliedVolts = driveFFVolts +
+            driveController.calculate(moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond));
         } else {
             driveController.reset();
         }
@@ -125,8 +124,8 @@ public class ModuleIOSim implements ModuleIO {
         double velocityRadPerSec = speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters);
 
         driveClosedLoop = true;
-        driveFFVolts =
-            SwerveConfig.driveSimKs * Math.signum(velocityRadPerSec) + SwerveConfig.driveSimKv * velocityRadPerSec;
+        driveFFVolts = SwerveConfig.driveSimKs * Math.signum(velocityRadPerSec) +
+        SwerveConfig.driveSimKv * velocityRadPerSec;
         driveController.setSetpoint(velocityRadPerSec);
     }
 

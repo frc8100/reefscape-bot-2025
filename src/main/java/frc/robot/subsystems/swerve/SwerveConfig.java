@@ -297,7 +297,9 @@ public class SwerveConfig {
         // Configure the PID controller for the angle motor
         angleConfig.closedLoop
             .pidf(SwerveConfig.angleKP, SwerveConfig.angleKI, SwerveConfig.angleKD, SwerveConfig.angleKF)
-            .outputRange(-SwerveConfig.MAX_ANGLE_POWER, SwerveConfig.MAX_ANGLE_POWER);
+            .outputRange(-SwerveConfig.MAX_ANGLE_POWER, SwerveConfig.MAX_ANGLE_POWER)
+            .positionWrappingEnabled(true)
+            .positionWrappingInputRange(-180, 180);
 
         angleConfig.signals
             .absoluteEncoderPositionAlwaysOn(true)
