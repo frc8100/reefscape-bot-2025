@@ -6,6 +6,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -221,6 +222,8 @@ public class AutoRoutines {
                         .andThen(
                             elevatorSubsystem.getPositionCommandAndWait(SuperstructureConstants.Level.INITIAL_POSITION)
                         )
+                        // Move back
+                        .alongWith(driveForwardWithSpeedFor(-1.5, 0.4))
                 )
             )
             // Stop when interrupted
@@ -233,9 +236,10 @@ public class AutoRoutines {
     /**
      * @return A command to do only the claw movements for L4.
      */
-    public Command scoreL4() {
+    public Command doClawMovementsForL4() {
         return clawSubsystem
             .getWaitForAngleCommand(ClawConstants.RotationPositions.CLAW_L4_SCORING_POSITION)
+            // TODO: Claw will not register that coral is not in claw for L4 because it is too close to the branch
             .andThen(clawSubsystem.runOuttakeUntilCoralIsNotInClaw())
             .andThen(clawSubsystem.getWaitForAngleCommand(SuperstructureConstants.Level.L4.getClawAngle()))
             // Stop when interrupted

@@ -259,23 +259,27 @@ public class RobotContainer {
             .getJoystickButtonOf(Controls.mainDriveControls.zeroGyroButton)
             .onTrue(new InstantCommand(swerveSubsystem::zeroGyro));
 
+        // Align to reefs
         Controls.mainDriveControls
             .getJoystickButtonOf(Controls.mainDriveControls.alignToLeftReefUsingVision)
             .whileTrue(new AlignToReefTagRelative(false, swerveSubsystem));
+        Controls.mainDriveControls
+            .getJoystickButtonOf(Controls.mainDriveControls.alignToRightReefUsingVision)
+            .whileTrue(new AlignToReefTagRelative(true, swerveSubsystem));
 
         // Align (new)
-        Controls.mainDriveControls
-            .getJoystickButtonOf(Controls.mainDriveControls.pathfindToNearestRightReef)
-            .whileTrue(
-                new DeferredCommand(() -> autoRoutines.pathFindToLocation(nearestRightReef), Set.of(swerveSubsystem))
-                // autoRoutines.continuouslyPathFindToLocation(() -> nearestRightReef)
-            );
+        // Controls.mainDriveControls
+        //     .getJoystickButtonOf(Controls.mainDriveControls.pathfindToNearestRightReef)
+        //     .whileTrue(
+        //         new DeferredCommand(() -> autoRoutines.pathFindToLocation(nearestRightReef), Set.of(swerveSubsystem))
+        //         // autoRoutines.continuouslyPathFindToLocation(() -> nearestRightReef)
+        //     );
 
-        Controls.mainDriveControls
-            .getJoystickButtonOf(Controls.mainDriveControls.pathfindToNearestCoralStation)
-            .whileTrue(
-                new DeferredCommand(() -> autoRoutines.pathFindToLocation(nearestRightReef), Set.of(swerveSubsystem))
-            );
+        // Controls.mainDriveControls
+        //     .getJoystickButtonOf(Controls.mainDriveControls.pathfindToNearestCoralStation)
+        //     .whileTrue(
+        //         new DeferredCommand(() -> autoRoutines.pathFindToLocation(nearestRightReef), Set.of(swerveSubsystem))
+        //     );
 
         // Claw
         clawSubsystem.setDefaultCommand(clawSubsystem.getRunCommand(Controls.Claw::getIntakeOrOuttake));
@@ -288,8 +292,17 @@ public class RobotContainer {
             Commands.runOnce(() -> clawSubsystem.io.zeroEncoder(0))
         );
 
+        // Elevator
         new JoystickButton(Controls.Elevator.elevatorController, Controls.Elevator.zeroEncoder).onTrue(
             Commands.runOnce(() -> elevatorSubsystem.io.zeroEncoder(0))
+        );
+
+        elevatorSubsystem.whenElevatorIsAtBottom.onTrue(
+            // Reset elevator positions when hitting the limit switches
+            Commands.runOnce(() -> {
+                elevatorSubsystem.io.zeroEncoder(0);
+                elevatorSubsystem.io.resetSetpointToCurrentPosition();
+            })
         );
 
         // Superstructure
@@ -314,7 +327,7 @@ public class RobotContainer {
         new JoystickButton(
             Controls.Superstructure.superstructureController,
             Controls.Superstructure.clawOuttakeForL4
-        ).whileTrue(autoRoutines.scoreL4());
+        ).whileTrue(autoRoutines.doClawMovementsForL4());
 
         // Elevator
         elevatorSubsystem.setDefaultCommand(elevatorSubsystem.getUpOrDown(Controls.Elevator::getUpOrDown));
@@ -360,5 +373,7 @@ public class RobotContainer {
         Logger.recordOutput("Odometry/NearestLeftReef", nearestLeftReef);
         Logger.recordOutput("Odometry/NearestRightReef", nearestRightReef);
         Logger.recordOutput("Odometry/NearestCoralStation", nearestCoralStation);
+
+        Logger.recordOutput("Vision/CanAlignToReef", AlignToReefTagRelative.getCanAlignToReef());
     }
 }

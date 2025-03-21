@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
 import frc.robot.subsystems.superstructure.claw.ClawConstants;
 import java.util.function.DoubleSupplier;
@@ -34,17 +35,22 @@ public class Elevator extends SubsystemBase {
      */
     protected final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
 
+    public Trigger whenElevatorIsAtBottom;
+
     /**
      * Creates a new Elevator subsystem.
      * @param io - The IO interface for the elevator.
      */
     public Elevator(ElevatorIO io) {
         this.io = io;
+
+        whenElevatorIsAtBottom = new Trigger(this::isElevatorAtBottom);
     }
 
     /**
      * @return Whether the elevator is at the target position, within a tolerance.
      */
+    @AutoLogOutput(key = "Elevator/IsElevatorAtTarget")
     public boolean isElevatorAtTarget() {
         // return MathUtil.isNear(
         //     inputs.setpoint,
@@ -57,6 +63,14 @@ public class Elevator extends SubsystemBase {
             inputs.setpoint,
             ElevatorConstants.ELEVATOR_RAD_TOLERANCE.in(Radians)
         );
+    }
+
+    /**
+     * @return Whether the elevator is at the bottom
+     */
+    @AutoLogOutput(key = "Elevator/IsElevatorAtBottom")
+    public boolean isElevatorAtBottom() {
+        return inputs.isAtBottom;
     }
 
     // TODO: refactor

@@ -138,9 +138,10 @@ public class Claw extends SubsystemBase {
     }
 
     public Command runIntakeUntilCoralIsInClaw(Time timeout) {
-        return runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE, timeout).until(() ->
-            inputs.isCoralInClaw
-        );
+        return runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE, timeout)
+            .until(() -> inputs.isCoralInClaw)
+            // Decelerate
+            .andThen(runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.BACK, Seconds.of(0.09)));
     }
 
     public Command runIntakeUntilCoralIsInClaw() {
@@ -148,8 +149,8 @@ public class Claw extends SubsystemBase {
     }
 
     public Command runOuttakeUntilCoralIsNotInClaw(Time timeout) {
-        return runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE, timeout).until(() ->
-            !inputs.isCoralInClaw
+        return runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE, timeout.div(2)).andThen(
+            runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE, timeout).until(() -> !inputs.isCoralInClaw)
         );
     }
 

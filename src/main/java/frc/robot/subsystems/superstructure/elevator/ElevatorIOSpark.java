@@ -93,7 +93,7 @@ public class ElevatorIOSpark implements ElevatorIO {
         motor = new SparkMax(ElevatorConstants.ELEVATOR_MOTOR_ID, MotorType.kBrushless);
         encoder = motor.getEncoder();
         closedLoopController = motor.getClosedLoopController();
-        limitSwitch = motor.getForwardLimitSwitch();
+        limitSwitch = motor.getReverseLimitSwitch();
 
         config = new MotorConfig().getConfig();
 
@@ -110,11 +110,7 @@ public class ElevatorIOSpark implements ElevatorIO {
             .maxVelocity(ElevatorConstants.ELEVATOR_MAX_ANGULAR_VELOCITY.in(RadiansPerSecond))
             .maxAcceleration(ElevatorConstants.ELEVATOR_MAX_ANGULAR_ACCELERATION.in(RadiansPerSecondPerSecond));
 
-        config.limitSwitch
-            .reverseLimitSwitchType(Type.kNormallyOpen)
-            .reverseLimitSwitchEnabled(false)
-            .forwardLimitSwitchType(Type.kNormallyOpen)
-            .forwardLimitSwitchEnabled(false);
+        config.limitSwitch.reverseLimitSwitchType(Type.kNormallyOpen).reverseLimitSwitchEnabled(true);
 
         // Apply the config
         tryUntilOk(motor, 5, () ->

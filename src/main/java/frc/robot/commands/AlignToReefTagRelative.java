@@ -34,15 +34,15 @@ public class AlignToReefTagRelative extends Command {
 
     public static double ROT_SETPOINT_REEF_ALIGNMENT = 0; // Rotation
     public static double ar = 0.7; // TODO: rename
-    // 0.7
+
     public static double ROT_TOLERANCE_REEF_ALIGNMENT = 1;
     public static double X_SETPOINT_REEF_ALIGNMENT = -0.16; // Vertical pose
     public static double ax = -0.17;
-    // -0.17
+
     public static double X_TOLERANCE_REEF_ALIGNMENT = 0.04;
     public static double Y_SETPOINT_REEF_ALIGNMENT = 0.21; // Horizontal pose
     public static double ay = 1;
-    // 1
+
     public static double Y_TOLERANCE_REEF_ALIGNMENT = 0.04;
 
     public static final TunableValue ROT_SETPOINT_REEF_ALIGNMENT_TUNABLE = new TunableValue(
@@ -60,6 +60,12 @@ public class AlignToReefTagRelative extends Command {
         Y_SETPOINT_REEF_ALIGNMENT,
         (double value) -> Y_SETPOINT_REEF_ALIGNMENT = value
     );
+
+    static {
+        new TunableValue("Align/Right/RotationSetpoint", ar, (double value) -> ar = value);
+        new TunableValue("Align/Right/XSetpoint", ax, (double value) -> ax = value);
+        new TunableValue("Align/Right/YSetpoint", ay, (double value) -> ay = value);
+    }
 
     public static double X_P = 0.85;
     public static double X_D = 0.005;
@@ -85,6 +91,13 @@ public class AlignToReefTagRelative extends Command {
     private final PIDController xController;
     private final PIDController yController;
     private final PIDController rotController;
+
+    /**
+     * @return Whether or not the limelight sees the tag and can align.
+     */
+    public static boolean getCanAlignToReef() {
+        return LimelightHelpers.getTV("");
+    }
 
     // private final ProfiledPIDController rotController = new ProfiledPIDController(
     //     1,
@@ -120,6 +133,18 @@ public class AlignToReefTagRelative extends Command {
         xController = new PIDController(X_P_TUNABLE.get(), 0.0, X_D_TUNABLE.get());
         yController = new PIDController(Y_P_TUNABLE.get(), 0.0, Y_D_TUNABLE.get());
         rotController = new PIDController(R_P_TUNABLE.get(), 0.0, R_D_TUNABLE.get());
+
+        // Refresh config
+        TunableValue.addRefreshConfigConsumer(() -> {
+            xController.setP(X_P_TUNABLE.get());
+            xController.setD(X_D_TUNABLE.get());
+
+            yController.setP(Y_P_TUNABLE.get());
+            yController.setD(Y_D_TUNABLE.get());
+
+            rotController.setP(R_P_TUNABLE.get());
+            rotController.setD(R_D_TUNABLE.get());
+        });
     }
 
     @Override

@@ -56,9 +56,8 @@ public final class SuperstructureConstants {
          * @return The radian of the elevator.
          */
         public double getElevatorRadian() {
-            // return elevatorRadian;
-
-            return elevatorRadianTunable.get();
+            return elevatorRadian;
+            // return elevatorRadianTunable.get();
         }
 
         /**

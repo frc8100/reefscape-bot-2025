@@ -100,18 +100,19 @@ public class Controls {
          * Aligns the robot to the reef.
          */
         public int alignToLeftReefUsingVision = XboxController.Button.kB.value;
+        public int alignToRightReefUsingVision = XboxController.Button.kX.value;
 
         /**
          * Aligns the robot to the nearest left reef.
          */
-        public int pathfindToNearestLeftReef = XboxController.Button.kB.value;
+        // public int pathfindToNearestLeftReef = XboxController.Button.kB.value;
 
         /**
          * Aligns the robot to the nearest right reef.
          */
-        public int pathfindToNearestRightReef = XboxController.Button.kA.value;
+        // public int pathfindToNearestRightReef = XboxController.Button.kA.value;
 
-        public int pathfindToNearestCoralStation = XboxController.Button.kX.value;
+        // public int pathfindToNearestCoralStation = XboxController.Button.kX.value;
 
         public POVButton robotRelativeMoveForward;
 

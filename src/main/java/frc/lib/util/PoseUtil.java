@@ -18,7 +18,6 @@ import java.util.Optional;
  * A utility class for working with poses.
  * Note: Use {@link FlippingUtil instead}.
  */
-@Deprecated(forRemoval = true)
 public final class PoseUtil {
 
     private PoseUtil() {}

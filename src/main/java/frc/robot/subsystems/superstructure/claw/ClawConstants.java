@@ -131,14 +131,14 @@ public final class ClawConstants {
     }
 
     public static final Time INTAKE_TIME = Seconds.of(8);
-    public static final Time OUTTAKE_TIME = Seconds.of(1.5);
+    public static final Time OUTTAKE_TIME = Seconds.of(1.2);
     public static final Time ALGAE_TIMEOUT_TIME = Seconds.of(10);
 
     /**
      * How much the claw can be off from the desired angle before it is considered "in position".
      * This is in radians.
      */
-    public static final Angle ANGLE_TOLERANCE_RADIANS = Degrees.of(2);
+    public static final Angle ANGLE_TOLERANCE_RADIANS = Degrees.of(5);
 
     /**
      * Deadband for the claw (controller input).
@@ -150,7 +150,7 @@ public final class ClawConstants {
     /**
      * The maximum power for the angle motor, from 0-1.
      */
-    public static final double MAX_ANGLE_POWER = 0.3;
+    public static final double MAX_ANGLE_POWER = 0.35;
 
     public static final double ANGLE_GEAR_RATIO = 30;
     public static final boolean IS_ANGLE_MOTOR_INVERTED = true;
@@ -173,9 +173,9 @@ public final class ClawConstants {
     // public static final double ANGLE_KD = 0.0;
     // public static final double ANGLE_KF = 0.0;
 
-    public static final TunableValue ANGLE_KP = new TunableValue("Claw/KP", 0.75);
+    public static final TunableValue ANGLE_KP = new TunableValue("Claw/KP", 0.9);
     public static final TunableValue ANGLE_KI = new TunableValue("Claw/KI", 0.0);
-    public static final TunableValue ANGLE_KD = new TunableValue("Claw/KD", 0.1);
+    public static final TunableValue ANGLE_KD = new TunableValue("Claw/KD", 0.0);
     public static final TunableValue ANGLE_KF = new TunableValue("Claw/KF", 0.0);
 
     // Outtake motor configs

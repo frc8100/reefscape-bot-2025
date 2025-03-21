@@ -52,6 +52,37 @@
           "data": {
             "name": "ScoreL2"
           }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "ResetSuperstructure"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "4c. R to CS1"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeCoral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "3. CS1 to R"
+          }
         }
       ]
     }
