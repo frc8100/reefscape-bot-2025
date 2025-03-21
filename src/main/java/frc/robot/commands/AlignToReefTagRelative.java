@@ -61,7 +61,7 @@ public class AlignToReefTagRelative extends Command {
         (double value) -> Y_SETPOINT_REEF_ALIGNMENT = value
     );
 
-    public static double X_P = 1;
+    public static double X_P = 0.85;
     public static double X_D = 0.005;
 
     public static double Y_P = 0.75;

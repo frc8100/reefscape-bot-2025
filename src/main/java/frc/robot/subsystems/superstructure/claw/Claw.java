@@ -144,7 +144,7 @@ public class Claw extends SubsystemBase {
     }
 
     public Command runIntakeUntilCoralIsInClaw() {
-        return runOuttakeUntilCoralIsNotInClaw(ClawConstants.OUTTAKE_TIME);
+        return runIntakeUntilCoralIsInClaw(ClawConstants.INTAKE_TIME);
     }
 
     public Command runOuttakeUntilCoralIsNotInClaw(Time timeout) {

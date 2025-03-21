@@ -13,25 +13,44 @@
         {
           "type": "named",
           "data": {
-            "name": "SetupSuperstructureL3"
+            "name": "ScoreL2"
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "2. R to CS1"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "ResetSuperstructure"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "2. R to CS1"
+                }
+              }
+            ]
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "SetupSuperstructureL3"
+            "name": "IntakeCoral"
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "3. CS1 to R"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreL2"
           }
         }
       ]

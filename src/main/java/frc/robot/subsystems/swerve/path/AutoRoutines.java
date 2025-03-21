@@ -318,11 +318,13 @@ public class AutoRoutines {
             .andThen(clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.BACK));
     }
 
-    public Command moveForwardAndL2() {
-        return driveForwardWithSpeedFor(0.75, 1)
-            .alongWith(setUpSuperstructure(SuperstructureConstants.Level.L2))
-            .andThen(new AlignToReefTagRelative(false, swerveSubsystem))
-            .andThen(clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE));
+    /**
+     * @return Align with the reef, and score on the level.
+     */
+    public Command alignAndScore(SuperstructureConstants.Level levelToScoreOn) {
+        return new AlignToReefTagRelative(false, swerveSubsystem)
+            .alongWith(setUpSuperstructure(levelToScoreOn))
+            .andThen(clawSubsystem.runOuttakeUntilCoralIsNotInClaw());
     }
 
     /**

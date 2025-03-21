@@ -4,24 +4,24 @@
     {
       "anchor": {
         "x": 7.576229508196722,
-        "y": 1.669415983606557
+        "y": 1.9571209016393447
       },
       "prevControl": null,
       "nextControl": {
         "x": 6.6263386691342205,
-        "y": 2.2832037115900317
+        "y": 2.5709086296228194
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.335,
-        "y": 2.8561987704918033
+        "x": 5.406454918032787,
+        "y": 2.2688012295081954
       },
       "prevControl": {
-        "x": 5.97767127728947,
-        "y": 2.4742673588883215
+        "x": 6.049126195322256,
+        "y": 1.8868698179047136
       },
       "nextControl": null,
       "isLocked": false,
@@ -48,7 +48,7 @@
   "folder": "Coral Auto",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 140.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

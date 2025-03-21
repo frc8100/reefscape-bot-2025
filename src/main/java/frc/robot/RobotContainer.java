@@ -192,33 +192,16 @@ public class RobotContainer {
         // Set up auto routines
         autoRoutines = new AutoRoutines(swerveSubsystem, elevatorSubsystem, clawSubsystem);
 
-        // TODO: Register named commands
-        // NamedCommands.registerCommand(
-        //     "SetupSuperstructureL1",
-        //     autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L1_AUTO)
-        // );
-        // NamedCommands.registerCommand(
-        //     "SetupSuperstructureL2",
-        //     autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L2)
-        // );
-        // NamedCommands.registerCommand(
-        //     "SetupSuperstructureL3",
-        //     autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L3)
-        // );
-        // NamedCommands.registerCommand(
-        //     "SetupSuperstructureAlgaeL2",
-        //     autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.ALGAE_L2)
-        // );
+        // Register named commands
+        NamedCommands.registerCommand(
+            "ResetSuperstructure",
+            autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.INITIAL_POSITION)
+        );
 
-        // NamedCommands.registerCommand(
-        //     "ClawOut",
-        //     clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE)
-        // );
+        NamedCommands.registerCommand("ScoreL2", autoRoutines.alignAndScore(SuperstructureConstants.Level.L2));
+        NamedCommands.registerCommand("ScoreL3", autoRoutines.alignAndScore(SuperstructureConstants.Level.L3));
 
-        // NamedCommands.registerCommand(
-        //     "ClawHoldAlgae",
-        //     clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.BACK, Seconds.of(10))
-        // );
+        NamedCommands.registerCommand("IntakeCoral", clawSubsystem.runIntakeUntilCoralIsInClaw());
 
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -278,7 +261,7 @@ public class RobotContainer {
 
         Controls.mainDriveControls
             .getJoystickButtonOf(Controls.mainDriveControls.alignToLeftReefUsingVision)
-            .whileTrue(new AlignToReefTagRelative(true, swerveSubsystem));
+            .whileTrue(new AlignToReefTagRelative(false, swerveSubsystem));
 
         // Align (new)
         Controls.mainDriveControls

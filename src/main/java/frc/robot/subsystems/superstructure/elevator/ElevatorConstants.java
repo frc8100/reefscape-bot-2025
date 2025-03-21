@@ -70,13 +70,13 @@ public final class ElevatorConstants {
      */
     public static final int ELEVATOR_MOTOR_ID = 15;
 
-    public static final double ELEVATOR_MAX_OUTPUT = 0.65;
-    public static final double ELEVATOR_TOP_INPUT = 0.15;
+    public static final double ELEVATOR_MAX_OUTPUT = 0.75;
+    public static final double ELEVATOR_TOP_INPUT = 0.35;
     public static final Angle ELEVATOR_TOP_THRESHOLD = Radians.of(20);
 
     public static final double ELEVATOR_GEAR_RATIO = 48.0;
 
-    public static final Angle ELEVATOR_MIN_POSITION = Radians.of(-3);
+    public static final Angle ELEVATOR_MIN_POSITION = Radians.of(-2);
     public static final Angle ELEVATOR_MAX_POSITION = Radians.of(28.5);
 
     public static final boolean ELEVATOR_MOTOR_INVERTED = false;
@@ -88,8 +88,8 @@ public final class ElevatorConstants {
 
     /** Radians to meters */
     public static final double ELEVATOR_RADIANS_TO_METERS = (8.6 / (16 - 1.75)) / Inches.of(1).in(Meters);
-    public static final AngularVelocity ELEVATOR_MAX_ANGULAR_VELOCITY = RadiansPerSecond.of(6.5);
-    public static final AngularAcceleration ELEVATOR_MAX_ANGULAR_ACCELERATION = RadiansPerSecondPerSecond.of(5);
+    public static final AngularVelocity ELEVATOR_MAX_ANGULAR_VELOCITY = RadiansPerSecond.of(10);
+    public static final AngularAcceleration ELEVATOR_MAX_ANGULAR_ACCELERATION = RadiansPerSecondPerSecond.of(15);
     public static final double AMOUNT_PER_FRAME = 0.335;
 
     public static final LinearVelocity ELEVATOR_SIM_MAX_VELOCITY = MetersPerSecond.of(0.5);
@@ -101,7 +101,7 @@ public final class ElevatorConstants {
     // public static final double ELEVATOR_KD = 0.0;
     // public static final double ELEVATOR_KF = 0.0;
 
-    public static final TunableValue ELEVATOR_KP = new TunableValue("Elevator/KP", 0.6);
+    public static final TunableValue ELEVATOR_KP = new TunableValue("Elevator/KP", 0.7);
     public static final TunableValue ELEVATOR_KI = new TunableValue("Elevator/KI", 0.0);
     public static final TunableValue ELEVATOR_KD = new TunableValue("Elevator/KD", 0.0);
     public static final TunableValue ELEVATOR_KF = new TunableValue("Elevator/KF", 0.0);

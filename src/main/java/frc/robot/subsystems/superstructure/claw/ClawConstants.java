@@ -130,7 +130,7 @@ public final class ClawConstants {
         }
     }
 
-    public static final Time INTAKE_TIME = Seconds.of(1.5);
+    public static final Time INTAKE_TIME = Seconds.of(8);
     public static final Time OUTTAKE_TIME = Seconds.of(1.5);
     public static final Time ALGAE_TIMEOUT_TIME = Seconds.of(10);
 
@@ -150,7 +150,7 @@ public final class ClawConstants {
     /**
      * The maximum power for the angle motor, from 0-1.
      */
-    public static final double MAX_ANGLE_POWER = 0.35;
+    public static final double MAX_ANGLE_POWER = 0.3;
 
     public static final double ANGLE_GEAR_RATIO = 30;
     public static final boolean IS_ANGLE_MOTOR_INVERTED = true;
