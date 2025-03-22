@@ -47,7 +47,7 @@ public class VisionConstants {
      */
     public static final Transform3d TRANSFORM_TO_CAMERA_0 = new Transform3d(
         Inches.of(9.5), // (28 - 4.5) - 14 or 0.2413 m
-        Inches.of(-5.5), // -((28 - 8.5) - 14) or 0.1397 m
+        Inches.of(-5.25), // -((28 - 8.75) - 14) or 0.1397 m
         Inches.of(11.25), // 0.28575 m
         new Rotation3d()
     );
@@ -58,8 +58,11 @@ public class VisionConstants {
 
     // Standard deviation baselines, for 1 meter distance and 1 tag
     // (Adjusted automatically based on distance and # of tags)
-    public static final double LINEAR_STD_DEV_BASELINE = 0.4; // Meters
-    public static final double ANGULAR_STD_DEV_BASELINE = 1.2; // Radians
+    // public static final double LINEAR_STD_DEV_BASELINE = 0.04; // Meters
+    // public static final double ANGULAR_STD_DEV_BASELINE = 0.12; // Radians
+
+    public static final double LINEAR_STD_DEV_BASELINE = 0.04; // Meters
+    public static final double ANGULAR_STD_DEV_BASELINE = 0.12; // Radians
 
     // Standard deviation multipliers for each camera
     // (Adjust to trust some cameras more than others)

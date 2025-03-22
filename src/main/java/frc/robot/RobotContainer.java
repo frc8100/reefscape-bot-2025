@@ -4,9 +4,12 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -17,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.lib.LimelightHelpers;
 import frc.lib.util.TunableValue;
 import frc.robot.commands.AlignToReefTagRelative;
 import frc.robot.commands.SwerveSysidRoutines;
@@ -102,8 +106,15 @@ public class RobotContainer {
                     }
                 );
 
+                // TODO: reimplement
                 visionSubsystem = new Vision(
-                    swerveSubsystem::addVisionMeasurement,
+                    // swerveSubsystem::addVisionMeasurement,
+
+                    (
+                        Pose2d visionRobotPoseMeters,
+                        double timestampSeconds,
+                        Matrix<N3, N1> visionMeasurementStdDevs
+                    ) -> {},
                     new VisionIOLimelight(VisionConstants.CAMERA_0_NAME, swerveSubsystem::getRotation)
                 );
 
@@ -232,11 +243,12 @@ public class RobotContainer {
         );
 
         // TODO: Temporary
-        autoChooser.addOption("Coral and Go To All Reefs Test", autoRoutines.getCoralAndGoToAllReefsTest());
+        // autoChooser.addOption("Coral and Go To All Reefs Test", autoRoutines.getCoralAndGoToAllReefsTest());
 
-        autoChooser.addOption("Actually move forward", autoRoutines.actuallyMoveForward());
+        autoChooser.addDefaultOption("Actually move forward", autoRoutines.actuallyMoveForward());
+        autoChooser.addOption("Push another robot forward", autoRoutines.pushAnotherRobotForward());
 
-        autoChooser.addOption("L1 Auto", autoRoutines.moveForwardAndL1());
+        // autoChooser.addOption("L1 Auto", autoRoutines.moveForwardAndL1());
 
         autoChooser.addOption("runIntakeUntilCoralIsInClaw", clawSubsystem.runIntakeUntilCoralIsInClaw());
         autoChooser.addOption("runOuttakeUntilCoralIsNotInClaw", clawSubsystem.runOuttakeUntilCoralIsNotInClaw());
@@ -297,13 +309,13 @@ public class RobotContainer {
             Commands.runOnce(() -> elevatorSubsystem.io.zeroEncoder(0))
         );
 
-        elevatorSubsystem.whenElevatorIsAtBottom.onTrue(
-            // Reset elevator positions when hitting the limit switches
-            Commands.runOnce(() -> {
-                elevatorSubsystem.io.zeroEncoder(0);
-                elevatorSubsystem.io.resetSetpointToCurrentPosition();
-            })
-        );
+        // elevatorSubsystem.whenElevatorIsAtBottom.onTrue(
+        //     // Reset elevator positions when hitting the limit switches
+        //     Commands.runOnce(() -> {
+        //         elevatorSubsystem.io.zeroEncoder(0);
+        //         elevatorSubsystem.io.resetSetpointToCurrentPosition();
+        //     })
+        // );
 
         // Superstructure
         // @formatter:off
@@ -360,20 +372,22 @@ public class RobotContainer {
      */
     public void periodic() {
         // Update telemetry for claw position
-        Logger.recordOutput("ComponentPositions/Claw", clawSubsystem.getPose(elevatorSubsystem.getStage2Pose()));
-        Logger.recordOutput(
-            "ComponentPositions/CoralInClaw",
-            clawSubsystem.getCoralInClawPosition(swerveSubsystem, elevatorSubsystem)
-        );
-        // TODO: Log nearest reef position
-        nearestLeftReef = autoRoutines.getNearestLeftReef();
-        nearestRightReef = autoRoutines.getNearestRightReef();
-        nearestCoralStation = autoRoutines.getNearestCoralStation();
+        // Logger.recordOutput("ComponentPositions/Claw", clawSubsystem.getPose(elevatorSubsystem.getStage2Pose()));
+        // Logger.recordOutput(
+        //     "ComponentPositions/CoralInClaw",
+        //     clawSubsystem.getCoralInClawPosition(swerveSubsystem, elevatorSubsystem)
+        // );
 
-        Logger.recordOutput("Odometry/NearestLeftReef", nearestLeftReef);
-        Logger.recordOutput("Odometry/NearestRightReef", nearestRightReef);
-        Logger.recordOutput("Odometry/NearestCoralStation", nearestCoralStation);
+        // Log nearest reef position
+        // nearestLeftReef = autoRoutines.getNearestLeftReef();
+        // nearestRightReef = autoRoutines.getNearestRightReef();
+        // nearestCoralStation = autoRoutines.getNearestCoralStation();
+
+        // Logger.recordOutput("Odometry/NearestLeftReef", nearestLeftReef);
+        // Logger.recordOutput("Odometry/NearestRightReef", nearestRightReef);
+        // Logger.recordOutput("Odometry/NearestCoralStation", nearestCoralStation);
 
         Logger.recordOutput("Vision/CanAlignToReef", AlignToReefTagRelative.getCanAlignToReef());
+        Logger.recordOutput("Align/Positions", LimelightHelpers.getBotPose_TargetSpace(""));
     }
 }

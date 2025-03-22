@@ -190,7 +190,7 @@ public class SwerveConfig {
     public static final double WHEEL_COF = 1.2;
     public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(3.9506340342);
 
-    public static final Pose2d initialPose = new Pose2d(7.75, 3.75, Rotation2d.fromDegrees(180));
+    public static final Pose2d initialPose = new Pose2d(7.576, 2.29, Rotation2d.fromDegrees(180));
     public static final PathConstraints pathConstraints = new PathConstraints(
         MAX_SPEED,
         MAX_ACCELERATION,

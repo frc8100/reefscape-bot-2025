@@ -23,9 +23,9 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.LimelightHelpers;
 import frc.lib.util.TunableValue;
 import frc.robot.Constants;
-import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import org.littletonrobotics.junction.Logger;
@@ -36,14 +36,14 @@ public class AlignToReefTagRelative extends Command {
     public static double ar = 0.7; // TODO: rename
 
     public static double ROT_TOLERANCE_REEF_ALIGNMENT = 1;
-    public static double X_SETPOINT_REEF_ALIGNMENT = -0.16; // Vertical pose
+    public static double X_SETPOINT_REEF_ALIGNMENT = -0.68; // TZ / Vertical pose -0.16
     public static double ax = -0.17;
 
     public static double X_TOLERANCE_REEF_ALIGNMENT = 0.04;
-    public static double Y_SETPOINT_REEF_ALIGNMENT = 0.21; // Horizontal pose
+    public static double Y_SETPOINT_REEF_ALIGNMENT = 0.31; // Horizontal pose
     public static double ay = 1;
 
-    public static double Y_TOLERANCE_REEF_ALIGNMENT = 0.04;
+    public static double Y_TOLERANCE_REEF_ALIGNMENT = -0.15;
 
     public static final TunableValue ROT_SETPOINT_REEF_ALIGNMENT_TUNABLE = new TunableValue(
         "Align/RotationSetpoint",
@@ -189,7 +189,7 @@ public class AlignToReefTagRelative extends Command {
 
         double[] positions = LimelightHelpers.getBotPose_TargetSpace("");
 
-        Logger.recordOutput("Align/Positions", positions);
+        // Logger.recordOutput("Align/Positions", positions);
 
         Logger.recordOutput("Align/XSetpoint", xController.getSetpoint());
         Logger.recordOutput("Align/XCurrent", positions[2]);

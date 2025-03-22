@@ -22,7 +22,7 @@ public final class SuperstructureConstants {
          */
         INITIAL_POSITION("L1", Meters.of(0.0), CLAW_ANGLE_OFFSET, 0),
         L2("L2", Meters.of(1).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(60), 5.3),
-        L3("L3", Meters.of(1.25).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(60), 14.9),
+        L3("L3", Meters.of(1.25).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(60), 12.9),
         L4("L4", Meters.of(2.1).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(60), 28.2),
 
         L1_AUTO("L1Auto", Meters.of(0.4).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(180), 3.5),

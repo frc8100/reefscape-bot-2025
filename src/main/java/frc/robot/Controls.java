@@ -82,7 +82,7 @@ public class Controls {
          */
         public int slowButton = XboxController.Button.kLeftBumper.value;
 
-        public double slowMultiplier = 0.5;
+        public double slowMultiplier = 0.55;
 
         /**
          * When held, makes the robot move robot centric.

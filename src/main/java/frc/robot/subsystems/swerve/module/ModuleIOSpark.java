@@ -138,7 +138,7 @@ public class ModuleIOSpark implements ModuleIO {
         angleCANcoder.getConfigurator().apply(SwerveConfig.getCANcoderConfig());
 
         turnAbsolutePosition = angleCANcoder.getAbsolutePosition();
-        turnAbsolutePosition.setUpdateFrequency(SwerveConfig.ODOMETRY_FREQUENCY_HZ);
+        turnAbsolutePosition.setUpdateFrequency(50.0);
         angleCANcoder.optimizeBusUtilization();
 
         // Reset the module to absolute position

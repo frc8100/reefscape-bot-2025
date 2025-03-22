@@ -313,7 +313,11 @@ public class AutoRoutines {
      * More reliable than pathfinding.
      */
     public Command actuallyMoveForward() {
-        return driveForwardWithSpeedFor(1, 2.25);
+        return driveForwardWithSpeedFor(1.75, 3);
+    }
+
+    public Command pushAnotherRobotForward() {
+        return driveForwardWithSpeedFor(3, 4);
     }
 
     public Command moveForwardAndL1() {

@@ -7,6 +7,7 @@ import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -24,6 +25,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.lib.LimelightHelpers;
 import frc.lib.math.GeometryUtils;
 import frc.robot.Constants;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
@@ -106,7 +108,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
             kinematics,
             rawGyroRotation,
             lastModulePositions,
-            new Pose2d(),
+            SwerveConfig.initialPose,
             Constants.PoseEstimator.stateStdDevs,
             Constants.PoseEstimator.VisionStdDevs
         );
@@ -380,5 +382,19 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
             // Apply update
             poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
         }
+        // TODO: refactor
+        // LimelightHelpers.SetRobotOrientation(
+        //     "limelight",
+        //     poseEstimator.getEstimatedPosition().getRotation().getDegrees(),
+        //     0,
+        //     0,
+        //     0,
+        //     0,
+        //     0
+        // );
+        // LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+
+        // poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+        // poseEstimator.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
     }
 }
