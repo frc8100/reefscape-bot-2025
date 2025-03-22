@@ -56,6 +56,8 @@ public final class ClawConstants {
 
         public static final Rotation2d CLAW_L4_SCORING_POSITION = Rotation2d.fromDegrees(95).minus(CLAW_ANGLE_OFFSET);
 
+        public static final Rotation2d CLAW_ALGAE_THROW_POSITION = Rotation2d.fromDegrees(75).minus(CLAW_ANGLE_OFFSET);
+
         /**
          * The horizontal, front/back translation of the claw from the origin of the second elevator stage.
          */

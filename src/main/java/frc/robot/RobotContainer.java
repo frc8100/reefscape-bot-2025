@@ -68,7 +68,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
 
     // Subsystems
-    private final Vision visionSubsystem;
+    // private final Vision visionSubsystem;
     private final SwerveDrive swerveSubsystem;
     private final Claw clawSubsystem;
     private final Elevator elevatorSubsystem;
@@ -107,16 +107,16 @@ public class RobotContainer {
                 );
 
                 // TODO: reimplement
-                visionSubsystem = new Vision(
-                    // swerveSubsystem::addVisionMeasurement,
+                // visionSubsystem = new Vision(
+                //     // swerveSubsystem::addVisionMeasurement,
 
-                    (
-                        Pose2d visionRobotPoseMeters,
-                        double timestampSeconds,
-                        Matrix<N3, N1> visionMeasurementStdDevs
-                    ) -> {},
-                    new VisionIOLimelight(VisionConstants.CAMERA_0_NAME, swerveSubsystem::getRotation)
-                );
+                //     (
+                //         Pose2d visionRobotPoseMeters,
+                //         double timestampSeconds,
+                //         Matrix<N3, N1> visionMeasurementStdDevs
+                //     ) -> {},
+                //     new VisionIOLimelight(VisionConstants.CAMERA_0_NAME, swerveSubsystem::getRotation)
+                // );
 
                 clawSubsystem = new Claw(new ClawIOSpark());
                 // clawSubsystem = new ClawSim();
@@ -152,14 +152,14 @@ public class RobotContainer {
                 );
 
                 // Create a simulated vision subsystem
-                visionSubsystem = new Vision(
-                    swerveSubsystem::addVisionMeasurement,
-                    new VisionIOPhotonSim(
-                        VisionConstants.CAMERA_0_NAME,
-                        VisionConstants.TRANSFORM_TO_CAMERA_0,
-                        swerveSubsystem::getActualPose
-                    )
-                );
+                // visionSubsystem = new Vision(
+                //     swerveSubsystem::addVisionMeasurement,
+                //     new VisionIOPhotonSim(
+                //         VisionConstants.CAMERA_0_NAME,
+                //         VisionConstants.TRANSFORM_TO_CAMERA_0,
+                //         swerveSubsystem::getActualPose
+                //     )
+                // );
 
                 // Create a simulated claw
                 clawSubsystem = new ClawSim();
@@ -340,6 +340,11 @@ public class RobotContainer {
             Controls.Superstructure.superstructureController,
             Controls.Superstructure.clawOuttakeForL4
         ).whileTrue(autoRoutines.doClawMovementsForL4());
+
+        // new JoystickButton(
+        //     Controls.Superstructure.superstructureController,
+        //     Controls.Superstructure.launchAlgae
+        // ).whileTrue(autoRoutines.launchAlgae());
 
         // Elevator
         elevatorSubsystem.setDefaultCommand(elevatorSubsystem.getUpOrDown(Controls.Elevator::getUpOrDown));

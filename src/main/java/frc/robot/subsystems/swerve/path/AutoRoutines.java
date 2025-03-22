@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.lib.util.PoseUtil;
 import frc.robot.commands.AlignToReefTagRelative;
@@ -222,8 +223,8 @@ public class AutoRoutines {
                         .andThen(
                             elevatorSubsystem.getPositionCommandAndWait(SuperstructureConstants.Level.INITIAL_POSITION)
                         )
-                        // Move back
-                        .alongWith(driveForwardWithSpeedFor(-1.5, 0.4))
+                    // Move back
+                    // .alongWith(driveForwardWithSpeedFor(-1.5, 0.4))
                 )
             )
             // Stop when interrupted
@@ -324,6 +325,29 @@ public class AutoRoutines {
         return driveForwardWithSpeedFor(0.75, 2.25)
             .alongWith(setUpSuperstructure(SuperstructureConstants.Level.L1_AUTO))
             .andThen(clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.BACK));
+    }
+
+    public Command launchAlgae() {
+        return new ParallelRaceGroup(
+            // Continuously hold until done with elevator movements
+            clawSubsystem.runIntakeOrOuttake(IntakeOuttakeDirection.BACK, ClawConstants.ALGAE_TIMEOUT_TIME),
+            // Raise elevator
+            setUpSuperstructure(SuperstructureConstants.Level.ALGAE_HOLD_NET)
+        ).andThen(
+            // Launch
+            // clawSubsystem
+            //     .runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE)
+            //     .alongWith(
+            //         clawSubsystem.getWaitForAngleCommand(ClawConstants.RotationPositions.CLAW_ALGAE_THROW_POSITION)
+            //     )
+            clawSubsystem
+                .getWaitForAngleCommand(ClawConstants.RotationPositions.CLAW_ALGAE_THROW_POSITION)
+                .alongWith(
+                    Commands.waitTime(Seconds.of(0.3)).andThen(
+                        clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE)
+                    )
+                )
+        );
     }
 
     /**

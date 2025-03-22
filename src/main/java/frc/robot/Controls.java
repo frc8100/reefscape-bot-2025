@@ -335,5 +335,7 @@ public class Controls {
         public static final int intakeAlgaeFromL3 = XboxController.Button.kB.value;
 
         public static final int clawOuttakeForL4 = XboxController.Button.kY.value;
+
+        public static final int launchAlgae = XboxController.Button.kX.value;
     }
 }

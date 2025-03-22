@@ -28,7 +28,9 @@ public final class SuperstructureConstants {
         L1_AUTO("L1Auto", Meters.of(0.4).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(180), 3.5),
 
         ALGAE_L2("L2Algae", Meters.of(0.9), Rotation2d.fromDegrees(180), 4.8),
-        ALGAE_L3("L3Algae", Meters.of(1.2), Rotation2d.fromDegrees(180), 10);
+        ALGAE_L3("L3Algae", Meters.of(1.2), Rotation2d.fromDegrees(180), 10),
+
+        ALGAE_HOLD_NET("L4", Meters.of(2.1).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(180), 20); // TODO: increase height
 
         private final Distance elevatorDistance;
 
