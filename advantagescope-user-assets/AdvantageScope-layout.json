@@ -1,48 +1,39 @@
 {
   "hubs": [
     {
-      "x": 207,
-      "y": 99,
-      "width": 1119,
-      "height": 641,
+      "x": 216,
+      "y": 104,
+      "width": 1112,
+      "height": 664,
       "state": {
         "sidebar": {
           "width": 300,
           "expanded": [
-            "/AdvantageKit/RealOutputs/Vision/Summary",
             "/SmartDashboard/BatterySim",
-            "/AdvantageKit/RealOutputs",
-            "/AdvantageKit/RealOutputs/Swerve/States",
             "/AdvantageKit/Drive/Module1/TurnPosition",
             "/SmartDashboard/Auto Choices",
             "/Tuning/Claw",
             "/photonvision/limelight",
-            "/AdvantageKit/Vision/Camera0",
-            "/AdvantageKit/Vision/Camera0/LatestTargetObservation",
-            "/AdvantageKit/RealOutputs/Vision/Summary/RobotPoses",
-            "/AdvantageKit/RealOutputs/Vision/Summary/RobotPosesAccepted",
-            "/AdvantageKit/RealOutputs/Vision/Summary/RobotPosesRejected",
             "/AdvantageKit/RealOutputs/Swerve/States/Measured",
             "/AdvantageKit/RealOutputs/Swerve/States/Measured/0",
             "/AdvantageKit/RealOutputs/Swerve/States/Setpoints",
             "/AdvantageKit/RealOutputs/Swerve/States/Setpoints/0",
             "/AdvantageKit/Drive/Module0/TurnPosition",
-            "/AdvantageKit/RealOutputs/Swerve/ChassisSpeeds/Measured",
             "/Tuning/Drive",
             "/AdvantageKit",
-            "/AdvantageKit/RealOutputs/Align",
             "/AdvantageKit/RealOutputs/Align/positions",
             "/AdvantageKit/RealOutputs/Align/Positions",
-            "/AdvantageKit/RealOutputs/Align/Speeds",
-            "/AdvantageKit/RealOutputs/Swerve",
-            "/Tuning",
             "/Tuning/Align",
-            "/AdvantageKit/Drive",
-            "/AdvantageKit/Drive/Module1",
-            "/AdvantageKit/RealOutputs/Swerve/Mod1",
-            "/AdvantageKit/Drive/Module1/OdometryTurnPositions",
             "/AdvantageKit/Drive/Module1/OdometryTurnPositions/0",
-            "/AdvantageKit/Drive/Module1/OdometryTurnPositions/1"
+            "/AdvantageKit/Drive/Module1/OdometryTurnPositions/1",
+            "/AdvantageKit/RealOutputs",
+            "/AdvantageKit/RealOutputs/Vision",
+            "/AdvantageKit/RealOutputs/Align",
+            "/RealOutputs",
+            "/RealOutputs/Odometry",
+            "/RealOutputs/Odometry/Field",
+            "/RealOutputs/Swerve",
+            "/RealOutputs/Swerve/Mod0"
           ]
         },
         "tabs": {
@@ -120,16 +111,34 @@
                     "type": "robot",
                     "logKey": "NT:/AdvantageKit/RealOutputs/Odometry/OpponentRobotPoses",
                     "logType": "Pose2d[]",
-                    "visible": true,
+                    "visible": false,
                     "options": {}
                   },
                   {
                     "type": "ghost",
                     "logKey": "NT:/AdvantageKit/RealOutputs/Odometry/NearestRightReef",
                     "logType": "Pose2d",
-                    "visible": true,
+                    "visible": false,
                     "options": {
                       "color": "#0000ff"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Odometry/NearestCoralStation",
+                    "logType": "Pose2d",
+                    "visible": false,
+                    "options": {
+                      "color": "#ff8c00"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/Summary/RobotPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ffff"
                     }
                   }
                 ],
@@ -254,14 +263,14 @@
                 "cameraIndex": -1,
                 "orbitFov": 50,
                 "cameraPosition": [
-                  4.1844590779152115,
-                  3.2839757884866767,
-                  -2.540940722343932
+                  4.908457737053075,
+                  4.240997129989589,
+                  -4.109297093920082
                 ],
                 "cameraTarget": [
-                  3.2105320127031276,
-                  -0.6874042569536025,
-                  0.851505629177629
+                  4.856070249790112,
+                  0.4226220252470297,
+                  -1.8477123945667895
                 ]
               },
               "controlsHeight": 245
@@ -328,14 +337,14 @@
             },
             {
               "type": 1,
-              "title": "Line Graph",
+              "title": "Align",
               "controller": {
                 "leftSources": [
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Swerve/Mod1/Current",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Align/RCurrent",
                     "logType": "Number",
-                    "visible": true,
+                    "visible": false,
                     "options": {
                       "color": "#2b66a2",
                       "size": "normal"
@@ -343,39 +352,55 @@
                   },
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Swerve/Mod1/Setpoint",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Align/RSetpoint",
                     "logType": "Number",
-                    "visible": true,
+                    "visible": false,
                     "options": {
                       "color": "#e5b31b",
                       "size": "normal"
                     }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Align/XCurrent",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Align/XSetpoint",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#80588e",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Align/YCurrent",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e48b32",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Align/YSetpoint",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#c0b487",
+                      "size": "normal"
+                    }
                   }
                 ],
-                "rightSources": [],
-                "discreteSources": [],
-                "leftLockedRange": null,
-                "rightLockedRange": null,
-                "leftUnitConversion": {
-                  "type": null,
-                  "factor": 1
-                },
-                "rightUnitConversion": {
-                  "type": null,
-                  "factor": 1
-                },
-                "leftFilter": 0,
-                "rightFilter": 0
-              },
-              "controllerUUID": "vvam7qw24uu06i7nh7qynduo482rz3uf",
-              "renderer": null,
-              "controlsHeight": 200
-            },
-            {
-              "type": 1,
-              "title": "Align",
-              "controller": {
-                "leftSources": [],
                 "rightSources": [],
                 "discreteSources": [],
                 "leftLockedRange": null,
@@ -402,17 +427,7 @@
                 "leftSources": [
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Drive/Module0/DriveCurrentAmps",
-                    "logType": "Number",
-                    "visible": false,
-                    "options": {
-                      "color": "#af2437",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Drive/Module0/DriveVelocityRadPerSec",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Swerve/Mod1/Current",
                     "logType": "Number",
                     "visible": true,
                     "options": {
@@ -422,11 +437,21 @@
                   },
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Swerve/Mod0DrivePID",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Swerve/Mod1/Setpoint",
                     "logType": "Number",
                     "visible": true,
                     "options": {
                       "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Swerve/Mod1/Setpoint",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#80588e",
                       "size": "normal"
                     }
                   }
@@ -434,11 +459,11 @@
                 "rightSources": [
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Swerve/ChassisSpeeds/Measured/vx",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Swerve/Mod1/RequestedVoltage",
                     "logType": "Number",
                     "visible": true,
                     "options": {
-                      "color": "#80588e",
+                      "color": "#af2437",
                       "size": "normal"
                     }
                   }
@@ -455,7 +480,7 @@
                   "factor": 1
                 },
                 "leftFilter": 0,
-                "rightFilter": 1
+                "rightFilter": 0
               },
               "controllerUUID": "dof0zzvjpgufkiz0t57aihmqnt4d737h",
               "renderer": null,
@@ -487,7 +512,18 @@
                     }
                   }
                 ],
-                "rightSources": [],
+                "rightSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/Claw/TurnVelocityRadPerSec",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  }
+                ],
                 "discreteSources": [],
                 "leftLockedRange": [
                   -7,
@@ -538,19 +574,9 @@
                 "rightSources": [
                   {
                     "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Elevator/percentOutput",
+                    "logKey": "NT:/AdvantageKit/Elevator/VelocityRadPerSec",
                     "logType": "Number",
-                    "visible": true,
-                    "options": {
-                      "color": "#80588e",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/Elevator/AppliedVolts",
-                    "logType": "Number",
-                    "visible": true,
+                    "visible": false,
                     "options": {
                       "color": "#af2437",
                       "size": "normal"
@@ -584,5 +610,5 @@
     }
   ],
   "satellites": [],
-  "version": "4.1.4"
+  "version": "4.1.5"
 }
