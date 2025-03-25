@@ -35,50 +35,36 @@ import org.littletonrobotics.junction.Logger;
 
 public class ElevatorIOSpark implements ElevatorIO {
 
-    // Turn motor variables
-    /**
-     * The motor.
-     */
-    private final SparkMax motor;
+    // Leader turn motor variables
+    private final SparkMax leaderMotor;
+    private final RelativeEncoder leaderEncoder;
+    private final SparkClosedLoopController leaderClosedLoopController;
+    private SparkMaxConfig leaderConfig;
 
-    /**
-     * The relative encoder.
-     */
-    private final RelativeEncoder encoder;
+    // Follower turn motor variables
+    private final SparkMax followerMotor;
+    private SparkMaxConfig followerConfig;
 
-    /**
-     * The closed loop controller.
-     */
-    private final SparkClosedLoopController closedLoopController;
-
-    /**
-     * The limit swtich.
-     */
     private final SparkLimitSwitch limitSwitch;
 
     /**
      * A debouncer for the connected state, to prevent flickering.
      */
-    private final Debouncer connectedDebouncer = new Debouncer(0.5);
+    private final Debouncer leaderConnectedDebouncer = new Debouncer(0.5);
 
     /**
      * The setpoint of the elevator in radians.
      */
     private double radianSetpoint = 0.0;
 
-    /**
-     * The configuration for the elevator motor.
-     */
-    private SparkMaxConfig config;
-
     private boolean isUsingPID = true;
 
     /**
      * The config for the outtake motor.
      */
-    private static class MotorConfig extends GenericSparkIOConfig {
+    private static class LeaderMotorConfig extends GenericSparkIOConfig {
 
-        public MotorConfig() {
+        public LeaderMotorConfig() {
             super();
             // Override the default config
             this.idleMode = SparkBaseConfig.IdleMode.kBrake;
@@ -88,16 +74,28 @@ public class ElevatorIOSpark implements ElevatorIO {
         }
     }
 
+    // private static class FollowerMotorConfig extends GenericSparkIOConfig {
+
+    //     public FollowerMotorConfig() {
+    //         super();
+    //         // Override the default config
+    //         this.idleMode = SparkBaseConfig.IdleMode.kBrake;
+    //         this.inverted = ElevatorConstants.ELEVATOR_MOTOR_INVERTED;
+    //         this.smartCurrentLimit = (int) ElevatorConstants.ELEVATOR_MOTOR_CURRENT_LIMIT.in(Amps);
+    //         this.positionConversionFactor = ElevatorConstants.ELEVATOR_MOTOR_POSITION_FACTOR;
+    //     }
+    // }
+
     public ElevatorIOSpark() {
         // Create the motor and configure it
-        motor = new SparkMax(ElevatorConstants.ELEVATOR_MOTOR_ID, MotorType.kBrushless);
-        encoder = motor.getEncoder();
-        closedLoopController = motor.getClosedLoopController();
-        limitSwitch = motor.getReverseLimitSwitch();
+        leaderMotor = new SparkMax(ElevatorConstants.ELEVATOR_MOTOR_ID, MotorType.kBrushless);
+        leaderEncoder = leaderMotor.getEncoder();
+        leaderClosedLoopController = leaderMotor.getClosedLoopController();
+        limitSwitch = leaderMotor.getReverseLimitSwitch();
 
-        config = new MotorConfig().getConfig();
+        leaderConfig = new LeaderMotorConfig().getConfig();
 
-        config.closedLoop
+        leaderConfig.closedLoop
             .pidf(
                 ElevatorConstants.ELEVATOR_KP.get(),
                 ElevatorConstants.ELEVATOR_KI.get(),
@@ -106,19 +104,40 @@ public class ElevatorIOSpark implements ElevatorIO {
             )
             .outputRange(-ElevatorConstants.ELEVATOR_MAX_OUTPUT, ElevatorConstants.ELEVATOR_MAX_OUTPUT);
 
-        config.closedLoop.maxMotion
+        leaderConfig.closedLoop.maxMotion
             .maxVelocity(ElevatorConstants.ELEVATOR_MAX_ANGULAR_VELOCITY.in(RadiansPerSecond))
             .maxAcceleration(ElevatorConstants.ELEVATOR_MAX_ANGULAR_ACCELERATION.in(RadiansPerSecondPerSecond));
 
-        config.limitSwitch.reverseLimitSwitchType(Type.kNormallyOpen).reverseLimitSwitchEnabled(false);
+        leaderConfig.limitSwitch.reverseLimitSwitchType(Type.kNormallyOpen).reverseLimitSwitchEnabled(false);
 
         // Apply the config
-        tryUntilOk(motor, 5, () ->
-            motor.configure(config, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters)
+        tryUntilOk(leaderMotor, 5, () ->
+            leaderMotor.configure(
+                leaderConfig,
+                SparkBase.ResetMode.kResetSafeParameters,
+                SparkBase.PersistMode.kPersistParameters
+            )
         );
 
         // Reset the encoder
-        tryUntilOk(motor, 5, () -> encoder.setPosition(0.0));
+        tryUntilOk(leaderMotor, 5, () -> leaderEncoder.setPosition(0.0));
+
+        // Create the follower motor and configure it
+        followerMotor = new SparkMax(ElevatorConstants.ELEVATOR_FOLLOWER_MOTOR_ID, MotorType.kBrushless);
+
+        // followerConfig = new FollowerMotorConfig().getConfig();
+        followerConfig = leaderConfig;
+
+        followerConfig.follow(leaderMotor);
+
+        // Apply the config
+        tryUntilOk(followerMotor, 5, () ->
+            followerMotor.configure(
+                followerConfig,
+                SparkBase.ResetMode.kResetSafeParameters,
+                SparkBase.PersistMode.kPersistParameters
+            )
+        );
 
         TunableValue.addRefreshConfigConsumer(this::refreshConfig);
     }
@@ -126,7 +145,7 @@ public class ElevatorIOSpark implements ElevatorIO {
     @Override
     public void refreshConfig() {
         // Refresh the config for the motor
-        config.closedLoop.pidf(
+        leaderConfig.closedLoop.pidf(
             ElevatorConstants.ELEVATOR_KP.get(),
             ElevatorConstants.ELEVATOR_KI.get(),
             ElevatorConstants.ELEVATOR_KD.get(),
@@ -134,15 +153,19 @@ public class ElevatorIOSpark implements ElevatorIO {
         );
         // .outputRange(-ElevatorConstants.ELEVATOR_MAX_OUTPUT, ElevatorConstants.ELEVATOR_MAX_OUTPUT);
 
-        tryUntilOk(motor, 5, () ->
-            motor.configure(config, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters)
+        tryUntilOk(leaderMotor, 5, () ->
+            leaderMotor.configure(
+                leaderConfig,
+                SparkBase.ResetMode.kResetSafeParameters,
+                SparkBase.PersistMode.kPersistParameters
+            )
         );
     }
 
     @Override
     public void runMotor(double motorInput) {
         // Use PID
-        double positionCurrent = encoder.getPosition();
+        double positionCurrent = leaderEncoder.getPosition();
 
         double percentOutput = motorInput * ElevatorConstants.AMOUNT_PER_FRAME;
 
@@ -170,17 +193,17 @@ public class ElevatorIOSpark implements ElevatorIO {
 
     @Override
     public void stop() {
-        motor.stopMotor();
+        leaderMotor.stopMotor();
     }
 
     @Override
     public void resetSetpointToCurrentPosition() {
-        radianSetpoint = encoder.getPosition();
+        radianSetpoint = leaderEncoder.getPosition();
     }
 
     @Override
     public void zeroEncoder(double value) {
-        encoder.setPosition(value);
+        leaderEncoder.setPosition(value);
         radianSetpoint = value;
     }
 
@@ -211,7 +234,7 @@ public class ElevatorIOSpark implements ElevatorIO {
         inputs.setpoint = radianSetpoint;
 
         if (isUsingPID) {
-            closedLoopController.setReference(radianSetpoint, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+            leaderClosedLoopController.setReference(radianSetpoint, ControlType.kPosition, ClosedLoopSlot.kSlot0);
         }
 
         // Reset spark sticky fault
@@ -220,25 +243,25 @@ public class ElevatorIOSpark implements ElevatorIO {
         // Update inputs for the turn motor
 
         // Set the position and velocity
-        ifOk(motor, encoder::getPosition, position -> inputs.positionRad = position);
-        ifOk(motor, encoder::getVelocity, velocity -> inputs.velocityRadPerSec = velocity);
-        ifOk(motor, encoder::getPosition, position ->
+        ifOk(leaderMotor, leaderEncoder::getPosition, position -> inputs.positionRad = position);
+        ifOk(leaderMotor, leaderEncoder::getVelocity, velocity -> inputs.velocityRadPerSec = velocity);
+        ifOk(leaderMotor, leaderEncoder::getPosition, position ->
             inputs.height = position * ElevatorConstants.ELEVATOR_RADIANS_TO_METERS
         );
 
         // Set the supply current based on the bus voltage multiplied by the applied output
-        ifOk(motor, new DoubleSupplier[] { motor::getBusVoltage, motor::getAppliedOutput }, x ->
+        ifOk(leaderMotor, new DoubleSupplier[] { leaderMotor::getBusVoltage, leaderMotor::getAppliedOutput }, x ->
             inputs.appliedVolts = x[0] * x[1]
         );
 
         // Set the torque current
-        ifOk(motor, motor::getOutputCurrent, current -> inputs.torqueCurrentAmps = current);
+        ifOk(leaderMotor, leaderMotor::getOutputCurrent, current -> inputs.torqueCurrentAmps = current);
 
         // Set the connected state with a debouncer
-        inputs.connected = connectedDebouncer.calculate(!sparkStickyFault);
+        inputs.connected = leaderConnectedDebouncer.calculate(!sparkStickyFault);
 
         // Set the temperature
-        ifOk(motor, motor::getMotorTemperature, temp -> inputs.tempCelsius = temp);
+        ifOk(leaderMotor, leaderMotor::getMotorTemperature, temp -> inputs.tempCelsius = temp);
 
         inputs.isAtBottom = limitSwitch.isPressed();
     }
