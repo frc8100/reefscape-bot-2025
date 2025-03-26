@@ -112,6 +112,14 @@ public class ClawIOSim implements ClawIO {
     }
 
     @Override
+    public void increaseTurnPosition(double valueToIncreaseBy) {
+        isAngleUsingPID = true;
+
+        // Increase the setpoint of the angle controller
+        angleController.setSetpoint(angleController.getSetpoint() + valueToIncreaseBy);
+    }
+
+    @Override
     public void runOuttake(double motorInput) {
         isOuttakeUsingPID = true;
 

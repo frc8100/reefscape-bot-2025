@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
@@ -138,10 +139,32 @@ public class ElevatorIOSim implements ElevatorIO {
     }
 
     @Override
+    public void runMotor(double motorInput) {
+        // TODO: Run the motor
+        // isUsingPID = false;
+        // motorSim.setInputVoltage(MathUtil.clamp(motorInput, -12, 12));
+
+        // Set the elevator position
+        isUsingPID = true;
+        controller.setGoal(
+            controller.getSetpoint().position +
+            motorInput * ElevatorConstants.AMOUNT_PER_FRAME * ElevatorConstants.ELEVATOR_MAX_OUTPUT
+        );
+    }
+
+    @Override
+    public void zeroEncoder(double value) {
+        motorSim.setAngle(value);
+    }
+
+    @Override
     public void updateInputs(ElevatorIOInputs inputs) {
         // Motor inputs
         inputs.connected = true;
-        inputs.positionRad = motorSim.getAngularPositionRad();
+        // inputs.positionRad = motorSim.getAngularPositionRad();
+        inputs.positionRad = ElevatorConstants.getMotorPositionFromHeight(
+            Meters.of(controller.getSetpoint().position)
+        ).in(Radians);
         inputs.velocityRadPerSec = motorSim.getAngularVelocityRadPerSec();
         inputs.appliedVolts = motorSim.getInputVoltage();
         inputs.supplyCurrentAmps = motorSim.getCurrentDrawAmps();
