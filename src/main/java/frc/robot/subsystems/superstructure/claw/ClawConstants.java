@@ -52,7 +52,7 @@ public final class ClawConstants {
         /**
          * Amount to rotate the claw to when moving the elevator up.
          */
-        public static final Rotation2d CLAW_HOLDING_POSITION = Rotation2d.fromDegrees(125).minus(CLAW_ANGLE_OFFSET);
+        public static final Rotation2d CLAW_HOLDING_POSITION = Rotation2d.fromDegrees(100).minus(CLAW_ANGLE_OFFSET);
 
         public static final Rotation2d CLAW_L4_SCORING_POSITION = Rotation2d.fromDegrees(95).minus(CLAW_ANGLE_OFFSET);
 

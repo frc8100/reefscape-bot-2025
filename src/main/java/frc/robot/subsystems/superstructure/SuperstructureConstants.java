@@ -84,13 +84,14 @@ public final class SuperstructureConstants {
      * The elevator will move until it hits this range (assuming a critical level is between the current and target position).
      * It will then wait for the claw to rotate to the correct angle before moving again.
      */
-    public static final Angle ELEVATOR_RADIAN_RANGE_BETWEEN_CRITICAL_LEVELS_TO_WAIT_FOR_CLAW = Radians.of(1);
+    public static final Angle ELEVATOR_RADIAN_RANGE_BETWEEN_CRITICAL_LEVELS_TO_WAIT_FOR_CLAW = Radians.of(2.25);
 
     /**
      * A list of critical levels. See {@link CriticalLevel}.
      */
     public static final CriticalLevel[] CRITICAL_LEVELS = {
-        new CriticalLevel(Radians.of(6), ClawConstants.RotationPositions.CLAW_HOLDING_POSITION),
+        new CriticalLevel(Radians.of(15), ClawConstants.RotationPositions.CLAW_HOLDING_POSITION),
+        new CriticalLevel(Radians.of(18), ClawConstants.RotationPositions.CLAW_HOLDING_POSITION),
     };
 
     public static record CriticalLevelRaw(Angle elevatorRadian, Rotation2d clawAngle) {}

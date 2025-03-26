@@ -273,6 +273,7 @@ public class AutoRoutines {
         // If there are critical levels to wait for, move the elevator to the each critical level
         SequentialCommandGroup command = new SequentialCommandGroup();
 
+        // TODO: Only have one elevator move command in total and move the claw in parallel
         for (CriticalLevel criticalLevel : elevatorCriticalPositions) {
             command.addCommands(
                 // Simultaneously move the elevator and claw to the critical level holding position
