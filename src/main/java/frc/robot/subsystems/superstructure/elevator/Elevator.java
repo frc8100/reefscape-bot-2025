@@ -53,17 +53,7 @@ public class Elevator extends SubsystemBase {
      */
     @AutoLogOutput(key = "Elevator/IsElevatorAtTarget")
     public boolean isElevatorAtTarget() {
-        // return MathUtil.isNear(
-        //     inputs.setpoint,
-        //     inputs.height,
-        //     ElevatorConstants.ELEVATOR_DISTANCE_TOLERANCE.in(Meters)
-        // );
-
-        return MathUtil.isNear(
-            inputs.positionRad,
-            inputs.setpoint,
-            ElevatorConstants.ELEVATOR_RAD_TOLERANCE.in(Radians)
-        );
+        return io.isAtTarget();
     }
 
     /**
@@ -81,18 +71,6 @@ public class Elevator extends SubsystemBase {
             this
         );
     }
-
-    /**
-     * @return Whether the elevator is at the given position, within a tolerance.
-     */
-    // public boolean isElevatorAtTarget(Distance targetPosition) {
-    // TODO:
-    // return MathUtil.isNear(
-    //     targetPosition.in(Meters),
-    //     inputs.height,
-    //     ElevatorConstants.ELEVATOR_DISTANCE_TOLERANCE.in(Meters)
-    // );
-    // }
 
     /**
      * @return The position of the elevator as an angle of the motor.

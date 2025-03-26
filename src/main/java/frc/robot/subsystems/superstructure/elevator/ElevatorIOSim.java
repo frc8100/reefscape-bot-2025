@@ -139,6 +139,19 @@ public class ElevatorIOSim implements ElevatorIO {
     }
 
     @Override
+    public boolean isAtTarget() {
+        // Check if the elevator is at the target position
+        // return controller.atGoal();
+
+        return MathUtil.isNear(
+            controller.getSetpoint().position,
+            // elevatorSim.getPositionMeters(),
+            controller.getGoal().position,
+            ElevatorConstants.ELEVATOR_DISTANCE_TOLERANCE.in(Meters)
+        );
+    }
+
+    @Override
     public void runMotor(double motorInput) {
         // TODO: Run the motor
         // isUsingPID = false;

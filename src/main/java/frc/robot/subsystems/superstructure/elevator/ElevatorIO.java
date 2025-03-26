@@ -52,6 +52,11 @@ public interface ElevatorIO extends GenericSparkIO<ElevatorIO.ElevatorIOInputs> 
     public abstract void stop();
 
     /**
+     * @return Whether the elevator is at the target position, within a tolerance.
+     */
+    public abstract boolean isAtTarget();
+
+    /**
      * Sets the desired elevator position.
      * @param position - The desired elevator position.
      */

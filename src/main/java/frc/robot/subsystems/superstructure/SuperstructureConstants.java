@@ -121,14 +121,14 @@ public final class SuperstructureConstants {
         /**
          * @return The radian of the elevator at the lower bound of the critical level. See {@link #ELEVATOR_RADIAN_RANGE_BETWEEN_CRITICAL_LEVELS_TO_WAIT_FOR_CLAW}
          */
-        public Angle getLowerElevatorRadian() {
+        private Angle getLowerElevatorRadian() {
             return elevatorAngle.minus(ELEVATOR_RADIAN_RANGE_BETWEEN_CRITICAL_LEVELS_TO_WAIT_FOR_CLAW);
         }
 
         /**
          * @return The radian of the elevator at the upper bound of the critical level. See {@link #ELEVATOR_RADIAN_RANGE_BETWEEN_CRITICAL_LEVELS_TO_WAIT_FOR_CLAW}
          */
-        public Angle getUpperElevatorRadian() {
+        private Angle getUpperElevatorRadian() {
             return elevatorAngle.plus(ELEVATOR_RADIAN_RANGE_BETWEEN_CRITICAL_LEVELS_TO_WAIT_FOR_CLAW);
         }
 

@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Contains the autonomous (and teleop) routines for the robot.
@@ -244,6 +245,18 @@ public class AutoRoutines {
             }
         }
 
+        // test
+        // Logger.recordOutput("TestElevator/ElevatorCurrentPosition", elevatorCurrentPosition);
+        // Logger.recordOutput("TestElevator/ElevatorTargetPosition", elevatorTargetPosition);
+        // Logger.recordOutput(
+        //     "TestElevator/ElevatorCriticalPositions",
+        //     elevatorCriticalPositions
+        //         .stream()
+        //         .mapToDouble((CriticalLevel c) -> c.getElevatorAngle().in(Radians))
+        //         .toArray()
+        // );
+        // Logger.recordOutput("TestElevator/IsElevatorCriticalPositionsEmpty", elevatorCriticalPositions.isEmpty());
+
         // If there are no critical levels to wait for, just move the elevator
         if (elevatorCriticalPositions.isEmpty()) {
             return elevatorSubsystem
@@ -281,6 +294,7 @@ public class AutoRoutines {
                 .alongWith(clawSubsystem.getWaitForAngleCommand(level.getClawAngle()))
         );
 
+        // Stop when interrupted
         return command.handleInterrupt(() -> {
             elevatorSubsystem.io.resetSetpointToCurrentPosition();
             clawSubsystem.io.resetSetpointToCurrentPosition();
