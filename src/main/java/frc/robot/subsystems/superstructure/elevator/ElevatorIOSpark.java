@@ -24,6 +24,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import frc.lib.util.GenericSparkIO.GenericSparkIOConfig;
 import frc.lib.util.TunableValue;
@@ -210,7 +211,7 @@ public class ElevatorIOSpark implements ElevatorIO {
     @Override
     public void setPosition(Distance position) {
         // Set the position of the turn motor
-        radianSetpoint = ElevatorConstants.getMotorPositionFromHeight(position);
+        radianSetpoint = ElevatorConstants.getMotorPositionFromHeight(position).in(Radians);
 
         isUsingPID = true;
     }
@@ -218,6 +219,13 @@ public class ElevatorIOSpark implements ElevatorIO {
     @Override
     public void setPosition(SuperstructureConstants.Level level) {
         radianSetpoint = level.getElevatorRadian();
+
+        isUsingPID = true;
+    }
+
+    @Override
+    public void setPosition(Angle position) {
+        radianSetpoint = position.in(Radians);
 
         isUsingPID = true;
     }

@@ -1,5 +1,6 @@
 package frc.robot.subsystems.superstructure.elevator;
 
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import frc.lib.util.GenericSparkIO;
 import frc.lib.util.GenericSparkIO.GenericSparkIOInputs;
@@ -55,6 +56,8 @@ public interface ElevatorIO extends GenericSparkIO<ElevatorIO.ElevatorIOInputs> 
      * @param position - The desired elevator position.
      */
     public void setPosition(Distance position);
+
+    public void setPosition(Angle angle);
 
     /**
      * Sets the desired elevator position given a level. Can be used to get the radian position for SPARK io.

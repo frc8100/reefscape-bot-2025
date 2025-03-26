@@ -14,6 +14,7 @@ import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
@@ -127,6 +128,13 @@ public class ElevatorIOSim implements ElevatorIO {
         // Set the elevator position
         isUsingPID = true;
         controller.setGoal(position.in(Meters));
+    }
+
+    @Override
+    public void setPosition(Angle angle) {
+        // Set the elevator position
+        isUsingPID = true;
+        controller.setGoal(ElevatorConstants.getHeightFromMotorPosition(angle).in(Meters));
     }
 
     @Override

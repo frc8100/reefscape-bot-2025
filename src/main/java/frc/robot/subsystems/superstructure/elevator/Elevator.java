@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.Radians;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -93,6 +94,14 @@ public class Elevator extends SubsystemBase {
     // );
     // }
 
+    /**
+     * @return The position of the elevator as an angle of the motor.
+     * ! IMPORTANT: This is not the linear position of the elevator.
+     */
+    public Angle getAngularPosition() {
+        return Radians.of(inputs.positionRad);
+    }
+
     @Override
     public void periodic() {
         io.periodic();
@@ -121,6 +130,10 @@ public class Elevator extends SubsystemBase {
         io.setPosition(level);
     }
 
+    public void setPosition(Angle angle) {
+        io.setPosition(angle);
+    }
+
     /**
      * Runs the elevator motor at the given input.
      * @param motorInput - The input to the motor from -1 to 1.
@@ -138,6 +151,10 @@ public class Elevator extends SubsystemBase {
 
     public Command getPositionCommand(SuperstructureConstants.Level level) {
         return new InstantCommand(() -> setPosition(level), this);
+    }
+
+    public Command getPositionCommand(Angle angle) {
+        return new InstantCommand(() -> setPosition(angle), this);
     }
 
     /**
@@ -159,6 +176,15 @@ public class Elevator extends SubsystemBase {
         // @formatter:off
         return (
             getPositionCommand(level)
+                .andThen(Commands.waitUntil(this::isElevatorAtTarget))
+        );
+        // @formatter:on
+    }
+
+    public Command getPositionCommandAndWait(Angle angle) {
+        // @formatter:off
+        return (
+            getPositionCommand(angle)
                 .andThen(Commands.waitUntil(this::isElevatorAtTarget))
         );
         // @formatter:on

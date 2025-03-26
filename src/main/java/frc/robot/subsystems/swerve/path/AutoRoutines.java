@@ -1,5 +1,6 @@
 package frc.robot.subsystems.swerve.path;
 
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Seconds;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -8,6 +9,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -19,12 +21,15 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.lib.util.PoseUtil;
 import frc.robot.commands.AlignToReefTagRelative;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
+import frc.robot.subsystems.superstructure.SuperstructureConstants.CriticalLevel;
+import frc.robot.subsystems.superstructure.SuperstructureConstants.CriticalLevelRaw;
 import frc.robot.subsystems.superstructure.claw.Claw;
 import frc.robot.subsystems.superstructure.claw.ClawConstants;
 import frc.robot.subsystems.superstructure.claw.ClawConstants.IntakeOuttakeDirection;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveDrive;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -191,19 +196,95 @@ public class AutoRoutines {
     /**
      * @return A command to set up the superstructure for a given level by moving the elevator and claw to the correct positions.
      */
-    public Command setUpSuperstructure(SuperstructureConstants.Level level) {
-        return clawSubsystem
-            // Move claw out of way
-            .getWaitForAngleCommand(ClawConstants.RotationPositions.CLAW_HOLDING_POSITION)
-            // Raise elevator
-            .andThen(elevatorSubsystem.getPositionCommandAndWait(level))
-            // Move claw to level angle
-            .andThen(clawSubsystem.getWaitForAngleCommand(level.getClawAngle()))
-            // Stop when interrupted
-            .handleInterrupt(() -> {
-                elevatorSubsystem.io.resetSetpointToCurrentPosition();
-                clawSubsystem.io.resetSetpointToCurrentPosition();
-            });
+    public DeferredCommand setUpSuperstructure(SuperstructureConstants.Level level) {
+        // return clawSubsystem
+        //     // Move claw out of way
+        //     .getWaitForAngleCommand(ClawConstants.RotationPositions.CLAW_HOLDING_POSITION)
+        //     // Raise elevator
+        //     .andThen(elevatorSubsystem.getPositionCommandAndWait(level))
+        //     // Move claw to level angle
+        //     .andThen(clawSubsystem.getWaitForAngleCommand(level.getClawAngle()))
+        //     // Stop when interrupted
+        //     .handleInterrupt(() -> {
+        //         elevatorSubsystem.io.resetSetpointToCurrentPosition();
+        //         clawSubsystem.io.resetSetpointToCurrentPosition();
+        //     });
+
+        return new DeferredCommand(() -> setUpSuperstructureDeferred(level), Set.of(elevatorSubsystem, clawSubsystem));
+    }
+
+    private Command setUpSuperstructureDeferred(SuperstructureConstants.Level level) {
+        Angle elevatorCurrentPosition = elevatorSubsystem.getAngularPosition();
+        Angle elevatorTargetPosition = Radians.of(level.getElevatorRadian());
+
+        ArrayList<CriticalLevel> elevatorCriticalPositions = new ArrayList<>();
+
+        // Check if any critical levels are reached when moving the elevator from the current position to the target position
+        for (CriticalLevel criticalLevel : SuperstructureConstants.CRITICAL_LEVELS) {
+            // If the elevator is moving up and will reach a critical level
+            if (
+                elevatorCurrentPosition.lt(criticalLevel.getElevatorAngle()) &&
+                elevatorTargetPosition.gte(criticalLevel.getElevatorAngle())
+            ) {
+                elevatorCriticalPositions.add(
+                    // new CriticalLevelRaw(criticalLevel.getLowerElevatorRadian(), criticalLevel.getClawAngle())
+                    criticalLevel
+                );
+            }
+
+            // If the elevator is moving down and will reach a critical level
+            if (
+                elevatorCurrentPosition.gt(criticalLevel.getElevatorAngle()) &&
+                elevatorTargetPosition.lte(criticalLevel.getElevatorAngle())
+            ) {
+                elevatorCriticalPositions.add(
+                    // new CriticalLevelRaw(criticalLevel.getUpperElevatorRadian(), criticalLevel.getClawAngle())
+                    criticalLevel
+                );
+            }
+        }
+
+        // If there are no critical levels to wait for, just move the elevator
+        if (elevatorCriticalPositions.isEmpty()) {
+            return elevatorSubsystem
+                .getPositionCommandAndWait(level)
+                // Move claw to level angle
+                .alongWith(clawSubsystem.getWaitForAngleCommand(level.getClawAngle()))
+                // Stop when interrupted
+                .handleInterrupt(() -> {
+                    elevatorSubsystem.io.resetSetpointToCurrentPosition();
+                    clawSubsystem.io.resetSetpointToCurrentPosition();
+                });
+        }
+
+        // If there are critical levels to wait for, move the elevator to the each critical level
+        SequentialCommandGroup command = new SequentialCommandGroup();
+
+        for (CriticalLevel criticalLevel : elevatorCriticalPositions) {
+            command.addCommands(
+                // Simultaneously move the elevator and claw to the critical level holding position
+                elevatorSubsystem
+                    .getPositionCommandAndWait(criticalLevel.getFirstElevatorRadian(elevatorCurrentPosition))
+                    .alongWith(clawSubsystem.getWaitForAngleCommand(criticalLevel.getClawAngle())),
+                // Then move the elevator over the critical level without moving the claw
+                elevatorSubsystem.getPositionCommandAndWait(
+                    criticalLevel.getSecondElevatorRadian(elevatorCurrentPosition)
+                )
+            );
+        }
+
+        // Move the elevator to the target level
+        command.addCommands(
+            elevatorSubsystem
+                .getPositionCommandAndWait(level)
+                // Move claw to level angle
+                .alongWith(clawSubsystem.getWaitForAngleCommand(level.getClawAngle()))
+        );
+
+        return command.handleInterrupt(() -> {
+            elevatorSubsystem.io.resetSetpointToCurrentPosition();
+            clawSubsystem.io.resetSetpointToCurrentPosition();
+        });
     }
 
     /**

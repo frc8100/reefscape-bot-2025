@@ -1,12 +1,15 @@
 package frc.robot.subsystems.superstructure;
 
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
 import static frc.robot.subsystems.superstructure.claw.ClawConstants.RotationPositions.CLAW_ANGLE_OFFSET;
 import static frc.robot.subsystems.superstructure.elevator.ElevatorConstants.Position.INITIAL_HEIGHT_CLAW;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import frc.lib.util.TunableValue;
+import frc.robot.subsystems.superstructure.claw.ClawConstants;
 
 /**
  * Contains the constants for the superstructure.
@@ -14,7 +17,7 @@ import frc.lib.util.TunableValue;
 public final class SuperstructureConstants {
 
     /**
-     * The levels of the reef and the corresponding elevator height and claw angle
+     * The levels of the reef and the corresponding elevator height and claw angle.
      */
     public enum Level {
         /**
@@ -30,7 +33,7 @@ public final class SuperstructureConstants {
         ALGAE_L2("L2Algae", Meters.of(0.9), Rotation2d.fromDegrees(180), 4.8),
         ALGAE_L3("L3Algae", Meters.of(1.2), Rotation2d.fromDegrees(180), 10),
 
-        ALGAE_HOLD_NET("L4", Meters.of(2.1).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(180), 20); // TODO: increase height
+        ALGAE_HOLD_NET("AlgaeNet", Meters.of(2.1).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(180), 20); // TODO: increase height
 
         private final Distance elevatorDistance;
 
@@ -73,6 +76,83 @@ public final class SuperstructureConstants {
             this.elevatorRadian = elevatorRadian;
 
             this.elevatorRadianTunable = new TunableValue("SSLevels/" + key, elevatorRadian);
+        }
+    }
+
+    /**
+     * The range below and above the critical levels to wait for the claw to rotate.
+     * The elevator will move until it hits this range (assuming a critical level is between the current and target position).
+     * It will then wait for the claw to rotate to the correct angle before moving again.
+     */
+    public static final Angle ELEVATOR_RADIAN_RANGE_BETWEEN_CRITICAL_LEVELS_TO_WAIT_FOR_CLAW = Radians.of(1);
+
+    /**
+     * A list of critical levels. See {@link CriticalLevel}.
+     */
+    public static final CriticalLevel[] CRITICAL_LEVELS = {
+        new CriticalLevel(Radians.of(6), ClawConstants.RotationPositions.CLAW_HOLDING_POSITION),
+    };
+
+    public static record CriticalLevelRaw(Angle elevatorRadian, Rotation2d clawAngle) {}
+
+    /**
+     * Represents points on the elevator position in which a specific claw rotation is needed to avoiding hitting the elevator.
+     */
+    public static class CriticalLevel {
+
+        /**
+         * The radian of the elevator at this critical level.
+         */
+        private final Angle elevatorAngle;
+
+        /**
+         * The angle of the claw to avoid hitting the elevator.
+         */
+        private final Rotation2d clawAngle;
+
+        public Rotation2d getClawAngle() {
+            return clawAngle;
+        }
+
+        public Angle getElevatorAngle() {
+            return elevatorAngle;
+        }
+
+        /**
+         * @return The radian of the elevator at the lower bound of the critical level. See {@link #ELEVATOR_RADIAN_RANGE_BETWEEN_CRITICAL_LEVELS_TO_WAIT_FOR_CLAW}
+         */
+        public Angle getLowerElevatorRadian() {
+            return elevatorAngle.minus(ELEVATOR_RADIAN_RANGE_BETWEEN_CRITICAL_LEVELS_TO_WAIT_FOR_CLAW);
+        }
+
+        /**
+         * @return The radian of the elevator at the upper bound of the critical level. See {@link #ELEVATOR_RADIAN_RANGE_BETWEEN_CRITICAL_LEVELS_TO_WAIT_FOR_CLAW}
+         */
+        public Angle getUpperElevatorRadian() {
+            return elevatorAngle.plus(ELEVATOR_RADIAN_RANGE_BETWEEN_CRITICAL_LEVELS_TO_WAIT_FOR_CLAW);
+        }
+
+        /**
+         * @return The radian of the elevator that is closest to the current position.
+         * - If the current position is less than the elevator angle, return the lower elevator radian.
+         * - If the current position is greater than the elevator angle, return the upper elevator radian.
+         */
+        public Angle getFirstElevatorRadian(Angle currentPosition) {
+            return currentPosition.lt(elevatorAngle) ? getLowerElevatorRadian() : getUpperElevatorRadian();
+        }
+
+        /**
+         * @return The radian of the elevator that is further from the current position.
+         * - If the current position is less than the elevator angle, return the upper elevator radian.
+         * - If the current position is greater than the elevator angle, return the lower elevator radian.
+         */
+        public Angle getSecondElevatorRadian(Angle currentPosition) {
+            return currentPosition.lt(elevatorAngle) ? getUpperElevatorRadian() : getLowerElevatorRadian();
+        }
+
+        public CriticalLevel(Angle elevatorRadian, Rotation2d clawAngle) {
+            this.elevatorAngle = elevatorRadian;
+            this.clawAngle = clawAngle;
         }
     }
 }

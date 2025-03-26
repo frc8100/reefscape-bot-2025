@@ -54,8 +54,16 @@ public final class ElevatorConstants {
      * @return The radian position of the elevator motor from the height.
      * @param height - The height of the elevator.
      */
-    public static double getMotorPositionFromHeight(Distance height) {
-        return height.in(Meters) / ELEVATOR_RADIANS_TO_METERS;
+    public static Angle getMotorPositionFromHeight(Distance height) {
+        return Radians.of(height.in(Meters) / ELEVATOR_RADIANS_TO_METERS);
+    }
+
+    /**
+     * @return The height of the elevator from the radian position of the motor.
+     * @param position - The position of the motor.
+     */
+    public static Distance getHeightFromMotorPosition(Angle position) {
+        return Meters.of(position.in(Radians) * ELEVATOR_RADIANS_TO_METERS);
     }
 
     /**
@@ -88,7 +96,7 @@ public final class ElevatorConstants {
     public static final Distance ELEVATOR_DRUM_RADIUS = Inches.of(0.75);
 
     /** Radians to meters */
-    public static final double ELEVATOR_RADIANS_TO_METERS = (8.6 / (16 - 1.75)) / Inches.of(1).in(Meters);
+    public static final double ELEVATOR_RADIANS_TO_METERS = ((16 - 1.75) / 8.6) * Inches.of(1).in(Meters);
     public static final AngularVelocity ELEVATOR_MAX_ANGULAR_VELOCITY = RadiansPerSecond.of(10);
     public static final AngularAcceleration ELEVATOR_MAX_ANGULAR_ACCELERATION = RadiansPerSecondPerSecond.of(15);
     public static final double AMOUNT_PER_FRAME = 0.335;
