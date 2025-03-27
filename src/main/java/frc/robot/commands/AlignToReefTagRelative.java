@@ -32,61 +32,66 @@ import org.littletonrobotics.junction.Logger;
 
 public class AlignToReefTagRelative extends Command {
 
-    public static double ROT_SETPOINT_REEF_ALIGNMENT = 0; // Rotation
-    public static double ar = 0.7; // TODO: rename
+    private static double ROT_SETPOINT_REEF_ALIGNMENT = 0; // Rotation
+    private static double ROT_RIGHT_SETPOINT_REEF_ALIGNMENT = 0.7;
+    private static double ROT_TOLERANCE_REEF_ALIGNMENT = 1;
 
-    public static double ROT_TOLERANCE_REEF_ALIGNMENT = 1;
-    public static double X_SETPOINT_REEF_ALIGNMENT = -0.68; // TZ / Vertical pose -0.16
-    public static double ax = -0.17;
+    private static double X_SETPOINT_REEF_ALIGNMENT = -0.68; // TZ / Vertical pose -0.16
+    private static double X_RIGHT_SETPOINT_REEF_ALIGNMENT = -0.17;
+    private static double X_TOLERANCE_REEF_ALIGNMENT = 0.04;
 
-    public static double X_TOLERANCE_REEF_ALIGNMENT = 0.04;
-    public static double Y_SETPOINT_REEF_ALIGNMENT = 0.31; // Horizontal pose
-    public static double ay = 1;
+    private static double Y_SETPOINT_REEF_ALIGNMENT = 0.31; // Horizontal pose
+    private static double Y_RIGHT_SETPOINT_REEF_ALIGNMENT = 1;
+    private static double Y_TOLERANCE_REEF_ALIGNMENT = -0.15;
 
-    public static double Y_TOLERANCE_REEF_ALIGNMENT = -0.15;
-
-    public static final TunableValue ROT_SETPOINT_REEF_ALIGNMENT_TUNABLE = new TunableValue(
+    private static final TunableValue ROT_SETPOINT_REEF_ALIGNMENT_TUNABLE = new TunableValue(
         "Align/RotationSetpoint",
         ROT_SETPOINT_REEF_ALIGNMENT,
         (double value) -> ROT_SETPOINT_REEF_ALIGNMENT = value
     );
-    public static final TunableValue X_SETPOINT_REEF_ALIGNMENT_TUNABLE = new TunableValue(
+    private static final TunableValue X_SETPOINT_REEF_ALIGNMENT_TUNABLE = new TunableValue(
         "Align/XSetpoint",
         X_SETPOINT_REEF_ALIGNMENT,
         (double value) -> X_SETPOINT_REEF_ALIGNMENT = value
     );
-    public static final TunableValue Y_SETPOINT_REEF_ALIGNMENT_TUNABLE = new TunableValue(
+    private static final TunableValue Y_SETPOINT_REEF_ALIGNMENT_TUNABLE = new TunableValue(
         "Align/YSetpoint",
         Y_SETPOINT_REEF_ALIGNMENT,
         (double value) -> Y_SETPOINT_REEF_ALIGNMENT = value
     );
 
     static {
-        new TunableValue("Align/Right/RotationSetpoint", ar, (double value) -> ar = value);
-        new TunableValue("Align/Right/XSetpoint", ax, (double value) -> ax = value);
-        new TunableValue("Align/Right/YSetpoint", ay, (double value) -> ay = value);
+        new TunableValue("Align/Right/RotationSetpoint", ROT_RIGHT_SETPOINT_REEF_ALIGNMENT, (double value) ->
+            ROT_RIGHT_SETPOINT_REEF_ALIGNMENT = value
+        );
+        new TunableValue("Align/Right/XSetpoint", X_RIGHT_SETPOINT_REEF_ALIGNMENT, (double value) ->
+            X_RIGHT_SETPOINT_REEF_ALIGNMENT = value
+        );
+        new TunableValue("Align/Right/YSetpoint", Y_RIGHT_SETPOINT_REEF_ALIGNMENT, (double value) ->
+            Y_RIGHT_SETPOINT_REEF_ALIGNMENT = value
+        );
     }
 
-    public static double X_P = 0.85;
-    public static double X_D = 0.005;
+    private static double X_P = 0.85;
+    private static double X_D = 0.005;
 
-    public static double Y_P = 0.75;
-    public static double Y_D = 0.005;
+    private static double Y_P = 0.75;
+    private static double Y_D = 0.005;
 
-    public static double R_P = 0.04;
-    public static double R_D = 0.002;
+    private static double R_P = 0.04;
+    private static double R_D = 0.002;
 
-    public static final TunableValue X_P_TUNABLE = new TunableValue("Align/XP", X_P, (double value) -> X_P = value);
-    public static final TunableValue X_D_TUNABLE = new TunableValue("Align/XD", X_D, (double value) -> X_D = value);
+    private static final TunableValue X_P_TUNABLE = new TunableValue("Align/XP", X_P, (double value) -> X_P = value);
+    private static final TunableValue X_D_TUNABLE = new TunableValue("Align/XD", X_D, (double value) -> X_D = value);
 
-    public static final TunableValue Y_P_TUNABLE = new TunableValue("Align/YP", Y_P, (double value) -> Y_P = value);
-    public static final TunableValue Y_D_TUNABLE = new TunableValue("Align/YD", Y_D, (double value) -> Y_D = value);
+    private static final TunableValue Y_P_TUNABLE = new TunableValue("Align/YP", Y_P, (double value) -> Y_P = value);
+    private static final TunableValue Y_D_TUNABLE = new TunableValue("Align/YD", Y_D, (double value) -> Y_D = value);
 
-    public static final TunableValue R_P_TUNABLE = new TunableValue("Align/RP", R_P, (double value) -> R_P = value);
-    public static final TunableValue R_D_TUNABLE = new TunableValue("Align/RD", R_D, (double value) -> R_D = value);
+    private static final TunableValue R_P_TUNABLE = new TunableValue("Align/RP", R_P, (double value) -> R_P = value);
+    private static final TunableValue R_D_TUNABLE = new TunableValue("Align/RD", R_D, (double value) -> R_D = value);
 
-    public static final double DONT_SEE_TAG_WAIT_TIME = 1;
-    public static final double POSE_VALIDATION_TIME = 0.3;
+    private static final double DONT_SEE_TAG_WAIT_TIME = 1;
+    private static final double POSE_VALIDATION_TIME = 0.3;
 
     private final PIDController xController;
     private final PIDController yController;
@@ -99,36 +104,16 @@ public class AlignToReefTagRelative extends Command {
         return LimelightHelpers.getTV("");
     }
 
-    // private final ProfiledPIDController rotController = new ProfiledPIDController(
-    //     1,
-    //     0,
-    //     0,
-    //     new TrapezoidProfile.Constraints(
-    //         SwerveConfig.MAX_ANGULAR_VELOCITY.in(RadiansPerSecond),
-    //         SwerveConfig.MAX_ANGULAR_ACCELERATION.in(RadiansPerSecondPerSecond)
-    //     )
-    // );
-
-    // private final PPHolonomicDriveController driveController = new PPHolonomicDriveController(
-    //     new PIDConstants(1.0, 0.02),
-    //     new PIDConstants(1.0, 0.05)
-    // );
-
-    // private final HolonomicDriveController driveController = new HolonomicDriveController(
-    //     xController,
-    //     yController,
-    //     rotController
-    // );
-
     private boolean isRightScore;
-    private Timer dontSeeTagTimer, stopTimer;
-    private SwerveDrive driveSubsystem;
+    private Timer dontSeeTagTimer;
+    private Timer stopTimer;
+    private SwerveDrive swerveSubsystem;
     private double tagID = -1;
 
-    public AlignToReefTagRelative(boolean isRightScore, SwerveDrive driveSubsystem) {
+    public AlignToReefTagRelative(boolean isRightScore, SwerveDrive swerveSubsystem) {
         this.isRightScore = isRightScore;
-        this.driveSubsystem = driveSubsystem;
-        addRequirements(driveSubsystem);
+        this.swerveSubsystem = swerveSubsystem;
+        addRequirements(swerveSubsystem);
 
         xController = new PIDController(X_P_TUNABLE.get(), 0.0, X_D_TUNABLE.get());
         yController = new PIDController(Y_P_TUNABLE.get(), 0.0, Y_D_TUNABLE.get());
@@ -165,13 +150,13 @@ public class AlignToReefTagRelative extends Command {
 
         // driveController.calculate(driveSubsystem.getPose(), new Trajectory.State(), null);
 
-        rotController.setSetpoint(!isRightScore ? ROT_SETPOINT_REEF_ALIGNMENT : ar);
+        rotController.setSetpoint(!isRightScore ? ROT_SETPOINT_REEF_ALIGNMENT : ROT_RIGHT_SETPOINT_REEF_ALIGNMENT);
         rotController.setTolerance(ROT_TOLERANCE_REEF_ALIGNMENT);
 
-        xController.setSetpoint(!isRightScore ? X_SETPOINT_REEF_ALIGNMENT : ax);
+        xController.setSetpoint(!isRightScore ? X_SETPOINT_REEF_ALIGNMENT : X_RIGHT_SETPOINT_REEF_ALIGNMENT);
         xController.setTolerance(X_TOLERANCE_REEF_ALIGNMENT);
 
-        yController.setSetpoint(!isRightScore ? Y_SETPOINT_REEF_ALIGNMENT : ay);
+        yController.setSetpoint(!isRightScore ? Y_SETPOINT_REEF_ALIGNMENT : Y_RIGHT_SETPOINT_REEF_ALIGNMENT);
         yController.setTolerance(Y_TOLERANCE_REEF_ALIGNMENT);
 
         tagID = LimelightHelpers.getFiducialID("");
@@ -181,7 +166,7 @@ public class AlignToReefTagRelative extends Command {
     public void execute() {
         // If the tag is not found, drive empty
         if (!(LimelightHelpers.getTV("") && LimelightHelpers.getFiducialID("") == tagID)) {
-            driveSubsystem.drive(new Translation2d(), 0, false);
+            swerveSubsystem.drive(new Translation2d(), 0, false);
             return;
         }
 
@@ -206,7 +191,7 @@ public class AlignToReefTagRelative extends Command {
 
         Logger.recordOutput("Align/Speeds", new double[] { xSpeed, ySpeed, rotValue });
 
-        driveSubsystem.drive(new Translation2d(xSpeed, ySpeed), rotValue, false);
+        swerveSubsystem.drive(new Translation2d(xSpeed, ySpeed), rotValue, false);
 
         // driveController.calculateRobotRelativeSpeeds(driveSubsystem.getPose(), new PathPlannerTrajectoryState())
 
@@ -218,7 +203,7 @@ public class AlignToReefTagRelative extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        driveSubsystem.drive(new Translation2d(), 0, false);
+        swerveSubsystem.drive(new Translation2d(), 0, false);
     }
 
     @Override

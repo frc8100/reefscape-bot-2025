@@ -15,7 +15,10 @@ package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import java.util.LinkedList;
+import java.util.List;
 import org.littletonrobotics.junction.AutoLog;
+import org.photonvision.targeting.PhotonPipelineResult;
 
 public interface VisionIO {
     @AutoLog
@@ -25,6 +28,8 @@ public interface VisionIO {
         public TargetObservation latestTargetObservation = new TargetObservation(new Rotation2d(), new Rotation2d());
         public PoseObservation[] poseObservations = new PoseObservation[0];
         public int[] tagIds = new int[0];
+
+        public List<PhotonPipelineResult> photonPipelineResults = new LinkedList<>();
     }
 
     /** Represents the angle to a simple target, not used for pose estimation. */

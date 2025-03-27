@@ -32,6 +32,7 @@ import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import java.util.LinkedList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
+import org.photonvision.targeting.PhotonPipelineResult;
 
 /**
  * The vision subsystem. This subsystem processes vision data and sends it to the robot code.
@@ -59,6 +60,26 @@ public class Vision extends SubsystemBase {
 
     private final VisionIOInputsAutoLogged[] inputs;
     private final Alert[] disconnectedAlerts;
+
+    /**
+     * @return A list of all Photon pipeline results from all cameras.
+     * If photon vision is not used, this method returns an empty list.
+     */
+    public List<PhotonPipelineResult> getPhotonPipelineResults() {
+        // Check if photon vision is used
+        if (!(io instanceof VisionIOPhotonVision[])) {
+            return new LinkedList<>();
+        }
+
+        List<PhotonPipelineResult> results = new LinkedList<>();
+
+        // For each photon vision IO, add all unread results
+        for (VisionIOPhotonVision photonVisionIO : (VisionIOPhotonVision[]) io) {
+            results.addAll(photonVisionIO.camera.getAllUnreadResults());
+        }
+
+        return results;
+    }
 
     public Vision(VisionConsumer consumer, VisionIO... io) {
         this.consumer = consumer;
