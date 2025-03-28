@@ -23,12 +23,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import org.photonvision.PhotonCamera;
+import org.photonvision.targeting.PhotonPipelineResult;
 
 /** IO implementation for real PhotonVision hardware. */
 public class VisionIOPhotonVision implements VisionIO {
 
     protected final PhotonCamera camera;
     protected final Transform3d robotToCamera;
+
+    /**
+     * A list of all Photon pipeline results from this camera.
+     * If photon vision is not used, this is an empty list.
+     */
+    private List<PhotonPipelineResult> photonPipelineResults = new LinkedList<>();
 
     /**
      * Creates a new VisionIOPhotonVision.
@@ -42,15 +49,23 @@ public class VisionIOPhotonVision implements VisionIO {
     }
 
     @Override
+    public List<PhotonPipelineResult> getPhotonPipelineResults() {
+        return photonPipelineResults;
+    }
+
+    @Override
     public void updateInputs(VisionIOInputs inputs) {
         inputs.connected = camera.isConnected();
 
         // Read new camera observations
         Set<Short> tagIds = new HashSet<>();
         List<PoseObservation> poseObservations = new LinkedList<>();
-        for (var result : camera.getAllUnreadResults()) {
-            // TODO: add results to input
 
+        // Add results to inputs
+        // TODO: Optimize memory usage, this creates a new list every time
+        photonPipelineResults = camera.getAllUnreadResults();
+
+        for (var result : photonPipelineResults) {
             // Update latest target observation
             if (result.hasTargets()) {
                 inputs.latestTargetObservation = new TargetObservation(

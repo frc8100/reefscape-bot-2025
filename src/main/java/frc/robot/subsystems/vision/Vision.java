@@ -31,6 +31,7 @@ import frc.robot.subsystems.vision.VisionIO.PoseObservation;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.targeting.PhotonPipelineResult;
 
@@ -61,26 +62,6 @@ public class Vision extends SubsystemBase {
     private final VisionIOInputsAutoLogged[] inputs;
     private final Alert[] disconnectedAlerts;
 
-    /**
-     * @return A list of all Photon pipeline results from all cameras.
-     * If photon vision is not used, this method returns an empty list.
-     */
-    public List<PhotonPipelineResult> getPhotonPipelineResults() {
-        // Check if photon vision is used
-        if (!(io instanceof VisionIOPhotonVision[])) {
-            return new LinkedList<>();
-        }
-
-        List<PhotonPipelineResult> results = new LinkedList<>();
-
-        // For each photon vision IO, add all unread results
-        for (VisionIOPhotonVision photonVisionIO : (VisionIOPhotonVision[]) io) {
-            results.addAll(photonVisionIO.camera.getAllUnreadResults());
-        }
-
-        return results;
-    }
-
     public Vision(VisionConsumer consumer, VisionIO... io) {
         this.consumer = consumer;
         this.io = io;
@@ -99,6 +80,36 @@ public class Vision extends SubsystemBase {
                 AlertType.kWarning
             );
         }
+    }
+
+    /**
+     * @return A list of all Photon pipeline results from all cameras.
+     * If photon vision is not used, this method returns an empty list.
+     */
+    public List<PhotonPipelineResult> getPhotonPipelineResults() {
+        List<PhotonPipelineResult> results = new LinkedList<>();
+
+        // For each photon vision IO, add all unread results
+        for (VisionIO photonVisionIO : io) {
+            results.addAll(photonVisionIO.getPhotonPipelineResults());
+        }
+
+        return results;
+    }
+
+    /**
+     * @return The latest target from the specified camera, if it exists.
+     */
+    public Optional<PhotonPipelineResult> getLatestTargetFromCamera(int cameraIndex) {
+        List<PhotonPipelineResult> pipelineResults = io[cameraIndex].getPhotonPipelineResults();
+
+        // Return the latest target if it exists
+        if (pipelineResults.size() > 0) {
+            return Optional.of(pipelineResults.get(pipelineResults.size() - 1));
+        }
+
+        // Return empty if no targets
+        return Optional.empty();
     }
 
     /**

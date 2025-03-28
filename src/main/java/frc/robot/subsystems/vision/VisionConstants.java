@@ -21,6 +21,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import org.photonvision.simulation.SimCameraProperties;
 
 /**
  * Vision constants. Some must be configured in the web UI.
@@ -51,6 +52,12 @@ public class VisionConstants {
         Inches.of(11.25), // 0.28575 m
         new Rotation3d()
     );
+
+    /**
+     * Camera 0 simulated properties
+     */
+    public static final SimCameraProperties CAMERA_0_PROPERTIES = SimCameraProperties.PERFECT_90DEG();
+    // SimCameraProperties.LL2_1280_720();
 
     // Basic filtering thresholds
     public static final double MAX_AMBIGUITY = 0.3;

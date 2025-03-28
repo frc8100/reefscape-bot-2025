@@ -28,8 +28,6 @@ public interface VisionIO {
         public TargetObservation latestTargetObservation = new TargetObservation(new Rotation2d(), new Rotation2d());
         public PoseObservation[] poseObservations = new PoseObservation[0];
         public int[] tagIds = new int[0];
-
-        public List<PhotonPipelineResult> photonPipelineResults = new LinkedList<>();
     }
 
     /** Represents the angle to a simple target, not used for pose estimation. */
@@ -55,4 +53,12 @@ public interface VisionIO {
      * Updates the inputs of the vision IO.
      */
     public default void updateInputs(VisionIOInputs inputs) {}
+
+    /**
+     * @return A list of all Photon pipeline results from this camera.
+     * If photon vision is not used, this is an empty list.
+     */
+    public default List<PhotonPipelineResult> getPhotonPipelineResults() {
+        return new LinkedList<>();
+    }
 }

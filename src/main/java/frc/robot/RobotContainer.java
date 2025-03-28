@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.LimelightHelpers;
 import frc.lib.util.TunableValue;
 import frc.robot.commands.AlignToReefTagRelative;
+import frc.robot.commands.PhotonVisionAlign;
 import frc.robot.commands.SwerveSysidRoutines;
 import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
@@ -50,6 +51,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonSim;
+import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import java.util.Set;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -109,7 +111,8 @@ public class RobotContainer {
                 // TODO: implement photonvision
                 visionSubsystem = new Vision(
                     swerveSubsystem::addVisionMeasurement,
-                    new VisionIOLimelight(VisionConstants.CAMERA_0_NAME, swerveSubsystem::getRotation)
+                    // new VisionIOLimelight(VisionConstants.CAMERA_0_NAME, swerveSubsystem::getRotation)
+                    new VisionIOPhotonVision(VisionConstants.CAMERA_0_NAME, VisionConstants.TRANSFORM_TO_CAMERA_0)
                 );
 
                 clawSubsystem = new Claw(new ClawIOSpark());
@@ -151,7 +154,8 @@ public class RobotContainer {
                     new VisionIOPhotonSim(
                         VisionConstants.CAMERA_0_NAME,
                         VisionConstants.TRANSFORM_TO_CAMERA_0,
-                        swerveSubsystem::getActualPose
+                        swerveSubsystem::getActualPose,
+                        VisionConstants.CAMERA_0_PROPERTIES
                     )
                 );
 
@@ -268,10 +272,12 @@ public class RobotContainer {
         // Align to reefs
         Controls.mainDriveControls
             .getJoystickButtonOf(Controls.mainDriveControls.alignToLeftReefUsingVision)
-            .whileTrue(new AlignToReefTagRelative(false, swerveSubsystem));
+            // .whileTrue(new AlignToReefTagRelative(false, swerveSubsystem));
+            .whileTrue(new PhotonVisionAlign(false, swerveSubsystem, visionSubsystem));
         Controls.mainDriveControls
             .getJoystickButtonOf(Controls.mainDriveControls.alignToRightReefUsingVision)
-            .whileTrue(new AlignToReefTagRelative(true, swerveSubsystem));
+            // .whileTrue(new AlignToReefTagRelative(true, swerveSubsystem));
+            .whileTrue(new PhotonVisionAlign(true, swerveSubsystem, visionSubsystem));
 
         // Align (new)
         // Controls.mainDriveControls
@@ -377,7 +383,7 @@ public class RobotContainer {
             clawSubsystem.getCoralInClawPosition(swerveSubsystem, elevatorSubsystem)
         );
 
-        // Log nearest reef position
+        // TODO: Log nearest reef position
         // nearestLeftReef = autoRoutines.getNearestLeftReef();
         // nearestRightReef = autoRoutines.getNearestRightReef();
         // nearestCoralStation = autoRoutines.getNearestCoralStation();
@@ -386,7 +392,7 @@ public class RobotContainer {
         // Logger.recordOutput("Odometry/NearestRightReef", nearestRightReef);
         // Logger.recordOutput("Odometry/NearestCoralStation", nearestCoralStation);
 
-        Logger.recordOutput("Vision/CanAlignToReef", AlignToReefTagRelative.getCanAlignToReef());
+        // Logger.recordOutput("Vision/CanAlignToReef", AlignToReefTagRelative.getCanAlignToReef());
         Logger.recordOutput("Align/Positions", LimelightHelpers.getBotPose_TargetSpace(""));
     }
 }

@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.lib.util.PoseUtil;
 import frc.robot.commands.AlignToReefTagRelative;
+import frc.robot.commands.PhotonVisionAlign;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
 import frc.robot.subsystems.superstructure.SuperstructureConstants.CriticalLevel;
 import frc.robot.subsystems.superstructure.SuperstructureConstants.CriticalLevelRaw;
@@ -365,7 +366,8 @@ public class AutoRoutines {
             (location.getType() == FieldLocationType.LEFT_REEF || location.getType() == FieldLocationType.RIGHT_REEF)
         ) {
             return initialPathfindCommand.andThen(
-                new AlignToReefTagRelative(location.getType() == FieldLocationType.RIGHT_REEF, swerveSubsystem)
+                // new AlignToReefTagRelative(location.getType() == FieldLocationType.RIGHT_REEF, swerveSubsystem)
+                // new PhotonVisionAlign(location.getType() == FieldLocationType.RIGHT_REEF, swerveSubsystem, visionSubsystem)
             );
         }
 
