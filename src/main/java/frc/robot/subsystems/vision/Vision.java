@@ -21,8 +21,10 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -33,6 +35,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
+import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 /**
@@ -203,22 +206,22 @@ public class Vision extends SubsystemBase {
             }
 
             // Log camera datadata
-            Logger.recordOutput(
-                "Vision/Camera" + Integer.toString(cameraIndex) + "/TagPoses",
-                tagPoses.toArray(new Pose3d[tagPoses.size()])
-            );
-            Logger.recordOutput(
-                "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPoses",
-                robotPoses.toArray(new Pose3d[robotPoses.size()])
-            );
-            Logger.recordOutput(
-                "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPosesAccepted",
-                robotPosesAccepted.toArray(new Pose3d[robotPosesAccepted.size()])
-            );
-            Logger.recordOutput(
-                "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPosesRejected",
-                robotPosesRejected.toArray(new Pose3d[robotPosesRejected.size()])
-            );
+            // Logger.recordOutput(
+            //     "Vision/Camera" + Integer.toString(cameraIndex) + "/TagPoses",
+            //     tagPoses.toArray(new Pose3d[tagPoses.size()])
+            // );
+            // Logger.recordOutput(
+            //     "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPoses",
+            //     robotPoses.toArray(new Pose3d[robotPoses.size()])
+            // );
+            // Logger.recordOutput(
+            //     "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPosesAccepted",
+            //     robotPosesAccepted.toArray(new Pose3d[robotPosesAccepted.size()])
+            // );
+            // Logger.recordOutput(
+            //     "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPosesRejected",
+            //     robotPosesRejected.toArray(new Pose3d[robotPosesRejected.size()])
+            // );
             allTagPoses.addAll(tagPoses);
             allRobotPoses.addAll(robotPoses);
             allRobotPosesAccepted.addAll(robotPosesAccepted);
@@ -227,14 +230,47 @@ public class Vision extends SubsystemBase {
 
         // Log summary data
         Logger.recordOutput("Vision/Summary/TagPoses", allTagPoses.toArray(new Pose3d[allTagPoses.size()]));
-        Logger.recordOutput("Vision/Summary/RobotPoses", allRobotPoses.toArray(new Pose3d[allRobotPoses.size()]));
-        Logger.recordOutput(
-            "Vision/Summary/RobotPosesAccepted",
-            allRobotPosesAccepted.toArray(new Pose3d[allRobotPosesAccepted.size()])
+        // Logger.recordOutput("Vision/Summary/RobotPoses", allRobotPoses.toArray(new Pose3d[allRobotPoses.size()]));
+        // Logger.recordOutput(
+        //     "Vision/Summary/RobotPosesAccepted",
+        //     allRobotPosesAccepted.toArray(new Pose3d[allRobotPosesAccepted.size()])
+        // );
+        // Logger.recordOutput(
+        //     "Vision/Summary/RobotPosesRejected",
+        //     allRobotPosesRejected.toArray(new Pose3d[allRobotPosesRejected.size()])
+        // );
+
+        // debug
+    }
+
+    /**
+     * For debugging purposes, returns the target relative to camera 0.
+     *
+     * @return The target relative to camera 0, or a 0 translation if no target is found.
+     */
+    public Translation2d debugGetTargetRelativeToCamera0(double tagHeightMeters) {
+        var latestObservation = getLatestTargetFromCamera(0);
+        if (latestObservation.isEmpty()) {
+            // Return a zero translation if no target is found
+            return new Translation2d(0, 0);
+        }
+
+        // Calculate tag position
+        var latestObservationTarget = latestObservation.get().getBestTarget();
+
+        double targetYaw = latestObservationTarget.getYaw();
+        double targetDistance = PhotonUtils.calculateDistanceToTargetMeters(
+            VisionConstants.TRANSFORM_TO_CAMERA_0.getZ(),
+            tagHeightMeters,
+            VisionConstants.TRANSFORM_TO_CAMERA_0.getRotation().getZ(),
+            Units.degreesToRadians(latestObservationTarget.getPitch())
         );
-        Logger.recordOutput(
-            "Vision/Summary/RobotPosesRejected",
-            allRobotPosesRejected.toArray(new Pose3d[allRobotPosesRejected.size()])
+
+        Translation2d targetRelativeToCamera = PhotonUtils.estimateCameraToTargetTranslation(
+            targetDistance,
+            Rotation2d.fromDegrees(targetYaw)
         );
+
+        return targetRelativeToCamera;
     }
 }

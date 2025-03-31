@@ -119,8 +119,12 @@ public class AutoRoutines {
             return coralStationPoses;
         }
 
-        private Pose2d pose;
-        private FieldLocationType type;
+        private final Pose2d pose;
+        private final FieldLocationType type;
+
+        // TODO: AprilTag IDs
+        // public final int blueAprilTagId;
+        // public final int redAprilTagId;
 
         /**
          * @return The pose of the location. Automatically flips if necessary.
@@ -142,9 +146,12 @@ public class AutoRoutines {
             return type;
         }
 
+        // private FieldLocations(Pose2d pose, FieldLocationType type, int blueAprilTagId, int redAprilTagId) {
         private FieldLocations(Pose2d pose, FieldLocationType type) {
             this.pose = pose;
             this.type = type;
+            // this.blueAprilTagId = blueAprilTagId;
+            // this.redAprilTagId = redAprilTagId;
         }
     }
 

@@ -21,6 +21,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import java.util.List;
 import org.photonvision.simulation.SimCameraProperties;
 
 /**
@@ -35,6 +36,26 @@ public class VisionConstants {
      */
     public static final AprilTagFieldLayout aprilTagLayout = AprilTagFieldLayout.loadField(
         AprilTagFields.k2025ReefscapeWelded
+    );
+
+    /**
+     * A list of all the tag IDs on the reefs, for localization purposes.
+     */
+    public static final List<Integer> REEF_APRILTAG_IDS = List.of(
+        // Red
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        // Blue
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
     );
 
     /**

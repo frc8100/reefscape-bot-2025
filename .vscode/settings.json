@@ -68,6 +68,7 @@
   },
   "wpilib.selectDefaultSimulateExtension": true,
   "cSpell.words": [
+    "APRILTAG",
     "CANCODER",
     "CTRE",
     "DEADBAND",
