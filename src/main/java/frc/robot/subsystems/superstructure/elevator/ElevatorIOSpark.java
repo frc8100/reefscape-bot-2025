@@ -278,7 +278,7 @@ public class ElevatorIOSpark implements ElevatorIO {
         inputs.connected = leaderConnectedDebouncer.calculate(!sparkStickyFault);
 
         // Set the temperature
-        ifOk(leaderMotor, leaderMotor::getMotorTemperature, temp -> inputs.tempCelsius = temp);
+        // ifOk(leaderMotor, leaderMotor::getMotorTemperature, temp -> inputs.tempCelsius = temp);
 
         inputs.isAtBottom = limitSwitch.isPressed();
     }

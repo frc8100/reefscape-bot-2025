@@ -28,7 +28,7 @@ public interface ClawIO extends GenericSparkIO<ClawIO.ClawIOInputs> {
         public double turnAppliedVolts = 0.0;
         public double turnSupplyCurrentAmps = 0.0;
         public double turnTorqueCurrentAmps = 0.0;
-        public double turnTempCelsius = 0.0;
+        // public double turnTempCelsius = 0.0;
         public double turnSetpointRad = 0.0;
 
         // Inputs from the outtake motor
@@ -38,7 +38,7 @@ public interface ClawIO extends GenericSparkIO<ClawIO.ClawIOInputs> {
         public double outtakeAppliedVolts = 0.0;
         public double outtakeSupplyCurrentAmps = 0.0;
         public double outtakeTorqueCurrentAmps = 0.0;
-        public double outtakeTempCelsius = 0.0;
+        // public double outtakeTempCelsius = 0.0;
         public double outtakeSetpointVelocityRadPerSec = 0.0;
     }
 

@@ -27,10 +27,10 @@ public class FieldConstants {
      */
     public static final Distance fieldWidth = Meters.of(VisionConstants.aprilTagLayout.getFieldWidth());
 
-    static {
-        Logger.recordOutput("Test/FieldLength", fieldLength);
-        Logger.recordOutput("Test/fieldWidth", fieldWidth);
-    }
+    // static {
+    //     Logger.recordOutput("Test/FieldLength", fieldLength);
+    //     Logger.recordOutput("Test/fieldWidth", fieldWidth);
+    // }
 
     /**
      * Where the starting line is on the field, measured from the inside of the starting line.

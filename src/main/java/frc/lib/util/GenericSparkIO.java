@@ -45,11 +45,10 @@ public interface GenericSparkIO<TInputs> {
          * The torque current of the motor in amps.
          */
         public double torqueCurrentAmps = 0.0;
-
         /**
          * The temperature of the motor in celsius.
          */
-        public double tempCelsius = 0.0;
+        // public double tempCelsius = 0.0;
     }
 
     /**

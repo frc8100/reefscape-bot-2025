@@ -202,10 +202,9 @@ public class ClawIOSpark implements ClawIO {
         // Run the motor
         double percentOutput = ClawConstants.OUTTAKE_MAX_OUTPUT * motorInput;
         outtakeMotor.set(percentOutput);
-
         // Log
-        Logger.recordOutput("Claw/motorInput", motorInput);
-        Logger.recordOutput("Claw/percentOutput", percentOutput);
+        // Logger.recordOutput("Claw/motorInput", motorInput);
+        // Logger.recordOutput("Claw/percentOutput", percentOutput);
     }
 
     @Override
@@ -271,7 +270,7 @@ public class ClawIOSpark implements ClawIO {
         inputs.turnConnected = angleConnectedDebouncer.calculate(!sparkStickyFault);
 
         // Set the temperature
-        ifOk(angleMotor, angleMotor::getMotorTemperature, temp -> inputs.turnTempCelsius = temp);
+        // ifOk(angleMotor, angleMotor::getMotorTemperature, temp -> inputs.turnTempCelsius = temp);
 
         // Update inputs for the outtake motor
 

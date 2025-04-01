@@ -348,10 +348,9 @@ public class ModuleIOSpark implements ModuleIO {
         } else {
             angleClosedLoopController.setReference(degReference, ControlType.kPosition, ClosedLoopSlot.kSlot0);
         }
-
         // debug
-        Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "/Setpoint", degReference);
-        Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "/Current", relAngleEncoder.getPosition());
-        Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "/CANcoder", getCanCoder().getDegrees());
+        // Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "/Setpoint", degReference);
+        // Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "/Current", relAngleEncoder.getPosition());
+        // Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "/CANcoder", getCanCoder().getDegrees());
     }
 }

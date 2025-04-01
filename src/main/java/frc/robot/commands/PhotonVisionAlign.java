@@ -176,7 +176,7 @@ public class PhotonVisionAlign extends Command {
         var latestObservation = visionSubsystem.getLatestTargetFromCamera(0);
 
         // Set the tag ID and height if it exists and is not already set
-        if (tagID == -1 && latestObservation.isPresent()) {
+        if (tagID == -1 && latestObservation.isPresent() && latestObservation.get().hasTargets()) {
             tagID = latestObservation.get().getBestTarget().fiducialId;
 
             // If the tag ID is not a reef tag, try again

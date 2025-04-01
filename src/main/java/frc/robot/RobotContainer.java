@@ -382,7 +382,6 @@ public class RobotContainer {
             "ComponentPositions/CoralInClaw",
             clawSubsystem.getCoralInClawPosition(swerveSubsystem, elevatorSubsystem)
         );
-
         // TODO: Log nearest reef position
         // nearestLeftReef = autoRoutines.getNearestLeftReef();
         // nearestRightReef = autoRoutines.getNearestRightReef();
@@ -393,6 +392,6 @@ public class RobotContainer {
         // Logger.recordOutput("Odometry/NearestCoralStation", nearestCoralStation);
 
         // Logger.recordOutput("Vision/CanAlignToReef", AlignToReefTagRelative.getCanAlignToReef());
-        Logger.recordOutput("Align/Positions", LimelightHelpers.getBotPose_TargetSpace(""));
+        // Logger.recordOutput("Align/Positions", LimelightHelpers.getBotPose_TargetSpace(""));
     }
 }

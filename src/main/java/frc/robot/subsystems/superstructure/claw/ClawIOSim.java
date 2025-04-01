@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import org.ironmaple.simulation.motorsims.MapleMotorSim;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController;
 import org.littletonrobotics.junction.Logger;
-import org.opencv.core.Mat;
 
 /**
  * The simulator implementation for the claw.

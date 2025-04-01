@@ -182,7 +182,7 @@ public class ElevatorIOSim implements ElevatorIO {
         inputs.appliedVolts = motorSim.getInputVoltage();
         inputs.supplyCurrentAmps = motorSim.getCurrentDrawAmps();
         inputs.torqueCurrentAmps = motorSim.getCurrentDrawAmps();
-        inputs.tempCelsius = 0.0;
+        // inputs.tempCelsius = 0.0;
 
         // Elevator inputs
         // TODO: fix elevator sim
