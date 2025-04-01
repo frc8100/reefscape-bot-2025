@@ -147,7 +147,7 @@ public class TeleopSwerve extends Command {
             MathUtil.applyDeadband(rotationInput, SwerveConfig.DRIVE_STICK_DEADBAND) * dampenAndSpeedConstant;
 
         // Heading direction state
-        double currentGyroYawRadians = swerveSubsystem.getGyroHeading().getRadians();
+        double currentGyroYawRadians = swerveSubsystem.getHeadingForFieldOriented().getRadians();
 
         // Calculate the rotation value based on the drive state
         if (!SwerveDrive.driveState.isStandard) {

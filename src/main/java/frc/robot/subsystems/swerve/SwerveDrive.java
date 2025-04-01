@@ -211,9 +211,11 @@ public interface SwerveDrive extends Subsystem {
     }
 
     /**
-     * @return The current gyro heading.
+     * @return The rotation of the robot for field-oriented control.
+     * This can be different from the rotation of the robot from the pose estimator
+     * and can be zeroed to any angle.
      */
-    public Rotation2d getGyroHeading();
+    public Rotation2d getHeadingForFieldOriented();
 
     /** Stops the drive. */
     public default void stop() {

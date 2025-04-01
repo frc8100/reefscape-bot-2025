@@ -57,28 +57,27 @@ public interface GyroIO {
 
     /**
      * Updates the gyro inputs. Automatically called by the robot loop.
-     *
      * @param inputs The gyro inputs to update.
      */
     public abstract void updateInputs(GyroIOInputs inputs);
 
     /**
-     * Zeros the gyro.
-     *
+     * Zeros the field relative angle of the gyro.
      * @param deg The angle to zero the gyro to.
      */
-    public abstract void zeroGyro(double deg);
+    public abstract void zeroFieldRelativeGyro(double deg);
 
-    /**
-     * Note: this is functionally equivalent to {@link #getGyroHeading()}.
-     * @return The current gyro yaw of the robot.
-     */
-    @AutoLogOutput(key = "Gyro/Yaw")
-    public abstract Rotation2d getYaw();
+    public default void zeroGyro(double deg) {
+        zeroFieldRelativeGyro(deg);
+    }
 
     /**
      * @return The current gyro heading of the robot.
      */
     @AutoLogOutput(key = "Gyro/Heading")
     public abstract Rotation2d getGyroHeading();
+
+    public default Rotation2d getGyroHeadingForFieldRelative() {
+        return getGyroHeading();
+    }
 }

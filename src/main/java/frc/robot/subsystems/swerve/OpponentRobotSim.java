@@ -217,7 +217,7 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
     }
 
     @Override
-    public Rotation2d getGyroHeading() {
+    public Rotation2d getHeadingForFieldOriented() {
         // return simulatedDrive.getRawGyroAngle();
         // Returns the gyro angle in the simulation world to save resources
         return getPose().getRotation();

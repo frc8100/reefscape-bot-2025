@@ -48,6 +48,11 @@ public class SwerveConfig {
     public static final double ODOMETRY_FREQUENCY_HZ = 100;
 
     /**
+     * How often the status signals for CANCoders and the Pigeon 2 is updated (in Hz).
+     */
+    public static final double STATUS_SIGNAL_FREQUENCY_HZ = 50;
+
+    /**
      * The deadband for the sticks. This is the range of values that will be considered 0.
      */
     public static final double DRIVE_STICK_DEADBAND = 0.1;
@@ -181,12 +186,13 @@ public class SwerveConfig {
     // Swerve Profiling Values
     public static final LinearVelocity MAX_SPEED = MetersPerSecond.of(4);
     public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(7);
+    // ! IMPORTANT: The actual max angular velocity is much higher
     public static final AngularVelocity MAX_ANGULAR_VELOCITY = RadiansPerSecond.of(6.0);
 
     public static final AngularAcceleration MAX_ANGULAR_ACCELERATION = RadiansPerSecondPerSecond.of(3.0);
 
     // Path Planner Values
-    public static final Mass ROBOT_MASS = Pounds.of(90);
+    public static final Mass ROBOT_MASS = Pounds.of(100);
     public static final double WHEEL_COF = 1.2;
     public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(3.9506340342);
 

@@ -36,11 +36,13 @@ public class GyroIOPigeon2 implements GyroIO {
     private final Queue<Double> yawTimestampQueue;
     private final StatusSignal<AngularVelocity> yawVelocity = pigeon.getAngularVelocityZWorld();
 
+    private Rotation2d yawOffset = new Rotation2d();
+
     public GyroIOPigeon2() {
         pigeon.getConfigurator().apply(new Pigeon2Configuration());
         pigeon.getConfigurator().setYaw(0.0);
         yaw.setUpdateFrequency(SwerveConfig.ODOMETRY_FREQUENCY_HZ);
-        yawVelocity.setUpdateFrequency(50.0);
+        yawVelocity.setUpdateFrequency(SwerveConfig.STATUS_SIGNAL_FREQUENCY_HZ);
         pigeon.optimizeBusUtilization();
         yawTimestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
         yawPositionQueue = SparkOdometryThread.getInstance().registerSignal(yaw::getValueAsDouble);
@@ -73,24 +75,31 @@ public class GyroIOPigeon2 implements GyroIO {
     }
 
     @Override
-    public Rotation2d getYaw() {
-        // If the gyro is inverted, return the inverted yaw
+    public void zeroFieldRelativeGyro(double deg) {
+        // Invert the gyro if necessary
         if (SwerveConfig.IS_GYRO_INVERTED) {
-            return Rotation2d.fromDegrees(360 - pigeon.getYaw().getValueAsDouble());
+            deg = -deg;
         }
 
-        // Otherwise, return the yaw as-is
-        return new Rotation2d(pigeon.getYaw().getValue());
+        // Set the angle offset
+        // pigeon.setYaw(deg);
+
+        yawOffset = getGyroHeading().minus(Rotation2d.fromDegrees(deg));
     }
 
     @Override
     public Rotation2d getGyroHeading() {
         // If the gyro is inverted, return the inverted yaw
         if (SwerveConfig.IS_GYRO_INVERTED) {
-            return pigeon.getRotation2d().rotateBy(new Rotation2d(180));
+            return Rotation2d.fromDegrees(yaw.getValueAsDouble()).rotateBy(new Rotation2d(180));
         }
 
         // Otherwise, return the yaw as-is
-        return pigeon.getRotation2d();
+        return Rotation2d.fromDegrees(yaw.getValueAsDouble());
+    }
+
+    @Override
+    public Rotation2d getGyroHeadingForFieldRelative() {
+        return getGyroHeading().minus(yawOffset);
     }
 }

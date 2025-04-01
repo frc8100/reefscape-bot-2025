@@ -114,6 +114,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         );
 
         zeroGyro(180);
+        // gyroIO.zeroFieldRelativeGyro(180);
 
         configurePathPlannerAutoBuilder();
 
@@ -182,7 +183,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
                 translation.getX(),
                 translation.getY(),
                 rotation,
-                gyroIO.getGyroHeading()
+                getHeadingForFieldOriented()
             )
             : new ChassisSpeeds(translation.getX(), translation.getY(), rotation);
 
@@ -321,13 +322,13 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
     @Override
     public void zeroGyro(double deg) {
-        gyroIO.zeroGyro(deg);
+        gyroIO.zeroFieldRelativeGyro(deg);
         // poseEstimator.update(gyroIO.getGyroHeading(), getModulePositions());
     }
 
     @Override
-    public Rotation2d getGyroHeading() {
-        return gyroIO.getGyroHeading();
+    public Rotation2d getHeadingForFieldOriented() {
+        return gyroIO.getGyroHeadingForFieldRelative();
     }
 
     /** Periodically updates the SmartDashboard with information about the swerve modules. */
