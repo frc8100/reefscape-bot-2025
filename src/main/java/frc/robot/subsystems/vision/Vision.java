@@ -89,30 +89,32 @@ public class Vision extends SubsystemBase {
      * @return A list of all Photon pipeline results from all cameras.
      * If photon vision is not used, this method returns an empty list.
      */
-    public List<PhotonPipelineResult> getPhotonPipelineResults() {
-        List<PhotonPipelineResult> results = new LinkedList<>();
+    // public List<PhotonPipelineResult> getPhotonPipelineResults() {
+    //     List<PhotonPipelineResult> results = new LinkedList<>();
 
-        // For each photon vision IO, add all unread results
-        for (VisionIO photonVisionIO : io) {
-            results.addAll(photonVisionIO.getPhotonPipelineResults());
-        }
+    //     // For each photon vision IO, add all unread results
+    //     for (VisionIO photonVisionIO : io) {
+    //         results.addAll(photonVisionIO.getPhotonPipelineResults());
+    //     }
 
-        return results;
-    }
+    //     return results;
+    // }
 
     /**
      * @return The latest target from the specified camera, if it exists.
      */
     public Optional<PhotonPipelineResult> getLatestTargetFromCamera(int cameraIndex) {
-        List<PhotonPipelineResult> pipelineResults = io[cameraIndex].getPhotonPipelineResults();
+        // List<PhotonPipelineResult> pipelineResults = io[cameraIndex].getPhotonPipelineResults();
 
-        // Return the latest target if it exists
-        if (pipelineResults.size() > 0) {
-            return Optional.of(pipelineResults.get(pipelineResults.size() - 1));
-        }
+        // // Return the latest target if it exists
+        // if (pipelineResults.size() > 0) {
+        //     return Optional.of(pipelineResults.get(pipelineResults.size() - 1));
+        // }
 
-        // Return empty if no targets
-        return Optional.empty();
+        // // Return empty if no targets
+        // return Optional.empty();
+
+        return Optional.of(io[cameraIndex].getLatestPipelineResult());
     }
 
     /**

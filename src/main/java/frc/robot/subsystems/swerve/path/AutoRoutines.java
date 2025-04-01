@@ -30,6 +30,7 @@ import frc.robot.subsystems.superstructure.claw.ClawConstants.IntakeOuttakeDirec
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveDrive;
+import frc.robot.subsystems.vision.Vision;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -56,28 +57,28 @@ public class AutoRoutines {
      * Pose is relative to the blue alliance.
      */
     public enum FieldLocations {
-        REEF_1L(new Pose2d(3.74, 5, Rotation2d.fromDegrees(-60)), FieldLocationType.LEFT_REEF),
-        REEF_1R(new Pose2d(4, 5.15, Rotation2d.fromDegrees(-60)), FieldLocationType.RIGHT_REEF),
+        REEF_1L(new Pose2d(3.74, 5, Rotation2d.fromDegrees(-60)), FieldLocationType.LEFT_REEF, 19, 6),
+        REEF_1R(new Pose2d(4, 5.15, Rotation2d.fromDegrees(-60)), FieldLocationType.RIGHT_REEF, 19, 6),
 
-        REEF_2L(new Pose2d(4.95, 5.16, Rotation2d.fromDegrees(-120)), FieldLocationType.LEFT_REEF),
-        REEF_2R(new Pose2d(5.22, 5, Rotation2d.fromDegrees(-120)), FieldLocationType.RIGHT_REEF),
+        REEF_2L(new Pose2d(4.95, 5.16, Rotation2d.fromDegrees(-120)), FieldLocationType.LEFT_REEF, 20, 11),
+        REEF_2R(new Pose2d(5.22, 5, Rotation2d.fromDegrees(-120)), FieldLocationType.RIGHT_REEF, 20, 11),
 
-        REEF_3L(new Pose2d(5.7, 4.2, Rotation2d.fromDegrees(180)), FieldLocationType.LEFT_REEF),
-        REEF_3R(new Pose2d(5.7, 3.87, Rotation2d.fromDegrees(180)), FieldLocationType.RIGHT_REEF),
+        REEF_3L(new Pose2d(5.7, 4.2, Rotation2d.fromDegrees(180)), FieldLocationType.LEFT_REEF, 21, 10),
+        REEF_3R(new Pose2d(5.7, 3.87, Rotation2d.fromDegrees(180)), FieldLocationType.RIGHT_REEF, 21, 10),
 
-        REEF_4L(new Pose2d(5.24, 3.06, Rotation2d.fromDegrees(120)), FieldLocationType.LEFT_REEF),
-        REEF_4R(new Pose2d(4.96, 2.9, Rotation2d.fromDegrees(120)), FieldLocationType.RIGHT_REEF),
+        REEF_4L(new Pose2d(5.24, 3.06, Rotation2d.fromDegrees(120)), FieldLocationType.LEFT_REEF, 22, 9),
+        REEF_4R(new Pose2d(4.96, 2.9, Rotation2d.fromDegrees(120)), FieldLocationType.RIGHT_REEF, 22, 9),
 
-        REEF_5L(new Pose2d(4.03, 2.89, Rotation2d.fromDegrees(60)), FieldLocationType.LEFT_REEF),
-        REEF_5R(new Pose2d(3.75, 3.06, Rotation2d.fromDegrees(60)), FieldLocationType.RIGHT_REEF),
+        REEF_5L(new Pose2d(4.03, 2.89, Rotation2d.fromDegrees(60)), FieldLocationType.LEFT_REEF, 17, 8),
+        REEF_5R(new Pose2d(3.75, 3.06, Rotation2d.fromDegrees(60)), FieldLocationType.RIGHT_REEF, 17, 8),
 
-        REEF_6L(new Pose2d(3.28, 3.85, Rotation2d.fromDegrees(0)), FieldLocationType.LEFT_REEF),
-        REEF_6R(new Pose2d(3.28, 4.17, Rotation2d.fromDegrees(0)), FieldLocationType.RIGHT_REEF),
+        REEF_6L(new Pose2d(3.28, 3.85, Rotation2d.fromDegrees(0)), FieldLocationType.LEFT_REEF, 18, 7),
+        REEF_6R(new Pose2d(3.28, 4.17, Rotation2d.fromDegrees(0)), FieldLocationType.RIGHT_REEF, 18, 7),
 
-        CORAL_STATION_1(new Pose2d(1.1, 1.1, Rotation2d.fromDegrees(55)), FieldLocationType.CORAL_STATION),
-        CORAL_STATION_2(new Pose2d(1.1, 6.8, Rotation2d.fromDegrees(-55)), FieldLocationType.CORAL_STATION),
+        CORAL_STATION_1(new Pose2d(1.1, 1.1, Rotation2d.fromDegrees(55)), FieldLocationType.CORAL_STATION, 12, 2),
+        CORAL_STATION_2(new Pose2d(1.1, 6.8, Rotation2d.fromDegrees(-55)), FieldLocationType.CORAL_STATION, 13, 1),
 
-        PROCESSOR(new Pose2d(6.732, 0.652, Rotation2d.fromDegrees(-90)), FieldLocationType.PROCESSOR);
+        PROCESSOR(new Pose2d(6.732, 0.652, Rotation2d.fromDegrees(-90)), FieldLocationType.PROCESSOR, 16, 3);
 
         // A list of all the left reef poses and right reef poses, for easy access
         private static final List<Pose2d> leftReefPoses;
@@ -123,8 +124,8 @@ public class AutoRoutines {
         private final FieldLocationType type;
 
         // TODO: AprilTag IDs
-        // public final int blueAprilTagId;
-        // public final int redAprilTagId;
+        public final int blueAprilTagId;
+        public final int redAprilTagId;
 
         /**
          * @return The pose of the location. Automatically flips if necessary.
@@ -146,13 +147,67 @@ public class AutoRoutines {
             return type;
         }
 
-        // private FieldLocations(Pose2d pose, FieldLocationType type, int blueAprilTagId, int redAprilTagId) {
-        private FieldLocations(Pose2d pose, FieldLocationType type) {
+        private FieldLocations(Pose2d pose, FieldLocationType type, int blueAprilTagId, int redAprilTagId) {
+            // private FieldLocations(Pose2d pose, FieldLocationType type) {
             this.pose = pose;
             this.type = type;
-            // this.blueAprilTagId = blueAprilTagId;
-            // this.redAprilTagId = redAprilTagId;
+            this.blueAprilTagId = blueAprilTagId;
+            this.redAprilTagId = redAprilTagId;
         }
+    }
+
+    /**
+     * @return The rotation of the robot at the reef based on the tag ID.
+     * @param tagId - The tag ID of the reef.
+     */
+    public static Rotation2d getReefRotationOfTargetPoseBasedOnTagId(int tagId) {
+        Rotation2d output = new Rotation2d();
+
+        switch (tagId) {
+            // Blue
+            case 19:
+                output = Rotation2d.fromDegrees(-60);
+                break;
+            case 20:
+                output = Rotation2d.fromDegrees(-120);
+                break;
+            case 21:
+                output = Rotation2d.fromDegrees(180);
+                break;
+            case 22:
+                output = Rotation2d.fromDegrees(120);
+                break;
+            case 17:
+                output = Rotation2d.fromDegrees(60);
+                break;
+            case 18:
+                output = Rotation2d.fromDegrees(0);
+                break;
+            // Red (rotation - pi)
+            case 6:
+                output = Rotation2d.fromDegrees(-60.0 + 180.0);
+                break;
+            case 11:
+                output = Rotation2d.fromDegrees(-120.0 + 180.0);
+                break;
+            case 10:
+                output = Rotation2d.fromDegrees(180.0 + 180.0);
+                break;
+            case 9:
+                output = Rotation2d.fromDegrees(120.0 + 180.0);
+                break;
+            case 8:
+                output = Rotation2d.fromDegrees(60.0 + 180.0);
+                break;
+            case 7:
+                output = Rotation2d.fromDegrees(0.0 + 180.0);
+                break;
+            default:
+                output = Rotation2d.fromDegrees(0);
+                break;
+        }
+
+        return output;
     }
 
     /**
@@ -174,14 +229,21 @@ public class AutoRoutines {
     private SwerveDrive swerveSubsystem;
     private Elevator elevatorSubsystem;
     private Claw clawSubsystem;
+    private Vision visionSubsystem;
 
     /**
      * Creates a new AutoRoutines object given required subsystems.
      */
-    public AutoRoutines(SwerveDrive swerveSubsystem, Elevator elevatorSubsystem, Claw clawSubsystem) {
+    public AutoRoutines(
+        SwerveDrive swerveSubsystem,
+        Elevator elevatorSubsystem,
+        Claw clawSubsystem,
+        Vision visionSubsystem
+    ) {
         this.swerveSubsystem = swerveSubsystem;
         this.elevatorSubsystem = elevatorSubsystem;
         this.clawSubsystem = clawSubsystem;
+        this.visionSubsystem = visionSubsystem;
     }
 
     /**
@@ -374,7 +436,11 @@ public class AutoRoutines {
         ) {
             return initialPathfindCommand.andThen(
                 // new AlignToReefTagRelative(location.getType() == FieldLocationType.RIGHT_REEF, swerveSubsystem)
-                // new PhotonVisionAlign(location.getType() == FieldLocationType.RIGHT_REEF, swerveSubsystem, visionSubsystem)
+                new PhotonVisionAlign(
+                    location.getType() == FieldLocationType.RIGHT_REEF,
+                    swerveSubsystem,
+                    visionSubsystem
+                )
             );
         }
 
@@ -459,7 +525,7 @@ public class AutoRoutines {
      * @return Align with the reef, and score on the level.
      */
     public Command alignAndScore(SuperstructureConstants.Level levelToScoreOn) {
-        return new AlignToReefTagRelative(false, swerveSubsystem)
+        return new PhotonVisionAlign(false, swerveSubsystem, visionSubsystem)
             .alongWith(setUpSuperstructure(levelToScoreOn))
             .andThen(clawSubsystem.runOuttakeUntilCoralIsNotInClaw());
     }

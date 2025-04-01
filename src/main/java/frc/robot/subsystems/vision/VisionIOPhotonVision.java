@@ -23,34 +23,50 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 
-/** IO implementation for real PhotonVision hardware. */
+/**
+ * IO implementation for real PhotonVision hardware.
+ */
 public class VisionIOPhotonVision implements VisionIO {
 
     protected final PhotonCamera camera;
     protected final Transform3d robotToCamera;
 
+    // protected final PhotonPoseEstimator poseEstimator;
+
     /**
      * A list of all Photon pipeline results from this camera.
      * If photon vision is not used, this is an empty list.
      */
-    private List<PhotonPipelineResult> photonPipelineResults = new LinkedList<>();
+    // private List<PhotonPipelineResult> photonPipelineResults = new LinkedList<>();
+    private PhotonPipelineResult latestPipelineResult = new PhotonPipelineResult();
 
     /**
      * Creates a new VisionIOPhotonVision.
-     *
      * @param name The configured name of the camera.
      * @param rotationSupplier The 3D position of the camera relative to the robot.
      */
     public VisionIOPhotonVision(String name, Transform3d robotToCamera) {
         camera = new PhotonCamera(name);
         this.robotToCamera = robotToCamera;
+        // poseEstimator = new PhotonPoseEstimator(
+        //     VisionConstants.aprilTagLayout,
+        //     PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+        //     robotToCamera
+        // );
     }
 
+    // @Override
+    // public List<PhotonPipelineResult> getPhotonPipelineResults() {
+    //     return photonPipelineResults;
+    // }
+
     @Override
-    public List<PhotonPipelineResult> getPhotonPipelineResults() {
-        return photonPipelineResults;
+    public PhotonPipelineResult getLatestPipelineResult() {
+        return latestPipelineResult;
     }
 
     @Override
@@ -63,9 +79,17 @@ public class VisionIOPhotonVision implements VisionIO {
 
         // Add results to inputs
         // TODO: Optimize memory usage, this creates a new list every time
-        photonPipelineResults = camera.getAllUnreadResults();
+        var photonPipelineResults = camera.getAllUnreadResults();
+
+        latestPipelineResult = photonPipelineResults.isEmpty()
+            // Keep the latest result if no new results
+            ? latestPipelineResult
+            // Get the most recent result
+            : photonPipelineResults.get(photonPipelineResults.size() - 1);
 
         for (var result : photonPipelineResults) {
+            // poseEstimator.update(result);
+
             // Update latest target observation
             if (result.hasTargets()) {
                 inputs.latestTargetObservation = new TargetObservation(

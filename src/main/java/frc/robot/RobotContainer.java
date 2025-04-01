@@ -199,7 +199,7 @@ public class RobotContainer {
         );
 
         // Set up auto routines
-        autoRoutines = new AutoRoutines(swerveSubsystem, elevatorSubsystem, clawSubsystem);
+        autoRoutines = new AutoRoutines(swerveSubsystem, elevatorSubsystem, clawSubsystem, visionSubsystem);
 
         // Register named commands
         NamedCommands.registerCommand(

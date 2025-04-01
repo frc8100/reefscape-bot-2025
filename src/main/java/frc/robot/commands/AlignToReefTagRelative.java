@@ -4,45 +4,28 @@
 
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
-
-import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.pathplanner.lib.trajectory.PathPlannerTrajectoryState;
-import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.LimelightHelpers;
 import frc.lib.util.TunableValue;
-import frc.robot.Constants;
-import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import org.littletonrobotics.junction.Logger;
 
 public class AlignToReefTagRelative extends Command {
 
     private static double ROT_SETPOINT_REEF_ALIGNMENT = 0; // Rotation
-    private static double ROT_RIGHT_SETPOINT_REEF_ALIGNMENT = 0.7;
+    private static double ROT_RIGHT_SETPOINT_REEF_ALIGNMENT = 0;
     private static double ROT_TOLERANCE_REEF_ALIGNMENT = 1;
 
     private static double X_SETPOINT_REEF_ALIGNMENT = -0.68; // TZ / Vertical pose -0.16
-    private static double X_RIGHT_SETPOINT_REEF_ALIGNMENT = -0.17;
+    private static double X_RIGHT_SETPOINT_REEF_ALIGNMENT = -0.68;
     private static double X_TOLERANCE_REEF_ALIGNMENT = 0.04;
 
     private static double Y_SETPOINT_REEF_ALIGNMENT = 0.31; // Horizontal pose
-    private static double Y_RIGHT_SETPOINT_REEF_ALIGNMENT = 1;
-    private static double Y_TOLERANCE_REEF_ALIGNMENT = -0.15;
+    private static double Y_RIGHT_SETPOINT_REEF_ALIGNMENT = -0.2;
+    private static double Y_TOLERANCE_REEF_ALIGNMENT = 0.15;
 
     private static final TunableValue ROT_SETPOINT_REEF_ALIGNMENT_TUNABLE = new TunableValue(
         "Align/RotationSetpoint",

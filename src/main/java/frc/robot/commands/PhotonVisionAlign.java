@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -14,8 +15,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.LimelightHelpers;
 import frc.lib.util.TunableValue;
 import frc.robot.subsystems.swerve.SwerveDrive;
+import frc.robot.subsystems.swerve.path.AutoRoutines;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.PhotonUtils;
 
@@ -24,10 +27,18 @@ import org.photonvision.PhotonUtils;
  */
 public class PhotonVisionAlign extends Command {
 
+    /**
+     * A supplier that provides the target robot rotation for a given tag ID.
+     */
+    @FunctionalInterface
+    public static interface TargetRobotRotationSupplier {
+        public Rotation2d getTargetRobotRotation(int tagID);
+    }
+
     private static final String DASHBOARD_STRING = "AlignPV/";
 
-    private static Angle ROT_SETPOINT_REEF_ALIGNMENT = Degrees.of(0);
-    private static Angle ROT_RIGHT_SETPOINT_REEF_ALIGNMENT = Degrees.of(0);
+    private static Angle ROT_SETPOINT_REEF_ALIGNMENT = Radians.of(0);
+    private static Angle ROT_RIGHT_SETPOINT_REEF_ALIGNMENT = Radians.of(0);
     private static double ROT_TOLERANCE_REEF_ALIGNMENT = 1;
 
     private static Distance X_SETPOINT_REEF_ALIGNMENT = Meters.of(0.3); // TZ / Vertical pose -0.16
@@ -40,8 +51,8 @@ public class PhotonVisionAlign extends Command {
 
     private static final TunableValue ROT_SETPOINT_REEF_ALIGNMENT_TUNABLE = new TunableValue(
         DASHBOARD_STRING + "RotationSetpoint",
-        ROT_SETPOINT_REEF_ALIGNMENT.in(Degrees),
-        (double value) -> ROT_SETPOINT_REEF_ALIGNMENT = Degrees.of(value)
+        ROT_SETPOINT_REEF_ALIGNMENT.in(Radians),
+        (double value) -> ROT_SETPOINT_REEF_ALIGNMENT = Radians.of(value)
     );
     private static final TunableValue X_SETPOINT_REEF_ALIGNMENT_TUNABLE = new TunableValue(
         DASHBOARD_STRING + "XSetpoint",
@@ -60,8 +71,8 @@ public class PhotonVisionAlign extends Command {
     private static double Y_P = 3;
     private static double Y_D = 0.05;
 
-    private static double R_P = 0.3;
-    private static double R_D = 0.02;
+    private static double R_P = 5;
+    private static double R_D = 0.05;
 
     private static final TunableValue X_P_TUNABLE = new TunableValue(DASHBOARD_STRING + "XP", X_P, (double value) ->
         X_P = value
@@ -91,6 +102,9 @@ public class PhotonVisionAlign extends Command {
     private final PIDController yController;
     private final PIDController rotController;
 
+    private final TargetRobotRotationSupplier targetRobotRotationSupplier;
+    private final Supplier<Rotation2d> robotRotationSupplier;
+
     private SwerveDrive swerveSubsystem;
     private Vision visionSubsystem;
 
@@ -101,15 +115,26 @@ public class PhotonVisionAlign extends Command {
     private int tagID = -1;
     private double tagHeightMeters = 0.0;
 
-    public PhotonVisionAlign(boolean isRightScore, SwerveDrive swerveSubsystem, Vision visionSubsystem) {
+    public PhotonVisionAlign(
+        boolean isRightScore,
+        // TargetRobotRotationSupplier targetRobotRotationSupplier,
+        SwerveDrive swerveSubsystem,
+        // Supplier<Rotation2d> robotRotationSupplier,
+        Vision visionSubsystem
+    ) {
         this.isRightScore = isRightScore;
         this.swerveSubsystem = swerveSubsystem;
         this.visionSubsystem = visionSubsystem;
+        // this.targetRobotRotationSupplier = targetRobotRotationSupplier;
+        this.targetRobotRotationSupplier = AutoRoutines::getReefRotationOfTargetPoseBasedOnTagId;
+        this.robotRotationSupplier = swerveSubsystem::getRotation;
         addRequirements(swerveSubsystem);
 
         xController = new PIDController(X_P_TUNABLE.get(), 0.0, X_D_TUNABLE.get());
         yController = new PIDController(Y_P_TUNABLE.get(), 0.0, Y_D_TUNABLE.get());
         rotController = new PIDController(R_P_TUNABLE.get(), 0.0, R_D_TUNABLE.get());
+
+        rotController.enableContinuousInput(-Math.PI, Math.PI);
 
         // Refresh config
         TunableValue.addRefreshConfigConsumer(() -> {
@@ -130,10 +155,6 @@ public class PhotonVisionAlign extends Command {
         this.stopTimer.start();
         this.dontSeeTagTimer = new Timer();
         this.dontSeeTagTimer.start();
-
-        rotController.setSetpoint(
-            !isRightScore ? ROT_SETPOINT_REEF_ALIGNMENT.in(Degrees) : ROT_RIGHT_SETPOINT_REEF_ALIGNMENT.in(Degrees)
-        );
         rotController.setTolerance(ROT_TOLERANCE_REEF_ALIGNMENT);
 
         xController.setSetpoint(
@@ -145,6 +166,8 @@ public class PhotonVisionAlign extends Command {
             !isRightScore ? Y_SETPOINT_REEF_ALIGNMENT.in(Meters) : Y_RIGHT_SETPOINT_REEF_ALIGNMENT.in(Meters)
         );
         yController.setTolerance(Y_TOLERANCE_REEF_ALIGNMENT);
+
+        tagID = -1;
     }
 
     @Override
@@ -163,21 +186,35 @@ public class PhotonVisionAlign extends Command {
                 return;
             }
 
+            // Logger.recordOutput("Align/TagFound", true);
             tagHeightMeters = VisionConstants.aprilTagLayout.getTagPose(tagID).get().getTranslation().getZ();
-        }
 
+            rotController.setSetpoint(targetRobotRotationSupplier.getTargetRobotRotation(tagID).getRadians());
+        }
+        Logger.recordOutput("Align/TagId", tagID);
+
+        // If the tag is not found, stop the robot
         if (
-            tagID < 0 || !latestObservation.isPresent() || latestObservation.get().getBestTarget().fiducialId != tagID
+            !latestObservation.isPresent() ||
+            !latestObservation.get().hasTargets() ||
+            latestObservation.get().getBestTarget().fiducialId != tagID
         ) {
+            // Logger.recordOutput("Align/TagFound", false);
+            // Logger.recordOutput(
+            //     "Align/CurrentBestTag",
+            //     latestObservation.isPresent() ? latestObservation.get().getBestTarget().fiducialId : -1
+            // );
+
             swerveSubsystem.drive(new Translation2d(), 0, false);
             return;
         }
 
-        this.dontSeeTagTimer.reset();
-
-        // Calculate tag position
         var latestObservationTarget = latestObservation.get().getBestTarget();
 
+        this.dontSeeTagTimer.reset();
+        Logger.recordOutput("Align/TagFound", true);
+
+        // Calculate tag position
         double targetYaw = latestObservationTarget.getYaw();
         double targetDistance = PhotonUtils.calculateDistanceToTargetMeters(
             VisionConstants.TRANSFORM_TO_CAMERA_0.getZ(),
@@ -193,7 +230,7 @@ public class PhotonVisionAlign extends Command {
 
         double xSpeed = -xController.calculate(targetRelativeToCamera.getX());
         double ySpeed = yController.calculate(targetRelativeToCamera.getY());
-        double rotValue = rotController.calculate(targetYaw);
+        double rotValue = rotController.calculate(robotRotationSupplier.get().getRadians());
 
         // Log
         Logger.recordOutput("Align/XSetpoint", xController.getSetpoint());
@@ -205,7 +242,7 @@ public class PhotonVisionAlign extends Command {
         Logger.recordOutput("Align/YSpeed", ySpeed);
 
         Logger.recordOutput("Align/RSetpoint", rotController.getSetpoint());
-        Logger.recordOutput("Align/RCurrent", targetYaw);
+        Logger.recordOutput("Align/RCurrent", robotRotationSupplier.get().getRadians());
         Logger.recordOutput("Align/RSpeed", rotValue);
 
         swerveSubsystem.drive(new Translation2d(xSpeed, ySpeed), rotValue, false);

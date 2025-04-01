@@ -61,4 +61,12 @@ public interface VisionIO {
     public default List<PhotonPipelineResult> getPhotonPipelineResults() {
         return new LinkedList<>();
     }
+
+    /**
+     * Gets the latest pipeline result from this camera.
+     * @return The latest PhotonPipelineResult, or a default one if none is available.
+     */
+    public default PhotonPipelineResult getLatestPipelineResult() {
+        return new PhotonPipelineResult();
+    }
 }
