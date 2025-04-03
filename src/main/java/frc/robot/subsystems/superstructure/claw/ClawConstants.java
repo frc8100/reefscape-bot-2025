@@ -52,7 +52,7 @@ public final class ClawConstants {
         /**
          * Amount to rotate the claw to when moving the elevator up.
          */
-        public static final Rotation2d CLAW_HOLDING_POSITION = Rotation2d.fromDegrees(100).minus(CLAW_ANGLE_OFFSET);
+        public static final Rotation2d CLAW_HOLDING_POSITION = Rotation2d.fromDegrees(110).minus(CLAW_ANGLE_OFFSET);
 
         public static final Rotation2d CLAW_L4_SCORING_POSITION = Rotation2d.fromDegrees(95).minus(CLAW_ANGLE_OFFSET);
 
@@ -140,7 +140,7 @@ public final class ClawConstants {
      * How much the claw can be off from the desired angle before it is considered "in position".
      * This is in radians.
      */
-    public static final Angle ANGLE_TOLERANCE_RADIANS = Degrees.of(5);
+    public static final Angle ANGLE_TOLERANCE_RADIANS = Degrees.of(10);
 
     /**
      * Deadband for the claw (controller input).
@@ -152,7 +152,7 @@ public final class ClawConstants {
     /**
      * The maximum power for the angle motor, from 0-1.
      */
-    public static final double MAX_ANGLE_POWER = 0.35;
+    public static final double MAX_ANGLE_POWER = 0.25;
 
     public static final double ANGLE_GEAR_RATIO = 30;
     public static final boolean IS_ANGLE_MOTOR_INVERTED = true;
@@ -166,6 +166,7 @@ public final class ClawConstants {
     public static final Angle MIN_CLAW_ANGLE = Radians.of(-0.2);
 
     // unused
+    // TODO: why is this not affected by conversion factor?
     public static final AngularVelocity MAX_ANGLE_SPEED = RadiansPerSecond.of(5);
     public static final AngularAcceleration MAX_ANGLE_ACCELERATION = RadiansPerSecondPerSecond.of(10);
 
@@ -175,9 +176,9 @@ public final class ClawConstants {
     // public static final double ANGLE_KD = 0.0;
     // public static final double ANGLE_KF = 0.0;
 
-    public static final TunableValue ANGLE_KP = new TunableValue("Claw/KP", 0.9);
+    public static final TunableValue ANGLE_KP = new TunableValue("Claw/KP", 0.7);
     public static final TunableValue ANGLE_KI = new TunableValue("Claw/KI", 0.0);
-    public static final TunableValue ANGLE_KD = new TunableValue("Claw/KD", 0.0);
+    public static final TunableValue ANGLE_KD = new TunableValue("Claw/KD", 0.1);
     public static final TunableValue ANGLE_KF = new TunableValue("Claw/KF", 0.0);
 
     // Outtake motor configs

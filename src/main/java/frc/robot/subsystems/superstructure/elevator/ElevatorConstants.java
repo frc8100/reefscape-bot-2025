@@ -72,6 +72,7 @@ public final class ElevatorConstants {
     public static final Distance ELEVATOR_DISTANCE_TOLERANCE = Meters.of(0.05);
 
     public static final Angle ELEVATOR_RAD_TOLERANCE = Radians.of(0.2);
+    public static final Angle ELEVATOR_RAD_TOLERANCE_NOT_NEARER = Radians.of(1.5);
 
     /**
      * The CAN ID of the elevator motor.
@@ -99,7 +100,7 @@ public final class ElevatorConstants {
     public static final double ELEVATOR_RADIANS_TO_METERS = ((16 - 1.75) / 8.6) * Inches.of(1).in(Meters);
     public static final AngularVelocity ELEVATOR_MAX_ANGULAR_VELOCITY = RadiansPerSecond.of(10);
     public static final AngularAcceleration ELEVATOR_MAX_ANGULAR_ACCELERATION = RadiansPerSecondPerSecond.of(15);
-    public static final double AMOUNT_PER_FRAME = 0.335;
+    public static final double AMOUNT_PER_FRAME = 0.3;
 
     public static final LinearVelocity ELEVATOR_SIM_MAX_VELOCITY = MetersPerSecond.of(0.5);
     public static final LinearAcceleration ELEVATOR_SIM_MAX_ACCELERATION = MetersPerSecondPerSecond.of(0.2);

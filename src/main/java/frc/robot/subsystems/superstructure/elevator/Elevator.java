@@ -64,6 +64,10 @@ public class Elevator extends SubsystemBase {
         return inputs.isAtBottom;
     }
 
+    public boolean isElevatorAtTargetNotNearer() {
+        return io.isAtTargetNotNearer();
+    }
+
     // TODO: refactor
     public Command getUpOrDown(DoubleSupplier valueSupplier) {
         return new RunCommand(
@@ -155,6 +159,15 @@ public class Elevator extends SubsystemBase {
         return (
             getPositionCommand(level)
                 .andThen(Commands.waitUntil(this::isElevatorAtTarget))
+        );
+        // @formatter:on
+    }
+
+    public Command getPositionCommandAndWaitNotNearer(SuperstructureConstants.Level level) {
+        // @formatter:off
+        return (
+            getPositionCommand(level)
+                .andThen(Commands.waitUntil(this::isElevatorAtTargetNotNearer))
         );
         // @formatter:on
     }

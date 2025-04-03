@@ -285,6 +285,21 @@ public class AutoRoutines {
     }
 
     private Command setUpSuperstructureDeferred(SuperstructureConstants.Level level) {
+        return clawSubsystem
+            // Move claw out of way
+            .getWaitForAngleCommand(ClawConstants.RotationPositions.CLAW_HOLDING_POSITION)
+            // Raise elevator
+            .alongWith(elevatorSubsystem.getPositionCommandAndWaitNotNearer(level))
+            // Move claw to level angle
+            .andThen(clawSubsystem.getWaitForAngleCommand(level.getClawAngle()))
+            // Stop when interrupted
+            .handleInterrupt(() -> {
+                elevatorSubsystem.io.resetSetpointToCurrentPosition();
+                clawSubsystem.io.resetSetpointToCurrentPosition();
+            });
+    }
+
+    private Command setUpSuperstructureDeferredOld(SuperstructureConstants.Level level) {
         Angle elevatorCurrentPosition = elevatorSubsystem.getAngularPosition();
         Angle elevatorTargetPosition = Radians.of(level.getElevatorRadian());
 

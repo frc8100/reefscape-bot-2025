@@ -56,6 +56,10 @@ public interface ElevatorIO extends GenericSparkIO<ElevatorIO.ElevatorIOInputs> 
      */
     public abstract boolean isAtTarget();
 
+    public default boolean isAtTargetNotNearer() {
+        return isAtTarget();
+    }
+
     /**
      * Sets the desired elevator position.
      * @param position - The desired elevator position.

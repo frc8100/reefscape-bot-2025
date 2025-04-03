@@ -41,7 +41,7 @@ public class PhotonVisionAlign extends Command {
     private static Angle ROT_RIGHT_SETPOINT_REEF_ALIGNMENT = Radians.of(0);
     private static double ROT_TOLERANCE_REEF_ALIGNMENT = 1;
 
-    private static Distance X_SETPOINT_REEF_ALIGNMENT = Meters.of(0.3); // TZ / Vertical pose -0.16
+    private static Distance X_SETPOINT_REEF_ALIGNMENT = Meters.of(-0.3); // TZ / Vertical pose -0.16
     private static Distance X_RIGHT_SETPOINT_REEF_ALIGNMENT = Meters.of(0.3);
     private static double X_TOLERANCE_REEF_ALIGNMENT = 0.04;
 

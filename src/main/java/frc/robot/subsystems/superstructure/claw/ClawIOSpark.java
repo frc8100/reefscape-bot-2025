@@ -131,8 +131,11 @@ public class ClawIOSpark implements ClawIO {
             .outputRange(-ClawConstants.MAX_ANGLE_POWER, ClawConstants.MAX_ANGLE_POWER);
 
         angleConfig.closedLoop.maxMotion
-            .maxVelocity(ClawConstants.MAX_ANGLE_SPEED.in(RadiansPerSecond))
-            .maxAcceleration(ClawConstants.MAX_ANGLE_ACCELERATION.in(RadiansPerSecondPerSecond));
+            // .maxVelocity(ClawConstants.MAX_ANGLE_SPEED.in(RadiansPerSecond))
+            // .maxAcceleration(ClawConstants.MAX_ANGLE_ACCELERATION.in(RadiansPerSecondPerSecond));
+
+            .maxVelocity(150)
+            .maxAcceleration(300);
 
         // Apply the config
         tryUntilOk(angleMotor, 5, () ->
@@ -248,6 +251,7 @@ public class ClawIOSpark implements ClawIO {
 
         // Set the position of the turn motor
         angleClosedLoopController.setReference(radianSetpoint, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+        // angleClosedLoopController.setReference(radianSetpoint, ControlType.kMAXMotionPositionControl);
 
         // Reset spark sticky fault
         sparkStickyFault = false;

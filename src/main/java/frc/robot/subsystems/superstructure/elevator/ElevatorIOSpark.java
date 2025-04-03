@@ -240,6 +240,15 @@ public class ElevatorIOSpark implements ElevatorIO {
     }
 
     @Override
+    public boolean isAtTargetNotNearer() {
+        return MathUtil.isNear(
+            leaderEncoder.getPosition(),
+            radianSetpoint,
+            ElevatorConstants.ELEVATOR_RAD_TOLERANCE_NOT_NEARER.in(Radians)
+        );
+    }
+
+    @Override
     public void updateInputs(ElevatorIOInputs inputs) {
         // Clamp
         radianSetpoint = MathUtil.clamp(
