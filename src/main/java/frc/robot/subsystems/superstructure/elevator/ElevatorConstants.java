@@ -80,14 +80,14 @@ public final class ElevatorConstants {
     public static final int ELEVATOR_MOTOR_ID = 15;
     public static final int ELEVATOR_FOLLOWER_MOTOR_ID = 20;
 
-    public static final double ELEVATOR_MAX_OUTPUT = 0.75;
-    public static final double ELEVATOR_TOP_INPUT = 0.35;
+    public static final double ELEVATOR_MAX_OUTPUT = 0.825;
+    public static final double ELEVATOR_TOP_INPUT = 0.45;
     public static final Angle ELEVATOR_TOP_THRESHOLD = Radians.of(20);
 
     public static final double ELEVATOR_GEAR_RATIO = 48.0;
 
     public static final Angle ELEVATOR_MIN_POSITION = Radians.of(-2);
-    public static final Angle ELEVATOR_MAX_POSITION = Radians.of(28.5);
+    public static final Angle ELEVATOR_MAX_POSITION = Radians.of(26);
 
     public static final boolean ELEVATOR_MOTOR_INVERTED = false;
     public static final Current ELEVATOR_MOTOR_CURRENT_LIMIT = Amps.of(40);

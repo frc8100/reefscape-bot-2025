@@ -212,12 +212,23 @@ public class RobotContainer {
         // NamedCommands.registerCommand("ScoreL2", autoRoutines.alignAndScore(SuperstructureConstants.Level.L2));
         // NamedCommands.registerCommand("ScoreL3", autoRoutines.alignAndScore(SuperstructureConstants.Level.L3));
 
-        
-        NamedCommands.registerCommand("SetupSuperstructureL1Auto", autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L1_AUTO));
-        NamedCommands.registerCommand("SetupSuperstructureL2", autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L2));
-        NamedCommands.registerCommand("SetupSuperstructureL3", autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L3));
-        NamedCommands.registerCommand("SetupSuperstructureL4", autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L4));
-        
+        NamedCommands.registerCommand(
+            "SetupSuperstructureL1Auto",
+            autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L1_AUTO)
+        );
+        NamedCommands.registerCommand(
+            "SetupSuperstructureL2",
+            autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L2)
+        );
+        NamedCommands.registerCommand(
+            "SetupSuperstructureL3",
+            autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L3)
+        );
+        NamedCommands.registerCommand(
+            "SetupSuperstructureL4",
+            autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L4)
+        );
+
         NamedCommands.registerCommand("ScoreL4", autoRoutines.doClawMovementsForL4());
         NamedCommands.registerCommand("ScoreCoral", clawSubsystem.runOuttakeUntilCoralIsNotInClaw());
 

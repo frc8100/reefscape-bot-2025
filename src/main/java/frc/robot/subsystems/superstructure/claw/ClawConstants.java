@@ -152,7 +152,7 @@ public final class ClawConstants {
     /**
      * The maximum power for the angle motor, from 0-1.
      */
-    public static final double MAX_ANGLE_POWER = 0.25;
+    public static final double MAX_ANGLE_POWER = 0.275;
 
     public static final double ANGLE_GEAR_RATIO = 30;
     public static final boolean IS_ANGLE_MOTOR_INVERTED = true;

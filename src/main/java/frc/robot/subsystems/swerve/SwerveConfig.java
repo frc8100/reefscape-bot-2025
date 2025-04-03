@@ -75,8 +75,8 @@ public class SwerveConfig {
 
     // Drivetrain constants
     // TODO: precise track/base measurement
-    public static final Distance TRACK_WIDTH = Inches.of(22.5);
-    public static final Distance WHEEL_BASE = Inches.of(22.5);
+    public static final Distance TRACK_WIDTH = Inches.of(23);
+    public static final Distance WHEEL_BASE = Inches.of(23);
     public static final Distance DRIVE_BASE_RADIUS = Meters.of(
         Math.hypot(TRACK_WIDTH.in(Meters) / 2.0, WHEEL_BASE.in(Meters) / 2.0)
     );
