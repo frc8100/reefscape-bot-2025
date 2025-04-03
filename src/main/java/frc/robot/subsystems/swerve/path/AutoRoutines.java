@@ -229,7 +229,7 @@ public class AutoRoutines {
     private SwerveDrive swerveSubsystem;
     private Elevator elevatorSubsystem;
     private Claw clawSubsystem;
-    private Vision visionSubsystem;
+    // private Vision visionSubsystem;
 
     /**
      * Creates a new AutoRoutines object given required subsystems.
@@ -237,13 +237,13 @@ public class AutoRoutines {
     public AutoRoutines(
         SwerveDrive swerveSubsystem,
         Elevator elevatorSubsystem,
-        Claw clawSubsystem,
-        Vision visionSubsystem
+        Claw clawSubsystem
+        // Vision visionSubsystem
     ) {
         this.swerveSubsystem = swerveSubsystem;
         this.elevatorSubsystem = elevatorSubsystem;
         this.clawSubsystem = clawSubsystem;
-        this.visionSubsystem = visionSubsystem;
+        // this.visionSubsystem = visionSubsystem;
     }
 
     /**
@@ -430,19 +430,19 @@ public class AutoRoutines {
         );
 
         // If the location is a reef, do the final alignment
-        if (
-            shouldAlignToReef &&
-            (location.getType() == FieldLocationType.LEFT_REEF || location.getType() == FieldLocationType.RIGHT_REEF)
-        ) {
-            return initialPathfindCommand.andThen(
-                // new AlignToReefTagRelative(location.getType() == FieldLocationType.RIGHT_REEF, swerveSubsystem)
-                new PhotonVisionAlign(
-                    location.getType() == FieldLocationType.RIGHT_REEF,
-                    swerveSubsystem,
-                    visionSubsystem
-                )
-            );
-        }
+        // if (
+        //     shouldAlignToReef &&
+        //     (location.getType() == FieldLocationType.LEFT_REEF || location.getType() == FieldLocationType.RIGHT_REEF)
+        // ) {
+        //     return initialPathfindCommand.andThen(
+        //         // new AlignToReefTagRelative(location.getType() == FieldLocationType.RIGHT_REEF, swerveSubsystem)
+        //         new PhotonVisionAlign(
+        //             location.getType() == FieldLocationType.RIGHT_REEF,
+        //             swerveSubsystem,
+        //             visionSubsystem
+        //         )
+        //     );
+        // }
 
         return initialPathfindCommand;
     }
@@ -524,11 +524,11 @@ public class AutoRoutines {
     /**
      * @return Align with the reef, and score on the level.
      */
-    public Command alignAndScore(SuperstructureConstants.Level levelToScoreOn) {
-        return new PhotonVisionAlign(false, swerveSubsystem, visionSubsystem)
-            .alongWith(setUpSuperstructure(levelToScoreOn))
-            .andThen(clawSubsystem.runOuttakeUntilCoralIsNotInClaw());
-    }
+    // public Command alignAndScore(SuperstructureConstants.Level levelToScoreOn) {
+    //     return new PhotonVisionAlign(false, swerveSubsystem, visionSubsystem)
+    //         .alongWith(setUpSuperstructure(levelToScoreOn))
+    //         .andThen(clawSubsystem.runOuttakeUntilCoralIsNotInClaw());
+    // }
 
     /**
      * @return A command to get coral and go to all reefs, repeating the process.
