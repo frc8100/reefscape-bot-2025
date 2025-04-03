@@ -70,7 +70,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
 
     // Subsystems
-    private final Vision visionSubsystem;
+    // private final Vision visionSubsystem;
     private final SwerveDrive swerveSubsystem;
     private final Claw clawSubsystem;
     private final Elevator elevatorSubsystem;
@@ -109,11 +109,11 @@ public class RobotContainer {
                 );
 
                 // TODO: implement photonvision
-                visionSubsystem = new Vision(
-                    swerveSubsystem::addVisionMeasurement,
-                    // new VisionIOLimelight(VisionConstants.CAMERA_0_NAME, swerveSubsystem::getRotation)
-                    new VisionIOPhotonVision(VisionConstants.CAMERA_0_NAME, VisionConstants.TRANSFORM_TO_CAMERA_0)
-                );
+                // visionSubsystem = new Vision(
+                //     swerveSubsystem::addVisionMeasurement,
+                //     // new VisionIOLimelight(VisionConstants.CAMERA_0_NAME, swerveSubsystem::getRotation)
+                //     new VisionIOPhotonVision(VisionConstants.CAMERA_0_NAME, VisionConstants.TRANSFORM_TO_CAMERA_0)
+                // );
 
                 clawSubsystem = new Claw(new ClawIOSpark());
                 // clawSubsystem = new ClawSim();
@@ -149,15 +149,15 @@ public class RobotContainer {
                 );
 
                 // Create a simulated vision subsystem
-                visionSubsystem = new Vision(
-                    swerveSubsystem::addVisionMeasurement,
-                    new VisionIOPhotonSim(
-                        VisionConstants.CAMERA_0_NAME,
-                        VisionConstants.TRANSFORM_TO_CAMERA_0,
-                        swerveSubsystem::getActualPose,
-                        VisionConstants.CAMERA_0_PROPERTIES
-                    )
-                );
+                // visionSubsystem = new Vision(
+                //     swerveSubsystem::addVisionMeasurement,
+                //     new VisionIOPhotonSim(
+                //         VisionConstants.CAMERA_0_NAME,
+                //         VisionConstants.TRANSFORM_TO_CAMERA_0,
+                //         swerveSubsystem::getActualPose,
+                //         VisionConstants.CAMERA_0_PROPERTIES
+                //     )
+                // );
 
                 // Create a simulated claw
                 clawSubsystem = new ClawSim();
@@ -199,7 +199,8 @@ public class RobotContainer {
         );
 
         // Set up auto routines
-        autoRoutines = new AutoRoutines(swerveSubsystem, elevatorSubsystem, clawSubsystem, visionSubsystem);
+        // autoRoutines = new AutoRoutines(swerveSubsystem, elevatorSubsystem, clawSubsystem, visionSubsystem);
+        autoRoutines = new AutoRoutines(swerveSubsystem, elevatorSubsystem, clawSubsystem);
 
         // Register named commands
         NamedCommands.registerCommand(
@@ -207,38 +208,48 @@ public class RobotContainer {
             autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.INITIAL_POSITION)
         );
 
-        NamedCommands.registerCommand("ScoreL2", autoRoutines.alignAndScore(SuperstructureConstants.Level.L2));
-        NamedCommands.registerCommand("ScoreL3", autoRoutines.alignAndScore(SuperstructureConstants.Level.L3));
+        // TODO:
+        // NamedCommands.registerCommand("ScoreL2", autoRoutines.alignAndScore(SuperstructureConstants.Level.L2));
+        // NamedCommands.registerCommand("ScoreL3", autoRoutines.alignAndScore(SuperstructureConstants.Level.L3));
+
+        
+        NamedCommands.registerCommand("SetupSuperstructureL1Auto", autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L1_AUTO));
+        NamedCommands.registerCommand("SetupSuperstructureL2", autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L2));
+        NamedCommands.registerCommand("SetupSuperstructureL3", autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L3));
+        NamedCommands.registerCommand("SetupSuperstructureL4", autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L4));
+        
+        NamedCommands.registerCommand("ScoreL4", autoRoutines.doClawMovementsForL4());
+        NamedCommands.registerCommand("ScoreCoral", clawSubsystem.runOuttakeUntilCoralIsNotInClaw());
 
         NamedCommands.registerCommand("IntakeCoral", clawSubsystem.runIntakeUntilCoralIsInClaw());
 
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
         // Set up SysId routines
-        autoChooser.addOption(
-            "Drive Wheel Radius Characterization",
-            SwerveSysidRoutines.wheelRadiusCharacterization(swerveSubsystem)
-        );
-        autoChooser.addOption(
-            "Drive Simple FF Characterization",
-            SwerveSysidRoutines.feedforwardCharacterization(swerveSubsystem)
-        );
-        autoChooser.addOption(
-            "Drive SysId (Quasistatic Forward)",
-            swerveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
-        );
-        autoChooser.addOption(
-            "Drive SysId (Quasistatic Reverse)",
-            swerveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
-        );
-        autoChooser.addOption(
-            "Drive SysId (Dynamic Forward)",
-            swerveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward)
-        );
-        autoChooser.addOption(
-            "Drive SysId (Dynamic Reverse)",
-            swerveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse)
-        );
+        // autoChooser.addOption(
+        //     "Drive Wheel Radius Characterization",
+        //     SwerveSysidRoutines.wheelRadiusCharacterization(swerveSubsystem)
+        // );
+        // autoChooser.addOption(
+        //     "Drive Simple FF Characterization",
+        //     SwerveSysidRoutines.feedforwardCharacterization(swerveSubsystem)
+        // );
+        // autoChooser.addOption(
+        //     "Drive SysId (Quasistatic Forward)",
+        //     swerveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
+        // );
+        // autoChooser.addOption(
+        //     "Drive SysId (Quasistatic Reverse)",
+        //     swerveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
+        // );
+        // autoChooser.addOption(
+        //     "Drive SysId (Dynamic Forward)",
+        //     swerveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward)
+        // );
+        // autoChooser.addOption(
+        //     "Drive SysId (Dynamic Reverse)",
+        //     swerveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse)
+        // );
 
         // TODO: Temporary
         // autoChooser.addOption("Coral and Go To All Reefs Test", autoRoutines.getCoralAndGoToAllReefsTest());
@@ -269,15 +280,15 @@ public class RobotContainer {
             .getJoystickButtonOf(Controls.mainDriveControls.zeroGyroButton)
             .onTrue(new InstantCommand(swerveSubsystem::zeroGyro));
 
-        // Align to reefs
-        Controls.mainDriveControls
-            .getJoystickButtonOf(Controls.mainDriveControls.alignToLeftReefUsingVision)
-            // .whileTrue(new AlignToReefTagRelative(false, swerveSubsystem));
-            .whileTrue(new PhotonVisionAlign(false, swerveSubsystem, visionSubsystem));
-        Controls.mainDriveControls
-            .getJoystickButtonOf(Controls.mainDriveControls.alignToRightReefUsingVision)
-            // .whileTrue(new AlignToReefTagRelative(true, swerveSubsystem));
-            .whileTrue(new PhotonVisionAlign(true, swerveSubsystem, visionSubsystem));
+        // TODO: Align to reefs
+        // Controls.mainDriveControls
+        //     .getJoystickButtonOf(Controls.mainDriveControls.alignToLeftReefUsingVision)
+        //     // .whileTrue(new AlignToReefTagRelative(false, swerveSubsystem));
+        //     .whileTrue(new PhotonVisionAlign(false, swerveSubsystem, visionSubsystem));
+        // Controls.mainDriveControls
+        //     .getJoystickButtonOf(Controls.mainDriveControls.alignToRightReefUsingVision)
+        //     // .whileTrue(new AlignToReefTagRelative(true, swerveSubsystem));
+        //     .whileTrue(new PhotonVisionAlign(true, swerveSubsystem, visionSubsystem));
 
         // Align (new)
         // Controls.mainDriveControls

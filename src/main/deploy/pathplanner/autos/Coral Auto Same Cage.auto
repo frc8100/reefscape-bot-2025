@@ -5,15 +5,28 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "1cf. To R"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "1cf. To R"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "SetupSuperstructureL2"
+                }
+              }
+            ]
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "ScoreL2"
+            "name": "ScoreCoral"
           }
         },
         {
@@ -42,15 +55,28 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "3cf. CS1 to R"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "3cf. CS1 to R"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "SetupSuperstructureL2"
+                }
+              }
+            ]
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "ScoreL2"
+            "name": "ScoreCoral"
           }
         },
         {
@@ -79,9 +105,28 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "3cf. CS1 to R"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "5cf. CS1 to MML"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "SetupSuperstructureL2"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreCoral"
           }
         }
       ]
