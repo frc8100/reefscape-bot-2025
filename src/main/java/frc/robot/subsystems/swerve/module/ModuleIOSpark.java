@@ -147,6 +147,7 @@ public class ModuleIOSpark implements ModuleIO {
         // Create odometry queues
         timestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
         drivePositionQueue = SparkOdometryThread.getInstance().registerSignal(driveMotor, relDriveEncoder::getPosition);
+        // TODO: this uses the motor encoder now instead of the CANCoder
         turnPositionQueue = SparkOdometryThread.getInstance()
             .registerSignal(angleMotor, () -> turnAbsolutePosition.getValue().in(Radians));
 
@@ -207,12 +208,12 @@ public class ModuleIOSpark implements ModuleIO {
         SparkUtil.sparkStickyFault = false;
         SparkUtil.ifOk(driveMotor, relDriveEncoder::getPosition, value -> inputs.drivePositionRad = value);
         SparkUtil.ifOk(driveMotor, relDriveEncoder::getVelocity, value -> inputs.driveVelocityRadPerSec = value);
-        SparkUtil.ifOk(
-            driveMotor,
-            new DoubleSupplier[] { driveMotor::getAppliedOutput, driveMotor::getBusVoltage },
-            values -> inputs.driveAppliedVolts = values[0] * values[1]
-        );
-        SparkUtil.ifOk(driveMotor, driveMotor::getOutputCurrent, value -> inputs.driveCurrentAmps = value);
+        // SparkUtil.ifOk(
+        //     driveMotor,
+        //     new DoubleSupplier[] { driveMotor::getAppliedOutput, driveMotor::getBusVoltage },
+        //     values -> inputs.driveAppliedVolts = values[0] * values[1]
+        // );
+        // SparkUtil.ifOk(driveMotor, driveMotor::getOutputCurrent, value -> inputs.driveCurrentAmps = value);
         inputs.driveConnected = driveConnectedDebounce.calculate(!SparkUtil.sparkStickyFault);
 
         // Update turn inputs
@@ -226,18 +227,18 @@ public class ModuleIOSpark implements ModuleIO {
             () -> turnAbsolutePosition.getValue().in(Radians),
             value -> inputs.turnPosition = new Rotation2d(value).minus(angleOffset)
         );
-        SparkUtil.ifOk(
-            angleMotor,
-            () -> turnAbsolutePosition.getValue().in(Radians),
-            value -> inputs.turnPositionRaw = value
-        );
+        // SparkUtil.ifOk(
+        //     angleMotor,
+        //     () -> turnAbsolutePosition.getValue().in(Radians),
+        //     value -> inputs.turnPositionRaw = value
+        // );
         SparkUtil.ifOk(angleMotor, relAngleEncoder::getVelocity, value -> inputs.turnVelocityRadPerSec = value);
-        SparkUtil.ifOk(
-            angleMotor,
-            new DoubleSupplier[] { angleMotor::getAppliedOutput, angleMotor::getBusVoltage },
-            values -> inputs.turnAppliedVolts = values[0] * values[1]
-        );
-        SparkUtil.ifOk(angleMotor, angleMotor::getOutputCurrent, value -> inputs.turnCurrentAmps = value);
+        // SparkUtil.ifOk(
+        //     angleMotor,
+        //     new DoubleSupplier[] { angleMotor::getAppliedOutput, angleMotor::getBusVoltage },
+        //     values -> inputs.turnAppliedVolts = values[0] * values[1]
+        // );
+        // SparkUtil.ifOk(angleMotor, angleMotor::getOutputCurrent, value -> inputs.turnCurrentAmps = value);
         inputs.turnConnected = turnConnectedDebounce.calculate(!SparkUtil.sparkStickyFault);
 
         // Update odometry inputs

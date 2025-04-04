@@ -25,15 +25,15 @@ public final class SuperstructureConstants {
          */
         INITIAL_POSITION("L1", Meters.of(0.0), CLAW_ANGLE_OFFSET, 0),
         L2("L2", Meters.of(1).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(57.6), 6),
-        L3("L3", Meters.of(1.25).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(57.5), 13.5),
-        L4("L4", Meters.of(2.1).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(60.5), 26),
+        L3("L3", Meters.of(1.25).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(57.5), 14),
+        L4("L4", Meters.of(2.1).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(60.5), 29),
 
         L1_AUTO("L1Auto", Meters.of(0.4).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(180), 3.5),
 
         ALGAE_L2("L2Algae", Meters.of(0.9), Rotation2d.fromDegrees(180), 4.8),
         ALGAE_L3("L3Algae", Meters.of(1.2), Rotation2d.fromDegrees(180), 10),
 
-        ALGAE_HOLD_NET("AlgaeNet", Meters.of(2.1).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(180), 20); // TODO: increase height
+        ALGAE_HOLD_NET("AlgaeNet", Meters.of(2.1).minus(INITIAL_HEIGHT_CLAW), Rotation2d.fromDegrees(180), 25); // TODO: increase height
 
         private final Distance elevatorDistance;
 
