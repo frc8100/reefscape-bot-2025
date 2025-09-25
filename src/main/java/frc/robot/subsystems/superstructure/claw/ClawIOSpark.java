@@ -18,6 +18,7 @@ import com.revrobotics.spark.config.LimitSwitchConfig.Type;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.util.TunableValue;
@@ -68,6 +69,7 @@ public class ClawIOSpark implements ClawIO {
      * The closed loop controller for the outtake motor.
      */
     // private final SparkClosedLoopController outtakeClosedLoopController;
+    private final ProfiledPIDController angleProfiledClosedLoopController;
 
     private double radianSetpoint = 0.0;
 
@@ -130,12 +132,12 @@ public class ClawIOSpark implements ClawIO {
             )
             .outputRange(-ClawConstants.MAX_ANGLE_POWER, ClawConstants.MAX_ANGLE_POWER);
 
-        angleConfig.closedLoop.maxMotion
-            // .maxVelocity(ClawConstants.MAX_ANGLE_SPEED.in(RadiansPerSecond))
-            // .maxAcceleration(ClawConstants.MAX_ANGLE_ACCELERATION.in(RadiansPerSecondPerSecond));
-
-            .maxVelocity(150)
-            .maxAcceleration(300);
+        angleProfiledClosedLoopController = new ProfiledPIDController(
+            ClawConstants.PROFILED_ANGLE_KP.get(),
+            ClawConstants.PROFILED_ANGLE_KI.get(),
+            ClawConstants.PROFILED_ANGLE_KD.get(),
+            ClawConstants.PROFILED_ANGLE_CONSTRAINTS
+        );
 
         // Apply the config
         tryUntilOk(angleMotor, 5, () ->
@@ -187,6 +189,14 @@ public class ClawIOSpark implements ClawIO {
             ClawConstants.ANGLE_KD.get(),
             ClawConstants.ANGLE_KF.get()
         );
+
+        angleProfiledClosedLoopController.setPID(
+            ClawConstants.PROFILED_ANGLE_KP.get(),
+            ClawConstants.PROFILED_ANGLE_KI.get(),
+            ClawConstants.PROFILED_ANGLE_KD.get()
+        );
+
+        // TODO: add max velocity and acceleration to tunable config
 
         tryUntilOk(angleMotor, 5, () ->
             angleMotor.configure(
@@ -250,8 +260,15 @@ public class ClawIOSpark implements ClawIO {
         inputs.turnSetpointRad = radianSetpoint;
 
         // Set the position of the turn motor
-        angleClosedLoopController.setReference(radianSetpoint, ControlType.kPosition, ClosedLoopSlot.kSlot0);
-        // angleClosedLoopController.setReference(radianSetpoint, ControlType.kMAXMotionPositionControl);
+        // angleClosedLoopController.setReference(radianSetpoint, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+
+        angleProfiledClosedLoopController.setGoal(radianSetpoint);
+        angleProfiledClosedLoopController.calculate(angleEncoder.getPosition());
+        // angleClosedLoopController.setReference(
+        //     angleProfiledClosedLoopController.calculate(angleEncoder.getPosition()),
+        //     ControlType.kPosition,
+        //     ClosedLoopSlot.kSlot0
+        // );
 
         // Reset spark sticky fault
         sparkStickyFault = false;
@@ -261,6 +278,8 @@ public class ClawIOSpark implements ClawIO {
         // Set the position and velocity
         ifOk(angleMotor, angleEncoder::getPosition, position -> inputs.turnPositionRad = position);
         ifOk(angleMotor, angleEncoder::getVelocity, velocity -> inputs.turnVelocityRadPerSec = velocity);
+        inputs.turnTrapezoidalTargetVelocityRadPerSec = angleProfiledClosedLoopController.getSetpoint().velocity;
+        inputs.turnTrapezoidalTargetPositionRad = angleProfiledClosedLoopController.getSetpoint().position;
 
         // Set the supply current based on the bus voltage multiplied by the applied output
         ifOk(angleMotor, new DoubleSupplier[] { angleMotor::getBusVoltage, angleMotor::getAppliedOutput }, x ->

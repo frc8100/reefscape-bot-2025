@@ -10,12 +10,14 @@ import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -167,19 +169,23 @@ public final class ClawConstants {
 
     // unused
     // TODO: why is this not affected by conversion factor?
-    public static final AngularVelocity MAX_ANGLE_SPEED = RadiansPerSecond.of(5);
-    public static final AngularAcceleration MAX_ANGLE_ACCELERATION = RadiansPerSecondPerSecond.of(10);
+    public static final AngularVelocity MAX_ANGLE_SPEED = RadiansPerSecond.of(3);
+    public static final AngularAcceleration MAX_ANGLE_ACCELERATION = RadiansPerSecondPerSecond.of(3);
 
     // PID configs
-    // public static final double ANGLE_KP = 1;
-    // public static final double ANGLE_KI = 0.0;
-    // public static final double ANGLE_KD = 0.0;
-    // public static final double ANGLE_KF = 0.0;
-
     public static final TunableValue ANGLE_KP = new TunableValue("Claw/KP", 0.7);
     public static final TunableValue ANGLE_KI = new TunableValue("Claw/KI", 0.0);
     public static final TunableValue ANGLE_KD = new TunableValue("Claw/KD", 0.1);
     public static final TunableValue ANGLE_KF = new TunableValue("Claw/KF", 0.0);
+
+    public static final TunableValue PROFILED_ANGLE_KP = new TunableValue("Claw/P_KP", 0.7);
+    public static final TunableValue PROFILED_ANGLE_KI = new TunableValue("Claw/P_KI", 0.0);
+    public static final TunableValue PROFILED_ANGLE_KD = new TunableValue("Claw/P_KD", 0.1);
+    public static final TunableValue PROFILED_ANGLE_KF = new TunableValue("Claw/P_KF", 0.0);
+    public static final TrapezoidProfile.Constraints PROFILED_ANGLE_CONSTRAINTS = new TrapezoidProfile.Constraints(
+        MAX_ANGLE_SPEED.in(RadiansPerSecond),
+        MAX_ANGLE_ACCELERATION.in(RadiansPerSecondPerSecond)
+    );
 
     // Outtake motor configs
     public static final int OUTTAKE_MOTOR_ID = 6;

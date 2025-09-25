@@ -31,6 +31,9 @@ public interface ClawIO extends GenericSparkIO<ClawIO.ClawIOInputs> {
         // public double turnTempCelsius = 0.0;
         public double turnSetpointRad = 0.0;
 
+        public double turnTrapezoidalTargetVelocityRadPerSec = 0.0;
+        public double turnTrapezoidalTargetPositionRad = 0.0;
+
         // Inputs from the outtake motor
         public boolean outtakeConnected = true;
         public double outtakePositionRad = 0.0;
