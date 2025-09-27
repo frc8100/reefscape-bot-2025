@@ -229,6 +229,7 @@ public class AutoRoutines {
     private SwerveDrive swerveSubsystem;
     private Elevator elevatorSubsystem;
     private Claw clawSubsystem;
+
     // private Vision visionSubsystem;
 
     /**
@@ -429,8 +430,7 @@ public class AutoRoutines {
                 clawSubsystem.io.resetSetpointToCurrentPosition();
                 clawSubsystem.io.runOuttake(0);
             });
-
-            // 
+        //
     }
 
     /**

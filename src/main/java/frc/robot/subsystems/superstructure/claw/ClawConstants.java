@@ -142,7 +142,7 @@ public final class ClawConstants {
      * How much the claw can be off from the desired angle before it is considered "in position".
      * This is in radians.
      */
-    public static final Angle ANGLE_TOLERANCE_RADIANS = Degrees.of(10);
+    public static final Angle ANGLE_TOLERANCE_RADIANS = Degrees.of(7.5);
 
     /**
      * Deadband for the claw (controller input).
@@ -169,8 +169,8 @@ public final class ClawConstants {
 
     // unused
     // TODO: why is this not affected by conversion factor?
-    public static final AngularVelocity MAX_ANGLE_SPEED = RadiansPerSecond.of(3);
-    public static final AngularAcceleration MAX_ANGLE_ACCELERATION = RadiansPerSecondPerSecond.of(3);
+    public static final AngularVelocity MAX_ANGLE_SPEED = RadiansPerSecond.of(4);
+    public static final AngularAcceleration MAX_ANGLE_ACCELERATION = RadiansPerSecondPerSecond.of(15);
 
     // PID configs
     public static final TunableValue ANGLE_KP = new TunableValue("Claw/KP", 0.7);

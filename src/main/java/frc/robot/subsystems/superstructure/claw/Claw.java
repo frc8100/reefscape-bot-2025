@@ -100,6 +100,20 @@ public class Claw extends SubsystemBase {
      * It will not finish until the claw is at the target angle.
      */
     public Command getWaitForAngleCommand(Rotation2d rotationToRotateClawTo) {
+        // TODO: add constants
+        // If the claw angle is 0, set it to an amount slightly above zero then set it to zero
+        if (rotationToRotateClawTo.getDegrees() < 7) {
+            // @formatter:off
+            return (
+                getAngleCommand(Rotation2d.fromDegrees(7))
+                    .andThen(Commands.waitUntil(() -> isClawAtTarget(Rotation2d.fromDegrees(7))))
+                    .andThen(getAngleCommand(rotationToRotateClawTo))
+                    .andThen(Commands.waitUntil(() -> isClawAtTarget(rotationToRotateClawTo)))
+
+            );
+            // @formatter:on
+        }
+
         // @formatter:off
         return (
             // First, set the target angle

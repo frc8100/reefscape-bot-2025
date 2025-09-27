@@ -264,11 +264,11 @@ public class ClawIOSpark implements ClawIO {
 
         angleProfiledClosedLoopController.setGoal(radianSetpoint);
         angleProfiledClosedLoopController.calculate(angleEncoder.getPosition());
-        // angleClosedLoopController.setReference(
-        //     angleProfiledClosedLoopController.calculate(angleEncoder.getPosition()),
-        //     ControlType.kPosition,
-        //     ClosedLoopSlot.kSlot0
-        // );
+        angleClosedLoopController.setReference(
+            angleProfiledClosedLoopController.getSetpoint().position,
+            ControlType.kPosition,
+            ClosedLoopSlot.kSlot0
+        );
 
         // Reset spark sticky fault
         sparkStickyFault = false;
