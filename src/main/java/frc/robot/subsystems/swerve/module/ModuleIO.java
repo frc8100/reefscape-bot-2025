@@ -62,6 +62,7 @@ public interface ModuleIO {
     /**
      * Sets the desired state for the module. Should update the turn and drive motors to reach the desired state.
      * @param desiredState - The desired state for the module.
+     * @param currentRotation2d - The current rotation of the module. Used for optimization.
      */
-    public abstract void setDesiredState(SwerveModuleState desiredState);
+    public abstract void setDesiredState(SwerveModuleState desiredState, Rotation2d currentRotation2d);
 }

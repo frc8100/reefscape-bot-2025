@@ -114,7 +114,7 @@ public class ModuleIOSim implements ModuleIO {
     }
 
     @Override
-    public void setDesiredState(SwerveModuleState desiredState) {
+    public void setDesiredState(SwerveModuleState desiredState, Rotation2d currentRotation2d) {
         setDriveVelocity(desiredState.speedMetersPerSecond);
         setTurnPosition(desiredState.angle);
     }

@@ -97,7 +97,7 @@ public class Module {
         state.optimize(inputs.turnPosition);
 
         // Apply setpoints
-        io.setDesiredState(state);
+        io.setDesiredState(state, inputs.turnPosition);
     }
 
     /** Runs the module with the specified output while controlling to zero degrees. */

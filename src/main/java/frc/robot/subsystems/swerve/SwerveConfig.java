@@ -151,10 +151,13 @@ public class SwerveConfig {
     // TODO: Change these to UPPER_SNAKE_CASE
 
     // Angle Motor PID Values
-    public static final double angleKP = 0.05;
+    public static final double angleKP = 0.08;
     public static final double angleKI = 0;
     public static final double angleKD = 0;
     public static final double angleKF = 0;
+
+    public static final TunableValue angleKPTunable = new TunableValue("Drive/angleKP", angleKP);
+    public static final TunableValue angleKDTunable = new TunableValue("Drive/angleKD", angleKD);
 
     public static final double angleSimKP = 8.0;
     public static final double angleSimKD = 0.0;

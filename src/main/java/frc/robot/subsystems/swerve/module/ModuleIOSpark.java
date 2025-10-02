@@ -147,13 +147,12 @@ public class ModuleIOSpark implements ModuleIO {
         // Create odometry queues
         timestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
         drivePositionQueue = SparkOdometryThread.getInstance().registerSignal(driveMotor, relDriveEncoder::getPosition);
-        // TODO: this uses the motor encoder now instead of the CANCoder
         turnPositionQueue = SparkOdometryThread.getInstance()
             .registerSignal(angleMotor, () -> turnAbsolutePosition.getValue().in(Radians));
 
         TunableValue.addRefreshConfigConsumer(this::onRefresh);
 
-        debugAnglePidController = new PIDController(0.2, SwerveConfig.angleKI, SwerveConfig.angleKD);
+        debugAnglePidController = new PIDController(SwerveConfig.angleKP, SwerveConfig.angleKI, SwerveConfig.angleKD);
         debugAnglePidController.enableContinuousInput(-180, 180);
         debugAnglePidController.setSetpoint(getCanCoder().getDegrees());
     }
@@ -164,6 +163,12 @@ public class ModuleIOSpark implements ModuleIO {
         newConfig.closedLoop.p(SwerveConfig.driveKPTunable.get()).d(SwerveConfig.driveKDTunable.get());
 
         driveMotor.configure(newConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+        debugAnglePidController.setPID(
+            SwerveConfig.angleKPTunable.get(),
+            SwerveConfig.angleKI,
+            SwerveConfig.angleKDTunable.get()
+        );
     }
 
     /**
@@ -264,8 +269,8 @@ public class ModuleIOSpark implements ModuleIO {
     }
 
     @Override
-    public void setDesiredState(SwerveModuleState desiredState) {
-        setAngle(desiredState);
+    public void setDesiredState(SwerveModuleState desiredState, Rotation2d currentRotation2d) {
+        setAngle(desiredState, currentRotation2d);
         setSpeed(desiredState);
     }
 
@@ -308,21 +313,26 @@ public class ModuleIOSpark implements ModuleIO {
 
     @Override
     public void setTurnPosition(Rotation2d rotation) {
-        setAngle(new SwerveModuleState(0, rotation));
+        // TODO: update this
+        setAngle(new SwerveModuleState(0, rotation), rotation);
     }
 
     /**
      * Sets the angle of the module.
      * @param desiredState The desired state.
      */
-    private void setAngle(SwerveModuleState desiredState) {
+    private void setAngle(SwerveModuleState desiredState, Rotation2d currentRotation2d) {
         // Reset it
         // if (moduleNumber == 1) {
         //     resetToAbsolute();
         // }
 
         // Stop the motor if the speed is less than 1%. Prevents Jittering
-        if (Math.abs(desiredState.speedMetersPerSecond) <= (SwerveConfig.MAX_SPEED.in(MetersPerSecond) * 0.01)) {
+        // if (Math.abs(desiredState.speedMetersPerSecond) <= (SwerveConfig.MAX_SPEED.in(MetersPerSecond) * 0.01)) {
+        if (
+            Math.abs(currentRotation2d.minus(desiredState.angle).getDegrees()) < 0.5 &&
+            Math.abs(desiredState.speedMetersPerSecond) <= (SwerveConfig.MAX_SPEED.in(MetersPerSecond) * 0.01)
+        ) {
             angleMotor.stopMotor();
             return;
         }
@@ -331,24 +341,25 @@ public class ModuleIOSpark implements ModuleIO {
         Rotation2d angle = desiredState.angle;
         double degReference = angle.getDegrees();
 
-        if (moduleNumber == 1) {
-            debugAnglePidController.setSetpoint(degReference);
+        // if (moduleNumber == 1) {
+        // if (true) {
+        debugAnglePidController.setSetpoint(degReference);
 
-            double requestedVoltage = MathUtil.clamp(
-                debugAnglePidController.calculate(
-                    angleCANcoder.getPosition().getValue().in(Degrees) - angleOffset.getDegrees()
-                ),
-                -9,
-                9
-            );
+        double requestedVoltage = MathUtil.clamp(
+            debugAnglePidController.calculate(
+                angleCANcoder.getPosition().getValue().in(Degrees) - angleOffset.getDegrees()
+            ),
+            -10.5,
+            10.5
+        );
 
-            angleMotor.setVoltage(requestedVoltage);
+        angleMotor.setVoltage(requestedVoltage);
 
-            Logger.recordOutput("Swerve/Mod1/RequestedVoltage", requestedVoltage);
-            Logger.recordOutput("Swerve/Mod1/PIDSetpoint", debugAnglePidController.getSetpoint());
-        } else {
-            angleClosedLoopController.setReference(degReference, ControlType.kPosition, ClosedLoopSlot.kSlot0);
-        }
+        Logger.recordOutput("Swerve/Mod" + moduleNumber + "/RequestedVoltage", requestedVoltage);
+        Logger.recordOutput("Swerve/Mod" + moduleNumber + "/PIDSetpoint", debugAnglePidController.getSetpoint());
+        // } else {
+        //     angleClosedLoopController.setReference(degReference, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+        // }
         // debug
         // Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "/Setpoint", degReference);
         // Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "/Current", relAngleEncoder.getPosition());
