@@ -363,10 +363,10 @@ public class RobotContainer {
             Controls.Superstructure.clawOuttakeForL4
         ).whileTrue(autoRoutines.doClawMovementsForL4());
 
-        // new JoystickButton(
-        //     Controls.Superstructure.superstructureController,
-        //     Controls.Superstructure.launchAlgae
-        // ).whileTrue(autoRoutines.launchAlgae());
+        new JoystickButton(
+            Controls.Superstructure.superstructureController,
+            Controls.Superstructure.launchAlgae
+        ).whileTrue(autoRoutines.launchAlgae());
 
         // Elevator
         elevatorSubsystem.setDefaultCommand(elevatorSubsystem.getUpOrDown(Controls.Elevator::getUpOrDown));

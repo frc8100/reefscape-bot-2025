@@ -82,7 +82,7 @@ public class Controls {
          */
         public int slowButton = XboxController.Button.kLeftBumper.value;
 
-        public double slowMultiplier = 0.55;
+        public double slowMultiplier = 0.7;
 
         /**
          * When held, makes the robot move robot centric.
@@ -268,8 +268,8 @@ public class Controls {
         public static final Joystick elevatorController = Claw.clawController;
 
         // TODO: temporary
-        public static final int upButton = XboxController.Button.kY.value;
-        public static final int downButton = XboxController.Button.kX.value;
+        // public static final int upButton = XboxController.Button.kY.value;
+        // public static final int downButton = XboxController.Button.kX.value;
         public static final int zeroEncoder = XboxController.Button.kLeftBumper.value;
 
         public static final int slowButton = XboxController.Button.kRightBumper.value;

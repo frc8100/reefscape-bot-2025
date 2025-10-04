@@ -12,6 +12,7 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -80,8 +81,8 @@ public final class ElevatorConstants {
     public static final int ELEVATOR_MOTOR_ID = 15;
     public static final int ELEVATOR_FOLLOWER_MOTOR_ID = 20;
 
-    public static final double ELEVATOR_MAX_OUTPUT = 0.825;
-    public static final double ELEVATOR_TOP_INPUT = 0.45;
+    public static final double ELEVATOR_MAX_OUTPUT = 0.875;
+    public static final double ELEVATOR_TOP_INPUT = 0.55;
     public static final Angle ELEVATOR_TOP_THRESHOLD = Radians.of(20);
 
     public static final double ELEVATOR_GEAR_RATIO = 48.0;
@@ -99,11 +100,16 @@ public final class ElevatorConstants {
     /** Radians to meters */
     public static final double ELEVATOR_RADIANS_TO_METERS = ((16 - 1.75) / 8.6) * Inches.of(1).in(Meters);
     public static final AngularVelocity ELEVATOR_MAX_ANGULAR_VELOCITY = RadiansPerSecond.of(10);
-    public static final AngularAcceleration ELEVATOR_MAX_ANGULAR_ACCELERATION = RadiansPerSecondPerSecond.of(15);
+    public static final AngularAcceleration ELEVATOR_MAX_ANGULAR_ACCELERATION = RadiansPerSecondPerSecond.of(20);
     public static final double AMOUNT_PER_FRAME = 0.3;
 
     public static final LinearVelocity ELEVATOR_SIM_MAX_VELOCITY = MetersPerSecond.of(0.5);
     public static final LinearAcceleration ELEVATOR_SIM_MAX_ACCELERATION = MetersPerSecondPerSecond.of(0.2);
+    
+    public static final TrapezoidProfile.Constraints PROFILED_ELEVATOR_CONSTRAINTS = new TrapezoidProfile.Constraints(
+        ELEVATOR_MAX_ANGULAR_VELOCITY.in(RadiansPerSecond),
+        ELEVATOR_MAX_ANGULAR_ACCELERATION.in(RadiansPerSecondPerSecond)
+    );
 
     // PID constants
     // public static final double ELEVATOR_KP = 0.1;

@@ -22,6 +22,7 @@ import com.revrobotics.spark.config.LimitSwitchConfig.Type;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
@@ -59,6 +60,8 @@ public class ElevatorIOSpark implements ElevatorIO {
     private double radianSetpoint = 0.0;
 
     private boolean isUsingPID = true;
+
+    private final ProfiledPIDController debugProfiledPIDController;
 
     /**
      * The config for the outtake motor.
@@ -140,6 +143,13 @@ public class ElevatorIOSpark implements ElevatorIO {
             )
         );
 
+        debugProfiledPIDController = new ProfiledPIDController(
+            ElevatorConstants.ELEVATOR_KP.get(),
+            ElevatorConstants.ELEVATOR_KI.get(),
+            ElevatorConstants.ELEVATOR_KD.get(),
+            ElevatorConstants.PROFILED_ELEVATOR_CONSTRAINTS
+        );
+
         TunableValue.addRefreshConfigConsumer(this::refreshConfig);
     }
 
@@ -153,6 +163,12 @@ public class ElevatorIOSpark implements ElevatorIO {
             ElevatorConstants.ELEVATOR_KF.get()
         );
         // .outputRange(-ElevatorConstants.ELEVATOR_MAX_OUTPUT, ElevatorConstants.ELEVATOR_MAX_OUTPUT);
+        
+        debugProfiledPIDController.setPID(
+            ElevatorConstants.ELEVATOR_KP.get(),
+            ElevatorConstants.ELEVATOR_KI.get(),
+            ElevatorConstants.ELEVATOR_KD.get()
+        );
 
         tryUntilOk(leaderMotor, 5, () ->
             leaderMotor.configure(
@@ -259,8 +275,12 @@ public class ElevatorIOSpark implements ElevatorIO {
 
         inputs.setpoint = radianSetpoint;
 
+        debugProfiledPIDController.setGoal(radianSetpoint);
+        inputs.trapezoidalVoltage = debugProfiledPIDController.calculate(leaderEncoder.getPosition());
+
         if (isUsingPID) {
             leaderClosedLoopController.setReference(radianSetpoint, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+            // leaderClosedLoopController.setReference(debugProfiledPIDController.getSetpoint().position, ControlType.kPosition, ClosedLoopSlot.kSlot0);
         }
 
         // Reset spark sticky fault
@@ -290,5 +310,8 @@ public class ElevatorIOSpark implements ElevatorIO {
         // ifOk(leaderMotor, leaderMotor::getMotorTemperature, temp -> inputs.tempCelsius = temp);
 
         inputs.isAtBottom = limitSwitch.isPressed();
+
+        inputs.trapezoidalSetpoint = debugProfiledPIDController.getSetpoint().position;
+        inputs.trapezoidalSetpointVelocity = debugProfiledPIDController.getSetpoint().velocity;
     }
 }

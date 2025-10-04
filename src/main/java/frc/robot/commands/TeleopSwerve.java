@@ -137,7 +137,7 @@ public class TeleopSwerve extends Command {
         /**
          * The constant to multiply each value by
          */
-        double dampenAndSpeedConstant = (dampen.getAsBoolean() ? 0.2 : 1) * (speedDial.getAsDouble());
+        double dampenAndSpeedConstant = (dampen.getAsBoolean() ? 0.3 : 1) * (speedDial.getAsDouble());
 
         double translationValue =
             MathUtil.applyDeadband(translationInput, SwerveConfig.DRIVE_STICK_DEADBAND) * dampenAndSpeedConstant;

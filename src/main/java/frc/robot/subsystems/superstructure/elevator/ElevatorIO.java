@@ -44,6 +44,10 @@ public interface ElevatorIO extends GenericSparkIO<ElevatorIO.ElevatorIOInputs> 
          * The setpoint of the elevator in meters per second.
          */
         public double setpointVelocity = 0.0;
+
+        public double trapezoidalSetpoint = 0.0;
+        public double trapezoidalSetpointVelocity = 0.0;
+        public double trapezoidalVoltage = 0.0;
     }
 
     /**
