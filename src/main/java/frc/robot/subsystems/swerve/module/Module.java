@@ -44,7 +44,6 @@ public class Module {
 
     /** Alerts for disconnected motors. */
     private final Alert driveDisconnectedAlert;
-
     private final Alert turnDisconnectedAlert;
 
     /** The odometry positions received this cycle. This is processed in {@link SparkSwerveOdometryThread}. */
@@ -54,6 +53,7 @@ public class Module {
     public Module(ModuleIO io, int index) {
         this.io = io;
         this.index = index;
+
         driveDisconnectedAlert = new Alert(
             "Disconnected drive motor on module " + Integer.toString(index) + ".",
             AlertType.kError
@@ -95,6 +95,9 @@ public class Module {
         // Optimize setpoint
         // state = CTREModuleState.optimize(state, inputs.turnPosition);
         state.optimize(inputs.turnPosition);
+
+        // TODO: Cosine scale?
+        // state.cosineScale(inputs.turnPosition);
 
         // Apply setpoints
         io.setDesiredState(state, inputs.turnPosition);

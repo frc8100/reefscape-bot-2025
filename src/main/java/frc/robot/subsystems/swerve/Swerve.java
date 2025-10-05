@@ -41,15 +41,11 @@ import org.littletonrobotics.junction.Logger;
 public class Swerve extends SubsystemBase implements SwerveDrive {
 
     /** Lock for the odometry thread. */
-    static final Lock odometryLock = new ReentrantLock();
+    public static final Lock odometryLock = new ReentrantLock();
 
-    /**
-     * SwerveState setpoint generator
-     */
     private final SwerveSetpointGenerator setpointGenerator;
-
     /**
-     * Previous setpoints
+     * Previous setpoints used for {@link #setpointGenerator}.
      */
     private SwerveSetpoint previousSetpoint;
 
@@ -61,7 +57,6 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
     /** The gyro. This is used to determine the robot's heading. */
     public final GyroIO gyroIO;
-
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
 
     /** Raw gyro rotation. Used for the pose estimator. */
@@ -146,35 +141,6 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         SmartDashboard.putData("Field", field);
     }
 
-    /**
-     * Corrects for the dynamics of the robot. This is used to ensure that the robot drives as
-     * expected.
-     *
-     * @param originalSpeeds The original chassis speeds.
-     * @return The corrected chassis speeds.
-     */
-    private static ChassisSpeeds correctForDynamics(ChassisSpeeds originalSpeeds) {
-        // Loop time in seconds
-        final double LOOP_TIME_S = 0.02;
-
-        // Calculate the future robot pose based on the original speeds and loop time
-        Pose2d futureRobotPose = new Pose2d(
-            originalSpeeds.vxMetersPerSecond * LOOP_TIME_S,
-            originalSpeeds.vyMetersPerSecond * LOOP_TIME_S,
-            Rotation2d.fromRadians(originalSpeeds.omegaRadiansPerSecond * LOOP_TIME_S)
-        );
-
-        // Compute the twist (change in pose) required to reach the future pose
-        Twist2d twistForPose = GeometryUtils.log(futureRobotPose);
-
-        // Update the speeds based on the computed twist
-        return new ChassisSpeeds(
-            twistForPose.dx / LOOP_TIME_S,
-            twistForPose.dy / LOOP_TIME_S,
-            twistForPose.dtheta / LOOP_TIME_S
-        );
-    }
-
     @Override
     public void drive(Translation2d translation, double rotation, boolean fieldRelative) {
         // Determine the desired chassis speeds based on whether the control is field-relative
@@ -186,9 +152,6 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
                 getHeadingForFieldOriented()
             )
             : new ChassisSpeeds(translation.getX(), translation.getY(), rotation);
-
-        // Correct the chassis speeds for robot dynamics
-        // desiredChassisSpeeds = correctForDynamics(desiredChassisSpeeds);
 
         runVelocityChassisSpeeds(desiredChassisSpeeds);
     }
@@ -331,7 +294,6 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         return gyroIO.getGyroHeadingForFieldRelative();
     }
 
-    /** Periodically updates the SmartDashboard with information about the swerve modules. */
     @Override
     public void periodic() {
         // Prevents odometry updates while reading data

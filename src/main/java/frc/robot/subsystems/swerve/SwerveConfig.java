@@ -37,9 +37,6 @@ public class SwerveConfig {
 
     private SwerveConfig() {}
 
-    /**
-     * The number of swerve modules
-     */
     public static final int NUMBER_OF_SWERVE_MODULES = 4;
 
     /**
@@ -119,17 +116,8 @@ public class SwerveConfig {
     public static final double ANGLE_ENCODER_VELOCITY_FACTOR = ANGLE_ENCODER_POSITION_FACTOR / 60;
 
     // Motor Inverts
-    /**
-     * Whether the angle motor is inverted.
-     */
     public static final boolean IS_ANGLE_MOTOR_INVERTED = true;
-
-    /**
-     * Whether the drive motor is inverted.
-     */
     public static final boolean IS_DRIVE_MOTOR_INVERTED = false;
-
-    /** Whether the CANCoder is inverted. */
     public static final boolean IS_CANCODER_INVERTED = false;
 
     // Swerve Current Limiting

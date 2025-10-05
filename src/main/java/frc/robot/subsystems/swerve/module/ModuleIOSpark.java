@@ -287,14 +287,6 @@ public class ModuleIOSpark implements ModuleIO {
      * @param isOpenLoop Whether the module is in open loop.
      */
     private void setSpeed(SwerveModuleState desiredState) {
-        // Calculate the percent output and set the speed
-        // double percentOutput = desiredState.speedMetersPerSecond / SwerveConfig.MAX_SPEED.in(MetersPerSecond);
-
-        // Clamp the percent output to the max speed
-        // percentOutput = MathUtil.clamp(percentOutput, -SwerveConfig.MAX_DRIVE_POWER, SwerveConfig.MAX_DRIVE_POWER);
-
-        // driveMotor.set(percentOutput);
-        // TODO: set the speed using the PID controller
         double velocityRadiansPerSecond = desiredState.speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters);
 
         double ffVolts =
@@ -324,13 +316,7 @@ public class ModuleIOSpark implements ModuleIO {
      * @param desiredState The desired state.
      */
     private void setAngle(SwerveModuleState desiredState, Rotation2d currentRotation2d) {
-        // Reset it
-        // if (moduleNumber == 1) {
-        //     resetToAbsolute();
-        // }
-
         // Stop the motor if the speed is less than 1%. Prevents Jittering
-        // if (Math.abs(desiredState.speedMetersPerSecond) <= (SwerveConfig.MAX_SPEED.in(MetersPerSecond) * 0.01)) {
         if (
             Math.abs(currentRotation2d.minus(desiredState.angle).getDegrees()) < 0.5 &&
             Math.abs(desiredState.speedMetersPerSecond) <= (SwerveConfig.MAX_SPEED.in(MetersPerSecond) * 0.01)
@@ -340,15 +326,17 @@ public class ModuleIOSpark implements ModuleIO {
         }
 
         // Set the angle using the PID controller
+
         Rotation2d angle = desiredState.angle;
         double degReference = angle.getDegrees();
 
-        // if (moduleNumber == 1) {
-        // if (true) {
+        // angleClosedLoopController.setReference(degReference, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+
         debugAnglePidController.setSetpoint(degReference);
 
         double requestedVoltage = MathUtil.clamp(
             debugAnglePidController.calculate(
+                // TODO: try absolute position instead of relative
                 angleCANcoder.getPosition().getValue().in(Degrees) - angleOffset.getDegrees()
             ),
             -10.5,
@@ -359,9 +347,6 @@ public class ModuleIOSpark implements ModuleIO {
 
         Logger.recordOutput("Swerve/Mod" + moduleNumber + "/RequestedVoltage", requestedVoltage);
         Logger.recordOutput("Swerve/Mod" + moduleNumber + "/PIDSetpoint", debugAnglePidController.getSetpoint());
-        // } else {
-        //     angleClosedLoopController.setReference(degReference, ControlType.kPosition, ClosedLoopSlot.kSlot0);
-        // }
         // debug
         // Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "/Setpoint", degReference);
         // Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "/Current", relAngleEncoder.getPosition());
