@@ -26,6 +26,9 @@ import frc.robot.commands.AlignToReefTagRelative;
 import frc.robot.commands.PhotonVisionAlign;
 import frc.robot.commands.SwerveSysidRoutines;
 import frc.robot.commands.TeleopSwerve;
+import frc.robot.subsystems.questnav.QuestNavIO;
+import frc.robot.subsystems.questnav.QuestNavIOReal;
+import frc.robot.subsystems.questnav.QuestNavSubsystem;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
 import frc.robot.subsystems.superstructure.claw.Claw;
 import frc.robot.subsystems.superstructure.claw.ClawConstants;
@@ -71,6 +74,8 @@ public class RobotContainer {
 
     // Subsystems
     // private final Vision visionSubsystem;
+    // TODO: Implement quest nav
+    // private final QuestNavSubsystem questNavSubsystem;
     private final SwerveDrive swerveSubsystem;
     private final Claw clawSubsystem;
     private final Elevator elevatorSubsystem;
@@ -115,11 +120,10 @@ public class RobotContainer {
                 //     new VisionIOPhotonVision(VisionConstants.CAMERA_0_NAME, VisionConstants.TRANSFORM_TO_CAMERA_0)
                 // );
 
-                clawSubsystem = new Claw(new ClawIOSpark());
-                // clawSubsystem = new ClawSim();
+                // questNavSubsystem = new QuestNavSubsystem(swerveSubsystem::addVisionMeasurement, new QuestNavIOReal());
 
+                clawSubsystem = new Claw(new ClawIOSpark());
                 elevatorSubsystem = new Elevator(new ElevatorIOSpark());
-                // elevatorSubsystem = new Elevator(new ElevatorIOSim());
                 break;
             default:
             case SIM:
@@ -157,6 +161,12 @@ public class RobotContainer {
                 //         swerveSubsystem::getActualPose,
                 //         VisionConstants.CAMERA_0_PROPERTIES
                 //     )
+                // );
+
+                // questNavSubsystem = new QuestNavSubsystem(
+                //     swerveSubsystem::addVisionMeasurement,
+                //     // No quest nav in sim for now, use empty implementation
+                //     new QuestNavIO() {}
                 // );
 
                 // Create a simulated claw
