@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SelfControlledSwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.littletonrobotics.junction.AutoLogOutput;
 
 /**
  * Simulates another robot.
@@ -53,7 +54,7 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
     private static ArrayList<Supplier<Pose2d>> opponentRobotPoses = new ArrayList<>();
 
     /** @return The list of opponent robot poses */
-    // @AutoLogOutput(key = "Odometry/OpponentRobotPoses")
+    @AutoLogOutput(key = "Odometry/OpponentRobotPoses")
     public static Pose2d[] getOpponentRobotPoses() {
         return opponentRobotPoses.stream().map(Supplier::get).toArray(Pose2d[]::new);
     }

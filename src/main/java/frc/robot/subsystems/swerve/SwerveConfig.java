@@ -62,18 +62,12 @@ public class SwerveConfig {
     public static final double MAX_DRIVE_POWER = 0.85;
     public static final double MAX_ANGLE_POWER = 0.9;
 
-    public static final boolean IS_GYRO_INVERTED = false; // Always ensure Gyro is CCW+ CW-
-
-    /**
-     * Whether to use open loop control.
-     * Default is `true`
-     */
-    public static final boolean IS_USING_OPEN_LOOP = true;
+    // Always ensure Gyro is CCW+ CW-
+    public static final boolean IS_GYRO_INVERTED = false;
 
     // Drivetrain constants
-    // TODO: precise track/base measurement
-    public static final Distance TRACK_WIDTH = Inches.of(23);
-    public static final Distance WHEEL_BASE = Inches.of(23);
+    public static final Distance TRACK_WIDTH = Inches.of(22.75);
+    public static final Distance WHEEL_BASE = Inches.of(22.75);
     public static final Distance DRIVE_BASE_RADIUS = Meters.of(
         Math.hypot(TRACK_WIDTH.in(Meters) / 2.0, WHEEL_BASE.in(Meters) / 2.0)
     );
@@ -133,8 +127,8 @@ public class SwerveConfig {
 
     // These values are used by the drive falcon to ramp in open loop and closed loop driving.
     // We found a small open loop ramp (0.25) helps with tread wear, tipping, etc
-    public static final double OPEN_LOOP_RAMP_VALUE = 0.25;
-    public static final double CLOSED_LOOP_RAMP_VALUE = 0.0;
+    // public static final double OPEN_LOOP_RAMP_VALUE = 0.25;
+    // public static final double CLOSED_LOOP_RAMP_VALUE = 0.0;
 
     // TODO: Change these to UPPER_SNAKE_CASE
 
@@ -162,7 +156,6 @@ public class SwerveConfig {
     public static final TunableValue driveKDTunable = new TunableValue("Drive/kD", driveKD);
 
     // Drive Motor Characterization Values
-    // Divide SYSID values by 12 to convert from volts to percent output for CTRE
     public static final double driveKS = 0.17388;
     public static final double driveKV = 0.13632;
 

@@ -220,7 +220,7 @@ public class ModuleIOSpark implements ModuleIO {
         //     new DoubleSupplier[] { driveMotor::getAppliedOutput, driveMotor::getBusVoltage },
         //     values -> inputs.driveAppliedVolts = values[0] * values[1]
         // );
-        // SparkUtil.ifOk(driveMotor, driveMotor::getOutputCurrent, value -> inputs.driveCurrentAmps = value);
+        SparkUtil.ifOk(driveMotor, driveMotor::getOutputCurrent, value -> inputs.driveCurrentAmps = value);
         inputs.driveConnected = driveConnectedDebounce.calculate(!SparkUtil.sparkStickyFault);
 
         // Update turn inputs

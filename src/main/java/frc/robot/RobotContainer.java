@@ -39,6 +39,8 @@ import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSpark;
+import frc.robot.subsystems.swerve.OpponentRobotSim;
+import frc.robot.subsystems.swerve.OpponentRobotSim.OpponentRobotBehavior;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveConstants;
@@ -175,9 +177,10 @@ public class RobotContainer {
 
                 // TODO: Add behavior chooser
                 // Create an opponent robot simulation
-                // OpponentRobotSim opponentRobotSim1 =
-                //         new OpponentRobotSim(new Pose2d(10, 2, new Rotation2d()),
-                // OpponentRobotBehavior.TeleopSwerve);
+                OpponentRobotSim opponentRobotSim1 = new OpponentRobotSim(
+                    new Pose2d(10, 2, new Rotation2d()),
+                    OpponentRobotBehavior.FOLLOW_PATH
+                );
 
                 // Create another joystick drive for the opponent robot
                 // Controls.Drive opponentRobotDriveControls = new Controls.JoystickDrive(new Joystick(1));
@@ -185,10 +188,17 @@ public class RobotContainer {
                 // Set the default command for the opponent robot
                 // opponentRobotSim1.setDefaultCommand(
                 //         new TeleopSwerve(opponentRobotSim1, opponentRobotDriveControls, false));
-                // opponentRobotSim1.setDefaultCommand(opponentRobotSim1.opponentRobotPathfindToPoseSupplier(swerveSubsystem::getActualPose));
+                opponentRobotSim1.setDefaultCommand(
+                    opponentRobotSim1.opponentRobotPathfindToPoseSupplier(swerveSubsystem::getActualPose)
+                );
 
-                // OpponentRobotSim opponentRobotSim2 = new OpponentRobotSim(new Pose2d(13, 6, new Rotation2d()));
-                // opponentRobotSim2.setDefaultCommand(opponentRobotSim2.opponentRobotPathfindToPoseSupplier(swerveSubsystem::getActualPose));
+                OpponentRobotSim opponentRobotSim2 = new OpponentRobotSim(
+                    new Pose2d(10, 2, new Rotation2d()),
+                    OpponentRobotBehavior.FOLLOW_PATH
+                );
+                opponentRobotSim2.setDefaultCommand(
+                    opponentRobotSim2.opponentRobotPathfindToPoseSupplier(swerveSubsystem::getActualPose)
+                );
 
                 // TODO: refactor
                 // opponentRobotDriveControls
@@ -246,30 +256,30 @@ public class RobotContainer {
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
         // Set up SysId routines
-        // autoChooser.addOption(
-        //     "Drive Wheel Radius Characterization",
-        //     SwerveSysidRoutines.wheelRadiusCharacterization(swerveSubsystem)
-        // );
-        // autoChooser.addOption(
-        //     "Drive Simple FF Characterization",
-        //     SwerveSysidRoutines.feedforwardCharacterization(swerveSubsystem)
-        // );
-        // autoChooser.addOption(
-        //     "Drive SysId (Quasistatic Forward)",
-        //     swerveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
-        // );
-        // autoChooser.addOption(
-        //     "Drive SysId (Quasistatic Reverse)",
-        //     swerveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
-        // );
-        // autoChooser.addOption(
-        //     "Drive SysId (Dynamic Forward)",
-        //     swerveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward)
-        // );
-        // autoChooser.addOption(
-        //     "Drive SysId (Dynamic Reverse)",
-        //     swerveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse)
-        // );
+        autoChooser.addOption(
+            "Drive Wheel Radius Characterization",
+            SwerveSysidRoutines.wheelRadiusCharacterization(swerveSubsystem)
+        );
+        autoChooser.addOption(
+            "Drive Simple FF Characterization",
+            SwerveSysidRoutines.feedforwardCharacterization(swerveSubsystem)
+        );
+        autoChooser.addOption(
+            "Drive SysId (Quasistatic Forward)",
+            swerveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
+        );
+        autoChooser.addOption(
+            "Drive SysId (Quasistatic Reverse)",
+            swerveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
+        );
+        autoChooser.addOption(
+            "Drive SysId (Dynamic Forward)",
+            swerveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward)
+        );
+        autoChooser.addOption(
+            "Drive SysId (Dynamic Reverse)",
+            swerveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse)
+        );
 
         // TODO: Temporary
         // autoChooser.addOption("Coral and Go To All Reefs Test", autoRoutines.getCoralAndGoToAllReefsTest());
