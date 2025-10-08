@@ -8,7 +8,10 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.subsystems.superstructure.claw.ClawConstants;
 import frc.robot.subsystems.swerve.SwerveDrive;
 
-/** Declares control key bindings */
+/**
+ * Declares control key bindings.
+ * - Controllers are declared with class {@link Joystick}, but it is also compatible with {@link XboxController}.
+ */
 public class Controls {
 
     private Controls() {}
@@ -304,7 +307,6 @@ public class Controls {
 
         /**
          * The controller used for the superstructure.
-         * Temporarily the same as the driver controller.
          */
         public static final Joystick superstructureController = Claw.clawController;
 
