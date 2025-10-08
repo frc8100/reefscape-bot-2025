@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -132,12 +133,10 @@ public class RobotContainer {
 
                 // Set up the simulated arena by overriding the instance and adding the pieces
                 SimulatedArena.overrideInstance(arenaSimulation);
-                SimulatedArena.getInstance().addCustomSimulation(new ReefscapeReefSimulation(arenaSimulation));
                 SimulatedArena.getInstance().placeGamePiecesOnField();
 
                 // Create a simulated drive
                 driveSimulation = new SwerveDriveSimulation(SwerveConfig.mapleSimConfig, SwerveConfig.initialPose);
-
                 SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
 
                 SwerveModuleSimulation[] moduleSims = driveSimulation.getModules();
