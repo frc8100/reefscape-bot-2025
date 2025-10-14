@@ -76,14 +76,14 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
 
     // Subsystems
-    // private final Vision visionSubsystem;
+    private final Vision visionSubsystem;
     // TODO: Implement quest nav
     // private final QuestNavSubsystem questNavSubsystem;
     private final SwerveDrive swerveSubsystem;
     private final Claw clawSubsystem;
     private final Elevator elevatorSubsystem;
 
-    private AutoRoutines autoRoutines;
+    private final AutoRoutines autoRoutines;
 
     // Alignment
     private Pose2d nearestLeftReef = new Pose2d();
@@ -117,11 +117,11 @@ public class RobotContainer {
                 );
 
                 // TODO: implement photonvision
-                // visionSubsystem = new Vision(
-                //     swerveSubsystem::addVisionMeasurement,
-                //     // new VisionIOLimelight(VisionConstants.CAMERA_0_NAME, swerveSubsystem::getRotation)
-                //     new VisionIOPhotonVision(VisionConstants.CAMERA_0_NAME, VisionConstants.TRANSFORM_TO_CAMERA_0)
-                // );
+                visionSubsystem = new Vision(
+                    swerveSubsystem::addVisionMeasurement,
+                    // new VisionIOLimelight(VisionConstants.CAMERA_0_NAME, swerveSubsystem::getRotation)
+                    new VisionIOPhotonVision(VisionConstants.CAMERA_0_NAME, VisionConstants.TRANSFORM_TO_CAMERA_0)
+                );
 
                 // questNavSubsystem = new QuestNavSubsystem(swerveSubsystem::addVisionMeasurement, new QuestNavIOReal());
 
@@ -131,7 +131,7 @@ public class RobotContainer {
             default:
             case SIM:
                 // Create a reefscape arena
-                var arenaSimulation = new Arena2025Reefscape();
+                Arena2025Reefscape arenaSimulation = new Arena2025Reefscape();
 
                 // Set up the simulated arena by overriding the instance and adding the pieces
                 SimulatedArena.overrideInstance(arenaSimulation);
@@ -154,15 +154,15 @@ public class RobotContainer {
                 );
 
                 // Create a simulated vision subsystem
-                // visionSubsystem = new Vision(
-                //     swerveSubsystem::addVisionMeasurement,
-                //     new VisionIOPhotonSim(
-                //         VisionConstants.CAMERA_0_NAME,
-                //         VisionConstants.TRANSFORM_TO_CAMERA_0,
-                //         swerveSubsystem::getActualPose,
-                //         VisionConstants.CAMERA_0_PROPERTIES
-                //     )
-                // );
+                visionSubsystem = new Vision(
+                    swerveSubsystem::addVisionMeasurement,
+                    new VisionIOPhotonSim(
+                        VisionConstants.CAMERA_0_NAME,
+                        VisionConstants.TRANSFORM_TO_CAMERA_0,
+                        swerveSubsystem::getActualPose,
+                        VisionConstants.CAMERA_0_PROPERTIES
+                    )
+                );
 
                 // questNavSubsystem = new QuestNavSubsystem(
                 //     swerveSubsystem::addVisionMeasurement,
@@ -177,10 +177,10 @@ public class RobotContainer {
 
                 // TODO: Add behavior chooser
                 // Create an opponent robot simulation
-                OpponentRobotSim opponentRobotSim1 = new OpponentRobotSim(
-                    new Pose2d(10, 2, new Rotation2d()),
-                    OpponentRobotBehavior.FOLLOW_PATH
-                );
+                // OpponentRobotSim opponentRobotSim1 = new OpponentRobotSim(
+                //     new Pose2d(10, 2, new Rotation2d()),
+                //     OpponentRobotBehavior.FOLLOW_PATH
+                // );
 
                 // Create another joystick drive for the opponent robot
                 // Controls.Drive opponentRobotDriveControls = new Controls.JoystickDrive(new Joystick(1));
@@ -188,17 +188,17 @@ public class RobotContainer {
                 // Set the default command for the opponent robot
                 // opponentRobotSim1.setDefaultCommand(
                 //         new TeleopSwerve(opponentRobotSim1, opponentRobotDriveControls, false));
-                opponentRobotSim1.setDefaultCommand(
-                    opponentRobotSim1.opponentRobotPathfindToPoseSupplier(swerveSubsystem::getActualPose)
-                );
+                // opponentRobotSim1.setDefaultCommand(
+                //     opponentRobotSim1.opponentRobotPathfindToPoseSupplier(swerveSubsystem::getActualPose)
+                // );
 
-                OpponentRobotSim opponentRobotSim2 = new OpponentRobotSim(
-                    new Pose2d(10, 2, new Rotation2d()),
-                    OpponentRobotBehavior.FOLLOW_PATH
-                );
-                opponentRobotSim2.setDefaultCommand(
-                    opponentRobotSim2.opponentRobotPathfindToPoseSupplier(swerveSubsystem::getActualPose)
-                );
+                // OpponentRobotSim opponentRobotSim2 = new OpponentRobotSim(
+                //     new Pose2d(10, 2, new Rotation2d()),
+                //     OpponentRobotBehavior.FOLLOW_PATH
+                // );
+                // opponentRobotSim2.setDefaultCommand(
+                //     opponentRobotSim2.opponentRobotPathfindToPoseSupplier(swerveSubsystem::getActualPose)
+                // );
 
                 // TODO: refactor
                 // opponentRobotDriveControls
@@ -296,99 +296,9 @@ public class RobotContainer {
         SmartDashboard.putData("Refresh Tunable Config", TunableValue.refreshConfig);
 
         // Configure the button bindings
-        configureButtonBindings();
-    }
-
-    /**
-     * Use this method to define your button->command mappings. Buttons can be created by
-     * instantiating a {@link GenericHID} or one of its subclasses ({@link
-     * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-     * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-     */
-    private void configureButtonBindings() {
-        Controls.mainDriveControls
-            .getJoystickButtonOf(Controls.mainDriveControls.zeroGyroButton)
-            .onTrue(new InstantCommand(swerveSubsystem::zeroGyro));
-
-        // TODO: Align to reefs
-        // Controls.mainDriveControls
-        //     .getJoystickButtonOf(Controls.mainDriveControls.alignToLeftReefUsingVision)
-        //     // .whileTrue(new AlignToReefTagRelative(false, swerveSubsystem));
-        //     .whileTrue(new PhotonVisionAlign(false, swerveSubsystem, visionSubsystem));
-        // Controls.mainDriveControls
-        //     .getJoystickButtonOf(Controls.mainDriveControls.alignToRightReefUsingVision)
-        //     // .whileTrue(new AlignToReefTagRelative(true, swerveSubsystem));
-        //     .whileTrue(new PhotonVisionAlign(true, swerveSubsystem, visionSubsystem));
-
-        // Align (new)
-        // Controls.mainDriveControls
-        //     .getJoystickButtonOf(Controls.mainDriveControls.pathfindToNearestRightReef)
-        //     .whileTrue(
-        //         new DeferredCommand(() -> autoRoutines.pathFindToLocation(nearestRightReef), Set.of(swerveSubsystem))
-        //         // autoRoutines.continuouslyPathFindToLocation(() -> nearestRightReef)
-        //     );
-
-        // Controls.mainDriveControls
-        //     .getJoystickButtonOf(Controls.mainDriveControls.pathfindToNearestCoralStation)
-        //     .whileTrue(
-        //         new DeferredCommand(() -> autoRoutines.pathFindToLocation(nearestRightReef), Set.of(swerveSubsystem))
-        //     );
-
-        // Claw
-        clawSubsystem.setDefaultCommand(clawSubsystem.getRunCommand(Controls.Claw::getIntakeOrOuttake));
-
-        clawSubsystem.setDefaultCommand(
-            clawSubsystem.getRunAndAngleCommand(Controls.Claw::getIntakeOrOuttake, Controls.Claw::getUpOrDown)
-        );
-
-        new JoystickButton(Controls.Claw.clawController, Controls.Claw.zeroEncoder).onTrue(
-            Commands.runOnce(() -> clawSubsystem.io.zeroEncoder(0))
-        );
-
-        // Elevator
-        new JoystickButton(Controls.Elevator.elevatorController, Controls.Elevator.zeroEncoder).onTrue(
-            Commands.runOnce(() -> elevatorSubsystem.io.zeroEncoder(0))
-        );
-
-        // elevatorSubsystem.whenElevatorIsAtBottom.onTrue(
-        //     // Reset elevator positions when hitting the limit switches
-        //     Commands.runOnce(() -> {
-        //         elevatorSubsystem.io.zeroEncoder(0);
-        //         elevatorSubsystem.io.resetSetpointToCurrentPosition();
-        //     })
-        // );
-
-        // Superstructure
-        // @formatter:off
-        Controls.Superstructure.moveToL1.whileTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.INITIAL_POSITION));
-        Controls.Superstructure.moveToL2.whileTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L2));
-        Controls.Superstructure.moveToL3.whileTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L3));
-        Controls.Superstructure.moveToL4.whileTrue(autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L4));
-        // @formatter:on
-
-        // Intake algae
-        new JoystickButton(
-            Controls.Superstructure.superstructureController,
-            Controls.Superstructure.intakeAlgaeFromL2
-        ).whileTrue(autoRoutines.intakeAlgae(SuperstructureConstants.Level.ALGAE_L2));
-
-        new JoystickButton(
-            Controls.Superstructure.superstructureController,
-            Controls.Superstructure.intakeAlgaeFromL3
-        ).whileTrue(autoRoutines.intakeAlgae(SuperstructureConstants.Level.ALGAE_L3));
-
-        new JoystickButton(
-            Controls.Superstructure.superstructureController,
-            Controls.Superstructure.clawOuttakeForL4
-        ).whileTrue(autoRoutines.doClawMovementsForL4());
-
-        new JoystickButton(
-            Controls.Superstructure.superstructureController,
-            Controls.Superstructure.launchAlgae
-        ).whileTrue(autoRoutines.launchAlgae());
-
-        // Elevator
-        elevatorSubsystem.setDefaultCommand(elevatorSubsystem.getUpOrDown(Controls.Elevator::getUpOrDown));
+        ButtonBindings buttonBindings = new ButtonBindings(autoRoutines);
+        buttonBindings.configureButtonBindings();
+        buttonBindings.assignDefaultCommands();
     }
 
     /**

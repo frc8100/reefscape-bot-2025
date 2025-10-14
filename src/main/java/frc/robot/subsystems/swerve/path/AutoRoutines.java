@@ -226,11 +226,12 @@ public class AutoRoutines {
     }
 
     // References to subsystems
-    private SwerveDrive swerveSubsystem;
-    private Elevator elevatorSubsystem;
-    private Claw clawSubsystem;
+    // Public because of use in configuring controls
+    public final SwerveDrive swerveSubsystem;
+    public final Elevator elevatorSubsystem;
+    public final Claw clawSubsystem;
 
-    // private Vision visionSubsystem;
+    // public final Vision visionSubsystem;
 
     /**
      * Creates a new AutoRoutines object given required subsystems.
@@ -468,10 +469,19 @@ public class AutoRoutines {
         return pathFindToLocation(location, true);
     }
 
+    /**
+     * @return A command to pathfind to a given pose using pathplanner.
+     * @param pose - The pose to pathfind to. Automatically flips if necessary.
+     */
     public Command pathFindToLocation(Pose2d pose) {
         return AutoBuilder.pathfindToPose(pose, SwerveConfig.pathConstraints);
     }
 
+    /**
+     * @return A command to continuously pathfind to a given location.
+     * Useful for teleop, as the robot will always be trying to go to the location.
+     * @param location - The location to pathfind to. See {@link FieldLocations} for possible locations.
+     */
     public Command continuouslyPathFindToLocation(Supplier<Pose2d> pose) {
         return new DeferredCommand(
             () ->

@@ -6,9 +6,7 @@ The code for the 2025 season game REEFSCAPE.
 > To get started with the code, follow the instructions in [the contributing guide](CONTRIBUTING.md).
 
 > [!NOTE]
-> This project uses code from [Team 364's Practical Neo Swerve](https://github.com/TeamFusion364/PracticalNeoSwerve)
-> and [AdvantageKit Template](https://github.com/Mechanical-Advantage/AdvantageKit).
-> This is temporary and will be replaced with our own code in the future.
+> This project uses code from [AdvantageKit Template](https://github.com/Mechanical-Advantage/AdvantageKit).
 
 ## Controls
 

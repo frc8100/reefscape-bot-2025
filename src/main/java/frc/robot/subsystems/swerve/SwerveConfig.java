@@ -133,6 +133,7 @@ public class SwerveConfig {
     // TODO: Change these to UPPER_SNAKE_CASE
 
     // Angle Motor PID Values
+    // TODO: tune
     public static final double angleKP = 0.08;
     public static final double angleKI = 0;
     public static final double angleKD = 0;
@@ -145,10 +146,8 @@ public class SwerveConfig {
     public static final double angleSimKD = 0.0;
 
     // Drive Motor PID Values
-    // public static final double driveKP = 0.01;
     public static final double driveKP = 0.01;
     public static final double driveKI = 0.0;
-    // public static final double driveKD = 0.0;
     public static final double driveKD = 0.005;
     public static final double driveKF = 0.0;
 
@@ -164,12 +163,13 @@ public class SwerveConfig {
     public static final double driveSimKP = 0.05;
     public static final double driveSimKD = 0.0;
 
-    public static final double driveSimKs = 0.0;
-    public static final double driveSimKv = 0.0789;
+    public static final double driveSimKs = 0.03152;
+    public static final double driveSimKv = 0.16215;
 
     // Swerve Profiling Values
+    // TODO: tune
     public static final LinearVelocity MAX_SPEED = MetersPerSecond.of(4);
-    public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(7);
+    public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(12);
     // ! IMPORTANT: The actual max angular velocity is much higher
     public static final AngularVelocity MAX_ANGULAR_VELOCITY = RadiansPerSecond.of(6.0);
 

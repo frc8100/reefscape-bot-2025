@@ -89,13 +89,6 @@ public class Controls {
          */
         public int robotCentricButton = XboxController.Button.kX.value;
 
-        // Direction buttons
-        // public POVButton up = new POVButton(driverController, 90);
-        // public POVButton down = new POVButton(driverController, 270);
-        // public POVButton right = new POVButton(driverController, 180);
-        // public POVButton left = new POVButton(driverController, 0);
-
-        // TODO: doc
         /**
          * Aligns the robot to the reef.
          */
@@ -267,9 +260,6 @@ public class Controls {
          */
         public static final Joystick elevatorController = Claw.clawController;
 
-        // TODO: temporary
-        // public static final int upButton = XboxController.Button.kY.value;
-        // public static final int downButton = XboxController.Button.kX.value;
         public static final int zeroEncoder = XboxController.Button.kLeftBumper.value;
 
         public static final int slowButton = XboxController.Button.kRightBumper.value;

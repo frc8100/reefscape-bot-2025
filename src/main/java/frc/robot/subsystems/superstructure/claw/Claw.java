@@ -184,7 +184,6 @@ public class Claw extends SubsystemBase {
     /**
      * @return The position of the claw.
      */
-    // @AutoLogOutput(key = "ComponentPositions/Claw")
     public Pose3d getPose(Pose3d elevatorPose) {
         return new Pose3d(
             ClawConstants.RotationPositions.ELEVATOR_TO_CLAW_X,
