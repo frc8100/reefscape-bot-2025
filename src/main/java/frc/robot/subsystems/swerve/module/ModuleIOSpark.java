@@ -166,6 +166,8 @@ public class ModuleIOSpark implements ModuleIO {
 
         driveMotor.configure(newConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
+        System.out.println("Refreshed to: " + SwerveConfig.angleKPTunable.get());
+
         debugAnglePidController.setPID(
             SwerveConfig.angleKPTunable.get(),
             SwerveConfig.angleKI,
@@ -346,7 +348,11 @@ public class ModuleIOSpark implements ModuleIO {
         angleMotor.setVoltage(requestedVoltage);
 
         Logger.recordOutput("Swerve/Mod" + moduleNumber + "/RequestedVoltage", requestedVoltage);
-        Logger.recordOutput("Swerve/Mod" + moduleNumber + "/PIDSetpoint", debugAnglePidController.getSetpoint());
+        Logger.recordOutput("Swerve/Mod" + moduleNumber + "/PIDSetpoint", debugAnglePidController.getSetpoint() % 180);
+        Logger.recordOutput(
+            "Swerve/Mod" + moduleNumber + "/Current",
+            (angleCANcoder.getPosition().getValue().in(Degrees) - angleOffset.getDegrees()) % 180
+        );
         // debug
         // Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "/Setpoint", degReference);
         // Logger.recordOutput("Swerve/Mod" + Integer.toString(moduleNumber) + "/Current", relAngleEncoder.getPosition());
