@@ -86,7 +86,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
      */
     private SwerveDrivePoseEstimator poseEstimator;
 
-    private final SysIdRoutine sysId;
+    protected SysIdRoutine sysId;
 
     /** Creates a new Swerve subsystem. */
     public Swerve(GyroIO gyroIO, ModuleIO[] moduleIOs) {

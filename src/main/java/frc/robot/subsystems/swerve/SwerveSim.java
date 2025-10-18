@@ -1,10 +1,15 @@
 package frc.robot.subsystems.swerve;
 
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
+
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.module.ModuleIO;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Simulator implementation of the swerve drive.
@@ -26,6 +31,14 @@ public class SwerveSim extends Swerve {
     public SwerveSim(GyroIO gyroIO, ModuleIO[] moduleIOs, SwerveDriveSimulation driveSimulation) {
         super(gyroIO, moduleIOs);
         this.driveSimulation = driveSimulation;
+
+        // Simulation specific SysId
+        super.sysId = new SysIdRoutine(
+            new SysIdRoutine.Config(Volts.of(0.75).per(Seconds), Volts.of(10), Seconds.of(15), state ->
+                Logger.recordOutput("Swerve/SysIdState", state.toString())
+            ),
+            new SysIdRoutine.Mechanism(voltage -> runCharacterization(voltage.in(Volts)), null, this)
+        );
     }
 
     @Override

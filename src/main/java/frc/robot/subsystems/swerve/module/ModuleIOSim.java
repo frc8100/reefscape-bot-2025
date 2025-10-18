@@ -16,6 +16,7 @@ package frc.robot.subsystems.swerve.module;
 import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.lib.util.SparkUtil;
@@ -39,6 +40,14 @@ public class ModuleIOSim implements ModuleIO {
     private double driveAppliedVolts = 0.0;
     private double turnAppliedVolts = 0.0;
 
+    private double previousVelocitySetpoint = 0.0;
+
+    private SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(
+        SwerveConfig.driveSimKs,
+        SwerveConfig.driveSimKv,
+        SwerveConfig.driveSimKa
+    );
+
     public ModuleIOSim(SwerveModuleSimulation moduleSimulation) {
         this.moduleSimulation = moduleSimulation;
         this.driveMotor = moduleSimulation
@@ -56,8 +65,9 @@ public class ModuleIOSim implements ModuleIO {
     public void updateInputs(ModuleIOInputs inputs) {
         // Run closed-loop control
         if (driveClosedLoop) {
-            driveAppliedVolts = driveFFVolts +
-            driveController.calculate(moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond));
+            driveAppliedVolts =
+                driveFFVolts +
+                driveController.calculate(moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond));
         } else {
             driveController.reset();
         }
@@ -76,6 +86,7 @@ public class ModuleIOSim implements ModuleIO {
         inputs.drivePositionRad = moduleSimulation.getDriveWheelFinalPosition().in(Radians);
         inputs.driveVelocityRadPerSec = moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond);
         inputs.driveAppliedVolts = driveAppliedVolts;
+        inputs.driveFFVolts = driveFFVolts;
         inputs.driveCurrentAmps = Math.abs(moduleSimulation.getDriveMotorStatorCurrent().in(Amps));
 
         // Update turn inputs
@@ -124,9 +135,16 @@ public class ModuleIOSim implements ModuleIO {
         double velocityRadPerSec = speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters);
 
         driveClosedLoop = true;
-        driveFFVolts = SwerveConfig.driveSimKs * Math.signum(velocityRadPerSec) +
-        SwerveConfig.driveSimKv * velocityRadPerSec;
+        // driveFFVolts =
+        //     SwerveConfig.driveSimKs * Math.signum(velocityRadPerSec) +
+        //     SwerveConfig.driveSimKv * velocityRadPerSec +
+        //     SwerveConfig.driveSimKa * ((velocityRadPerSec - previousVelocitySetpoint) / 0.02);
+
+        driveFFVolts = driveFeedforward.calculateWithVelocities(previousVelocitySetpoint, velocityRadPerSec);
+
         driveController.setSetpoint(velocityRadPerSec);
+
+        previousVelocitySetpoint = velocityRadPerSec;
     }
 
     @Override

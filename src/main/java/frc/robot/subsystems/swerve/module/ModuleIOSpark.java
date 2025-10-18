@@ -291,6 +291,7 @@ public class ModuleIOSpark implements ModuleIO {
     private void setSpeed(SwerveModuleState desiredState) {
         double velocityRadiansPerSecond = desiredState.speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters);
 
+        // TODO: add to inputs
         double ffVolts =
             SwerveConfig.driveKS * Math.signum(velocityRadiansPerSecond) +
             SwerveConfig.driveKV * velocityRadiansPerSecond;
