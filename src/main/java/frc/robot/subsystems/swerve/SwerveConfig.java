@@ -121,7 +121,7 @@ public class SwerveConfig {
     public static final Time ANGLE_PEAK_CURRENT_DURATION = Seconds.of(0.1); // unused
     public static final boolean IS_ANGLE_CURRENT_LIMIT_ACTIVE = true; // unused
 
-    public static final Current DRIVE_CONTINUOUS_CURRENT_LIMIT = Amps.of(30);
+    public static final Current DRIVE_CONTINUOUS_CURRENT_LIMIT = Amps.of(35);
     public static final Current DRIVE_PEAK_CURRENT_LIMIT = Amps.of(60); // unused
     public static final Time DRIVE_PEAK_CURRENT_DURATION = Seconds.of(0.1); // unused
     public static final boolean IS_DRIVE_CURRENT_LIMIT_ACTIVE = true; // unused
@@ -158,14 +158,23 @@ public class SwerveConfig {
     // Drive Motor Characterization Values
     public static final double driveKS = 0.17388;
     public static final double driveKV = 0.13632;
-
     // public static final double driveKA = (0.27);
 
-    public static final double driveSimKP = 0.05;
+    public static final double driveSimKP = 0.2;
     public static final double driveSimKD = 0.0;
 
-    public static final double driveSimKs = 0.03152;
-    public static final double driveSimKv = 0.16215;
+    // Simple characterization:
+    // kS: 0.03197
+    // kV: 0.16211
+
+    public static final double driveSimKs = 0.03197;
+    public static final double driveSimKv = 0.16211;
+    public static final double driveSimKa = 0.0;
+
+    // SysId
+    // public static final double driveSimKs = -0.10543;
+    // public static final double driveSimKv = 0.16202;
+    // public static final double driveSimKa = 0.051283;
 
     // Swerve path constraints
     public static final LinearVelocity MAX_SPEED = MetersPerSecond.of(3.75);
@@ -189,7 +198,7 @@ public class SwerveConfig {
     );
 
     public static final PIDConstants PP_INITIAL_TRANSLATION_PID = new PIDConstants(4, 0.8);
-    public static final PIDConstants PP_ENDING_TRANSLATION_PID = new PIDConstants(3.875, 0.45);
+    public static final PIDConstants PP_ENDING_TRANSLATION_PID = new PIDConstants(3.75, 0.45);
     public static final PIDConstants PP_ROTATION_PID = new PIDConstants(4.0, 0.02);
 
     // Simulator DC Motors
@@ -237,18 +246,6 @@ public class SwerveConfig {
      */
     public static RobotConfig getRobotConfig() {
         return pathPlannerConfig;
-        // Load the RobotConfig from the GUI settings.
-        // RobotConfig config;
-
-        // try {
-        //     config = RobotConfig.fromGUISettings();
-        // } catch (Exception e) {
-        //     // Handle exception as needed
-        //     e.printStackTrace();
-        //     config = null;
-        // }
-
-        // return config;
     }
 
     /**
