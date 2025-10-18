@@ -2,12 +2,14 @@ package frc.lib.util;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import frc.robot.Constants;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
@@ -47,11 +49,25 @@ public class TunableValue implements DoubleSupplier {
     /**
      * Refreshes all the consumers in the list of consumers that need to be refreshed when the config is updated.
      */
-    public static final Command refreshConfig = Commands.runOnce(() -> {
-        refreshConfigConsumers.forEach(RefreshConfigConsumer::accept);
-        tunableValuesWithConsumers.forEach(tunableValue -> tunableValue.onRefresh.accept(tunableValue.get()));
-        refreshConfigConsumers.clear();
-    });
+    public static final Command refreshConfig = new DeferredCommand(
+        () ->
+            Commands.runOnce(() -> {
+                // debug
+                System.out.println(
+                    "Refreshing config for " +
+                    refreshConfigConsumers.size() +
+                    " consumers and " +
+                    tunableValuesWithConsumers.size() +
+                    " tunable values with consumers."
+                );
+
+                refreshConfigConsumers.forEach(RefreshConfigConsumer::accept);
+                tunableValuesWithConsumers.forEach(tunableValue -> tunableValue.onRefresh.accept(tunableValue.get()));
+
+                refreshConfigConsumers.clear();
+            }),
+        Set.of()
+    );
 
     /**
      * The base key for the tuning table in NetworkTables.
