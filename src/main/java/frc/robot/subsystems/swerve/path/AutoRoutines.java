@@ -1,15 +1,20 @@
 package frc.robot.subsystems.swerve.path;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Seconds;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.lib.util.PoseUtil;
 import frc.robot.commands.AlignToReefTagRelative;
+import frc.robot.commands.DriveToPose;
 import frc.robot.commands.PhotonVisionAlign;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
 import frc.robot.subsystems.superstructure.SuperstructureConstants.CriticalLevel;
@@ -439,54 +445,94 @@ public class AutoRoutines {
      * @param location - The location to pathfind to. See {@link FieldLocations} for possible locations.
      * @param shouldAlignToReef - Whether or not to align to the reef tag after pathfinding.
      */
-    public Command pathFindToLocation(FieldLocations location, boolean shouldAlignToReef) {
-        // Get the command to go to the reef
-        Command initialPathfindCommand = AutoBuilder.pathfindToPose(
-            // Do not flip the pose, as it is already flipped
-            location.getPose(false),
-            SwerveConfig.pathConstraints
-        );
+    // public Command pathFindToLocation(FieldLocations location, boolean shouldAlignToReef) {
+    //     // Get the command to go to the reef
+    //     Command initialPathfindCommand = AutoBuilder.pathfindToPose(
+    //         // Do not flip the pose, as it is already flipped
+    //         location.getPose(false),
+    //         SwerveConfig.pathConstraints
+    //     );
 
-        // If the location is a reef, do the final alignment
-        // if (
-        //     shouldAlignToReef &&
-        //     (location.getType() == FieldLocationType.LEFT_REEF || location.getType() == FieldLocationType.RIGHT_REEF)
-        // ) {
-        //     return initialPathfindCommand.andThen(
-        //         // new AlignToReefTagRelative(location.getType() == FieldLocationType.RIGHT_REEF, swerveSubsystem)
-        //         new PhotonVisionAlign(
-        //             location.getType() == FieldLocationType.RIGHT_REEF,
-        //             swerveSubsystem,
-        //             visionSubsystem
-        //         )
-        //     );
-        // }
+    //     // If the location is a reef, do the final alignment
+    //     // if (
+    //     //     shouldAlignToReef &&
+    //     //     (location.getType() == FieldLocationType.LEFT_REEF || location.getType() == FieldLocationType.RIGHT_REEF)
+    //     // ) {
+    //     //     return initialPathfindCommand.andThen(
+    //     //         // new AlignToReefTagRelative(location.getType() == FieldLocationType.RIGHT_REEF, swerveSubsystem)
+    //     //         new PhotonVisionAlign(
+    //     //             location.getType() == FieldLocationType.RIGHT_REEF,
+    //     //             swerveSubsystem,
+    //     //             visionSubsystem
+    //     //         )
+    //     //     );
+    //     // }
 
-        return initialPathfindCommand;
-    }
+    //     return initialPathfindCommand;
+    // }
 
     public Command pathFindToLocation(FieldLocations location) {
-        return pathFindToLocation(location, true);
+        // return pathFindToLocation(location, true);
+        return pathFindToLocation(() -> location.getPose());
     }
 
     /**
      * @return A command to pathfind to a given pose using pathplanner.
      * @param pose - The pose to pathfind to. Automatically flips if necessary.
      */
-    public Command pathFindToLocation(Pose2d pose) {
-        return AutoBuilder.pathfindToPose(pose, SwerveConfig.pathConstraints);
+    public Command pathFindToLocation(Supplier<Pose2d> pose) {
+        // return AutoBuilder.pathfindToPose(pose, SwerveConfig.pathConstraints);
+        // return new DeferredCommand(() -> new DriveToPose(swerveSubsystem, () -> pose), Set.of(swerveSubsystem));
+        // return new DeferredCommand(
+        //     () ->
+        //         new PathfindingCommand(
+        //             pose,
+        //             SwerveConfig.pathConstraints,
+        //             swerveSubsystem::getPose,
+        //             swerveSubsystem::getChassisSpeeds,
+        //             (speeds, feedforwards) -> swerveSubsystem.runVelocityChassisSpeeds(speeds),
+        //             DriveToPose.driveController,
+        //             SwerveConfig.getRobotConfig()
+        //         ),
+        //     Set.of(swerveSubsystem)
+        // );
+
+        return new DeferredCommand(
+            () ->
+                // Use PathPlanner path finding for initial pathfinding
+                AutoBuilder.pathfindToPose(pose.get(), SwerveConfig.pathConstraints)
+                    .raceWith(
+                        Commands.waitUntil(() ->
+                            // Path find until close enough for final alignment
+                            PoseUtil.isNear(
+                                swerveSubsystem.getPose(),
+                                pose.get(),
+                                // TODO: move to constants file
+                                // Meters.of(0.75),
+                                // Start final alignment when within this distance plus a bit based on current speed
+                                Meters.of(0.4 + swerveSubsystem.getVelocityMagnitude().in(MetersPerSecond) * 0.4),
+                                Degrees.of(360)
+                            )
+                        )
+                    )
+                    // Use DriveToPose for final alignment
+                    .andThen(new DriveToPose(swerveSubsystem, pose)),
+            Set.of(swerveSubsystem)
+        );
     }
 
     /**
      * @return A command to continuously pathfind to a given location.
      * Useful for teleop, as the robot will always be trying to go to the location.
+     * @deprecated
      * @param location - The location to pathfind to. See {@link FieldLocations} for possible locations.
      */
     public Command continuouslyPathFindToLocation(Supplier<Pose2d> pose) {
         return new DeferredCommand(
             () ->
-                pathFindToLocation(pose.get())
-                    .andThen(Commands.waitSeconds(0.1))
+                pathFindToLocation(pose)
+                    // .andThen(Commands.waitSeconds(0.1))
+                    .withTimeout(0.1)
                     .andThen(continuouslyPathFindToLocation(pose)),
             Set.of(swerveSubsystem)
         );
@@ -565,14 +611,14 @@ public class AutoRoutines {
             // Get coral from station 1
             pathFindToLocation(FieldLocations.CORAL_STATION_1),
             // Run intake
-            clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.BACK),
+            clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.BACK).withTimeout(Seconds.of(1)),
             // Simultaneously set up superstructure and pathfind to reef
             new ParallelCommandGroup(
                 pathFindToLocation(FieldLocations.REEF_4L),
                 Commands.waitSeconds(1.75).andThen(setUpSuperstructure(SuperstructureConstants.Level.L4))
             ),
             // Run outtake
-            clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE),
+            clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE).withTimeout(Seconds.of(1)),
             // Reset superstructure
             // Simultaneously set up superstructure and pathfind to coral station
             new ParallelCommandGroup(
@@ -580,14 +626,14 @@ public class AutoRoutines {
                 setUpSuperstructure(SuperstructureConstants.Level.INITIAL_POSITION)
             ),
             // Run intake
-            clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.BACK),
+            clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.BACK).withTimeout(Seconds.of(1)),
             // Simultaneously set up superstructure and pathfind to reef
             new ParallelCommandGroup(
                 pathFindToLocation(FieldLocations.REEF_4R),
                 Commands.waitSeconds(1.75).andThen(setUpSuperstructure(SuperstructureConstants.Level.L4))
             ),
             // Run outtake
-            clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE),
+            clawSubsystem.runIntakeOrOuttake(ClawConstants.IntakeOuttakeDirection.OUTTAKE).withTimeout(Seconds.of(1)),
             // Reset superstructure
             setUpSuperstructure(SuperstructureConstants.Level.INITIAL_POSITION)
         );

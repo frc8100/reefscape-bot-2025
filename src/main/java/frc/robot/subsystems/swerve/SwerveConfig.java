@@ -6,6 +6,7 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.path.PathConstraints;
 import com.revrobotics.spark.config.SparkBaseConfig;
@@ -166,10 +167,9 @@ public class SwerveConfig {
     public static final double driveSimKs = 0.03152;
     public static final double driveSimKv = 0.16215;
 
-    // Swerve Profiling Values
-    // TODO: tune
-    public static final LinearVelocity MAX_SPEED = MetersPerSecond.of(4);
-    public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(12);
+    // Swerve path constraints
+    public static final LinearVelocity MAX_SPEED = MetersPerSecond.of(3.75);
+    public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(7);
     // ! IMPORTANT: The actual max angular velocity is much higher
     public static final AngularVelocity MAX_ANGULAR_VELOCITY = RadiansPerSecond.of(6.0);
 
@@ -187,6 +187,10 @@ public class SwerveConfig {
         MAX_ANGULAR_VELOCITY,
         MAX_ANGULAR_ACCELERATION
     );
+
+    public static final PIDConstants PP_INITIAL_TRANSLATION_PID = new PIDConstants(4, 0.8);
+    public static final PIDConstants PP_ENDING_TRANSLATION_PID = new PIDConstants(3.875, 0.45);
+    public static final PIDConstants PP_ROTATION_PID = new PIDConstants(4.0, 0.02);
 
     // Simulator DC Motors
     public static final DCMotor driveGearbox = DCMotor.getNEO(1);

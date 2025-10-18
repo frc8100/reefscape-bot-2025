@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
@@ -13,6 +14,7 @@ import frc.robot.subsystems.superstructure.claw.Claw;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import frc.robot.subsystems.swerve.path.AutoRoutines;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
@@ -251,24 +253,21 @@ public class ButtonBindings {
         //     .whileTrue(new PhotonVisionAlign(true, swerveSubsystem, visionSubsystem));
 
         // Align (new)
-        // Controls.mainDriveControls
-        //     .getJoystickButtonOf(Controls.mainDriveControls.pathfindToNearestRightReef)
+        // driverController
+        //     .getJoystickButton(XboxController.Button.kX)
         //     .whileTrue(
-        //         new DeferredCommand(() -> autoRoutines.pathFindToLocation(nearestRightReef), Set.of(swerveSubsystem))
-        //         // autoRoutines.continuouslyPathFindToLocation(() -> nearestRightReef)
+        //         new DeferredCommand(
+        //             () -> autoRoutines.pathFindToLocation(autoRoutines.getNearestCoralStation()),
+        //             Set.of(swerveSubsystem)
+        //         )
         //     );
 
-        // Controls.mainDriveControls
-        //     .getJoystickButtonOf(Controls.mainDriveControls.pathfindToNearestCoralStation)
-        //     .whileTrue(
-        //         new DeferredCommand(() -> autoRoutines.pathFindToLocation(nearestRightReef), Set.of(swerveSubsystem))
-        //     );
         driverController
             .getJoystickButton(XboxController.Button.kA)
-            .whileTrue(autoRoutines.continuouslyPathFindToLocation(() -> autoRoutines.getNearestRightReef()));
-        driverController
-            .getJoystickButton(XboxController.Button.kB)
-            .whileTrue(autoRoutines.continuouslyPathFindToLocation(() -> autoRoutines.getNearestCoralStation()));
+            .whileTrue(autoRoutines.pathFindToLocation(autoRoutines::getNearestRightReef));
+        // driverController
+        //     .getJoystickButton(XboxController.Button.kB)
+        //     .whileTrue(autoRoutines.continuouslyPathFindToLocation(() -> autoRoutines.getNearestCoralStation()));
 
         // Claw
         operatorController

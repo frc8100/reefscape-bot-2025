@@ -1,5 +1,6 @@
 package frc.robot.subsystems.swerve;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volt;
 
 import com.pathplanner.lib.util.DriveFeedforwards;
@@ -281,6 +282,14 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     @AutoLogOutput(key = "Swerve/ChassisSpeeds/Measured")
     public ChassisSpeeds getChassisSpeeds() {
         return kinematics.toChassisSpeeds(getModuleStates());
+    }
+
+    /**
+     * @return The velocity magnitude of the robot in meters per second.
+     */
+    @AutoLogOutput(key = "Swerve/ChassisSpeeds/Magnitude")
+    public double getVelocityMagnitudeAsDouble() {
+        return getVelocityMagnitude().in(MetersPerSecond);
     }
 
     @Override

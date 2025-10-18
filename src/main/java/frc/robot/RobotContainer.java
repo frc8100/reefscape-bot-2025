@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.LimelightHelpers;
+import frc.lib.util.EmptySimulationArena;
 import frc.lib.util.TunableValue;
 import frc.robot.commands.AlignToReefTagRelative;
 import frc.robot.commands.PhotonVisionAlign;
@@ -131,7 +132,8 @@ public class RobotContainer {
             default:
             case SIM:
                 // Create a reefscape arena
-                Arena2025Reefscape arenaSimulation = new Arena2025Reefscape();
+                SimulatedArena arenaSimulation = new Arena2025Reefscape();
+                // SimulatedArena arenaSimulation = new EmptySimulationArena();
 
                 // Set up the simulated arena by overriding the instance and adding the pieces
                 SimulatedArena.overrideInstance(arenaSimulation);
@@ -280,9 +282,13 @@ public class RobotContainer {
             "Drive SysId (Dynamic Reverse)",
             swerveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse)
         );
+        autoChooser.addOption(
+            "Max Acceleration and Velocity Test",
+            swerveSubsystem.runMaxAccelerationMaxVelocityTest()
+        );
 
         // TODO: Temporary
-        // autoChooser.addOption("Coral and Go To All Reefs Test", autoRoutines.getCoralAndGoToAllReefsTest());
+        autoChooser.addOption("Coral and Go To All Reefs Test", autoRoutines.getCoralAndGoToAllReefsTest());
 
         autoChooser.addDefaultOption("Actually move forward", autoRoutines.actuallyMoveForward());
         autoChooser.addOption("Push another robot forward", autoRoutines.pushAnotherRobotForward());

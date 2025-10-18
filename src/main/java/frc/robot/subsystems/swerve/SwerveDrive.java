@@ -1,5 +1,8 @@
 package frc.robot.subsystems.swerve;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -15,6 +18,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -92,7 +96,7 @@ public interface SwerveDrive extends Subsystem {
             this::setPose,
             this::getChassisSpeeds,
             this::runVelocityChassisSpeeds,
-            new PPHolonomicDriveController(new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
+            new PPHolonomicDriveController(SwerveConfig.PP_INITIAL_TRANSLATION_PID, SwerveConfig.PP_ROTATION_PID),
             SwerveConfig.getRobotConfig(),
             () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
             this
@@ -117,6 +121,20 @@ public interface SwerveDrive extends Subsystem {
      * @param fieldRelative Whether the speeds are field-relative.
      */
     public void drive(Translation2d translation, double rotation, boolean fieldRelative);
+
+    /**
+     * Returns a command to run the max acceleration / max velocity test. Runs the drive in a straight line at maximum voltage.
+     * Use AdvantageScope line graph to analyze the results.
+     * By default, this does nothing.
+     */
+    public default Command runMaxAccelerationMaxVelocityTest() {
+        return Commands.run(
+            () -> {
+                runCharacterization(12.0);
+            },
+            this
+        );
+    }
 
     /** Runs the drive in a straight line with the specified drive output. By default, this does nothing. */
     public default void runCharacterization(double output) {}
@@ -198,6 +216,14 @@ public interface SwerveDrive extends Subsystem {
      * @return The measured chassis speeds of the robot.
      */
     public ChassisSpeeds getChassisSpeeds();
+
+    /**
+     * @return The magnitude of the robot's velocity. Calculated from {@link #getChassisSpeeds()}.
+     */
+    public default LinearVelocity getVelocityMagnitude() {
+        ChassisSpeeds speeds = getChassisSpeeds();
+        return MetersPerSecond.of(Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond));
+    }
 
     /**
      * Zeros the gyro.

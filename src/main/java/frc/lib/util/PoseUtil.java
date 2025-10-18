@@ -1,15 +1,21 @@
 package frc.lib.util;
 
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Radians;
 
 import com.pathplanner.lib.util.FlippingUtil;
 import com.pathplanner.lib.util.GeometryUtil;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.math.GeometryUtils;
 import java.util.Optional;
@@ -26,14 +32,48 @@ public final class PoseUtil {
      * Checks if two poses are within a specified tolerance of each other.
      * @param pose1 - The first pose.
      * @param pose2 - The second pose.
-     * @param tolerance - The tolerance to check within. Includes x, y, and rotation.
+     * @param distanceTolerance - The maximum allowed distance between the two poses.
+     * @param angleTolerance - The maximum allowed angle difference between the two poses.
      * @return true if the poses are within the specified tolerance, false otherwise.
      */
-    public static boolean isNear(Pose2d pose1, Pose2d pose2, double tolerance) {
+    public static boolean isNear(Pose2d pose1, Pose2d pose2, Distance distanceTolerance, Angle angleTolerance) {
         return (
-            Math.abs(pose1.getX() - pose2.getX()) < tolerance &&
-            Math.abs(pose1.getY() - pose2.getY()) < tolerance &&
-            Math.abs(pose1.getRotation().getRadians() - pose2.getRotation().getRadians()) < tolerance
+            Math.abs(pose1.getX() - pose2.getX()) < distanceTolerance.in(Meters) &&
+            Math.abs(pose1.getY() - pose2.getY()) < distanceTolerance.in(Meters) &&
+            MathUtil.isNear(
+                0,
+                pose1.getRotation().minus(pose2.getRotation()).getRadians(),
+                angleTolerance.in(Radians),
+                -Math.PI,
+                Math.PI
+            )
+        );
+    }
+
+    /**
+     * Checks if two poses and their velocities are within a specified tolerance of each other.
+     * @param pose1 - The first pose.
+     * @param pose2 - The second pose.
+     * @param velocity1 - The velocity of the first pose.
+     * @param velocity2 - The velocity of the second pose.
+     * @param distanceTolerance - The maximum allowed distance between the two poses.
+     * @param angleTolerance - The maximum allowed angle difference between the two poses.
+     * @param velocityTolerance - The maximum allowed velocity difference between the two poses.
+     * @return true if the poses and velocities are within the specified tolerance, false otherwise.
+     */
+    public static boolean isPosesAndVelocityNear(
+        Pose2d pose1,
+        Pose2d pose2,
+        LinearVelocity velocity1,
+        LinearVelocity velocity2,
+        Distance distanceTolerance,
+        Angle angleTolerance,
+        LinearVelocity velocityTolerance
+    ) {
+        return (
+            isNear(pose1, pose2, distanceTolerance, angleTolerance) &&
+            Math.abs(velocity1.in(MetersPerSecond) - velocity2.in(MetersPerSecond)) <
+            velocityTolerance.in(MetersPerSecond)
         );
     }
 
