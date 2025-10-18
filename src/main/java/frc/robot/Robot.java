@@ -41,7 +41,7 @@ public class Robot extends LoggedRobot {
                 Logger.recordMetadata("GitDirty", "All changes committed");
                 break;
             case 1:
-                Logger.recordMetadata("GitDirty", "Uncomitted changes");
+                Logger.recordMetadata("GitDirty", "Uncommitted changes");
                 break;
             default:
                 Logger.recordMetadata("GitDirty", "Unknown");
@@ -66,6 +66,12 @@ public class Robot extends LoggedRobot {
                 Logger.addDataReceiver(new NT4Publisher());
                 break;
             case SIM:
+                // If SysId is enabled, log to a WPILOG file
+                if (Constants.enableSysId) {
+                    // TODO: add way to change path?
+                    Logger.addDataReceiver(new WPILOGWriter("D:\\wpilib\\2025\\logs"));
+                }
+
                 // Running a physics simulator, log to NT
                 Logger.addDataReceiver(new NT4Publisher());
                 break;
@@ -122,9 +128,14 @@ public class Robot extends LoggedRobot {
      */
     @Override
     public void autonomousInit() {
+        // If in simulation, reset the simulated arena
+        if (Constants.currentMode == Constants.Mode.SIM) {
+            SimulatedArena.getInstance().resetFieldForAuto();
+        }
+
         autonomousCommand = robotContainer.getAutonomousCommand();
 
-        // schedule the autonomous command (example)
+        // Schedule the autonomous command
         if (autonomousCommand != null) {
             autonomousCommand.schedule();
         }

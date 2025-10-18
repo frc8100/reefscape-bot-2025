@@ -19,6 +19,13 @@ public final class Constants {
     public static Mode currentMode = Mode.REAL;
 
     /**
+     * Whether or not to enable system identification mode.
+     * - When true, SysId routines are available for use (in the AutoChooser).
+     * - When true and in simulation, the WPILog will be stored and an empty SimulationArena will be used.
+     */
+    public static final boolean enableSysId = false;
+
+    /**
      * Whether or not to silence the reportJoystickUnpluggedWarning warning.
      */
     // ! IMPORTANT: Remember to set this to false before competition!
@@ -33,6 +40,7 @@ public final class Constants {
     /**
      * Whether or not to disable HAL (Hardware Abstraction Layer) calls.
      * This is useful for testing without hardware.
+     * @deprecated Use {@link #currentMode} instead.
      */
     public static final boolean disableHAL = false;
 

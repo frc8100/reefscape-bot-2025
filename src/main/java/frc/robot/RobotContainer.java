@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -86,11 +87,6 @@ public class RobotContainer {
 
     private final AutoRoutines autoRoutines;
 
-    // Alignment
-    private Pose2d nearestLeftReef = new Pose2d();
-    private Pose2d nearestRightReef = new Pose2d();
-    private Pose2d nearestCoralStation = new Pose2d();
-
     /**
      * The simulation of the robot's drive. Set to null if not in simulation mode.
      */
@@ -131,12 +127,15 @@ public class RobotContainer {
                 break;
             default:
             case SIM:
-                // Create a reefscape arena
-                SimulatedArena arenaSimulation = new Arena2025Reefscape();
-                // SimulatedArena arenaSimulation = new EmptySimulationArena();
+                // Override the arena
+                if (Constants.enableSysId) {
+                    // Use an empty arena for SysId to reduce obstacles
+                    SimulatedArena.overrideInstance(new EmptySimulationArena());
+                } else {
+                    // Use the reefscape arena for normal sim
+                    SimulatedArena.overrideInstance(new Arena2025Reefscape());
+                }
 
-                // Set up the simulated arena by overriding the instance and adding the pieces
-                SimulatedArena.overrideInstance(arenaSimulation);
                 SimulatedArena.getInstance().placeGamePiecesOnField();
 
                 // Create a simulated drive
@@ -258,34 +257,9 @@ public class RobotContainer {
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
         // Set up SysId routines
-        autoChooser.addOption(
-            "Drive Wheel Radius Characterization",
-            SwerveSysidRoutines.wheelRadiusCharacterization(swerveSubsystem)
-        );
-        autoChooser.addOption(
-            "Drive Simple FF Characterization",
-            SwerveSysidRoutines.feedforwardCharacterization(swerveSubsystem)
-        );
-        autoChooser.addOption(
-            "Drive SysId (Quasistatic Forward)",
-            swerveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
-        );
-        autoChooser.addOption(
-            "Drive SysId (Quasistatic Reverse)",
-            swerveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
-        );
-        autoChooser.addOption(
-            "Drive SysId (Dynamic Forward)",
-            swerveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward)
-        );
-        autoChooser.addOption(
-            "Drive SysId (Dynamic Reverse)",
-            swerveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse)
-        );
-        autoChooser.addOption(
-            "Max Acceleration and Velocity Test",
-            swerveSubsystem.runMaxAccelerationMaxVelocityTest()
-        );
+        if (Constants.enableSysId) {
+            setupSysIdRoutines();
+        }
 
         // TODO: Temporary
         autoChooser.addOption("Coral and Go To All Reefs Test", autoRoutines.getCoralAndGoToAllReefsTest());
@@ -305,6 +279,56 @@ public class RobotContainer {
         ButtonBindings buttonBindings = new ButtonBindings(autoRoutines);
         buttonBindings.configureButtonBindings();
         buttonBindings.assignDefaultCommands();
+    }
+
+    /**
+     * Adds SysId routines to the auto chooser.
+     */
+    private void setupSysIdRoutines() {
+        // Simple characterization routines
+        autoChooser.addOption(
+            "Drive Wheel Radius Characterization",
+            SwerveSysidRoutines.wheelRadiusCharacterization(swerveSubsystem)
+        );
+        autoChooser.addOption(
+            "Drive Simple FF Characterization",
+            SwerveSysidRoutines.feedforwardCharacterization(swerveSubsystem)
+        );
+        autoChooser.addOption(
+            "Max Acceleration and Velocity Test",
+            swerveSubsystem.runMaxAccelerationMaxVelocityTest()
+        );
+
+        // Actual SysId routines
+        autoChooser.addOption(
+            "Drive SysId (Quasistatic Forward)",
+            swerveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
+        );
+        autoChooser.addOption(
+            "Drive SysId (Quasistatic Reverse)",
+            swerveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
+        );
+        autoChooser.addOption(
+            "Drive SysId (Dynamic Forward)",
+            swerveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward)
+        );
+        autoChooser.addOption(
+            "Drive SysId (Dynamic Reverse)",
+            swerveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse)
+        );
+
+        autoChooser.addOption(
+            "Drive SysId (All 4)",
+            new SequentialCommandGroup(
+                swerveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward),
+                Commands.waitSeconds(1),
+                swerveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse),
+                Commands.waitSeconds(1),
+                swerveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward),
+                Commands.waitSeconds(1),
+                swerveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse)
+            )
+        );
     }
 
     /**
@@ -339,16 +363,5 @@ public class RobotContainer {
             "ComponentPositions/CoralInClaw",
             clawSubsystem.getCoralInClawPosition(swerveSubsystem, elevatorSubsystem)
         );
-        // TODO: Log nearest reef position
-        // nearestLeftReef = autoRoutines.getNearestLeftReef();
-        // nearestRightReef = autoRoutines.getNearestRightReef();
-        // nearestCoralStation = autoRoutines.getNearestCoralStation();
-
-        // Logger.recordOutput("Odometry/NearestLeftReef", nearestLeftReef);
-        // Logger.recordOutput("Odometry/NearestRightReef", nearestRightReef);
-        // Logger.recordOutput("Odometry/NearestCoralStation", nearestCoralStation);
-
-        // Logger.recordOutput("Vision/CanAlignToReef", AlignToReefTagRelative.getCanAlignToReef());
-        // Logger.recordOutput("Align/Positions", LimelightHelpers.getBotPose_TargetSpace(""));
     }
 }
