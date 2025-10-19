@@ -34,6 +34,7 @@ import frc.robot.subsystems.superstructure.claw.Claw;
 import frc.robot.subsystems.superstructure.claw.ClawConstants;
 import frc.robot.subsystems.superstructure.claw.ClawConstants.IntakeOuttakeDirection;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
+import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import frc.robot.subsystems.vision.Vision;
@@ -233,7 +234,7 @@ public class AutoRoutines {
 
     // References to subsystems
     // Public because of use in configuring controls
-    public final SwerveDrive swerveSubsystem;
+    public final Swerve swerveSubsystem;
     public final Elevator elevatorSubsystem;
     public final Claw clawSubsystem;
 
@@ -243,7 +244,7 @@ public class AutoRoutines {
      * Creates a new AutoRoutines object given required subsystems.
      */
     public AutoRoutines(
-        SwerveDrive swerveSubsystem,
+        Swerve swerveSubsystem,
         Elevator elevatorSubsystem,
         Claw clawSubsystem
         // Vision visionSubsystem
@@ -472,8 +473,7 @@ public class AutoRoutines {
     // }
 
     public Command pathFindToLocation(FieldLocations location) {
-        // return pathFindToLocation(location, true);
-        return pathFindToLocation(() -> location.getPose());
+        return pathFindToLocation(location::getPose);
     }
 
     /**
@@ -497,28 +497,28 @@ public class AutoRoutines {
         //     Set.of(swerveSubsystem)
         // );
 
-        return new DeferredCommand(
-            () ->
-                // Use PathPlanner path finding for initial pathfinding
-                AutoBuilder.pathfindToPose(pose.get(), SwerveConfig.pathConstraints)
-                    .raceWith(
-                        Commands.waitUntil(() ->
-                            // Path find until close enough for final alignment
-                            PoseUtil.isNear(
-                                swerveSubsystem.getPose(),
-                                pose.get(),
-                                // TODO: move to constants file
-                                // Meters.of(0.75),
-                                // Start final alignment when within this distance plus a bit based on current speed
-                                Meters.of(0.4 + swerveSubsystem.getVelocityMagnitude().in(MetersPerSecond) * 0.4),
-                                Degrees.of(360)
-                            )
-                        )
-                    )
-                    // Use DriveToPose for final alignment
-                    .andThen(new DriveToPose(swerveSubsystem, pose)),
-            Set.of(swerveSubsystem)
-        );
+        // return new DeferredCommand(
+        //     () ->
+        //         // Use PathPlanner path finding for initial pathfinding
+        //         AutoBuilder.pathfindToPose(pose.get(), SwerveConfig.pathConstraints)
+        //             .raceWith(
+        //                 Commands.waitUntil(() ->
+        //                     // Path find until close enough for final alignment
+        //                     PoseUtil.isNear(
+        //                         swerveSubsystem.getPose(),
+        //                         pose.get(),
+        //                         // Start final alignment when within this distance plus a bit based on current speed
+        //                         Meters.of(0.4 + swerveSubsystem.getVelocityMagnitude().in(MetersPerSecond) * 0.4),
+        //                         Degrees.of(360)
+        //                     )
+        //                 )
+        //             )
+        //             // Use DriveToPose for final alignment
+        //             .andThen(new DriveToPose(swerveSubsystem, pose)),
+        //     Set.of(swerveSubsystem)
+        // );
+
+        return Commands.none();
     }
 
     /**

@@ -1,5 +1,6 @@
 package frc.lib.util.statemachine;
 
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +15,7 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
     /**
      * The prefix key for logging to the dashboard.
      */
-    private static final String DEFAULT_DASHBOARD_KEY = "StateMachines";
+    private static final String DEFAULT_DASHBOARD_KEY = "StateMachines/";
 
     /**
      * The current state of the subsystem.
@@ -28,6 +29,10 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      */
     private StateMachineState<TStateType> defaultState = null;
 
+    /**
+     * The key used for logging to the dashboard.
+     * Example: "StateMachines/Swerve"
+     */
     private final String dashboardKey;
 
     /**
@@ -36,42 +41,140 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
     private final Map<TStateType, StateMachineState<TStateType>> stateMap = new HashMap<>();
 
     /**
+     * The state that has been scheduled to change to on the next update cycle.
+     * See {@link #scheduleStateChange}.
+     */
+    private StateMachineState<TStateType> scheduledStateChange = null;
+
+    /**
      * Constructs a state machine with the specified initial state.
      * State is logged to the dashboard with the given key.
      * @param dashboardKey - The key to use for logging to the dashboard. Added as a prefix to {@link #DEFAULT_DASHBOARD_KEY}.
      */
     public StateMachine(String dashboardKey) {
-        // this.currentState = initialState;
-        this.dashboardKey = dashboardKey + "/" + DEFAULT_DASHBOARD_KEY;
-        // Record initial state to dashboard
-        // Logger.recordOutput(dashboardKey, initialState);
+        this.dashboardKey = DEFAULT_DASHBOARD_KEY + dashboardKey;
+
+        recordCurrentState();
+        recordScheduledStateChange();
+
+        // Schedule state machine updates
+        CommandScheduler.getInstance()
+            .getDefaultButtonLoop()
+            .bind(() -> {
+                if (scheduledStateChange == null) return;
+
+                // Check if the state can be changed to the new state based on the requirements
+                if (!scheduledStateChange.canChangeCondition.canChange(currentState.enumType)) return;
+
+                currentState = scheduledStateChange;
+                recordCurrentState();
+
+                scheduledStateChange = null;
+                recordScheduledStateChange();
+            });
+    }
+
+    /**
+     * @param state - The enum state to get the corresponding StateMachineState object for.
+     * @return The StateMachineState object corresponding to the given enum state.
+     * @throws IllegalArgumentException if the state does not exist in the state machine.
+     */
+    private StateMachineState<TStateType> getStateObject(TStateType state) {
+        if (!stateMap.containsKey(state)) {
+            throw new IllegalArgumentException("StateMachine does not contain state: " + state);
+        }
+
+        return stateMap.get(state);
+    }
+
+    /**
+     * Records the current state to the dashboard.
+     */
+    private void recordCurrentState() {
+        if (currentState == null) {
+            Logger.recordOutput(dashboardKey + "/State", "None");
+            return;
+        }
+
+        Logger.recordOutput(dashboardKey + "/State", currentState.toString());
+    }
+
+    /**
+     * Records the scheduled state change to the dashboard.
+     */
+    private void recordScheduledStateChange() {
+        if (scheduledStateChange == null) {
+            Logger.recordOutput(dashboardKey + "/ScheduledStateChange", "None");
+            return;
+        }
+
+        Logger.recordOutput(dashboardKey + "/ScheduledStateChange", scheduledStateChange.toString());
     }
 
     /**
      * Sets the current state of the state machine.
-     * @param newState - The new state to set.
+     * @param newState - The new state to set, as the enum type.
      * @return True if the state was changed, false if it was the same as the current state.
+     * @throws IllegalArgumentException if the new state does not exist in the state machine.
      */
-    public boolean setState(StateMachineState<TStateType> newState) {
+    public boolean setState(TStateType newState) {
         // Check if the new state is the same as the current state
-        if (newState == getCurrentState()) {
+        if (newState == getCurrentState().enumType) {
             return false;
         }
 
-        // Check if the new state exists in the state machine
-        if (!stateMap.containsKey(newState.enumType)) {
-            throw new IllegalArgumentException("StateMachine does not contain state: " + newState);
-        }
+        StateMachineState<TStateType> newStateObj = getStateObject(newState);
 
         // Check if the state can be changed to the new state based on the requirements
-        if (!newState.canChangeCondition.canChange(currentState.enumType)) {
+        if (!newStateObj.canChangeCondition.canChange(currentState.enumType)) {
             return false;
         }
 
-        currentState = newState;
-        Logger.recordOutput(dashboardKey, currentState);
+        currentState = newStateObj;
+        recordCurrentState();
 
         return true;
+    }
+
+    /**
+     * Forces the current state of the state machine to the specified state.
+     * ! IMPORTANT: Bypasses any transition requirements.
+     * @param newState - The new state to set, as the enum type.
+     * @throws IllegalArgumentException if the new state does not exist in the state machine.
+     */
+    public void forceSetState(TStateType newState) {
+        StateMachineState<TStateType> newStateObj = getStateObject(newState);
+        currentState = newStateObj;
+
+        recordCurrentState();
+    }
+
+    /**
+     * Schedules a state change to the specified state on the next update cycle.
+     * If the state can be changed immediately, it will be changed immediately.
+     * @param newState - The new state to change to, as the enum type.
+     * @throws IllegalArgumentException if the new state does not exist in the state machine.
+     */
+    public void scheduleStateChange(TStateType newState) {
+        StateMachineState<TStateType> newStateObj = getStateObject(newState);
+
+        // If it can change now, change immediately
+        if (newStateObj.canChangeCondition.canChange(currentState.enumType)) {
+            currentState = newStateObj;
+            recordCurrentState();
+            return;
+        }
+
+        scheduledStateChange = newStateObj;
+        recordScheduledStateChange();
+    }
+
+    /**
+     * Unschedule any scheduled state change.
+     */
+    public void unscheduleStateChange() {
+        scheduledStateChange = null;
+        recordScheduledStateChange();
     }
 
     /**
@@ -112,15 +215,16 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
         // If currentState is null, set it to the default state
         if (currentState == null) {
             currentState = defaultState;
-            Logger.recordOutput(dashboardKey, currentState);
+            recordCurrentState();
         }
     }
 
     /**
-     * Sets the default state of the state machine and returns the state machine for chaining.
+     * Sets and adds the default state of the state machine and returns the state machine for chaining.
      * @param defaultState - The default state to set.
      */
     public StateMachine<TStateType> withDefaultState(StateMachineState<TStateType> defaultState) {
+        addState(defaultState);
         setDefaultState(defaultState);
         return this;
     }
@@ -135,7 +239,7 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
             // This should never happen if the state machine is properly initialized
             if (defaultState != null) {
                 currentState = defaultState;
-                Logger.recordOutput(dashboardKey, currentState);
+                recordCurrentState();
             } else {
                 throw new IllegalStateException("StateMachine does not have a current state defined.");
             }

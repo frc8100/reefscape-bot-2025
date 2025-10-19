@@ -109,12 +109,6 @@ public class Controls {
 
         public POVButton robotRelativeMoveForward;
 
-        public SwerveDrive.DriveStates getDriveState() {
-            return robotRelativeMoveForward.getAsBoolean()
-                ? SwerveDrive.DriveStates.D0
-                : SwerveDrive.DriveStates.STANDARD;
-        }
-
         /**
          * @return The translation (x)
          */

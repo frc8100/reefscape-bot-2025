@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.lib.util.LocalADStarAK;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -32,61 +33,6 @@ import org.littletonrobotics.junction.Logger;
  * The specification for the swerve drive. Implemented via a real swerve drive or a simulated swerve drive.
  */
 public interface SwerveDrive extends Subsystem {
-    /**
-     * Possible drive states.
-     * When set to {@link DriveStates#STANDARD}, the robot will drive normally.
-     * When set any other state, the robot will rotate to that angle. (ex. {@link DriveStates#D90} will rotate to 90 degrees)
-     */
-    public enum DriveStates {
-        STANDARD(),
-
-        /**
-         * Forward
-         */
-        D0(0.0),
-
-        /**
-         * Left
-         */
-        D90(90.0),
-
-        /**
-         * Back
-         */
-        D180(180.0),
-
-        /**
-         * Right
-         */
-        D270(270.0);
-
-        /**
-         * The degree measure of the state.
-         */
-        public final double degreeMeasure;
-
-        /**
-         * Whether the state is a standard state.
-         */
-        public final boolean isStandard;
-
-        DriveStates(double degreeMeasure) {
-            this.degreeMeasure = degreeMeasure;
-            this.isStandard = false;
-        }
-
-        DriveStates() {
-            this.degreeMeasure = 0.0;
-            this.isStandard = true;
-        }
-    }
-
-    /**
-     * The current drive state.
-     * See {@link DriveStates} for possible states.
-     */
-    public static DriveStates driveState = DriveStates.STANDARD;
-
     /**
      * Configures the path planner auto builder and records the path and trajectory setpoint to the logger.
      */
@@ -96,13 +42,14 @@ public interface SwerveDrive extends Subsystem {
             this::setPose,
             this::getChassisSpeeds,
             this::runVelocityChassisSpeeds,
-            new PPHolonomicDriveController(SwerveConfig.PP_INITIAL_TRANSLATION_PID, SwerveConfig.PP_ROTATION_PID),
+            SwerveConfig.PP_INITIAL_PID_CONTROLLER,
             SwerveConfig.getRobotConfig(),
             () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
             this
         );
 
-        Pathfinding.setPathfinder(new LocalADStar());
+        // Pathfinding.setPathfinder(new LocalADStar());
+        Pathfinding.setPathfinder(new LocalADStarAK());
         PathPlannerLogging.setLogActivePathCallback(activePath ->
             Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]))
         );

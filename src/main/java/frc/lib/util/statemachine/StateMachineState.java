@@ -1,13 +1,10 @@
 package frc.lib.util.statemachine;
 
-import edu.wpi.first.util.struct.StructSerializable;
-import java.util.function.BooleanSupplier;
-
 /**
  * A possible state that a {@link StateMachine} can be in.
  * @param <TEnumType> - The enum type representing the states of the state machine.
  */
-public class StateMachineState<TEnumType extends Enum<TEnumType>> implements StructSerializable {
+public class StateMachineState<TEnumType extends Enum<TEnumType>> {
 
     @FunctionalInterface
     public interface StateChangeCondition<TEnumType extends Enum<TEnumType>> {

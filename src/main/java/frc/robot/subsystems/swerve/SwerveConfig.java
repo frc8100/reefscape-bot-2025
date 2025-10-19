@@ -8,6 +8,7 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -200,6 +201,11 @@ public class SwerveConfig {
     public static final PIDConstants PP_INITIAL_TRANSLATION_PID = new PIDConstants(4, 0.8);
     public static final PIDConstants PP_ENDING_TRANSLATION_PID = new PIDConstants(3.75, 0.45);
     public static final PIDConstants PP_ROTATION_PID = new PIDConstants(4.0, 0.02);
+
+    public static final PPHolonomicDriveController PP_INITIAL_PID_CONTROLLER = new PPHolonomicDriveController(
+        SwerveConfig.PP_INITIAL_TRANSLATION_PID,
+        SwerveConfig.PP_ROTATION_PID
+    );
 
     // Simulator DC Motors
     public static final DCMotor driveGearbox = DCMotor.getNEO(1);

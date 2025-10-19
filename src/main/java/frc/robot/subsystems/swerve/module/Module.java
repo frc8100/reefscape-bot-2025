@@ -97,7 +97,7 @@ public class Module {
         state.optimize(inputs.turnPosition);
 
         // TODO: Cosine scale?
-        state.cosineScale(inputs.turnPosition);
+        // state.cosineScale(inputs.turnPosition);
 
         // Apply setpoints
         io.setDesiredState(state, inputs.turnPosition);

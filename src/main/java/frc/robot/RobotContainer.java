@@ -26,6 +26,7 @@ import frc.lib.LimelightHelpers;
 import frc.lib.util.EmptySimulationArena;
 import frc.lib.util.TunableValue;
 import frc.robot.commands.AlignToReefTagRelative;
+import frc.robot.commands.DriveToPose;
 import frc.robot.commands.PhotonVisionAlign;
 import frc.robot.commands.SwerveSysidRoutines;
 import frc.robot.commands.TeleopSwerve;
@@ -81,7 +82,7 @@ public class RobotContainer {
     private final Vision visionSubsystem;
     // TODO: Implement quest nav
     // private final QuestNavSubsystem questNavSubsystem;
-    private final SwerveDrive swerveSubsystem;
+    private final Swerve swerveSubsystem;
     private final Claw clawSubsystem;
     private final Elevator elevatorSubsystem;
 
@@ -208,6 +209,10 @@ public class RobotContainer {
                 break;
         }
 
+        // Set up auto routines
+        // autoRoutines = new AutoRoutines(swerveSubsystem, elevatorSubsystem, clawSubsystem, visionSubsystem);
+        autoRoutines = new AutoRoutines(swerveSubsystem, elevatorSubsystem, clawSubsystem);
+
         // Set up teleop swerve command
         swerveSubsystem.setDefaultCommand(
             new TeleopSwerve(
@@ -218,19 +223,11 @@ public class RobotContainer {
             )
         );
 
-        // Set up auto routines
-        // autoRoutines = new AutoRoutines(swerveSubsystem, elevatorSubsystem, clawSubsystem, visionSubsystem);
-        autoRoutines = new AutoRoutines(swerveSubsystem, elevatorSubsystem, clawSubsystem);
-
         // Register named commands
         NamedCommands.registerCommand(
             "ResetSuperstructure",
             autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.INITIAL_POSITION)
         );
-
-        // TODO:
-        // NamedCommands.registerCommand("ScoreL2", autoRoutines.alignAndScore(SuperstructureConstants.Level.L2));
-        // NamedCommands.registerCommand("ScoreL3", autoRoutines.alignAndScore(SuperstructureConstants.Level.L3));
 
         NamedCommands.registerCommand(
             "SetupSuperstructureL1Auto",
@@ -266,8 +263,6 @@ public class RobotContainer {
 
         autoChooser.addDefaultOption("Actually move forward", autoRoutines.actuallyMoveForward());
         autoChooser.addOption("Push another robot forward", autoRoutines.pushAnotherRobotForward());
-
-        // autoChooser.addOption("L1 Auto", autoRoutines.moveForwardAndL1());
 
         autoChooser.addOption("runIntakeUntilCoralIsInClaw", clawSubsystem.runIntakeUntilCoralIsInClaw());
         autoChooser.addOption("runOuttakeUntilCoralIsNotInClaw", clawSubsystem.runOuttakeUntilCoralIsNotInClaw());

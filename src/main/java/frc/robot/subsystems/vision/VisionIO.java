@@ -28,6 +28,8 @@ public interface VisionIO {
         public TargetObservation latestTargetObservation = new TargetObservation(new Rotation2d(), new Rotation2d());
         public PoseObservation[] poseObservations = new PoseObservation[0];
         public int[] tagIds = new int[0];
+
+        public GamePieceObservation[] gamePieceObservations = new GamePieceObservation[0];
     }
 
     /** Represents the angle to a simple target, not used for pose estimation. */
@@ -48,6 +50,13 @@ public interface VisionIO {
         MEGATAG_2,
         PHOTONVISION,
     }
+
+    public enum GamePieceObservationType {
+        CORAL,
+        ALGAE,
+    }
+
+    public static record GamePieceObservation(double timestamp, Pose3d pose, GamePieceObservationType type) {}
 
     /**
      * Updates the inputs of the vision IO.

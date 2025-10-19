@@ -49,10 +49,10 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
          */
         FULL_DRIVER_CONTROL,
 
-        /**
-         * The driver has partial control over swerve, with the robot assisting in driving to a pose.
-         */
-        SEMI_AUTONOMOUS_DRIVE_TO_POSE,
+        // Semi auto states
+        // The driver has partial control over swerve, with the robot assisting in driving to a pose.
+        DRIVE_TO_CORAL_STATION,
+        DRIVE_TO_REEF,
 
         /**
          * The robot is fully autonomous and following a pre-planned path.
@@ -61,9 +61,10 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     }
 
     public final StateMachine<SwerveState> stateMachine = new StateMachine<SwerveState>("Swerve")
-        .withDefaultState(new StateMachineState<>(SwerveState.FULL_DRIVER_CONTROL, "Full Control"))
-        .withState(new StateMachineState<>(SwerveState.SEMI_AUTONOMOUS_DRIVE_TO_POSE, "Semi Auto"))
-        .withState(new StateMachineState<>(SwerveState.FULL_AUTONOMOUS_PATH_FOLLOWING, "Full Auto"));
+        .withDefaultState(new StateMachineState<>(SwerveState.FULL_DRIVER_CONTROL, "Manual"))
+        .withState(new StateMachineState<>(SwerveState.DRIVE_TO_CORAL_STATION, "Drive to Coral Station"))
+        .withState(new StateMachineState<>(SwerveState.DRIVE_TO_REEF, "Drive to Reef"))
+        .withState(new StateMachineState<>(SwerveState.FULL_AUTONOMOUS_PATH_FOLLOWING, "Follow Path"));
 
     /** Lock for the odometry thread. */
     public static final Lock odometryLock = new ReentrantLock();
@@ -164,10 +165,9 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         SmartDashboard.putData("Field", field);
     }
 
-    @Override
-    public void drive(Translation2d translation, double rotation, boolean fieldRelative) {
+    public ChassisSpeeds getSpeedsFromTranslation(Translation2d translation, double rotation, boolean fieldRelative) {
         // Determine the desired chassis speeds based on whether the control is field-relative
-        ChassisSpeeds desiredChassisSpeeds = fieldRelative
+        return fieldRelative
             ? ChassisSpeeds.fromFieldRelativeSpeeds(
                 translation.getX(),
                 translation.getY(),
@@ -175,6 +175,11 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
                 getHeadingForFieldOriented()
             )
             : new ChassisSpeeds(translation.getX(), translation.getY(), rotation);
+    }
+
+    @Override
+    public void drive(Translation2d translation, double rotation, boolean fieldRelative) {
+        ChassisSpeeds desiredChassisSpeeds = getSpeedsFromTranslation(translation, rotation, fieldRelative);
 
         runVelocityChassisSpeeds(desiredChassisSpeeds);
     }
@@ -204,9 +209,6 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
     @Override
     public void setModuleStates(SwerveModuleState[] desiredStates) {
-        // Ensure the wheel speeds are within the allowable range
-        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, SwerveConfig.MAX_SPEED);
-
         // Set the desired state for each swerve module
         for (int i = 0; i < 4; i++) {
             Module mod = swerveModules[i];

@@ -12,6 +12,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
 import frc.robot.subsystems.superstructure.claw.Claw;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
+import frc.robot.subsystems.swerve.Swerve;
+import frc.robot.subsystems.swerve.Swerve.SwerveState;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import frc.robot.subsystems.swerve.path.AutoRoutines;
 import java.util.Set;
@@ -210,7 +212,7 @@ public class ButtonBindings {
 
     // Subsystem references
     private final AutoRoutines autoRoutines;
-    private final SwerveDrive swerveSubsystem;
+    private final Swerve swerveSubsystem;
     private final Elevator elevatorSubsystem;
     private final Claw clawSubsystem;
     // private final Vision visionSubsystem;
@@ -264,7 +266,16 @@ public class ButtonBindings {
 
         driverController
             .getJoystickButton(XboxController.Button.kA)
-            .whileTrue(autoRoutines.pathFindToLocation(autoRoutines::getNearestRightReef));
+            // .whileTrue(autoRoutines.pathFindToLocation(autoRoutines::getNearestRightReef));
+            .onTrue(
+                Commands.runOnce(() ->
+                    swerveSubsystem.stateMachine.scheduleStateChange(SwerveState.DRIVE_TO_CORAL_STATION)
+                )
+            )
+            .onFalse(
+                Commands.runOnce(() -> swerveSubsystem.stateMachine.scheduleStateChange(SwerveState.FULL_DRIVER_CONTROL)
+                )
+            );
         // driverController
         //     .getJoystickButton(XboxController.Button.kB)
         //     .whileTrue(autoRoutines.continuouslyPathFindToLocation(() -> autoRoutines.getNearestCoralStation()));
