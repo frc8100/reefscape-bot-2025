@@ -28,6 +28,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.LimelightHelpers;
 import frc.lib.math.GeometryUtils;
+import frc.lib.util.statemachine.StateMachine;
+import frc.lib.util.statemachine.StateMachineState;
 import frc.robot.Constants;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
@@ -40,6 +42,28 @@ import org.littletonrobotics.junction.Logger;
 
 /** Swerve subsystem, responsible for controlling the swerve drive. */
 public class Swerve extends SubsystemBase implements SwerveDrive {
+
+    public enum SwerveState {
+        /**
+         * The driver has full control over swerve. No autonomous actions are taken.
+         */
+        FULL_DRIVER_CONTROL,
+
+        /**
+         * The driver has partial control over swerve, with the robot assisting in driving to a pose.
+         */
+        SEMI_AUTONOMOUS_DRIVE_TO_POSE,
+
+        /**
+         * The robot is fully autonomous and following a pre-planned path.
+         */
+        FULL_AUTONOMOUS_PATH_FOLLOWING,
+    }
+
+    public final StateMachine<SwerveState> stateMachine = new StateMachine<SwerveState>("Swerve")
+        .withDefaultState(new StateMachineState<>(SwerveState.FULL_DRIVER_CONTROL, "Full Control"))
+        .withState(new StateMachineState<>(SwerveState.SEMI_AUTONOMOUS_DRIVE_TO_POSE, "Semi Auto"))
+        .withState(new StateMachineState<>(SwerveState.FULL_AUTONOMOUS_PATH_FOLLOWING, "Full Auto"));
 
     /** Lock for the odometry thread. */
     public static final Lock odometryLock = new ReentrantLock();
@@ -131,11 +155,9 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         );
 
         // Initialize the previous setpoint to the robot's current speeds & module states
-        ChassisSpeeds currentSpeeds = getChassisSpeeds(); // Method to get current robot-relative chassis speeds
-        SwerveModuleState[] currentStates = getModuleStates(); // Method to get the current swerve module states
         previousSetpoint = new SwerveSetpoint(
-            currentSpeeds,
-            currentStates,
+            getChassisSpeeds(),
+            getModuleStates(),
             DriveFeedforwards.zeros(SwerveConfig.NUMBER_OF_SWERVE_MODULES)
         );
 
@@ -173,7 +195,8 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
         // Log setpoints
         Logger.recordOutput("Swerve/States/Setpoints", setpointStates);
-        Logger.recordOutput("Swerve/ChassisSpeeds/Setpoints", speed);
+        Logger.recordOutput("Swerve/ChassisSpeeds/Setpoints", previousSetpoint.robotRelativeSpeeds());
+        Logger.recordOutput("Swerve/ChassisSpeeds/SetpointsRaw", speed);
 
         // Set the desired state for each swerve module
         setModuleStates(setpointStates);
