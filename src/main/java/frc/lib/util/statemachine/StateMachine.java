@@ -2,8 +2,13 @@ package frc.lib.util.statemachine;
 
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -11,6 +16,15 @@ import org.littletonrobotics.junction.Logger;
  * @param <TStateType> - The enum type representing the states of the subsystem.
  */
 public class StateMachine<TStateType extends Enum<TStateType>> {
+
+    @FunctionalInterface
+    public interface OnStateChangeAction<TEnumType extends Enum<TEnumType>> {
+        /**
+         * A functional interface representing an action to perform when a state change occurs.
+         * @param previousState - The previous state before the change.
+         */
+        public void onStateChange(TEnumType previousState);
+    }
 
     /**
      * The prefix key for logging to the dashboard.
@@ -41,6 +55,11 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
     private final Map<TStateType, StateMachineState<TStateType>> stateMap = new HashMap<>();
 
     /**
+     * A map of actions to perform on state changes.
+     */
+    private final Map<TStateType, List<OnStateChangeAction<TStateType>>> onStateChangeActions = new HashMap<>();
+
+    /**
      * The state that has been scheduled to change to on the next update cycle.
      * See {@link #scheduleStateChange}.
      */
@@ -66,8 +85,7 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
                 // Check if the state can be changed to the new state based on the requirements
                 if (!scheduledStateChange.canChangeCondition.canChange(currentState.enumType)) return;
 
-                currentState = scheduledStateChange;
-                recordCurrentState();
+                setStateAndUpdate(scheduledStateChange.enumType);
 
                 scheduledStateChange = null;
                 recordScheduledStateChange();
@@ -85,6 +103,20 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
         }
 
         return stateMap.get(state);
+    }
+
+    /**
+     * Executes all actions registered for the current state change.
+     * @param previousState - The previous state before the change.
+     */
+    private void executeOnStateChangeActions(TStateType previousState) {
+        if (currentState == null) return;
+
+        List<OnStateChangeAction<TStateType>> actions = onStateChangeActions.get(currentState.enumType);
+
+        for (OnStateChangeAction<TStateType> action : actions) {
+            action.onStateChange(previousState);
+        }
     }
 
     /**
@@ -112,6 +144,17 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
     }
 
     /**
+     * Sets the current state of the state machine, runs the onStateChange actions, and records the state change.
+     * Bypasses any transition requirements.
+     * @param newState - The new state to set, as the enum type.
+     */
+    private void setStateAndUpdate(TStateType newState) {
+        executeOnStateChangeActions(currentState.enumType);
+        currentState = getStateObject(newState);
+        recordCurrentState();
+    }
+
+    /**
      * Sets the current state of the state machine.
      * @param newState - The new state to set, as the enum type.
      * @return True if the state was changed, false if it was the same as the current state.
@@ -130,8 +173,7 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
             return false;
         }
 
-        currentState = newStateObj;
-        recordCurrentState();
+        setStateAndUpdate(newState);
 
         return true;
     }
@@ -144,9 +186,8 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      */
     public void forceSetState(TStateType newState) {
         StateMachineState<TStateType> newStateObj = getStateObject(newState);
-        currentState = newStateObj;
 
-        recordCurrentState();
+        setStateAndUpdate(newState);
     }
 
     /**
@@ -160,8 +201,7 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
 
         // If it can change now, change immediately
         if (newStateObj.canChangeCondition.canChange(currentState.enumType)) {
-            currentState = newStateObj;
-            recordCurrentState();
+            setStateAndUpdate(newState);
             return;
         }
 
@@ -193,6 +233,7 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      */
     public void addState(StateMachineState<TStateType> state) {
         stateMap.put(state.enumType, state);
+        onStateChangeActions.put(state.enumType, new ArrayList<>());
     }
 
     /**
@@ -214,8 +255,7 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
 
         // If currentState is null, set it to the default state
         if (currentState == null) {
-            currentState = defaultState;
-            recordCurrentState();
+            setStateAndUpdate(defaultState.enumType);
         }
     }
 
@@ -238,14 +278,27 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
             // Set to default state if it exists
             // This should never happen if the state machine is properly initialized
             if (defaultState != null) {
-                currentState = defaultState;
-                recordCurrentState();
+                setStateAndUpdate(defaultState.enumType);
             } else {
                 throw new IllegalStateException("StateMachine does not have a current state defined.");
             }
         }
 
         return currentState;
+    }
+
+    /**
+     * Adds an action to perform when the state machine changes to the specified state.
+     * @param state - The state to add the action for.
+     * @param action - The action to perform when the state machine changes to the specified state.
+     * @throws IllegalArgumentException if the state does not exist in the state machine.
+     */
+    public void addOnStateChangeAction(TStateType state, OnStateChangeAction<TStateType> action) {
+        if (!onStateChangeActions.containsKey(state)) {
+            throw new IllegalArgumentException("StateMachine does not contain state: " + state);
+        }
+
+        onStateChangeActions.get(state).add(action);
     }
 
     /**
