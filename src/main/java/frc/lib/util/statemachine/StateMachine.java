@@ -2,13 +2,11 @@ package frc.lib.util.statemachine;
 
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -149,7 +147,10 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      * @param newState - The new state to set, as the enum type.
      */
     private void setStateAndUpdate(TStateType newState) {
-        executeOnStateChangeActions(currentState.enumType);
+        if (currentState != null) {
+            executeOnStateChangeActions(currentState.enumType);
+        }
+
         currentState = getStateObject(newState);
         recordCurrentState();
     }

@@ -67,9 +67,8 @@ public class Robot extends LoggedRobot {
                 break;
             case SIM:
                 // If SysId is enabled, log to a WPILOG file
-                if (Constants.enableSysId) {
-                    // TODO: add way to change path?
-                    Logger.addDataReceiver(new WPILOGWriter("D:\\wpilib\\2025\\logs"));
+                if (Constants.storeSimLogs) {
+                    Logger.addDataReceiver(new WPILOGWriter(Constants.simLogDirectory));
                 }
 
                 // Running a physics simulator, log to NT

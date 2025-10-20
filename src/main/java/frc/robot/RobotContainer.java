@@ -32,6 +32,7 @@ import frc.robot.commands.SwerveSysidRoutines;
 import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.questnav.QuestNavIO;
 import frc.robot.subsystems.questnav.QuestNavIOReal;
+import frc.robot.subsystems.questnav.QuestNavIOSim;
 import frc.robot.subsystems.questnav.QuestNavSubsystem;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
 import frc.robot.subsystems.superstructure.claw.Claw;
@@ -58,6 +59,7 @@ import frc.robot.subsystems.swerve.path.AutoRoutines;
 import frc.robot.subsystems.swerve.path.AutoRoutines.FieldLocations;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
+import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonSim;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -80,8 +82,7 @@ public class RobotContainer {
 
     // Subsystems
     private final Vision visionSubsystem;
-    // TODO: Implement quest nav
-    // private final QuestNavSubsystem questNavSubsystem;
+    private final QuestNavSubsystem questNavSubsystem;
     private final Swerve swerveSubsystem;
     private final Claw clawSubsystem;
     private final Elevator elevatorSubsystem;
@@ -114,14 +115,14 @@ public class RobotContainer {
                     }
                 );
 
-                // TODO: implement photonvision
                 visionSubsystem = new Vision(
                     swerveSubsystem::addVisionMeasurement,
                     // new VisionIOLimelight(VisionConstants.CAMERA_0_NAME, swerveSubsystem::getRotation)
-                    new VisionIOPhotonVision(VisionConstants.CAMERA_0_NAME, VisionConstants.TRANSFORM_TO_CAMERA_0)
+                    // new VisionIOPhotonVision(VisionConstants.CAMERA_0_NAME, VisionConstants.TRANSFORM_TO_CAMERA_0)
+                    new VisionIO() {}
                 );
 
-                // questNavSubsystem = new QuestNavSubsystem(swerveSubsystem::addVisionMeasurement, new QuestNavIOReal());
+                questNavSubsystem = new QuestNavSubsystem(swerveSubsystem::addVisionMeasurement, new QuestNavIOReal());
 
                 clawSubsystem = new Claw(new ClawIOSpark());
                 elevatorSubsystem = new Elevator(new ElevatorIOSpark());
@@ -158,19 +159,19 @@ public class RobotContainer {
                 // Create a simulated vision subsystem
                 visionSubsystem = new Vision(
                     swerveSubsystem::addVisionMeasurement,
-                    new VisionIOPhotonSim(
-                        VisionConstants.CAMERA_0_NAME,
-                        VisionConstants.TRANSFORM_TO_CAMERA_0,
-                        swerveSubsystem::getActualPose,
-                        VisionConstants.CAMERA_0_PROPERTIES
-                    )
+                    // new VisionIOPhotonSim(
+                    //     VisionConstants.CAMERA_0_NAME,
+                    //     VisionConstants.TRANSFORM_TO_CAMERA_0,
+                    //     swerveSubsystem::getActualPose,
+                    //     VisionConstants.CAMERA_0_PROPERTIES
+                    // )
+                    new VisionIO() {}
                 );
 
-                // questNavSubsystem = new QuestNavSubsystem(
-                //     swerveSubsystem::addVisionMeasurement,
-                //     // No quest nav in sim for now, use empty implementation
-                //     new QuestNavIO() {}
-                // );
+                questNavSubsystem = new QuestNavSubsystem(
+                    swerveSubsystem::addVisionMeasurement,
+                    new QuestNavIOSim(swerveSubsystem)
+                );
 
                 // Create a simulated claw
                 clawSubsystem = new ClawSim();
@@ -292,6 +293,11 @@ public class RobotContainer {
         autoChooser.addOption(
             "Max Acceleration and Velocity Test",
             swerveSubsystem.runMaxAccelerationMaxVelocityTest()
+        );
+
+        autoChooser.addOption(
+            "QuestNav Transform Measure",
+            questNavSubsystem.getMeasureTransformCommand(swerveSubsystem, Seconds.of(0.2))
         );
 
         // Actual SysId routines

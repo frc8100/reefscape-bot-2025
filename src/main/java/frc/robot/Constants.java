@@ -4,6 +4,7 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import frc.robot.subsystems.swerve.SwerveConstants;
 
 /**
  * Contains constants for the robot. Swerve constants are located in {@link SwerveConstants}.
@@ -21,9 +22,19 @@ public final class Constants {
     /**
      * Whether or not to enable system identification mode.
      * - When true, SysId routines are available for use (in the AutoChooser).
-     * - When true and in simulation, the WPILog will be stored and an empty SimulationArena will be used.
+     * - When true and in simulation, an empty SimulationArena will be used.
      */
-    public static final boolean enableSysId = false;
+    public static final boolean enableSysId = true;
+
+    /**
+     * Whether or not to store WPILog files during simulation.
+     */
+    public static final boolean storeSimLogs = false;
+
+    /**
+     * The directory to store WPILog files during simulation.
+     */
+    public static final String simLogDirectory = "D:\\wpilib\\2025\\logs";
 
     /**
      * Whether or not to silence the reportJoystickUnpluggedWarning warning.
