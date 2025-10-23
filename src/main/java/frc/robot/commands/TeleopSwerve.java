@@ -227,7 +227,26 @@ public class TeleopSwerve extends Command {
     private ChassisSpeeds applyInputNudge(ChassisSpeeds previous) {
         ChassisSpeeds inputtedNudge = getChassisSpeedsFromControls();
 
-        return previous.plus(inputtedNudge);
+        Translation2d nudgeTranslation = new Translation2d(
+            inputtedNudge.vxMetersPerSecond,
+            inputtedNudge.vyMetersPerSecond
+        );
+
+        Translation2d previousTranslation = new Translation2d(
+            previous.vxMetersPerSecond,
+            previous.vyMetersPerSecond
+        );
+
+        previousTranslation = previousTranslation.rotateBy(nudgeTranslation.getAngle().times(0.5).times(
+            // Scale the nudge based on the magnitude of the nudge
+            Math.hypot(nudgeTranslation.getX(), nudgeTranslation.getY()) / SwerveConfig.MAX_SPEED.in(MetersPerSecond)
+        ));
+
+        return new ChassisSpeeds(
+            previousTranslation.getX(),
+            previousTranslation.getY(),
+            previous.omegaRadiansPerSecond + inputtedNudge.omegaRadiansPerSecond * 0.5
+        );
     }
 
     /**
@@ -235,10 +254,10 @@ public class TeleopSwerve extends Command {
      */
     @Override
     public void execute() {
-        ChassisSpeeds desiredChassisSpeeds = getChassisSpeedsFromControls();
-
+        
         switch (swerveSubsystem.stateMachine.getCurrentState().enumType) {
             case FULL_DRIVER_CONTROL:
+                ChassisSpeeds desiredChassisSpeeds = getChassisSpeedsFromControls();
                 swerveSubsystem.runVelocityChassisSpeeds(desiredChassisSpeeds);
                 break;
             case DRIVE_TO_CORAL_STATION, DRIVE_TO_REEF:
@@ -276,6 +295,10 @@ public class TeleopSwerve extends Command {
                         swerveSubsystem.runVelocityChassisSpeeds(
                             applyInputNudge(driveToPoseCommand.getChassisSpeeds())
                         );
+                        break;
+                    case AT_TARGET:
+                    case INITIAL_PATHFINDING:
+                        // Do nothing, handled elsewhere
                         break;
                 }
                 break;
