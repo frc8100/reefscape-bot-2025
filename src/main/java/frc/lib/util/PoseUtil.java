@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
 import com.pathplanner.lib.util.FlippingUtil;
-import com.pathplanner.lib.util.GeometryUtil;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -17,8 +16,6 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
-import frc.lib.math.GeometryUtils;
-import java.util.Optional;
 
 /**
  * A utility class for working with poses.
@@ -41,8 +38,8 @@ public final class PoseUtil {
             Math.abs(pose1.getX() - pose2.getX()) < distanceTolerance.in(Meters) &&
             Math.abs(pose1.getY() - pose2.getY()) < distanceTolerance.in(Meters) &&
             MathUtil.isNear(
-                0,
-                pose1.getRotation().minus(pose2.getRotation()).getRadians(),
+                pose1.getRotation().getRadians(),
+                pose2.getRotation().getRadians(),
                 angleTolerance.in(Radians),
                 -Math.PI,
                 Math.PI
