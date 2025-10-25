@@ -53,13 +53,11 @@ public class SwerveSim extends Swerve {
 
         driveSimulation.setSimulationWorldPose(pose);
     }
-
-    @Override
-    public void periodic() {
-        super.periodic();
-
-        // Send simulation data to dashboard for testing
-        field.setRobotPose(driveSimulation.getSimulatedDriveTrainPose());
-        field.getObject("odometry").setPose(getPose());
-    }
+    // @Override
+    // public void periodic() {
+    //     super.periodic();
+    //     // Send simulation data to dashboard for testing
+    //     // field.setRobotPose(driveSimulation.getSimulatedDriveTrainPose());
+    //     // field.getObject("odometry").setPose(getPose());
+    // }
 }

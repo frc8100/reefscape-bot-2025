@@ -24,7 +24,7 @@ public final class Constants {
      * - When true, SysId routines are available for use (in the AutoChooser).
      * - When true and in simulation, an empty SimulationArena will be used.
      */
-    public static final boolean enableSysId = true;
+    public static final boolean enableSysId = false;
 
     /**
      * Whether or not to store WPILog files during simulation.
@@ -34,7 +34,7 @@ public final class Constants {
     /**
      * The directory to store WPILog files during simulation.
      */
-    public static final String simLogDirectory = "D:\\wpilib\\2025\\logs";
+    public static final String simLogDirectory = "C:\\Users\\Public\\wpilib\\2025\\logs";
 
     /**
      * Whether or not to silence the reportJoystickUnpluggedWarning warning.

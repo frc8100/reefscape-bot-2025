@@ -8,7 +8,6 @@ import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -26,8 +25,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.lib.LimelightHelpers;
-import frc.lib.math.GeometryUtils;
 import frc.lib.util.statemachine.StateMachine;
 import frc.lib.util.statemachine.StateMachineState;
 import frc.robot.Constants;
@@ -103,7 +100,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     };
 
     /** A 2d representation of the field */
-    protected Field2d field = new Field2d();
+    // protected Field2d field = new Field2d();
 
     /**
      * Pose estimator. This is the same as odometry but includes vision input to correct for
@@ -147,7 +144,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         );
 
         // Set up custom logging to add the current path to a field 2d widget
-        PathPlannerLogging.setLogActivePathCallback(poses -> field.getObject("path").setPoses(poses));
+        // PathPlannerLogging.setLogActivePathCallback(poses -> field.getObject("path").setPoses(poses));
 
         // Configure setpoint generator
         setpointGenerator = new SwerveSetpointGenerator(
@@ -161,8 +158,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
             getModuleStates(),
             DriveFeedforwards.zeros(SwerveConfig.NUMBER_OF_SWERVE_MODULES)
         );
-
-        SmartDashboard.putData("Field", field);
+        // SmartDashboard.putData("Field", field);
     }
 
     public ChassisSpeeds getSpeedsFromTranslation(Translation2d translation, double rotation, boolean fieldRelative) {

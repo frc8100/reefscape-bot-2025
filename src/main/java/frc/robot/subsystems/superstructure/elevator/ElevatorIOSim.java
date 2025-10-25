@@ -209,11 +209,10 @@ public class ElevatorIOSim implements ElevatorIO {
             // Set the elevator input
             motorSim.setInputVoltage(MathUtil.clamp(outputVoltage, -12, 12));
         }
-
-        motorSim.update(0.02);
+        // motorSim.update(0.02);
 
         // Update the elevator simulation
-        elevatorSim.setInputVoltage(outputVoltage);
-        elevatorSim.update(0.02);
+        // elevatorSim.setInputVoltage(outputVoltage);
+        // elevatorSim.update(0.02);
     }
 }
