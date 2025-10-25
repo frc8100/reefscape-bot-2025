@@ -60,6 +60,10 @@ public class DriveToPose {
      */
     public final BooleanSupplier atTarget;
 
+    public final BooleanSupplier debugPoseTranslationsNear;
+    public final BooleanSupplier debugPoseRotationsNear;
+    public final BooleanSupplier debugVelocityNear;
+
     /**
      * Whether the robot can switch to final alignment mode.
      */
@@ -80,7 +84,7 @@ public class DriveToPose {
         atTarget = () ->
             PoseUtil.isPosesAndVelocityNear(
                 swerveSubsystem.getPose(),
-                targetPose,
+                this.targetPoseSupplier.get(),
                 swerveSubsystem.getVelocityMagnitude(),
                 MetersPerSecond.of(0),
                 positionTolerance,
@@ -96,6 +100,14 @@ public class DriveToPose {
                 Meters.of(0.4 + swerveSubsystem.getVelocityMagnitude().in(MetersPerSecond) * 0.35),
                 Degrees.of(360)
             );
+
+        // debug
+        debugPoseTranslationsNear = () ->
+            PoseUtil.isPoseTranslationNear(swerveSubsystem.getPose(), this.targetPoseSupplier.get(), positionTolerance);
+        debugPoseRotationsNear = () ->
+            PoseUtil.isPoseRotationNear(swerveSubsystem.getPose(), this.targetPoseSupplier.get(), angleTolerance);
+        debugVelocityNear = () ->
+            PoseUtil.isVelocityNear(swerveSubsystem.getVelocityMagnitude(), MetersPerSecond.of(0), speedTolerance);
     }
 
     /**

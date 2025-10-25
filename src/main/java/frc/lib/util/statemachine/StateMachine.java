@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import org.littletonrobotics.junction.Logger;
 
@@ -21,7 +22,7 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
          * A functional interface representing an action to perform when a state change occurs.
          * @param previousState - The previous state before the change.
          */
-        public void onStateChange(TEnumType previousState);
+        public void onStateChange(Optional<TEnumType> previousState);
     }
 
     /**
@@ -45,7 +46,7 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      * The key used for logging to the dashboard.
      * Example: "StateMachines/Swerve"
      */
-    private final String dashboardKey;
+    public final String dashboardKey;
 
     /**
      * A map of all possible states in the state machine.
@@ -105,7 +106,7 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
 
     /**
      * Executes all actions registered for the current state change.
-     * @param previousState - The previous state before the change.
+     * @param previousState - The previous state before the change. Can be null if there was no previous state.
      */
     private void executeOnStateChangeActions(TStateType previousState) {
         if (currentState == null) return;
@@ -113,7 +114,7 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
         List<OnStateChangeAction<TStateType>> actions = onStateChangeActions.get(currentState.enumType);
 
         for (OnStateChangeAction<TStateType> action : actions) {
-            action.onStateChange(previousState);
+            action.onStateChange(Optional.ofNullable(previousState));
         }
     }
 
@@ -147,12 +148,12 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      * @param newState - The new state to set, as the enum type.
      */
     private void setStateAndUpdate(TStateType newState) {
-        if (currentState != null) {
-            executeOnStateChangeActions(currentState.enumType);
-        }
+        TStateType previousState = (currentState != null) ? currentState.enumType : null;
 
         currentState = getStateObject(newState);
         recordCurrentState();
+
+        executeOnStateChangeActions(previousState);
     }
 
     /**
@@ -186,8 +187,6 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      * @throws IllegalArgumentException if the new state does not exist in the state machine.
      */
     public void forceSetState(TStateType newState) {
-        StateMachineState<TStateType> newStateObj = getStateObject(newState);
-
         setStateAndUpdate(newState);
     }
 

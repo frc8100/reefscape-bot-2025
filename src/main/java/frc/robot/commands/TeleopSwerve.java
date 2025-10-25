@@ -145,6 +145,14 @@ public class TeleopSwerve extends Command {
                         previousState == DriveToPoseState.INITIAL_PATHFINDING &&
                         driveToPoseCommand.canSwitchToFinalAlignment.getAsBoolean()
                 )
+            )
+            .withState(
+                new StateMachineState<>(
+                    DriveToPoseState.AT_TARGET,
+                    "At Target",
+                    (DriveToPoseState previousState) ->
+                        previousState == DriveToPoseState.FINAL_ALIGNMENT && driveToPoseCommand.atTarget.getAsBoolean()
+                )
             );
 
         // When we enter full driver control, cancel any pathfinding commands and set state to not driving to pose
@@ -156,6 +164,8 @@ public class TeleopSwerve extends Command {
 
             stateMachine.scheduleStateChange(DriveToPoseState.NOT_DRIVING_TO_POSE);
         });
+
+        logCurrentStates();
     }
 
     /**
@@ -271,6 +281,25 @@ public class TeleopSwerve extends Command {
     }
 
     /**
+     * Logs the current states of the drive to pose command.
+     */
+    private void logCurrentStates() {
+        Logger.recordOutput(stateMachine.dashboardKey + "/AtTarget", driveToPoseCommand.atTarget.getAsBoolean());
+        Logger.recordOutput(
+            stateMachine.dashboardKey + "/IsTranslationNear",
+            driveToPoseCommand.debugPoseTranslationsNear.getAsBoolean()
+        );
+        Logger.recordOutput(
+            stateMachine.dashboardKey + "/IsRotationNear",
+            driveToPoseCommand.debugPoseRotationsNear.getAsBoolean()
+        );
+        Logger.recordOutput(
+            stateMachine.dashboardKey + "/IsVelocityNear",
+            driveToPoseCommand.debugVelocityNear.getAsBoolean()
+        );
+    }
+
+    /**
      * Drives semi-autonomously to a target pose based on the state machine.
      * @param targetPoseSupplier - The supplier for the target pose.
      */
@@ -279,6 +308,8 @@ public class TeleopSwerve extends Command {
 
         switch (stateMachine.getCurrentState().enumType) {
             case NOT_DRIVING_TO_POSE:
+                Logger.recordOutput(stateMachine.dashboardKey + "/TargetPose", targetPoseSupplier.get());
+
                 // Initialize pathfinding to the target pose (if not already doing so)
                 pathFindToPoseCommand = new PathfindingCommand(
                     targetPoseSupplier.get(),
@@ -310,12 +341,16 @@ public class TeleopSwerve extends Command {
                 if (driveToPoseCommand.atTarget.getAsBoolean()) {
                     stateMachine.scheduleStateChange(DriveToPoseState.AT_TARGET);
                 }
+
+                logCurrentStates();
                 break;
             case AT_TARGET:
                 // If the robot is ever not at the target, go back to final alignment
                 if (!driveToPoseCommand.atTarget.getAsBoolean()) {
                     stateMachine.scheduleStateChange(DriveToPoseState.FINAL_ALIGNMENT);
                 }
+
+                swerveSubsystem.stop();
                 break;
             case INITIAL_PATHFINDING:
                 // Do nothing, handled elsewhere

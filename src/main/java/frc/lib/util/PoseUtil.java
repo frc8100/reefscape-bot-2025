@@ -25,6 +25,23 @@ public final class PoseUtil {
 
     private PoseUtil() {}
 
+    public static boolean isPoseTranslationNear(Pose2d pose1, Pose2d pose2, Distance distanceTolerance) {
+        return (
+            Math.abs(pose1.getX() - pose2.getX()) < distanceTolerance.in(Meters) &&
+            Math.abs(pose1.getY() - pose2.getY()) < distanceTolerance.in(Meters)
+        );
+    }
+
+    public static boolean isPoseRotationNear(Pose2d pose1, Pose2d pose2, Angle angleTolerance) {
+        return MathUtil.isNear(
+            pose1.getRotation().getRadians(),
+            pose2.getRotation().getRadians(),
+            angleTolerance.in(Radians),
+            -Math.PI,
+            Math.PI
+        );
+    }
+
     /**
      * Checks if two poses are within a specified tolerance of each other.
      * @param pose1 - The first pose.
@@ -44,6 +61,17 @@ public final class PoseUtil {
                 -Math.PI,
                 Math.PI
             )
+        );
+    }
+
+    public static boolean isVelocityNear(
+        LinearVelocity velocity1,
+        LinearVelocity velocity2,
+        LinearVelocity velocityTolerance
+    ) {
+        return (
+            Math.abs(velocity1.in(MetersPerSecond) - velocity2.in(MetersPerSecond)) <
+            velocityTolerance.in(MetersPerSecond)
         );
     }
 
