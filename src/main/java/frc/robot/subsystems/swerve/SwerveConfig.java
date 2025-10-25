@@ -56,6 +56,12 @@ public class SwerveConfig {
      */
     public static final double DRIVE_STICK_DEADBAND = 0.1;
 
+    /**
+     * When in semi-auto mode, the automatically calculated ChassisSpeeds will be adjusted by the controller inputs multiplied by this value.
+     */
+    public static final double NUDGE_TRANSLATION_INPUT_MULTIPLIER = 0.5;
+    public static final double NUDGE_ROTATION_INPUT_MULTIPLIER = 0.5;
+
     // Behavior of the motors when the robot is disabled/idling
     public static final SparkBaseConfig.IdleMode driveIdleMode = SparkBaseConfig.IdleMode.kBrake;
     public static final SparkBaseConfig.IdleMode angleIdleMode = SparkBaseConfig.IdleMode.kBrake;

@@ -3,26 +3,22 @@ package frc.robot.commands;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathfindingCommand;
-import com.pathplanner.lib.trajectory.PathPlannerTrajectoryState;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import frc.lib.util.statemachine.StateMachine;
 import frc.lib.util.statemachine.StateMachineState;
 import frc.robot.Controls;
-import frc.robot.commands.TeleopSwerve.DriveToPoseState;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.Swerve.SwerveState;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.path.AutoRoutines;
-import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -58,6 +54,9 @@ public class TeleopSwerve extends Command {
 
     public final StateMachine<DriveToPoseState> stateMachine;
 
+    /**
+     * The drive to pose command used for final alignment.
+     */
     public final DriveToPose driveToPoseCommand;
 
     private Command pathFindToPoseCommand = null;
@@ -92,11 +91,6 @@ public class TeleopSwerve extends Command {
     private BooleanSupplier robotCentricSupplier;
 
     /**
-     * Whether to dampen the input.
-     */
-    private BooleanSupplier dampen;
-
-    /**
      * The speed multiplier, as a double.
      * Default is `1`
      */
@@ -117,7 +111,6 @@ public class TeleopSwerve extends Command {
         DoubleSupplier strafeSupplier,
         DoubleSupplier rotationSupplier,
         BooleanSupplier robotCentricSupplier,
-        BooleanSupplier dampen,
         DoubleSupplier speedDial,
         boolean logValues
     ) {
@@ -129,12 +122,12 @@ public class TeleopSwerve extends Command {
         this.strafeSupplier = strafeSupplier;
         this.rotationSupplier = rotationSupplier;
         this.robotCentricSupplier = robotCentricSupplier;
-        this.dampen = dampen;
         this.speedDial = speedDial;
         this.logValues = logValues;
 
         driveToPoseCommand = new DriveToPose(this.swerveSubsystem, () -> new Pose2d());
 
+        // Set up the state machine
         stateMachine = new StateMachine<DriveToPoseState>("Swerve/DriveToPose")
             .withDefaultState(new StateMachineState<>(DriveToPoseState.NOT_DRIVING_TO_POSE, "Idle"))
             .withState(
@@ -154,17 +147,15 @@ public class TeleopSwerve extends Command {
                 )
             );
 
-        swerveSubsystem.stateMachine
-            .getStateTrigger(SwerveState.FULL_DRIVER_CONTROL)
-            .onTrue(
-                Commands.runOnce(() -> {
-                    if (pathFindToPoseCommand != null) {
-                        pathFindToPoseCommand.cancel();
-                        pathFindToPoseCommand = null;
-                    }
-                    stateMachine.scheduleStateChange(DriveToPoseState.NOT_DRIVING_TO_POSE);
-                })
-            );
+        // When we enter full driver control, cancel any pathfinding commands and set state to not driving to pose
+        swerveSubsystem.stateMachine.addOnStateChangeAction(SwerveState.FULL_DRIVER_CONTROL, () -> {
+            if (pathFindToPoseCommand != null) {
+                pathFindToPoseCommand.cancel();
+                pathFindToPoseCommand = null;
+            }
+
+            stateMachine.scheduleStateChange(DriveToPoseState.NOT_DRIVING_TO_POSE);
+        });
     }
 
     /**
@@ -177,14 +168,16 @@ public class TeleopSwerve extends Command {
             driveControls::getStrafeAxis,
             driveControls::getRotationAxis,
             driveControls::isRobotCentric,
-            driveControls::isDampen,
             driveControls::getSpeedMultiplier,
             logValues
         );
     }
 
+    /**
+     * @return The chassis speeds based on controller input, scaled to {@link SwerveConfig#MAX_SPEED} and {@link SwerveConfig#MAX_ANGULAR_VELOCITY}.
+     */
     public ChassisSpeeds getChassisSpeedsFromControls() {
-        // Get values and deadband
+        // Get values from suppliers
         double translationInput = translationSupplier.getAsDouble();
         double strafeInput = strafeSupplier.getAsDouble();
         double rotationInput = rotationSupplier.getAsDouble();
@@ -192,15 +185,13 @@ public class TeleopSwerve extends Command {
         /**
          * The constant to multiply each value by
          */
-        // TODO: refactor
-        double dampenAndSpeedConstant = (dampen.getAsBoolean() ? 0.3 : 1) * (speedDial.getAsDouble());
+        double speedMultiplier = speedDial.getAsDouble();
 
         double translationValue =
-            MathUtil.applyDeadband(translationInput, SwerveConfig.DRIVE_STICK_DEADBAND) * dampenAndSpeedConstant;
-        double strafeValue =
-            MathUtil.applyDeadband(strafeInput, SwerveConfig.DRIVE_STICK_DEADBAND) * dampenAndSpeedConstant;
+            MathUtil.applyDeadband(translationInput, SwerveConfig.DRIVE_STICK_DEADBAND) * speedMultiplier;
+        double strafeValue = MathUtil.applyDeadband(strafeInput, SwerveConfig.DRIVE_STICK_DEADBAND) * speedMultiplier;
         double rotationValue =
-            MathUtil.applyDeadband(rotationInput, SwerveConfig.DRIVE_STICK_DEADBAND) * dampenAndSpeedConstant;
+            MathUtil.applyDeadband(rotationInput, SwerveConfig.DRIVE_STICK_DEADBAND) * speedMultiplier;
 
         // Log the values
         if (logValues) {
@@ -225,27 +216,35 @@ public class TeleopSwerve extends Command {
      * @return Apply a nudge to the previous chassis speeds based on controller input.
      */
     private ChassisSpeeds applyInputNudge(ChassisSpeeds previous) {
+        // Get the nudge from the controller (as field centric)
         ChassisSpeeds inputtedNudge = getChassisSpeedsFromControls();
 
-        Translation2d nudgeTranslation = new Translation2d(
-            inputtedNudge.vxMetersPerSecond,
-            inputtedNudge.vyMetersPerSecond
-        );
+        // Convert to Translation2d to rotate around
+        Translation2d previousTranslation = new Translation2d(previous.vxMetersPerSecond, previous.vyMetersPerSecond);
 
-        Translation2d previousTranslation = new Translation2d(
-            previous.vxMetersPerSecond,
-            previous.vyMetersPerSecond
-        );
+        Rotation2d rotateBy =
+            // Use atan2 directly to avoid "x and y components of Rotation2d are zero" error
+            new Rotation2d(Math.atan2(inputtedNudge.vyMetersPerSecond, inputtedNudge.vxMetersPerSecond))
+                // Get the difference between the two angles
+                .minus(new Rotation2d(Math.atan2(previous.vyMetersPerSecond, previous.vxMetersPerSecond)))
+                .times(
+                    // Scale down by the nudge input multiplier (avoid overshooting)
+                    SwerveConfig.NUDGE_TRANSLATION_INPUT_MULTIPLIER *
+                    // Scale the nudge based on the magnitude of the nudge
+                    (Math.hypot(inputtedNudge.vxMetersPerSecond, inputtedNudge.vyMetersPerSecond) /
+                        SwerveConfig.MAX_SPEED.in(MetersPerSecond))
+                );
 
-        previousTranslation = previousTranslation.rotateBy(nudgeTranslation.getAngle().times(0.5).times(
-            // Scale the nudge based on the magnitude of the nudge
-            Math.hypot(nudgeTranslation.getX(), nudgeTranslation.getY()) / SwerveConfig.MAX_SPEED.in(MetersPerSecond)
-        ));
+        Logger.recordOutput("Swerve/NudgeRotateBy", rotateBy.getDegrees());
+
+        previousTranslation = previousTranslation.rotateBy(rotateBy);
 
         return new ChassisSpeeds(
             previousTranslation.getX(),
             previousTranslation.getY(),
-            previous.omegaRadiansPerSecond + inputtedNudge.omegaRadiansPerSecond * 0.5
+            // Also nudge omega
+            previous.omegaRadiansPerSecond +
+            (inputtedNudge.omegaRadiansPerSecond * SwerveConfig.NUDGE_ROTATION_INPUT_MULTIPLIER)
         );
     }
 
@@ -254,55 +253,72 @@ public class TeleopSwerve extends Command {
      */
     @Override
     public void execute() {
-        
         switch (swerveSubsystem.stateMachine.getCurrentState().enumType) {
             case FULL_DRIVER_CONTROL:
+                // Drive based on the raw controller inputs
                 ChassisSpeeds desiredChassisSpeeds = getChassisSpeedsFromControls();
                 swerveSubsystem.runVelocityChassisSpeeds(desiredChassisSpeeds);
                 break;
+            // Semi-autonomous states
             case DRIVE_TO_CORAL_STATION, DRIVE_TO_REEF:
                 // TODO: change pose based on state
                 // TODO: only set once
-                Supplier<Pose2d> targetPoseSupplier = AutoRoutines.FieldLocations.CORAL_STATION_1::getPose;
-                driveToPoseCommand.setPoseSupplier(targetPoseSupplier);
-
-                switch (stateMachine.getCurrentState().enumType) {
-                    case NOT_DRIVING_TO_POSE:
-                        pathFindToPoseCommand = new PathfindingCommand(
-                            targetPoseSupplier.get(),
-                            SwerveConfig.pathConstraints,
-                            swerveSubsystem::getPose,
-                            swerveSubsystem::getChassisSpeeds,
-                            (ChassisSpeeds speeds, DriveFeedforwards feedforwards) -> {
-                                swerveSubsystem.runVelocityChassisSpeeds(applyInputNudge(speeds));
-                            },
-                            SwerveConfig.PP_INITIAL_PID_CONTROLLER,
-                            SwerveConfig.getRobotConfig(),
-                            swerveSubsystem
-                        )
-                            .raceWith(Commands.waitUntil(driveToPoseCommand.canSwitchToFinalAlignment))
-                            .andThen(
-                                Commands.runOnce(() ->
-                                    stateMachine.scheduleStateChange(DriveToPoseState.FINAL_ALIGNMENT)
-                                )
-                            );
-
-                        stateMachine.scheduleStateChange(DriveToPoseState.INITIAL_PATHFINDING);
-
-                        pathFindToPoseCommand.schedule();
-                        break;
-                    case FINAL_ALIGNMENT:
-                        swerveSubsystem.runVelocityChassisSpeeds(
-                            applyInputNudge(driveToPoseCommand.getChassisSpeeds())
-                        );
-                        break;
-                    case AT_TARGET:
-                    case INITIAL_PATHFINDING:
-                        // Do nothing, handled elsewhere
-                        break;
-                }
+                driveSemiAuto(AutoRoutines.FieldLocations.CORAL_STATION_1::getPose);
                 break;
             default:
+                break;
+        }
+    }
+
+    /**
+     * Drives semi-autonomously to a target pose based on the state machine.
+     * @param targetPoseSupplier - The supplier for the target pose.
+     */
+    private void driveSemiAuto(Supplier<Pose2d> targetPoseSupplier) {
+        driveToPoseCommand.setPoseSupplier(targetPoseSupplier);
+
+        switch (stateMachine.getCurrentState().enumType) {
+            case NOT_DRIVING_TO_POSE:
+                // Initialize pathfinding to the target pose (if not already doing so)
+                pathFindToPoseCommand = new PathfindingCommand(
+                    targetPoseSupplier.get(),
+                    SwerveConfig.pathConstraints,
+                    swerveSubsystem::getPose,
+                    swerveSubsystem::getChassisSpeeds,
+                    (ChassisSpeeds speeds, DriveFeedforwards feedforwards) ->
+                        swerveSubsystem.runVelocityChassisSpeeds(applyInputNudge(speeds)),
+                    SwerveConfig.PP_INITIAL_PID_CONTROLLER,
+                    SwerveConfig.getRobotConfig(),
+                    swerveSubsystem
+                )
+                    // End when we can switch to final alignment
+                    .raceWith(Commands.waitUntil(driveToPoseCommand.canSwitchToFinalAlignment))
+                    .andThen(
+                        Commands.runOnce(() -> stateMachine.scheduleStateChange(DriveToPoseState.FINAL_ALIGNMENT))
+                    );
+
+                // Schedule state change to initial pathfinding so the command isn't scheduled multiple times
+                stateMachine.scheduleStateChange(DriveToPoseState.INITIAL_PATHFINDING);
+
+                pathFindToPoseCommand.schedule();
+                break;
+            case FINAL_ALIGNMENT:
+                // Run final alignment
+                swerveSubsystem.runVelocityChassisSpeeds(applyInputNudge(driveToPoseCommand.getChassisSpeeds()));
+
+                // If at target, switch state
+                if (driveToPoseCommand.atTarget.getAsBoolean()) {
+                    stateMachine.scheduleStateChange(DriveToPoseState.AT_TARGET);
+                }
+                break;
+            case AT_TARGET:
+                // If the robot is ever not at the target, go back to final alignment
+                if (!driveToPoseCommand.atTarget.getAsBoolean()) {
+                    stateMachine.scheduleStateChange(DriveToPoseState.FINAL_ALIGNMENT);
+                }
+                break;
+            case INITIAL_PATHFINDING:
+                // Do nothing, handled elsewhere
                 break;
         }
     }

@@ -15,8 +15,6 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.util.PoseUtil;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveDrive;
@@ -38,7 +36,6 @@ public class DriveToPose {
     );
 
     // TODO: Move these to a constants file
-    private static final Time debounceTime = Seconds.of(0.1);
     private static final Distance positionTolerance = Inches.of(1);
     private static final Angle angleTolerance = Degrees.of(3);
     private static final LinearVelocity speedTolerance = InchesPerSecond.of(2);
@@ -61,7 +58,7 @@ public class DriveToPose {
      * A trigger that is true when the robot is at the target pose.
      * Has debounce.
      */
-    public final Trigger atTarget;
+    public final BooleanSupplier atTarget;
 
     /**
      * Whether the robot can switch to final alignment mode.
@@ -80,7 +77,7 @@ public class DriveToPose {
 
         // addRequirements(swerveSubsystem);
 
-        atTarget = new Trigger(() ->
+        atTarget = () ->
             PoseUtil.isPosesAndVelocityNear(
                 swerveSubsystem.getPose(),
                 targetPose,
@@ -89,8 +86,7 @@ public class DriveToPose {
                 positionTolerance,
                 angleTolerance,
                 speedTolerance
-            )
-        ).debounce(debounceTime.in(Seconds));
+            );
 
         canSwitchToFinalAlignment = () ->
             PoseUtil.isNear(

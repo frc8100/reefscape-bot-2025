@@ -303,7 +303,18 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
     }
 
     /**
+     * Adds an action to perform when the state machine changes to the specified state.
+     * @param state - The state to add the action for.
+     * @param action - The action to perform when the state machine changes to the specified state.
+     * @throws IllegalArgumentException if the state does not exist in the state machine.
+     */
+    public void addOnStateChangeAction(TStateType state, Runnable action) {
+        addOnStateChangeAction(state, previousState -> action.run());
+    }
+
+    /**
      * Returns a trigger that is active when the state machine is in the specified state.
+     * See {@link #addOnStateChangeAction} for an better way to run actions on state changes.
      * @param state - The state to create a trigger for.
      */
     public Trigger getStateTrigger(TStateType state) {

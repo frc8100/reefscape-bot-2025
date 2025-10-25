@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.subsystems.superstructure.claw.ClawConstants;
-import frc.robot.subsystems.swerve.SwerveDrive;
 
 /** Declares control key bindings */
 public class Controls {
@@ -82,7 +81,7 @@ public class Controls {
          */
         public int slowButton = XboxController.Button.kLeftBumper.value;
 
-        public double slowMultiplier = 0.7;
+        public double slowMultiplier = 0.5;
 
         /**
          * When held, makes the robot move robot centric.
