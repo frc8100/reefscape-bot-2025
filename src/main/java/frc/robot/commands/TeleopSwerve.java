@@ -174,7 +174,7 @@ public class TeleopSwerve extends Command {
     }
 
     /**
-     * @return The chassis speeds based on controller input, scaled to {@link SwerveConfig#MAX_SPEED} and {@link SwerveConfig#MAX_ANGULAR_VELOCITY}.
+     * @return The chassis speeds based on controller input, scaled to {@link SwerveConfig#MAX_SPEED} and {@link SwerveConfig#ANGULAR_VELOCITY_FOR_TELEOP}.
      */
     public ChassisSpeeds getChassisSpeedsFromControls() {
         // Get values from suppliers
@@ -206,7 +206,7 @@ public class TeleopSwerve extends Command {
 
         return swerveSubsystem.getSpeedsFromTranslation(
             new Translation2d(translationValue, strafeValue).times(SwerveConfig.MAX_SPEED.in(MetersPerSecond)),
-            rotationValue * SwerveConfig.MAX_ANGULAR_VELOCITY.in(RadiansPerSecond),
+            rotationValue * SwerveConfig.ANGULAR_VELOCITY_FOR_TELEOP.in(RadiansPerSecond),
             !robotCentricSupplier.getAsBoolean()
         );
     }

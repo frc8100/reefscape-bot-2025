@@ -142,7 +142,7 @@ public class TunableValue implements DoubleSupplier {
         if (!hasDefault) {
             hasDefault = true;
             this.defaultValue = defaultValue;
-            if (Constants.tuningMode && !Constants.disableHAL) {
+            if (Constants.tuningMode) {
                 dashboardNumber = new LoggedNetworkNumber(key, defaultValue);
             }
         }
@@ -156,7 +156,7 @@ public class TunableValue implements DoubleSupplier {
         if (!hasDefault) {
             return 0.0;
         } else {
-            return (Constants.tuningMode && !Constants.disableHAL) ? dashboardNumber.get() : defaultValue;
+            return (Constants.tuningMode) ? dashboardNumber.get() : defaultValue;
         }
     }
 

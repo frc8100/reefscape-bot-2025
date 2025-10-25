@@ -46,7 +46,7 @@ public interface ModuleIO {
     /**
      * @return The state of the module.
      */
-    public SwerveModuleState getState();
+    public abstract SwerveModuleState getState();
 
     /** Run the drive motor at the specified open loop value (in volts). */
     public abstract void setDriveOpenLoop(double output);

@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import frc.robot.Constants;
 import org.ironmaple.simulation.motorsims.MapleMotorSim;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController;
 import org.littletonrobotics.junction.Logger;
@@ -144,8 +145,8 @@ public class ClawIOSim implements ClawIO {
         }
 
         // Update the simulation
-        angleMotorSim.update(Seconds.of(0.02));
-        outtakeMotorSim.update(Seconds.of(0.02));
+        angleMotorSim.update(Seconds.of(Constants.LOOP_PERIOD_SECONDS));
+        outtakeMotorSim.update(Seconds.of(Constants.LOOP_PERIOD_SECONDS));
     }
 
     @Override

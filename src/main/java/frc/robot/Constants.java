@@ -1,17 +1,16 @@
 package frc.robot;
 
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
-import frc.robot.subsystems.swerve.SwerveConstants;
-
 /**
- * Contains constants for the robot. Swerve constants are located in {@link SwerveConstants}.
+ * Contains constants for the robot. Subsystem-specific constants should go in their own files.
  */
 public final class Constants {
 
     private Constants() {}
+
+    /**
+     * The period of the main robot loop, in seconds.
+     */
+    public static final double LOOP_PERIOD_SECONDS = 0.02;
 
     /**
      * The current mode, see {@link Mode}.
@@ -49,13 +48,6 @@ public final class Constants {
     public static final boolean tuningMode = true;
 
     /**
-     * Whether or not to disable HAL (Hardware Abstraction Layer) calls.
-     * This is useful for testing without hardware.
-     * @deprecated Use {@link #currentMode} instead.
-     */
-    public static final boolean disableHAL = false;
-
-    /**
      * An enum of modes for the robot.
      */
     public enum Mode {
@@ -67,16 +59,5 @@ public final class Constants {
 
         /** Replaying from a log file. */
         REPLAY,
-    }
-
-    /**
-     * Constants for the pose estimator. Includes the state and vision standard deviations.
-     */
-    public static final class PoseEstimator {
-
-        private PoseEstimator() {}
-
-        public static final Matrix<N3, N1> stateStdDevs = VecBuilder.fill(0.1, 0.1, 0.1);
-        public static final Matrix<N3, N1> VisionStdDevs = VecBuilder.fill(2, 2, 2);
     }
 }

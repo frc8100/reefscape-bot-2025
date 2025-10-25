@@ -127,8 +127,8 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
             rawGyroRotation,
             lastModulePositions,
             SwerveConfig.initialPose,
-            Constants.PoseEstimator.stateStdDevs,
-            Constants.PoseEstimator.VisionStdDevs
+            SwerveConfig.stateStdDevs,
+            SwerveConfig.visionStdDevs
         );
 
         zeroGyro(180);
@@ -149,7 +149,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         // Configure setpoint generator
         setpointGenerator = new SwerveSetpointGenerator(
             SwerveConfig.getRobotConfig(),
-            SwerveConfig.MAX_ANGULAR_VELOCITY
+            SwerveConfig.MAX_ANGULAR_VELOCITY_OF_SWERVE_MODULE
         );
 
         // Initialize the previous setpoint to the robot's current speeds & module states
@@ -161,6 +161,9 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         // SmartDashboard.putData("Field", field);
     }
 
+    /**
+     * @return The chassis speeds from a translation and rotation input, either field-relative or robot-relative.
+     */
     public ChassisSpeeds getSpeedsFromTranslation(Translation2d translation, double rotation, boolean fieldRelative) {
         // Determine the desired chassis speeds based on whether the control is field-relative
         return fieldRelative
@@ -186,11 +189,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
         // Note: it is important to not discretize speeds before or after
         // using the setpoint generator, as it will discretize them for you
-        previousSetpoint = setpointGenerator.generateSetpoint(
-            previousSetpoint, // The previous setpoint
-            speed, // The desired target speeds
-            0.02 // The loop time of the robot code, in seconds
-        );
+        previousSetpoint = setpointGenerator.generateSetpoint(previousSetpoint, speed, Constants.LOOP_PERIOD_SECONDS);
 
         SwerveModuleState[] setpointStates = previousSetpoint.moduleStates();
 
@@ -335,13 +334,11 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         }
         odometryLock.unlock();
 
-        // Stop moving when disabled
         if (DriverStation.isDisabled()) {
+            // Stop moving when disabled
             stop();
-        }
 
-        // Log empty setpoint states when disabled
-        if (DriverStation.isDisabled()) {
+            // Log empty setpoint states when disabled
             Logger.recordOutput("Swerve/States/Setpoints", new SwerveModuleState[] {});
             Logger.recordOutput("Swerve/States/SetpointsOptimized", new SwerveModuleState[] {});
         }
@@ -375,19 +372,5 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
             // Apply update
             poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
         }
-        // TODO: refactor
-        // LimelightHelpers.SetRobotOrientation(
-        //     "limelight",
-        //     poseEstimator.getEstimatedPosition().getRotation().getDegrees(),
-        //     0,
-        //     0,
-        //     0,
-        //     0,
-        //     0
-        // );
-        // LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
-
-        // poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-        // poseEstimator.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
     }
 }

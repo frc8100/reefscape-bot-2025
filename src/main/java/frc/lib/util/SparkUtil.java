@@ -17,7 +17,11 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import com.revrobotics.REVLibError;
 import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.config.SparkBaseConfig;
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.subsystems.swerve.SwerveConfig;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
@@ -25,6 +29,8 @@ import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 
 public class SparkUtil {
+
+    private SparkUtil() {}
 
     /** Stores whether any error was has been detected by other utility methods. */
     public static boolean sparkStickyFault = false;
@@ -62,6 +68,15 @@ public class SparkUtil {
                 sparkStickyFault = true;
             }
         }
+    }
+
+    /**
+     * Attempts to configure a spark max with the default number of max attempts.
+     */
+    public static void configure(SparkBase spark, SparkBaseConfig config) {
+        tryUntilOk(spark, 5, () ->
+            spark.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters)
+        );
     }
 
     public static double[] getSimulationOdometryTimeStamps() {

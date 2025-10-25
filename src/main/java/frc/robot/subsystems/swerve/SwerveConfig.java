@@ -12,10 +12,14 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -67,8 +71,8 @@ public class SwerveConfig {
     public static final SparkBaseConfig.IdleMode angleIdleMode = SparkBaseConfig.IdleMode.kBrake;
 
     // Percent output value limit for angle and drive motors
-    public static final double MAX_DRIVE_POWER = 0.85;
-    public static final double MAX_ANGLE_POWER = 0.9;
+    public static final double MAX_DRIVE_POWER = 0.9;
+    public static final double MAX_ANGLE_POWER = 0.85;
 
     // Always ensure Gyro is CCW+ CW-
     public static final boolean IS_GYRO_INVERTED = false;
@@ -92,6 +96,10 @@ public class SwerveConfig {
         new Translation2d(WHEEL_BASE.div(-2), TRACK_WIDTH.div(2)),
         new Translation2d(WHEEL_BASE.div(-2), TRACK_WIDTH.div(-2)),
     };
+
+    // Standard deviations for the PoseEstimator
+    public static final Matrix<N3, N1> stateStdDevs = VecBuilder.fill(0.1, 0.1, 0.1);
+    public static final Matrix<N3, N1> visionStdDevs = VecBuilder.fill(0.9, 0.9, 0.9);
 
     public static final double DRIVE_GEAR_RATIO = 6.75;
     public static final double ANGLE_GEAR_RATIO = ((150.0 / 7.0) / 1.0);
@@ -128,21 +136,17 @@ public class SwerveConfig {
     public static final Time ANGLE_PEAK_CURRENT_DURATION = Seconds.of(0.1); // unused
     public static final boolean IS_ANGLE_CURRENT_LIMIT_ACTIVE = true; // unused
 
+    // TODO: tune these values (https://docs.revrobotics.com/brushless/home/faq#neo-v1.1)
     public static final Current DRIVE_CONTINUOUS_CURRENT_LIMIT = Amps.of(35);
     public static final Current DRIVE_PEAK_CURRENT_LIMIT = Amps.of(60); // unused
     public static final Time DRIVE_PEAK_CURRENT_DURATION = Seconds.of(0.1); // unused
     public static final boolean IS_DRIVE_CURRENT_LIMIT_ACTIVE = true; // unused
 
-    // These values are used by the drive falcon to ramp in open loop and closed loop driving.
-    // We found a small open loop ramp (0.25) helps with tread wear, tipping, etc
-    // public static final double OPEN_LOOP_RAMP_VALUE = 0.25;
-    // public static final double CLOSED_LOOP_RAMP_VALUE = 0.0;
-
     // TODO: Change these to UPPER_SNAKE_CASE
 
     // Angle Motor PID Values
     // TODO: tune
-    public static final double angleKP = 0.08;
+    public static final double angleKP = 0.1;
     public static final double angleKI = 0;
     public static final double angleKD = 0;
     public static final double angleKF = 0;
@@ -165,7 +169,6 @@ public class SwerveConfig {
     // Drive Motor Characterization Values
     public static final double driveKS = 0.17388;
     public static final double driveKV = 0.13632;
-    // public static final double driveKA = (0.27);
 
     public static final double driveSimKP = 0.2;
     public static final double driveSimKD = 0.0;
@@ -187,7 +190,15 @@ public class SwerveConfig {
     public static final LinearVelocity MAX_SPEED = MetersPerSecond.of(3.75);
     public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(7);
     // ! IMPORTANT: The actual max angular velocity is much higher
-    public static final AngularVelocity MAX_ANGULAR_VELOCITY = RadiansPerSecond.of(6.0);
+    public static final AngularVelocity MAX_ANGULAR_VELOCITY_OF_ROBOT = RadiansPerSecond.of(6.0);
+
+    public static final AngularVelocity MAX_ANGULAR_VELOCITY_OF_SWERVE_MODULE = RadiansPerSecond.of(7.5);
+
+    /**
+     * The angular velocity used during teleop driving.
+     * When the controller axis (for rotation) is at maximum, this angular velocity will be used.
+     */
+    public static final AngularVelocity ANGULAR_VELOCITY_FOR_TELEOP = RadiansPerSecond.of(6.0);
 
     public static final AngularAcceleration MAX_ANGULAR_ACCELERATION = RadiansPerSecondPerSecond.of(3.0);
 
@@ -200,7 +211,7 @@ public class SwerveConfig {
     public static final PathConstraints pathConstraints = new PathConstraints(
         MAX_SPEED,
         MAX_ACCELERATION,
-        MAX_ANGULAR_VELOCITY,
+        MAX_ANGULAR_VELOCITY_OF_ROBOT,
         MAX_ANGULAR_ACCELERATION
     );
 
