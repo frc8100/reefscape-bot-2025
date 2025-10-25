@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.util.statemachine.StateMachine;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
 import frc.robot.subsystems.superstructure.claw.Claw;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
@@ -16,6 +17,7 @@ import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.Swerve.SwerveState;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import frc.robot.subsystems.swerve.path.AutoRoutines;
+import java.util.List;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -232,53 +234,17 @@ public class ButtonBindings {
 
     public void configureButtonBindings() {
         // Driver controller bindings
-
-        // Controls.mainDriveControls
-        //     .getJoystickButtonOf(Controls.mainDriveControls.zeroGyroButton)
-        //     .onTrue(new InstantCommand(swerveSubsystem::zeroGyro));
-        // driverController.createBinding(Controls.mainDriveControls.zeroGyroButton, (trigger) ->
-        //     trigger.onTrue(new InstantCommand(swerveSubsystem::zeroGyro))
-        // );
-
         driverController
             .getJoystickButton(Controls.mainDriveControls.zeroGyroButton)
-            .onTrue(new InstantCommand(swerveSubsystem::zeroGyro));
+            .onTrue(Commands.runOnce(swerveSubsystem::zeroGyro));
 
-        // TODO: Align to reefs
-        // Controls.mainDriveControls
-        //     .getJoystickButtonOf(Controls.mainDriveControls.alignToLeftReefUsingVision)
-        //     // .whileTrue(new AlignToReefTagRelative(false, swerveSubsystem));
-        //     .whileTrue(new PhotonVisionAlign(false, swerveSubsystem, visionSubsystem));
-        // Controls.mainDriveControls
-        //     .getJoystickButtonOf(Controls.mainDriveControls.alignToRightReefUsingVision)
-        //     // .whileTrue(new AlignToReefTagRelative(true, swerveSubsystem));
-        //     .whileTrue(new PhotonVisionAlign(true, swerveSubsystem, visionSubsystem));
-
-        // Align (new)
-        // driverController
-        //     .getJoystickButton(XboxController.Button.kX)
-        //     .whileTrue(
-        //         new DeferredCommand(
-        //             () -> autoRoutines.pathFindToLocation(autoRoutines.getNearestCoralStation()),
-        //             Set.of(swerveSubsystem)
-        //         )
-        //     );
-
+        // Toggle drive to coral station state
+        StateMachine.StateCycle<SwerveState> toggleDriveToCoralStation = swerveSubsystem.stateMachine.createStateCycle(
+            List.of(SwerveState.DRIVE_TO_CORAL_STATION, SwerveState.FULL_DRIVER_CONTROL)
+        );
         driverController
             .getJoystickButton(XboxController.Button.kA)
-            // .whileTrue(autoRoutines.pathFindToLocation(autoRoutines::getNearestRightReef));
-            .onTrue(
-                Commands.runOnce(() ->
-                    swerveSubsystem.stateMachine.scheduleStateChange(SwerveState.DRIVE_TO_CORAL_STATION)
-                )
-            )
-            .onFalse(
-                Commands.runOnce(() -> swerveSubsystem.stateMachine.scheduleStateChange(SwerveState.FULL_DRIVER_CONTROL)
-                )
-            );
-        // driverController
-        //     .getJoystickButton(XboxController.Button.kB)
-        //     .whileTrue(autoRoutines.continuouslyPathFindToLocation(() -> autoRoutines.getNearestCoralStation()));
+            .onTrue(Commands.runOnce(toggleDriveToCoralStation::scheduleNextState));
 
         // Claw
         operatorController

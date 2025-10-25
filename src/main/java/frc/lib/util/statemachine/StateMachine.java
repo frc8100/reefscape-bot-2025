@@ -26,6 +26,109 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
     }
 
     /**
+     * A cycle of states. Mainly used for controller inputs that toggle/cycle through a set of states.
+     */
+    public static class StateCycle<TEnumType extends Enum<TEnumType>> {
+
+        /**
+         * The behavior of the state cycle when cycling through states.
+         */
+        public enum StateCycleBehavior {
+            /**
+             * Rely on the current state of the state machine to determine the next state in the cycle.
+             */
+            RELY_ON_CURRENT_STATE,
+
+            /**
+             * Rely on the index of the state in the cycle to determine the next state.
+             */
+            RELY_ON_INDEX,
+        }
+
+        private final StateMachine<TEnumType> stateMachine;
+        private final List<TEnumType> states;
+        private final StateCycleBehavior behavior;
+
+        private int currentIndex = 0;
+
+        /**
+         * Creates a new StateCycle with the specified states and behavior.
+         * @param stateMachine - The state machine to cycle through.
+         * @param states - The states to cycle through.
+         * @param behavior - The behavior of the state cycle.
+         */
+        public StateCycle(StateMachine<TEnumType> stateMachine, List<TEnumType> states, StateCycleBehavior behavior) {
+            this.stateMachine = stateMachine;
+            this.states = states;
+            this.behavior = behavior;
+        }
+
+        /**
+         * Creates a new StateCycle with the specified states. Behavior defaults to {@link StateCycleBehavior#RELY_ON_CURRENT_STATE}.
+         * @param stateMachine - The state machine to cycle through.
+         * @param states - The states to cycle through.
+         */
+        public StateCycle(StateMachine<TEnumType> stateMachine, List<TEnumType> states) {
+            this(stateMachine, states, StateCycleBehavior.RELY_ON_CURRENT_STATE);
+        }
+
+        /**
+         * @return The next state in the cycle depending on the behavior.
+         * If the behavior is {@link StateCycleBehavior#RELY_ON_CURRENT_STATE} and the current state is not in the cycle, the optional will be empty.
+         * Note: If the state list has duplicates, the first occurrence will be used (for {@link StateCycleBehavior#RELY_ON_CURRENT_STATE}).
+         */
+        public Optional<TEnumType> getNextState() {
+            if (behavior == StateCycleBehavior.RELY_ON_CURRENT_STATE) {
+                TEnumType currentState = stateMachine.getCurrentState().enumType;
+                int index = states.indexOf(currentState);
+
+                // If the current state is not in the cycle, return empty
+                if (index == -1) {
+                    return Optional.empty();
+                }
+
+                currentIndex = index;
+            }
+
+            // Get the next state in the cycle
+            currentIndex = (currentIndex + 1) % states.size();
+
+            try {
+                return Optional.of(states.get(currentIndex));
+            } catch (IndexOutOfBoundsException e) {
+                // Should never happen, but just in case
+                return Optional.empty();
+            }
+        }
+
+        /**
+         * Schedules the next state in the cycle to be set in the state machine.
+         * If the behavior is {@link StateCycleBehavior#RELY_ON_CURRENT_STATE} and the current state is not in the cycle, nothing will be scheduled.
+         */
+        public void scheduleNextState() {
+            Optional<TEnumType> nextState = getNextState();
+
+            nextState.ifPresent(stateMachine::scheduleStateChange);
+        }
+
+        /**
+         * Resets the state cycle to the given index.
+         * For {@link StateCycleBehavior#RELY_ON_CURRENT_STATE}, this will have no effect.
+         */
+        public void reset(int initialIndex) {
+            currentIndex = initialIndex % states.size();
+        }
+
+        /**
+         * Resets the state cycle to the beginning.
+         * For {@link StateCycleBehavior#RELY_ON_CURRENT_STATE}, this will have no effect.
+         */
+        public void reset() {
+            reset(0);
+        }
+    }
+
+    /**
      * The prefix key for logging to the dashboard.
      */
     private static final String DEFAULT_DASHBOARD_KEY = "StateMachines/";
@@ -318,5 +421,24 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      */
     public Trigger getStateTrigger(TStateType state) {
         return new Trigger(() -> getCurrentState().enumType == state);
+    }
+
+    /**
+     * Creates a StateCycle with the specified states and behavior.
+     * @param states - The states to cycle through.
+     * @param behavior - The behavior of the state cycle.
+     * @return The created StateCycle.
+     */
+    public StateCycle<TStateType> createStateCycle(List<TStateType> states, StateCycle.StateCycleBehavior behavior) {
+        return new StateCycle<>(this, states, behavior);
+    }
+
+    /**
+     * Creates a StateCycle with the specified states. Behavior defaults to {@link StateCycleBehavior#RELY_ON_CURRENT_STATE}.
+     * @param states - The states to cycle through.
+     * @return The created StateCycle.
+     */
+    public StateCycle<TStateType> createStateCycle(List<TStateType> states) {
+        return new StateCycle<>(this, states);
     }
 }
