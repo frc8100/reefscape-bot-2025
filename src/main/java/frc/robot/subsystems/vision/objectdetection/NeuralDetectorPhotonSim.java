@@ -32,10 +32,10 @@ public class NeuralDetectorPhotonSim {
     public abstract static class NeuralDetectorSimPipeline {
 
         public String className;
-        public double classID;
+        public int classID;
         public TargetModel targetModel;
 
-        public Supplier<Pose3d[]> potentialTargetsSupplier;
+        public Supplier<List<Pose3d>> potentialTargetsSupplier;
     }
 
     /**
@@ -52,60 +52,119 @@ public class NeuralDetectorPhotonSim {
      */
     public static final TargetModel algaeModel = new TargetModel(Inches.of(16.25).in(Meters));
 
+    /**
+     * The default neural detector pipelines for simulation.
+     */
+    // public static final NeuralDetectorSimPipeline[] defaultDetectorPipelines = new NeuralDetectorSimPipeline[] {
+    //     new NeuralDetectorSimPipeline() {
+    //         {
+    //             className = "Coral";
+    //             classID = 0;
+    //             targetModel = NeuralDetectorPhotonSim.coralModel;
+    //             potentialTargetsSupplier = () -> new ArrayList<>();
+    //         }
+    //     },
+    //     new NeuralDetectorSimPipeline() {
+    //         {
+    //             className = "Algae";
+    //             classID = 1;
+    //             targetModel = NeuralDetectorPhotonSim.algaeModel;
+    //             potentialTargetsSupplier = () -> new ArrayList<>();
+    //         }
+    //     }
+    // };
+
+    @FunctionalInterface
+    public interface NeuralDetectorSimPipelineFactory {
+        public List<Pose3d> getPoses(String className);
+    }
+
+    public static final NeuralDetectorSimPipeline[] getDetectorPipelines(NeuralDetectorSimPipelineFactory factory) {
+        return new NeuralDetectorSimPipeline[] {
+            new NeuralDetectorSimPipeline() {
+                {
+                    className = "Coral";
+                    classID = 0;
+                    targetModel = NeuralDetectorPhotonSim.coralModel;
+                    potentialTargetsSupplier = () -> factory.getPoses(className);
+                }
+            },
+            new NeuralDetectorSimPipeline() {
+                {
+                    className = "Algae";
+                    classID = 1;
+                    targetModel = NeuralDetectorPhotonSim.algaeModel;
+                    potentialTargetsSupplier = () -> factory.getPoses(className);
+                }
+            }
+        };
+    }
+
     private final VisionSystemSim systemSim;
-    private final PhotonCameraSim cameraSim;
+    // private final PhotonCameraSim cameraSim;
     private final NeuralDetectorSimPipeline[] pipelines;
 
     // private final Supplier<Pose2d> robotPoseSupplier;
 
     public NeuralDetectorPhotonSim(
         VisionSystemSim systemSim,
-        PhotonCameraSim cameraSim,
+        // PhotonCameraSim cameraSim,
         NeuralDetectorSimPipeline... pipelines
     ) {
         this.systemSim = systemSim;
-        this.cameraSim = cameraSim;
+        // this.cameraSim = cameraSim;
         this.pipelines = pipelines;
         // this.robotPoseSupplier = robotPoseSupplier;
+    }
 
-        // TODO: investigate adding/removing vision targets instead of simulating
-        // systemSim.addVisionTargets(null, null);
-        // systemSim.removeVisionTargets(null);
+    /**
+     * Updates the vision targets in the simulation based on the current potential targets from each pipeline.
+     */
+    public void updateVisionTargets() {
+        for (NeuralDetectorSimPipeline pipeline : pipelines) {
+            List<Pose3d> potentialTargets = pipeline.potentialTargetsSupplier.get();
+
+            // Remove all existing targets for this pipeline and add the new ones
+            systemSim.removeVisionTargets(pipeline.className);
+            systemSim.addVisionTargets(pipeline.className, potentialTargets.stream()
+                .map(pose -> new VisionTargetSim(pose, pipeline.targetModel)).toArray(VisionTargetSim[]::new)
+            );
+        }
     }
 
     /**
      * Gets all unread game piece observations since the last call to this method. Should only be called once per update.
      * @return An array of all unread game piece observations since the last call to this method.
      */
-    public List<GamePieceObservation> getUnreadObservations() {
-        // cameraSim.prop.estMsUntilNextFrame();
+    // public List<GamePieceObservation> getUnreadObservations() {
+    //     // cameraSim.prop.estMsUntilNextFrame();
 
-        Optional<Pose3d> measuredCameraPose = systemSim.getCameraPose(cameraSim);
+    //     Optional<Pose3d> measuredCameraPose = systemSim.getCameraPose(cameraSim);
 
-        // If the camera pose is not known, return no observations
-        if (measuredCameraPose.isEmpty()) {
-            return List.of();
-        }
+    //     // If the camera pose is not known, return no observations
+    //     if (measuredCameraPose.isEmpty()) {
+    //         return List.of();
+    //     }
 
-        Pose3d cameraPose = measuredCameraPose.get();
+    //     Pose3d cameraPose = measuredCameraPose.get();
 
-        List<GamePieceObservation> observations = new ArrayList<>();
+    //     List<GamePieceObservation> observations = new ArrayList<>();
 
-        // Simulate object detection for each pipeline
-        for (NeuralDetectorSimPipeline pipeline : pipelines) {
-            Pose3d[] potentialTargets = pipeline.potentialTargetsSupplier.get();
+    //     // Simulate object detection for each pipeline
+    //     for (NeuralDetectorSimPipeline pipeline : pipelines) {
+    //         Pose3d[] potentialTargets = pipeline.potentialTargetsSupplier.get();
 
-            for (Pose3d targetPose : potentialTargets) {
-                if (cameraSim.canSeeTargetPose(cameraPose, new VisionTargetSim(targetPose, pipeline.targetModel))) {
-                    // TODO: Add detected target to the pipeline result
-                    // return new GamePieceObservation[] {
-                    //     // new GamePieceObservation(pipeline.className, pipeline.classID, targetPose),
-                    // };
-                    // observations.add(new GamePieceObservation() {});
-                }
-            }
-        }
+    //         for (Pose3d targetPose : potentialTargets) {
+    //             if (cameraSim.canSeeTargetPose(cameraPose, new VisionTargetSim(targetPose, pipeline.targetModel))) {
+    //                 // TODO: Add detected target to the pipeline result
+    //                 // return new GamePieceObservation[] {
+    //                 //     // new GamePieceObservation(pipeline.className, pipeline.classID, targetPose),
+    //                 // };
+    //                 // observations.add(new GamePieceObservation() {});
+    //             }
+    //         }
+    //     }
 
-        return observations;
-    }
+    //     return observations;
+    // }
 }
