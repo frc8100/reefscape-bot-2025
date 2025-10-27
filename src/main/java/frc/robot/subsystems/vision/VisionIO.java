@@ -45,7 +45,7 @@ public interface VisionIO {
         PoseObservationType type
     ) {}
 
-    public static enum PoseObservationType {
+    public enum PoseObservationType {
         MEGATAG_1,
         MEGATAG_2,
         PHOTONVISION,
@@ -56,7 +56,12 @@ public interface VisionIO {
         ALGAE,
     }
 
-    public static record GamePieceObservation(double timestamp, Pose3d pose, GamePieceObservationType type) {}
+    public static record GamePieceObservation(
+        double timestamp,
+        Pose3d pose,
+        double ambiguity,
+        GamePieceObservationType type
+    ) {}
 
     /**
      * Updates the inputs of the vision IO.
