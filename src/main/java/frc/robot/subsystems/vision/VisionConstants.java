@@ -15,13 +15,17 @@ package frc.robot.subsystems.vision;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import java.util.List;
+import java.util.function.Supplier;
+import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.SimCameraProperties;
 
 /**
@@ -37,6 +41,45 @@ public class VisionConstants {
     public static final AprilTagFieldLayout aprilTagLayout = AprilTagFieldLayout.loadField(
         AprilTagFields.k2025ReefscapeWelded
     );
+
+    /**
+     * Whether to simulate AprilTags.
+     * If disabled, april tag targets will not be tracked.
+     */
+    public static final boolean simulateAprilTags = false;
+
+    /**
+     * A type of game piece observation that can be detected by the neural detector.
+     */
+    public enum GamePieceObservationType {
+        CORAL(
+            "Coral",
+            1,
+            new TargetModel(Inches.of(11.875).in(Meters), Inches.of(4).in(Meters), Inches.of(4).in(Meters))
+        ),
+        ALGAE("Algae", 2, new TargetModel(Inches.of(16.25).in(Meters)));
+
+        /**
+         * The class name used in the neural detector.
+         */
+        public final String className;
+
+        /**
+         * The class ID used in the neural detector.
+         */
+        public final int classID;
+
+        /**
+         * The target model for the object.
+         */
+        public final TargetModel targetModel;
+
+        private GamePieceObservationType(String className, int classID, TargetModel targetModel) {
+            this.className = className;
+            this.classID = classID;
+            this.targetModel = targetModel;
+        }
+    }
 
     /**
      * A list of all the tag IDs on the reefs, for localization purposes.

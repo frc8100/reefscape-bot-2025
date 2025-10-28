@@ -34,6 +34,7 @@ import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import limelight.networktables.target.pipeline.NeuralDetector;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonPipelineResult;
@@ -83,47 +84,6 @@ public class Vision extends SubsystemBase {
                 AlertType.kWarning
             );
         }
-    }
-
-    /**
-     * @return A list of all Photon pipeline results from all cameras.
-     * If photon vision is not used, this method returns an empty list.
-     */
-    // public List<PhotonPipelineResult> getPhotonPipelineResults() {
-    //     List<PhotonPipelineResult> results = new LinkedList<>();
-
-    //     // For each photon vision IO, add all unread results
-    //     for (VisionIO photonVisionIO : io) {
-    //         results.addAll(photonVisionIO.getPhotonPipelineResults());
-    //     }
-
-    //     return results;
-    // }
-
-    /**
-     * @return The latest target from the specified camera, if it exists.
-     */
-    public Optional<PhotonPipelineResult> getLatestTargetFromCamera(int cameraIndex) {
-        // List<PhotonPipelineResult> pipelineResults = io[cameraIndex].getPhotonPipelineResults();
-
-        // // Return the latest target if it exists
-        // if (pipelineResults.size() > 0) {
-        //     return Optional.of(pipelineResults.get(pipelineResults.size() - 1));
-        // }
-
-        // // Return empty if no targets
-        // return Optional.empty();
-
-        return Optional.of(io[cameraIndex].getLatestPipelineResult());
-    }
-
-    /**
-     * Returns the X angle to the best target, which can be used for simple servoing with vision.
-     *
-     * @param cameraIndex The index of the camera to use.
-     */
-    public Rotation2d getTargetX(int cameraIndex) {
-        return inputs[cameraIndex].latestTargetObservation.tx();
     }
 
     @Override
@@ -243,36 +203,5 @@ public class Vision extends SubsystemBase {
         // );
 
         // debug
-    }
-
-    /**
-     * For debugging purposes, returns the target relative to camera 0.
-     *
-     * @return The target relative to camera 0, or a 0 translation if no target is found.
-     */
-    public Translation2d debugGetTargetRelativeToCamera0(double tagHeightMeters) {
-        var latestObservation = getLatestTargetFromCamera(0);
-        if (latestObservation.isEmpty()) {
-            // Return a zero translation if no target is found
-            return new Translation2d(0, 0);
-        }
-
-        // Calculate tag position
-        var latestObservationTarget = latestObservation.get().getBestTarget();
-
-        double targetYaw = latestObservationTarget.getYaw();
-        double targetDistance = PhotonUtils.calculateDistanceToTargetMeters(
-            VisionConstants.TRANSFORM_TO_CAMERA_0.getZ(),
-            tagHeightMeters,
-            VisionConstants.TRANSFORM_TO_CAMERA_0.getRotation().getZ(),
-            Units.degreesToRadians(latestObservationTarget.getPitch())
-        );
-
-        Translation2d targetRelativeToCamera = PhotonUtils.estimateCameraToTargetTranslation(
-            targetDistance,
-            Rotation2d.fromDegrees(targetYaw)
-        );
-
-        return targetRelativeToCamera;
     }
 }

@@ -1,16 +1,50 @@
 package frc.robot.subsystems.vision;
 
-import java.util.function.Supplier;
-
-import org.photonvision.simulation.VisionSystemSim;
-
 import edu.wpi.first.math.geometry.Pose2d;
-import frc.robot.subsystems.vision.objectdetection.NeuralDetectorPhotonSim.NeuralDetectorSimPipeline;
+import edu.wpi.first.math.geometry.Pose3d;
+import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
+import java.util.List;
+import java.util.function.Supplier;
+import org.photonvision.simulation.VisionSystemSim;
+import org.photonvision.simulation.VisionTargetSim;
 
 /**
  * Extension of Vision subsystem with simulation support.
  */
 public class VisionSim extends Vision {
+
+    /**
+     * A pipeline configuration for a type of object that can be detected by the Neural Detector.
+     * @param type - The type and properties of the game piece.
+     * @param potentialTargetsSupplier - Supplier for the potential target poses in the field.
+     */
+    public static record NeuralDetectorSimPipeline(
+        GamePieceObservationType type,
+        Supplier<List<Pose3d>> potentialTargetsSupplier
+    ) {}
+
+    /**
+     * Gets the poses for a type of game piece.
+     */
+    @FunctionalInterface
+    public interface GetPosesForGamePieceType {
+        /**
+         * @return The poses for the given class name.
+         * @param className - The class name of the game piece.
+         */
+        public List<Pose3d> getPoses(String className);
+    }
+
+    /**
+     * @return The default neural detector pipelines for all game piece types.
+     * @param factory - The factory to get poses for each game piece type. See {@link GetPosesForGamePieceType}.
+     */
+    public static final NeuralDetectorSimPipeline[] getDetectorPipelines(GetPosesForGamePieceType factory) {
+        return List.of(GamePieceObservationType.values())
+            .stream()
+            .map(type -> new NeuralDetectorSimPipeline(type, () -> factory.getPoses(type.className)))
+            .toArray(NeuralDetectorSimPipeline[]::new);
+    }
 
     /**
      * A singleton instance of the vision system simulation.
@@ -24,7 +58,9 @@ public class VisionSim extends Vision {
         // Initialize vision sim if needed
         if (photonVisionSimSystem == null) {
             photonVisionSimSystem = new VisionSystemSim("main");
-            photonVisionSimSystem.addAprilTags(VisionConstants.aprilTagLayout);
+            if (VisionConstants.simulateAprilTags) {
+                photonVisionSimSystem.addAprilTags(VisionConstants.aprilTagLayout);
+            }
         }
 
         return photonVisionSimSystem;
@@ -33,23 +69,62 @@ public class VisionSim extends Vision {
     /**
      * The supplier for the robot pose to use in simulation.
      */
-    public Supplier<Pose2d> robotPoseSupplier;
+    private final Supplier<Pose2d> robotPoseSupplier;
+
+    /**
+     * The neural detector pipelines. Can be null if not used.
+     */
+    private final NeuralDetectorSimPipeline[] pipelines;
 
     /**
      * Creates a new VisionSim.
      * @param consumer - The vision consumer for pose measurements.
      * @param robotPoseSupplier - Supplier for the robot pose to use in simulation.
-     * @param pipelines - The neural detector pipelines.
+     * @param pipelines - The neural detector pipelines. Set to null to use defaults.
      * @param ios - The vision IO implementations.
      */
-    public VisionSim(VisionConsumer consumer, Supplier<Pose2d> robotPoseSupplier, NeuralDetectorSimPipeline[] pipelines, VisionIO... ios) {
+    public VisionSim(
+        VisionConsumer consumer,
+        Supplier<Pose2d> robotPoseSupplier,
+        NeuralDetectorSimPipeline[] pipelines,
+        VisionIO... ios
+    ) {
         super(consumer, ios);
         this.robotPoseSupplier = robotPoseSupplier;
+        this.pipelines = pipelines;
     }
 
+    /**
+     * Updates the vision targets in the simulation based on the current potential targets from each pipeline.
+     */
+    public void updateVisionTargets() {
+        if (pipelines == null) {
+            return;
+        }
+
+        for (NeuralDetectorSimPipeline pipeline : pipelines) {
+            List<Pose3d> potentialTargets = pipeline.potentialTargetsSupplier.get();
+
+            // Remove all existing targets for this pipeline
+            getVisionSim().removeVisionTargets(pipeline.type.className);
+
+            // Add new targets
+            getVisionSim()
+                .addVisionTargets(
+                    pipeline.type.className,
+                    potentialTargets
+                        .stream()
+                        .map(pose -> new VisionTargetSim(pose, pipeline.type.targetModel))
+                        .toArray(VisionTargetSim[]::new)
+                );
+        }
+    }
 
     @Override
     public void periodic() {
+        // Update vision targets from pipelines
+        updateVisionTargets();
+
         // Update vision sim with current robot pose
         getVisionSim().update(robotPoseSupplier.get());
 

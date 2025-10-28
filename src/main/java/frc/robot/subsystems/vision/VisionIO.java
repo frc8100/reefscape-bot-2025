@@ -15,8 +15,11 @@ package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
 import java.util.LinkedList;
 import java.util.List;
+import limelight.Limelight;
+import limelight.networktables.target.pipeline.NeuralDetector;
 import org.littletonrobotics.junction.AutoLog;
 import org.photonvision.targeting.PhotonPipelineResult;
 
@@ -24,8 +27,11 @@ public interface VisionIO {
     @AutoLog
     public static class VisionIOInputs {
 
+        /**
+         * Whether the vision device is currently connected.
+         */
         public boolean connected = false;
-        public TargetObservation latestTargetObservation = new TargetObservation(new Rotation2d(), new Rotation2d());
+        // public TargetObservation latestTargetObservation = new TargetObservation(new Rotation2d(), new Rotation2d());
         public PoseObservation[] poseObservations = new PoseObservation[0];
         public int[] tagIds = new int[0];
 
@@ -33,7 +39,7 @@ public interface VisionIO {
     }
 
     /** Represents the angle to a simple target, not used for pose estimation. */
-    public static record TargetObservation(Rotation2d tx, Rotation2d ty) {}
+    // public static record TargetObservation(Rotation2d tx, Rotation2d ty) {}
 
     /** Represents a robot pose sample used for pose estimation. */
     public static record PoseObservation(
@@ -49,11 +55,6 @@ public interface VisionIO {
         MEGATAG_1,
         MEGATAG_2,
         PHOTONVISION,
-    }
-
-    public enum GamePieceObservationType {
-        CORAL,
-        ALGAE,
     }
 
     public static record GamePieceObservation(
@@ -74,13 +75,5 @@ public interface VisionIO {
      */
     public default List<PhotonPipelineResult> getPhotonPipelineResults() {
         return new LinkedList<>();
-    }
-
-    /**
-     * Gets the latest pipeline result from this camera.
-     * @return The latest PhotonPipelineResult, or a default one if none is available.
-     */
-    public default PhotonPipelineResult getLatestPipelineResult() {
-        return new PhotonPipelineResult();
     }
 }
