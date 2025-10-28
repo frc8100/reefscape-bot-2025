@@ -63,6 +63,7 @@ import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonSim;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.subsystems.vision.VisionSim;
 import java.util.Set;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -157,15 +158,16 @@ public class RobotContainer {
                 );
 
                 // Create a simulated vision subsystem
-                visionSubsystem = new Vision(
+                visionSubsystem = new VisionSim(
                     swerveSubsystem::addVisionMeasurement,
-                    // new VisionIOPhotonSim(
-                    //     VisionConstants.CAMERA_0_NAME,
-                    //     VisionConstants.TRANSFORM_TO_CAMERA_0,
-                    //     swerveSubsystem::getActualPose,
-                    //     VisionConstants.CAMERA_0_PROPERTIES
-                    // )
-                    new VisionIO() {}
+                    swerveSubsystem::getActualPose,
+                    VisionSim.getDetectorPipelines(SimulatedArena.getInstance()::getGamePiecesPosesByType),
+                    new VisionIOPhotonSim(
+                        VisionConstants.CAMERA_0_NAME,
+                        VisionConstants.TRANSFORM_TO_CAMERA_0,
+                        swerveSubsystem::getActualPose,
+                        VisionConstants.CAMERA_0_PROPERTIES
+                    )
                 );
 
                 questNavSubsystem = new QuestNavSubsystem(
