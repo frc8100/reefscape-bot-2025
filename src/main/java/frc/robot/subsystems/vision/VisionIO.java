@@ -13,11 +13,14 @@
 
 package frc.robot.subsystems.vision;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
+
 import limelight.Limelight;
 import limelight.networktables.target.pipeline.NeuralDetector;
 import org.littletonrobotics.junction.AutoLog;
@@ -36,6 +39,16 @@ public interface VisionIO {
         public int[] tagIds = new int[0];
 
         public GamePieceObservation[] gamePieceObservations = new GamePieceObservation[0];
+    }
+
+    @FunctionalInterface
+    public interface RobotPoseAtTimestampSupplier {
+        /**
+         * Gets the robot pose at the given timestamp.
+         * @param timestampSeconds - The timestamp in seconds.
+         * @return The robot pose at the given timestamp.
+         */
+        public Optional<Pose2d> getRobotPoseAtTimestamp(double timestampSeconds);
     }
 
     /** Represents the angle to a simple target, not used for pose estimation. */
