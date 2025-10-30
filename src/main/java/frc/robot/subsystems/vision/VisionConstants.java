@@ -60,6 +60,32 @@ public class VisionConstants {
         ALGAE("Algae", 2, new TargetModel(Inches.of(16.25).in(Meters)));
 
         /**
+         * @param classID - The class ID from the neural detector.
+         * @return The GamePieceObservationType for the given class ID.
+         */
+        public static GamePieceObservationType fromClassID(int classID) {
+            for (GamePieceObservationType type : values()) {
+                if (type.classID == classID) {
+                    return type;
+                }
+            }
+            return null;
+        }
+
+        /**
+         * @param className - The class name from the neural detector.
+         * @return The GamePieceObservationType for the given class name.
+         */
+        public static GamePieceObservationType fromClassName(String className) {
+            for (GamePieceObservationType type : values()) {
+                if (type.className.equals(className)) {
+                    return type;
+                }
+            }
+            return null;
+        }
+
+        /**
          * The class name used in the neural detector.
          */
         public final String className;
