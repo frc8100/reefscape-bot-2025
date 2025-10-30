@@ -13,16 +13,22 @@
 
 package frc.robot.subsystems.vision;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
+
 import limelight.Limelight;
 import limelight.networktables.target.pipeline.NeuralDetector;
 import org.littletonrobotics.junction.AutoLog;
 import org.photonvision.targeting.PhotonPipelineResult;
 
+/**
+ * The IO layer for a single vision camera.
+ */
 public interface VisionIO {
     @AutoLog
     public static class VisionIOInputs {
@@ -32,10 +38,31 @@ public interface VisionIO {
          */
         public boolean connected = false;
         // public TargetObservation latestTargetObservation = new TargetObservation(new Rotation2d(), new Rotation2d());
+
+        /**
+         * A queue of unread pose observations.
+         */
         public PoseObservation[] poseObservations = new PoseObservation[0];
+        
+        /**
+         * The tag ids used for the pose observations.
+         */
         public int[] tagIds = new int[0];
 
+        /**
+         * A que of unread game piece observations.
+         */
         public GamePieceObservation[] gamePieceObservations = new GamePieceObservation[0];
+    }
+
+    @FunctionalInterface
+    public interface RobotPoseAtTimestampSupplier {
+        /**
+         * Gets the robot pose at the given timestamp.
+         * @param timestampSeconds - The timestamp in seconds.
+         * @return The robot pose at the given timestamp.
+         */
+        public Optional<Pose2d> getRobotPoseAtTimestamp(double timestampSeconds);
     }
 
     /** Represents the angle to a simple target, not used for pose estimation. */

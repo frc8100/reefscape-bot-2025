@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -27,19 +28,15 @@ public class VisionUtil {
      * @param robotToCamera - Transform from the robot center to the camera
      * @param tx - Horizontal offset from Limelight (degrees, +right)
      * @param ty - Vertical offset from Limelight (degrees, +down)
-     * @param cameraHeight - Height of the camera above the floor
      * @param targetHeight - Height of the target above the floor (≈ 0 if lying flat)
-     * @param cameraPitchRadians - Pitch of the camera (radians, positive up)
-     * @return The estimated Pose2d of the object on the field
+     * @return The estimated Pose3d of the object on the field
      */
-    public static Pose2d estimateTargetPose2d(
+    public static Pose3d estimateTargetPose3d(
         Pose2d robotPose,
         Transform3d robotToCamera,
         Angle tx,
         Angle ty,
-        // Distance cameraHeight,
         Distance targetHeight
-        // Angle cameraPitchRadians
     ) {
         // Convert angles to radians
         double txRad = tx.in(Radians);
@@ -62,9 +59,10 @@ public class VisionUtil {
             .transformBy(new Transform2d(new Translation2d(targetRobot.getX(), targetRobot.getY()), new Rotation2d()))
             .getTranslation();
 
-        // Return the target pose
-        return new Pose2d(targetFieldTranslation, new Rotation2d());
         // TODO: investigate this
-        // OpenCVHelp.solvePNP_SQPNP(null, null, null, null);
+        OpenCVHelp.solvePNP_SQPNP(null, null, null, null);
+
+        // Return the target pose
+        return new Pose3d(new Pose2d(targetFieldTranslation, new Rotation2d()));
     }
 }

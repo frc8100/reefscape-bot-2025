@@ -13,14 +13,21 @@
 
 package frc.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.subsystems.vision.VisionConstants.aprilTagLayout;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import frc.lib.util.VisionUtil;
+import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
+
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
@@ -41,6 +48,8 @@ public class VisionIOPhotonVision implements VisionIO {
      */
     protected final Transform3d robotToCamera;
 
+    protected final RobotPoseAtTimestampSupplier robotPoseSupplier;
+
     /**
      * A list of all Photon pipeline results from this camera.
      * If photon vision is not used, this is an empty list.
@@ -52,14 +61,32 @@ public class VisionIOPhotonVision implements VisionIO {
      * @param name The configured name of the camera.
      * @param rotationSupplier The 3D position of the camera relative to the robot.
      */
-    public VisionIOPhotonVision(String name, Transform3d robotToCamera) {
+    public VisionIOPhotonVision(String name, Transform3d robotToCamera, RobotPoseAtTimestampSupplier robotPoseSupplier) {
         camera = new PhotonCamera(name);
         this.robotToCamera = robotToCamera;
+        this.robotPoseSupplier = robotPoseSupplier;
     }
 
-    // private GamePieceObservation convertGamePieceObservation(PhotonTrackedTarget target) {
-    //     target.bestCameraToTarget
-    // }
+    protected Optional<GamePieceObservation> convertGamePieceObservation(PhotonTrackedTarget target, double timestampSeconds) {
+        Optional<Pose2d> robotPoseOpt = robotPoseSupplier.getRobotPoseAtTimestamp(timestampSeconds);
+
+        if (robotPoseOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(new GamePieceObservation(
+            timestampSeconds,
+            VisionUtil.estimateTargetPose3d(
+                robotPoseOpt.get(),
+                robotToCamera,
+                Degrees.of(target.getYaw()),
+                Degrees.of(target.getPitch()),
+                Meters.of(0)
+            ),
+            target.objDetectConf,
+            GamePieceObservationType.fromClassID(target.objDetectId)
+        ));
+    }
 
     @Override
     public void updateInputs(VisionIOInputs inputs) {
