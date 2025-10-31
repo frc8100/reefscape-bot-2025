@@ -67,26 +67,26 @@ public class VisionIOPhotonVision implements VisionIO {
         this.robotPoseSupplier = robotPoseSupplier;
     }
 
-    protected Optional<GamePieceObservation> convertGamePieceObservation(PhotonTrackedTarget target, double timestampSeconds) {
-        Optional<Pose2d> robotPoseOpt = robotPoseSupplier.getRobotPoseAtTimestamp(timestampSeconds);
+    // private Optional<GamePieceObservation> convertGamePieceObservation(PhotonTrackedTarget target, double timestampSeconds) {
+    //     Optional<Pose2d> robotPoseOpt = robotPoseSupplier.getRobotPoseAtTimestamp(timestampSeconds);
 
-        if (robotPoseOpt.isEmpty()) {
-            return Optional.empty();
-        }
+    //     if (robotPoseOpt.isEmpty()) {
+    //         return Optional.empty();
+    //     }
 
-        return Optional.of(new GamePieceObservation(
-            timestampSeconds,
-            VisionUtil.estimateTargetPose3d(
-                robotPoseOpt.get(),
-                robotToCamera,
-                Degrees.of(target.getYaw()),
-                Degrees.of(target.getPitch()),
-                Meters.of(0)
-            ),
-            target.objDetectConf,
-            GamePieceObservationType.fromClassID(target.objDetectId)
-        ));
-    }
+    //     return Optional.of(new GamePieceObservation(
+    //         timestampSeconds,
+    //         VisionUtil.estimateTargetPose3d(
+    //             robotPoseOpt.get(),
+    //             robotToCamera,
+    //             Degrees.of(target.getYaw()),
+    //             Degrees.of(target.getPitch()),
+    //             Meters.of(0)
+    //         ),
+    //         target.objDetectConf,
+    //         GamePieceObservationType.fromClassID(target.objDetectId)
+    //     ));
+    // }
 
     @Override
     public void updateInputs(VisionIOInputs inputs) {

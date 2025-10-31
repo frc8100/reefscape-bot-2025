@@ -14,15 +14,24 @@
 package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import frc.robot.subsystems.vision.VisionSim.NeuralDetectorSimPipeline;
+
+import java.util.Optional;
 import java.util.function.Supplier;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 
-/** IO implementation for physics sim using PhotonVision simulator. */
+/** IO implementation for vision sim using PhotonVision simulator. */
 public class VisionIOPhotonSim extends VisionIOPhotonVision {
 
     private final PhotonCameraSim cameraSim;
+
+    /**
+     * The neural detector pipelines. Can be null if not used.
+     */
+    private final NeuralDetectorSimPipeline[] pipelines;
 
     /**
      * Creates a new VisionIOPhotonVisionSim.
@@ -32,13 +41,36 @@ public class VisionIOPhotonSim extends VisionIOPhotonVision {
     public VisionIOPhotonSim(
         String name,
         Transform3d robotToCamera,
-        Supplier<Pose2d> poseSupplier,
-        SimCameraProperties cameraProperties
+        // Supplier<Pose2d> poseSupplier,
+        RobotPoseAtTimestampSupplier robotPoseSupplier,
+        SimCameraProperties cameraProperties,
+        NeuralDetectorSimPipeline[] pipelines
     ) {
-        super(name, robotToCamera);
+        super(name, robotToCamera, robotPoseSupplier);
 
         // Add sim camera
         cameraSim = new PhotonCameraSim(camera, cameraProperties, VisionConstants.aprilTagLayout);
         VisionSim.getVisionSim().addCamera(cameraSim, robotToCamera);
+
+        this.pipelines = pipelines;
+    }
+
+    @Override
+    public void updateInputs(VisionIOInputs inputs) {
+        inputs.connected = camera.isConnected();
+
+        Optional<Long> nextEntryTimeMicrosecondsOpt = cameraSim.consumeNextEntryTime();
+
+        if (!nextEntryTimeMicrosecondsOpt.isPresent()) {
+            // No new data
+            return;
+        }
+
+        long nextTimeMicroseconds = nextEntryTimeMicrosecondsOpt.get();
+
+        Pose3d cameraPose = VisionSim.getVisionSim().getCameraPose(cameraSim, nextTimeMicroseconds);
+
+        // Object detection
+        cameraSim.canSeeTargetPose(new Pose3d(robotPoseSupplier.getRobotPoseAtTimestamp(nextEntryTimeMicrosecondsOpt.get() / 1e9)), null);
     }
 }

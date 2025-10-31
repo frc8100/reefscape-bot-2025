@@ -2,6 +2,7 @@ package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.util.WPIUtilJNI;
 import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
 import java.util.List;
 import java.util.function.Supplier;
@@ -10,6 +11,7 @@ import org.photonvision.simulation.VisionTargetSim;
 
 /**
  * Extension of Vision subsystem with simulation support.
+ * For object detection sim, there will be a timer separate from PhotonVisionSim's internal timer.
  */
 public class VisionSim extends Vision {
 
@@ -39,11 +41,22 @@ public class VisionSim extends Vision {
      * @return The default neural detector pipelines for all game piece types.
      * @param factory - The factory to get poses for each game piece type. See {@link GetPosesForGamePieceType}.
      */
-    public static final NeuralDetectorSimPipeline[] getDetectorPipelines(GetPosesForGamePieceType factory) {
+    public static NeuralDetectorSimPipeline[] getDetectorPipelines(GetPosesForGamePieceType factory) {
         return List.of(GamePieceObservationType.values())
             .stream()
             .map(type -> new NeuralDetectorSimPipeline(type, () -> factory.getPoses(type.className)))
             .toArray(NeuralDetectorSimPipeline[]::new);
+    }
+
+    public static List<VisionTargetSim> getVisionTargetSimFromNeuralPipeline(
+        NeuralDetectorSimPipeline pipeline
+    ) {
+        List<Pose3d> potentialTargets = pipeline.potentialTargetsSupplier.get();
+
+        return potentialTargets
+            .stream()
+            .map(pose -> new VisionTargetSim(pose, pipeline.type.targetModel))
+            .toList();
     }
 
     /**
