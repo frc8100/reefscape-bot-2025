@@ -1,5 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
@@ -23,6 +25,9 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.gamepieces.GamePieceOnFieldSimulation;
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnField;
 
 public class ButtonBindings {
 
@@ -232,6 +237,9 @@ public class ButtonBindings {
         // this.visionSubsystem = autoRoutines.visionSubsystem;
     }
 
+    /**
+     * Creates button bindings for the robot.
+     */
     public void configureButtonBindings() {
         // Driver controller bindings
         driverController
@@ -291,6 +299,25 @@ public class ButtonBindings {
         operatorController.getJoystickButton(Controls.Superstructure.launchAlgae).whileTrue(autoRoutines.launchAlgae());
     }
 
+    public void configureSimulationBindings() {
+        // Spawn game pieces
+        driverController
+            .getJoystickButton(XboxController.Button.kB)
+            .onTrue(
+                Commands.runOnce(() ->
+                    SimulatedArena.getInstance()
+                        .addGamePiece(
+                            new ReefscapeCoralOnField(
+                                swerveSubsystem.getActualPose().plus(new Transform2d(1.0, 0.0, new Rotation2d()))
+                            )
+                        )
+                )
+            );
+    }
+
+    /**
+     * Assigns default commands to subsystems.
+     */
     public void assignDefaultCommands() {
         clawSubsystem.setDefaultCommand(
             clawSubsystem.getRunAndAngleCommand(Controls.Claw::getIntakeOrOuttake, Controls.Claw::getUpOrDown)

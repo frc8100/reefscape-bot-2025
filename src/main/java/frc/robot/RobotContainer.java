@@ -25,9 +25,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.LimelightHelpers;
 import frc.lib.util.EmptySimulationArena;
 import frc.lib.util.TunableValue;
-import frc.robot.commands.AlignToReefTagRelative;
 import frc.robot.commands.DriveToPose;
-import frc.robot.commands.PhotonVisionAlign;
 import frc.robot.commands.SwerveSysidRoutines;
 import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.questnav.QuestNavIO;
@@ -64,6 +62,7 @@ import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonSim;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionSim;
+import frc.robot.subsystems.vision.VisionSim.NeuralDetectorSimPipeline;
 import java.util.Set;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -158,15 +157,20 @@ public class RobotContainer {
                 );
 
                 // Create a simulated vision subsystem
+                NeuralDetectorSimPipeline[] simPipelines = VisionSim.getDetectorPipelines(
+                    SimulatedArena.getInstance()::getGamePiecesPosesByType
+                );
+
                 visionSubsystem = new VisionSim(
                     swerveSubsystem::addVisionMeasurement,
                     swerveSubsystem::getActualPose,
-                    VisionSim.getDetectorPipelines(SimulatedArena.getInstance()::getGamePiecesPosesByType),
+                    simPipelines,
                     new VisionIOPhotonSim(
                         VisionConstants.CAMERA_0_NAME,
                         VisionConstants.TRANSFORM_TO_CAMERA_0,
+                        VisionConstants.CAMERA_0_PROPERTIES,
                         swerveSubsystem::getActualPose,
-                        VisionConstants.CAMERA_0_PROPERTIES
+                        simPipelines
                     )
                 );
 
@@ -277,6 +281,11 @@ public class RobotContainer {
         ButtonBindings buttonBindings = new ButtonBindings(autoRoutines);
         buttonBindings.configureButtonBindings();
         buttonBindings.assignDefaultCommands();
+
+        if (Constants.currentMode == Constants.Mode.SIM) {
+            // Sim button bindings
+            buttonBindings.configureSimulationBindings();
+        }
     }
 
     /**
