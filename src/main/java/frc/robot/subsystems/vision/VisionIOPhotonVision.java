@@ -23,7 +23,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import frc.lib.util.VisionUtil;
 import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
-
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,7 +47,7 @@ public class VisionIOPhotonVision implements VisionIO {
      */
     protected final Transform3d robotToCamera;
 
-    protected final RobotPoseAtTimestampSupplier robotPoseSupplier;
+    // protected final RobotPoseAtTimestampSupplier robotPoseSupplier;
 
     /**
      * A list of all Photon pipeline results from this camera.
@@ -61,10 +60,10 @@ public class VisionIOPhotonVision implements VisionIO {
      * @param name The configured name of the camera.
      * @param rotationSupplier The 3D position of the camera relative to the robot.
      */
-    public VisionIOPhotonVision(String name, Transform3d robotToCamera, RobotPoseAtTimestampSupplier robotPoseSupplier) {
+    public VisionIOPhotonVision(String name, Transform3d robotToCamera) {
         camera = new PhotonCamera(name);
         this.robotToCamera = robotToCamera;
-        this.robotPoseSupplier = robotPoseSupplier;
+        // this.robotPoseSupplier = robotPoseSupplier;
     }
 
     // private Optional<GamePieceObservation> convertGamePieceObservation(PhotonTrackedTarget target, double timestampSeconds) {

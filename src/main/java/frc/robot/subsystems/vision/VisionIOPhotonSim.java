@@ -17,13 +17,18 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import frc.robot.subsystems.vision.VisionSim.NeuralDetectorSimPipeline;
-
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
+import org.photonvision.simulation.VisionTargetSim;
 
-/** IO implementation for vision sim using PhotonVision simulator. */
+/**
+ * IO implementation for vision sim using PhotonVision simulator.
+ * Currently only supports object detection.
+ */
 public class VisionIOPhotonSim extends VisionIOPhotonVision {
 
     private final PhotonCameraSim cameraSim;
@@ -33,6 +38,8 @@ public class VisionIOPhotonSim extends VisionIOPhotonVision {
      */
     private final NeuralDetectorSimPipeline[] pipelines;
 
+    private final Supplier<Pose2d> robotPoseSupplier;
+
     /**
      * Creates a new VisionIOPhotonVisionSim.
      * @param name - The name of the camera.
@@ -41,17 +48,16 @@ public class VisionIOPhotonSim extends VisionIOPhotonVision {
     public VisionIOPhotonSim(
         String name,
         Transform3d robotToCamera,
-        // Supplier<Pose2d> poseSupplier,
-        RobotPoseAtTimestampSupplier robotPoseSupplier,
         SimCameraProperties cameraProperties,
+        Supplier<Pose2d> robotPoseSupplier,
         NeuralDetectorSimPipeline[] pipelines
     ) {
-        super(name, robotToCamera, robotPoseSupplier);
-
+        super(name, robotToCamera);
         // Add sim camera
         cameraSim = new PhotonCameraSim(camera, cameraProperties, VisionConstants.aprilTagLayout);
         VisionSim.getVisionSim().addCamera(cameraSim, robotToCamera);
 
+        this.robotPoseSupplier = robotPoseSupplier;
         this.pipelines = pipelines;
     }
 
@@ -60,17 +66,31 @@ public class VisionIOPhotonSim extends VisionIOPhotonVision {
         inputs.connected = camera.isConnected();
 
         Optional<Long> nextEntryTimeMicrosecondsOpt = cameraSim.consumeNextEntryTime();
-
         if (!nextEntryTimeMicrosecondsOpt.isPresent()) {
             // No new data
             return;
         }
-
         long nextTimeMicroseconds = nextEntryTimeMicrosecondsOpt.get();
 
-        Pose3d cameraPose = VisionSim.getVisionSim().getCameraPose(cameraSim, nextTimeMicroseconds);
+        Pose3d cameraPose = new Pose3d(robotPoseSupplier.get()).transformBy(robotToCamera);
 
         // Object detection
-        cameraSim.canSeeTargetPose(new Pose3d(robotPoseSupplier.getRobotPoseAtTimestamp(nextEntryTimeMicrosecondsOpt.get() / 1e9)), null);
+        List<GamePieceObservation> gamePieceObservations = new LinkedList<>();
+
+        // For each pipeline, get potential targets and see if they are visible
+        for (NeuralDetectorSimPipeline pipeline : pipelines) {
+            List<VisionTargetSim> potentialTargets = VisionSim.getVisionTargetSimFromNeuralPipeline(pipeline);
+
+            for (VisionTargetSim target : potentialTargets) {
+                if (cameraSim.canSeeTargetPose(cameraPose, target)) {
+                    // Visible, add observation
+                    gamePieceObservations.add(
+                        new GamePieceObservation(nextTimeMicroseconds / 1e6, target.getPose(), 0.0, pipeline.type())
+                    );
+                }
+            }
+        }
+
+        inputs.gamePieceObservations = gamePieceObservations.toArray(new GamePieceObservation[0]);
     }
 }

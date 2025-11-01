@@ -48,15 +48,15 @@ public class VisionSim extends Vision {
             .toArray(NeuralDetectorSimPipeline[]::new);
     }
 
-    public static List<VisionTargetSim> getVisionTargetSimFromNeuralPipeline(
-        NeuralDetectorSimPipeline pipeline
-    ) {
+    /**
+     * Gets a list of VisionTargetSim objects for the given NeuralDetectorSimPipeline.
+     * @param pipeline - The NeuralDetectorSimPipeline to get the VisionTargetSim objects for.
+     * @return A list of VisionTargetSim objects for the given NeuralDetectorSimPipeline, based on the potential targets from the pipeline's supplier.
+     */
+    public static List<VisionTargetSim> getVisionTargetSimFromNeuralPipeline(NeuralDetectorSimPipeline pipeline) {
         List<Pose3d> potentialTargets = pipeline.potentialTargetsSupplier.get();
 
-        return potentialTargets
-            .stream()
-            .map(pose -> new VisionTargetSim(pose, pipeline.type.targetModel))
-            .toList();
+        return potentialTargets.stream().map(pose -> new VisionTargetSim(pose, pipeline.type.targetModel)).toList();
     }
 
     /**
@@ -136,11 +136,12 @@ public class VisionSim extends Vision {
     @Override
     public void periodic() {
         // Update vision targets from pipelines
-        updateVisionTargets();
-
-        // Update vision sim with current robot pose
-        getVisionSim().update(robotPoseSupplier.get());
+        // updateVisionTargets();
 
         super.periodic();
+        // Update vision sim with current robot pose
+        // Updated after because of camera frame calculations
+        // Currently removed because vision sim only has object detection which is handled separately
+        // getVisionSim().update(robotPoseSupplier.get());
     }
 }

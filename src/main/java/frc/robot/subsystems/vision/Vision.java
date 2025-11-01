@@ -20,24 +20,21 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.util.FieldConstants;
+import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
+import frc.robot.subsystems.vision.VisionIO.GamePieceObservation;
 import frc.robot.subsystems.vision.VisionIO.PoseObservation;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
+import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
-import limelight.networktables.target.pipeline.NeuralDetector;
+import java.util.Map;
 import org.littletonrobotics.junction.Logger;
-import org.photonvision.PhotonUtils;
-import org.photonvision.targeting.PhotonPipelineResult;
 
 /**
  * The vision subsystem. This subsystem processes vision data and sends it to the robot code.
@@ -65,6 +62,13 @@ public class Vision extends SubsystemBase {
 
     private final VisionIOInputsAutoLogged[] inputs;
     private final Alert[] disconnectedAlerts;
+
+    /**
+     * The latest observed game piece poses by type.
+     */
+    private final Map<GamePieceObservationType, List<Pose3d>> latestGamePiecePoses = new EnumMap<>(
+        GamePieceObservationType.class
+    );
 
     public Vision(VisionConsumer consumer, VisionIO... io) {
         this.consumer = consumer;
@@ -167,6 +171,24 @@ public class Vision extends SubsystemBase {
                 );
             }
 
+            // Loop over game piece observations
+            Map<GamePieceObservationType, Boolean> hasGamePieceBeenCleared = new EnumMap<>(
+                GamePieceObservationType.class
+            );
+
+            for (GamePieceObservation gamePieceObservation : inputs[cameraIndex].gamePieceObservations) {
+                latestGamePiecePoses.putIfAbsent(gamePieceObservation.type(), new LinkedList<>());
+
+                // Clear previous poses if this is the first observation of this type in this cycle
+                if (Boolean.FALSE.equals(hasGamePieceBeenCleared.getOrDefault(gamePieceObservation.type(), false))) {
+                    latestGamePiecePoses.put(gamePieceObservation.type(), new LinkedList<>());
+                    hasGamePieceBeenCleared.put(gamePieceObservation.type(), true);
+                }
+
+                // Add latest pose
+                latestGamePiecePoses.get(gamePieceObservation.type()).add(gamePieceObservation.pose());
+            }
+
             // Log camera datadata
             // Logger.recordOutput(
             //     "Vision/Camera" + Integer.toString(cameraIndex) + "/TagPoses",
@@ -202,6 +224,31 @@ public class Vision extends SubsystemBase {
         //     allRobotPosesRejected.toArray(new Pose3d[allRobotPosesRejected.size()])
         // );
 
-        // debug
+        logGamePiecePoses();
+    }
+
+    /**
+     * Logs the latest observed game piece poses by type.
+     */
+    private void logGamePiecePoses() {
+        // For each game piece type, log the latest observed poses
+        for (Map.Entry<GamePieceObservationType, List<Pose3d>> entry : latestGamePiecePoses.entrySet()) {
+            GamePieceObservationType type = entry.getKey();
+            List<Pose3d> poses = entry.getValue();
+
+            Logger.recordOutput(
+                "Vision/GamePieces/" + type.className + "/LatestPoses",
+                poses.toArray(new Pose3d[poses.size()])
+            );
+        }
+    }
+
+    /**
+     * Gets the latest observed game piece poses for the given type.
+     * @param type - The game piece observation type.
+     * @return A list of the latest observed game piece poses for the given type. If no poses have been observed, returns an empty list.
+     */
+    public List<Pose3d> getLatestGamePiecePoses(GamePieceObservationType type) {
+        return latestGamePiecePoses.getOrDefault(type, List.of());
     }
 }
