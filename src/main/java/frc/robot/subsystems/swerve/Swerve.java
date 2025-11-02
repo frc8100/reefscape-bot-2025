@@ -4,7 +4,6 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volt;
 
 import com.pathplanner.lib.util.DriveFeedforwards;
-import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import edu.wpi.first.math.Matrix;
@@ -19,9 +18,8 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -32,6 +30,7 @@ import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
 import frc.robot.subsystems.swerve.module.Module;
 import frc.robot.subsystems.swerve.module.ModuleIO;
+import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -39,6 +38,11 @@ import org.littletonrobotics.junction.Logger;
 
 /** Swerve subsystem, responsible for controlling the swerve drive. */
 public class Swerve extends SubsystemBase implements SwerveDrive {
+
+    /**
+     * Lock for the odometry thread.
+     */
+    public static final Lock odometryLock = new ReentrantLock();
 
     public enum SwerveState {
         /**
@@ -64,10 +68,11 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         .withState(new StateMachineState<>(SwerveState.FULL_AUTONOMOUS_PATH_FOLLOWING, "Follow Path"))
         .withReturnToDefaultStateOnDisable(true);
 
-    /** Lock for the odometry thread. */
-    public static final Lock odometryLock = new ReentrantLock();
+    private final SwerveSetpointGenerator setpointGenerator = new SwerveSetpointGenerator(
+        SwerveConfig.getRobotConfig(),
+        SwerveConfig.MAX_ANGULAR_VELOCITY_OF_SWERVE_MODULE
+    );
 
-    private final SwerveSetpointGenerator setpointGenerator;
     /**
      * Previous setpoints used for {@link #setpointGenerator}.
      */
@@ -79,37 +84,45 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
      */
     private final Module[] swerveModules = new Module[4];
 
-    /** The gyro. This is used to determine the robot's heading. */
+    /**
+     * The gyro. This is used to determine the robot's heading.
+     */
     public final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
 
-    /** Raw gyro rotation. Used for the pose estimator. */
+    /**
+     * Raw gyro rotation. Used for the pose estimator.
+     */
     private Rotation2d rawGyroRotation = new Rotation2d();
 
     /**
-     * Swerve Kinematics
-     * No need to ever change this unless you are not doing a traditional rectangular/square 4 module swerve
+     * Kinematics for the swerve drive. Used to convert between chassis speeds and module states.
      */
-    private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(SwerveConfig.MODULE_TRANSLATIONS);
+    private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(SwerveConfig.MODULE_TRANSLATIONS);
 
-    /** The last stored position of the swerve modules for delta tracking */
-    private SwerveModulePosition[] lastModulePositions = new SwerveModulePosition[] {
+    /**
+     * The last stored position of the swerve modules for delta tracking.
+     */
+    private final SwerveModulePosition[] lastModulePositions = new SwerveModulePosition[] {
         new SwerveModulePosition(),
         new SwerveModulePosition(),
         new SwerveModulePosition(),
         new SwerveModulePosition(),
     };
 
-    /** A 2d representation of the field */
+    /**
+     * A representation of the field for visualization (on Elastic).
+     * Currently disabled to increase performance.
+     * (use AdvantageScope for field visualization instead)
+     */
     // protected Field2d field = new Field2d();
 
-    /**
-     * Pose estimator. This is the same as odometry but includes vision input to correct for
-     * drifting.
-     */
-    private SwerveDrivePoseEstimator poseEstimator;
+    private final SwerveDrivePoseEstimator poseEstimator;
 
-    protected SysIdRoutine sysId;
+    protected SysIdRoutine sysId = new SysIdRoutine(
+        new SysIdRoutine.Config(null, null, null, state -> Logger.recordOutput("Swerve/SysIdState", state.toString())),
+        new SysIdRoutine.Mechanism(voltage -> runCharacterization(voltage.in(Volt)), null, this)
+    );
 
     /** Creates a new Swerve subsystem. */
     public Swerve(GyroIO gyroIO, ModuleIO[] moduleIOs) {
@@ -133,33 +146,16 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         );
 
         zeroGyro(180);
-        // gyroIO.zeroFieldRelativeGyro(180);
-
         configurePathPlannerAutoBuilder();
-
-        sysId = new SysIdRoutine(
-            new SysIdRoutine.Config(null, null, null, state ->
-                Logger.recordOutput("Swerve/SysIdState", state.toString())
-            ),
-            new SysIdRoutine.Mechanism(voltage -> runCharacterization(voltage.in(Volt)), null, this)
-        );
-
         // Set up custom logging to add the current path to a field 2d widget
         // PathPlannerLogging.setLogActivePathCallback(poses -> field.getObject("path").setPoses(poses));
+        // SmartDashboard.putData("Field", field);
 
-        // Configure setpoint generator
-        setpointGenerator = new SwerveSetpointGenerator(
-            SwerveConfig.getRobotConfig(),
-            SwerveConfig.MAX_ANGULAR_VELOCITY_OF_SWERVE_MODULE
-        );
-
-        // Initialize the previous setpoint to the robot's current speeds & module states
         previousSetpoint = new SwerveSetpoint(
             getChassisSpeeds(),
             getModuleStates(),
             DriveFeedforwards.zeros(SwerveConfig.NUMBER_OF_SWERVE_MODULES)
         );
-        // SmartDashboard.putData("Field", field);
     }
 
     /**
@@ -247,6 +243,17 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         return output;
     }
 
+    public Optional<Double> getWheelSlippingCharacterization() {
+        for (int i = 0; i < 4; i++) {
+            // Check if the module is slipping by seeing if the velocity is nonzero
+            if (swerveModules[i].getFFCharacterizationVelocity() < 0.15) continue;
+
+            return Optional.of(swerveModules[i].getWheelSlippingCharacterizationAmps());
+        }
+
+        return Optional.empty();
+    }
+
     @Override
     @AutoLogOutput(key = "Odometry/Robot")
     public Pose2d getPose() {
@@ -316,7 +323,6 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     @Override
     public void zeroGyro(double deg) {
         gyroIO.zeroFieldRelativeGyro(deg);
-        // poseEstimator.update(gyroIO.getGyroHeading(), getModulePositions());
     }
 
     @Override

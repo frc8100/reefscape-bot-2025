@@ -92,7 +92,6 @@ public class Module {
     /** Runs the module with the specified setpoint state. Mutates the state to optimize it. */
     public void runSetpoint(SwerveModuleState state) {
         // Optimize setpoint
-        // state = CTREModuleState.optimize(state, inputs.turnPosition);
         state.optimize(inputs.turnPosition);
 
         // TODO: Cosine scale?
@@ -157,5 +156,10 @@ public class Module {
     /** Returns the module velocity in rad/sec. */
     public double getFFCharacterizationVelocity() {
         return inputs.driveVelocityRadPerSec;
+    }
+
+    /** Returns the current draw in amps. */
+    public double getWheelSlippingCharacterizationAmps() {
+        return inputs.driveCurrentAmps;
     }
 }

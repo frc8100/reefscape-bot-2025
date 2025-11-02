@@ -21,9 +21,14 @@ public final class Constants {
     /**
      * Whether or not to enable system identification mode.
      * - When true, SysId routines are available for use (in the AutoChooser).
+     */
+    public static final boolean enableSysId = true;
+
+    /**
+     * Whether or not to disable the simulation arena.
      * - When true and in simulation, an empty SimulationArena will be used.
      */
-    public static final boolean enableSysId = false;
+    public static final boolean disableSimArena = false;
 
     /**
      * Whether or not to store WPILog files during simulation.

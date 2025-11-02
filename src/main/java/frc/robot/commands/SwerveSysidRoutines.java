@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -9,6 +10,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import java.text.DecimalFormat;
@@ -17,7 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Contains commands for use with the SysId characterization tool.
+ * Contains more complex characterization routines.
  */
 public class SwerveSysidRoutines {
 
@@ -30,7 +32,6 @@ public class SwerveSysidRoutines {
 
     /**
      * Measures the velocity feedforward constants for the drive motors.
-     *
      * <p>This command should only be used in voltage control mode.
      */
     public static Command feedforwardCharacterization(SwerveDrive drive) {
@@ -143,5 +144,30 @@ public class SwerveSysidRoutines {
         double[] positions = new double[4];
         Rotation2d lastAngle = new Rotation2d();
         double gyroDelta = 0.0;
+    }
+
+    /**
+     * Drives the robot until the wheels slip. The robot should be facing a wall.
+     * From https://github.com/Mechanical-Advantage/AdvantageKit/blob/main/docs/docs/getting-started/template-projects/spark-swerve-template.md:
+     * 1. Place the robot against the solid wall.
+     * 2. Using AdvantageScope, plot the current of a drive motor from the /Drive/Module.../DriveCurrentAmps key, and the velocity of the motor from the /Drive/Module.../DriveVelocityRadPerSec key.
+     * 3. Accelerate forward until the drive velocity increases (the wheel slips). Note the current at this time.
+     * 4. Update the value of driveMotorCurrentLimit to this value.
+     */
+    public static Command wheelSlipCurrentCharacterization(Swerve drive) {
+        return Commands.run(
+            () -> {
+                drive.runCharacterization(7);
+            },
+            drive
+        )
+            .until(() -> drive.getWheelSlippingCharacterization().isPresent())
+            .andThen(() -> {
+                double slipData = drive.getWheelSlippingCharacterization().get();
+                NumberFormat formatter = new DecimalFormat("#0.000");
+                System.out.println("********** Wheel Slip Current Characterization Results **********");
+                System.out.println("\tSlip Current: " + formatter.format(slipData) + " Amps");
+            })
+            .withTimeout(Seconds.of(10));
     }
 }

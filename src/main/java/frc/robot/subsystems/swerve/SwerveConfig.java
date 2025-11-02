@@ -137,7 +137,7 @@ public class SwerveConfig {
     public static final boolean IS_ANGLE_CURRENT_LIMIT_ACTIVE = true; // unused
 
     // TODO: tune these values (https://docs.revrobotics.com/brushless/home/faq#neo-v1.1)
-    public static final Current DRIVE_CONTINUOUS_CURRENT_LIMIT = Amps.of(35);
+    public static final Current DRIVE_CONTINUOUS_CURRENT_LIMIT = Amps.of(42.5);
     public static final Current DRIVE_PEAK_CURRENT_LIMIT = Amps.of(60); // unused
     public static final Time DRIVE_PEAK_CURRENT_DURATION = Seconds.of(0.1); // unused
     public static final boolean IS_DRIVE_CURRENT_LIMIT_ACTIVE = true; // unused

@@ -14,22 +14,21 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import frc.robot.subsystems.vision.Vision.VisionConsumer;
 import gg.questnav.questnav.PoseFrame;
-import gg.questnav.questnav.QuestNav;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Subsystem for interfacing with the QuestNav.
  */
 public class QuestNavSubsystem extends SubsystemBase {
+
+    private static record MeasurementPoint(double x, double y) {}
 
     /**
      * @return A command that measures the transform between the QuestNav and the robot's coordinate frame.
@@ -37,7 +36,7 @@ public class QuestNavSubsystem extends SubsystemBase {
      * @param timePerMeasurement - The time to wait between measurements.
      */
     public Command getMeasureTransformCommand(SwerveDrive swerveSubsystem, Time timePerMeasurement) {
-        ArrayList<String> measuredPoints = new ArrayList<>();
+        List<MeasurementPoint> measuredPoints = new ArrayList<>();
 
         Debouncer debounce = new Debouncer(timePerMeasurement.in(Seconds), DebounceType.kRising);
 
@@ -50,6 +49,7 @@ public class QuestNavSubsystem extends SubsystemBase {
                 () -> {
                     // Spin in place
                     swerveSubsystem.runVelocityChassisSpeeds(new ChassisSpeeds(0, 0, 1));
+
                     if (!inputs.isTracking) {
                         return;
                     }
@@ -58,14 +58,13 @@ public class QuestNavSubsystem extends SubsystemBase {
                         return;
                     }
 
+                    // Take a measurement
                     PoseFrame[] frames = inputs.unreadPoseFrames;
-
                     for (PoseFrame frame : frames) {
                         Pose2d questPose = frame.questPose();
-
                         Transform2d measurement = questPose.minus(swerveSubsystem.getPose());
 
-                        measuredPoints.add("(" + measurement.getX() + "," + measurement.getY() + ")");
+                        measuredPoints.add(new MeasurementPoint(measurement.getX(), measurement.getY()));
                     }
 
                     // Reset debounce
@@ -73,8 +72,31 @@ public class QuestNavSubsystem extends SubsystemBase {
                 },
                 swerveSubsystem
             ).finallyDo(() -> {
-                System.out.println("Measured points:");
-                System.out.println(String.join(",", measuredPoints));
+                // System.out.println("Measured points:");
+                // System.out.println(String.join(",", measuredPoints));
+
+                // Calculate average
+                double sumX = 0;
+                double sumY = 0;
+
+                for (MeasurementPoint point : measuredPoints) {
+                    sumX += point.x;
+                    sumY += point.y;
+                }
+
+                double avgX = sumX / measuredPoints.size();
+                double avgY = sumY / measuredPoints.size();
+
+                System.out.println(
+                    "Estimated ROBOT_TO_QUEST transform:" +
+                    " new Transform2d(" +
+                    avgX +
+                    ", " +
+                    avgY +
+                    ", " +
+                    "new Rotation2d()" +
+                    ");"
+                );
             })
         );
     }
@@ -110,6 +132,11 @@ public class QuestNavSubsystem extends SubsystemBase {
     private final Alert lowBatteryAlert = new Alert("QuestNav battery low.", Alert.AlertType.kWarning);
 
     /**
+     * The last battery percentage reported. Used to detect changes in battery level and update alerts accordingly.
+     */
+    private int lastBatteryPercent = -1;
+
+    /**
      * Creates a new QuestNavSubsystem.
      * @param consumer - The vision consumer to send pose data to.
      * @param io - The IO implementation to use (real or simulated).
@@ -126,7 +153,18 @@ public class QuestNavSubsystem extends SubsystemBase {
 
         // Handle alerts
         notConnectedAlert.set(inputs.connected);
-        lowBatteryAlert.set(inputs.batteryPercent >= 0 && inputs.batteryPercent <= LOW_BATTERY_THRESHOLD);
+        if (inputs.batteryPercent >= 0 && inputs.batteryPercent <= LOW_BATTERY_THRESHOLD) {
+            lowBatteryAlert.set(true);
+
+            // Update alert only if battery percentage has changed
+            if (inputs.batteryPercent != lastBatteryPercent) {
+                lowBatteryAlert.setText("QuestNav battery low: " + inputs.batteryPercent + "% remaining.");
+
+                lastBatteryPercent = inputs.batteryPercent;
+            }
+        } else {
+            lowBatteryAlert.set(false);
+        }
 
         if (!inputs.isTracking) {
             // Not currently tracking, so don't do anything

@@ -130,7 +130,7 @@ public class RobotContainer {
             default:
             case SIM:
                 // Override the arena
-                if (Constants.enableSysId) {
+                if (Constants.disableSimArena) {
                     // Use an empty arena for SysId to reduce obstacles
                     SimulatedArena.overrideInstance(new EmptySimulationArena());
                 } else {
@@ -300,6 +300,10 @@ public class RobotContainer {
         autoChooser.addOption(
             "Drive Simple FF Characterization",
             SwerveSysidRoutines.feedforwardCharacterization(swerveSubsystem)
+        );
+        autoChooser.addOption(
+            "Drive Wheel Slip Current Characterization",
+            SwerveSysidRoutines.wheelSlipCurrentCharacterization(swerveSubsystem)
         );
         autoChooser.addOption(
             "Max Acceleration and Velocity Test",

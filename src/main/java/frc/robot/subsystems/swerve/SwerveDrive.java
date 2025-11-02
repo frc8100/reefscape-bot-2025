@@ -1,12 +1,8 @@
 package frc.robot.subsystems.swerve;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Seconds;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.pathplanner.lib.pathfinding.LocalADStar;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.Matrix;
@@ -26,7 +22,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.util.LocalADStarAK;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -62,7 +57,6 @@ public interface SwerveDrive extends Subsystem {
      * Drives the swerve modules based on the desired translation and rotation.
      * Should convert the translation and rotation to ChassisSpeeds and set the swerve modules to those speeds
      * in {@link #runVelocityChassisSpeeds}.
-     *
      * @param translation The desired translation (x and y speeds).
      * @param rotation The desired rotation speed.
      * @param fieldRelative Whether the speeds are field-relative.
@@ -75,12 +69,7 @@ public interface SwerveDrive extends Subsystem {
      * By default, this does nothing.
      */
     public default Command runMaxAccelerationMaxVelocityTest() {
-        return Commands.run(
-            () -> {
-                runCharacterization(12.0);
-            },
-            this
-        );
+        return Commands.run(() -> runCharacterization(12.0), this);
     }
 
     /** Runs the drive in a straight line with the specified drive output. By default, this does nothing. */
@@ -114,7 +103,6 @@ public interface SwerveDrive extends Subsystem {
 
     /**
      * Sets the desired states for the swerve modules. Used by SwerveControllerCommand in Auto.
-     *
      * @param desiredStates The desired states for the swerve modules.
      */
     public void setModuleStates(SwerveModuleState[] desiredStates);
@@ -174,7 +162,6 @@ public interface SwerveDrive extends Subsystem {
 
     /**
      * Zeros the gyro.
-     *
      * @param deg The angle to zero the gyro to. Raw, without invert.
      */
     public void zeroGyro(double deg);
