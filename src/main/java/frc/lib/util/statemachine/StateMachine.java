@@ -1,6 +1,8 @@
 package frc.lib.util.statemachine;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -133,6 +135,11 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
     private static final String DEFAULT_DASHBOARD_KEY = "StateMachines/";
 
     /**
+     * A trigger that is active when the driver station/robot is disabled.
+     */
+    private static final Trigger onDriverStationDisable = new Trigger(DriverStation::isDisabled);
+
+    /**
      * The current state of the subsystem.
      */
     private StateMachineState<TStateType> currentState = null;
@@ -161,10 +168,15 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
     private final Map<TStateType, List<OnStateChangeAction<TStateType>>> onStateChangeActions;
 
     /**
-     * The state that has been scheduled to change to on the next update cycle.
+     * The state that has been scheduled to change to on the next update cycle. Can be null.
      * See {@link #scheduleStateChange}.
      */
     private StateMachineState<TStateType> scheduledStateChange = null;
+
+    /**
+     * Whether the state machine should return to the default state when disabled.
+     */
+    private boolean shouldReturnToDefaultStateOnDisable = false;
 
     /**
      * Constructs a state machine with the specified initial state.
@@ -183,19 +195,44 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
         recordScheduledStateChange();
 
         // Schedule state machine updates
-        CommandScheduler.getInstance()
-            .getDefaultButtonLoop()
-            .bind(() -> {
-                if (scheduledStateChange == null) return;
+        CommandScheduler.getInstance().getDefaultButtonLoop().bind(this::commandSchedulerLoop);
 
-                // Check if the state can be changed to the new state based on the requirements
-                if (!scheduledStateChange.canChangeCondition.canChange(currentState.enumType)) return;
+        // Disable handling
+        onDriverStationDisable.onTrue(
+            Commands.runOnce(() -> {
+                if (
+                    shouldReturnToDefaultStateOnDisable &&
+                    defaultState != null &&
+                    (currentState == null || !currentState.equals(defaultState))
+                ) {
+                    System.out.println(
+                        "[StateMachine \"" +
+                        dashboardKey +
+                        "\"] Returning to default state on disable: " +
+                        defaultState.enumType
+                    );
 
-                setStateAndUpdate(scheduledStateChange.enumType);
+                    setStateAndUpdate(defaultState.enumType);
 
-                scheduledStateChange = null;
-                recordScheduledStateChange();
-            });
+                    scheduledStateChange = null;
+                    recordScheduledStateChange();
+                }
+            }).ignoringDisable(true)
+        );
+    }
+
+    /**
+     * A function that runs every command scheduler cycle to handle scheduled state changes.
+     */
+    private void commandSchedulerLoop() {
+        // Check if the scheduled state can be changed to the new state based on the requirements
+        if (scheduledStateChange == null) return;
+        if (!scheduledStateChange.canChangeCondition.canChange(currentState.enumType)) return;
+
+        setStateAndUpdate(scheduledStateChange.enumType);
+
+        scheduledStateChange = null;
+        recordScheduledStateChange();
     }
 
     /**
@@ -373,6 +410,23 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
     public StateMachine<TStateType> withDefaultState(StateMachineState<TStateType> defaultState) {
         addState(defaultState);
         setDefaultState(defaultState);
+        return this;
+    }
+
+    /**
+     * Sets whether the state machine should return to the default state when disabled.
+     * @param shouldReturn - Whether the state machine should return to the default state when disabled.
+     */
+    public void setReturnToDefaultStateOnDisable(boolean shouldReturn) {
+        this.shouldReturnToDefaultStateOnDisable = shouldReturn;
+    }
+
+    /**
+     * Sets whether the state machine should return to the default state when disabled, and returns the state machine for chaining.
+     * @param shouldReturn - Whether the state machine should return to the default state when disabled.
+     */
+    public StateMachine<TStateType> withReturnToDefaultStateOnDisable(boolean shouldReturn) {
+        setReturnToDefaultStateOnDisable(shouldReturn);
         return this;
     }
 

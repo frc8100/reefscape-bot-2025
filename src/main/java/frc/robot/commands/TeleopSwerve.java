@@ -153,7 +153,8 @@ public class TeleopSwerve extends Command {
                     (DriveToPoseState previousState) ->
                         previousState == DriveToPoseState.FINAL_ALIGNMENT && driveToPoseCommand.atTarget.getAsBoolean()
                 )
-            );
+            )
+            .withReturnToDefaultStateOnDisable(true);
 
         // When we enter full driver control, cancel any pathfinding commands and set state to not driving to pose
         swerveSubsystem.stateMachine.addOnStateChangeAction(SwerveState.FULL_DRIVER_CONTROL, () -> {
@@ -353,7 +354,11 @@ public class TeleopSwerve extends Command {
                 swerveSubsystem.stop();
                 break;
             case INITIAL_PATHFINDING:
-                // Do nothing, handled elsewhere
+                // If the pathfinding command is not scheduled, something went wrong, go back to not driving to pose
+                if (pathFindToPoseCommand == null || !pathFindToPoseCommand.isScheduled()) {
+                    stateMachine.scheduleStateChange(DriveToPoseState.NOT_DRIVING_TO_POSE);
+                }
+
                 break;
         }
     }

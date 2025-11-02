@@ -61,7 +61,8 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         .withDefaultState(new StateMachineState<>(SwerveState.FULL_DRIVER_CONTROL, "Manual"))
         .withState(new StateMachineState<>(SwerveState.DRIVE_TO_CORAL_STATION, "Drive to Coral Station"))
         .withState(new StateMachineState<>(SwerveState.DRIVE_TO_REEF, "Drive to Reef"))
-        .withState(new StateMachineState<>(SwerveState.FULL_AUTONOMOUS_PATH_FOLLOWING, "Follow Path"));
+        .withState(new StateMachineState<>(SwerveState.FULL_AUTONOMOUS_PATH_FOLLOWING, "Follow Path"))
+        .withReturnToDefaultStateOnDisable(true);
 
     /** Lock for the odometry thread. */
     public static final Lock odometryLock = new ReentrantLock();
