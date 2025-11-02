@@ -30,6 +30,7 @@ import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
 import frc.robot.subsystems.vision.VisionIO.GamePieceObservation;
 import frc.robot.subsystems.vision.VisionIO.PoseObservation;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
+import frc.robot.subsystems.vision.objectdetection.GamePiecePoseEstimator;
 import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -63,12 +64,7 @@ public class Vision extends SubsystemBase {
     private final VisionIOInputsAutoLogged[] inputs;
     private final Alert[] disconnectedAlerts;
 
-    /**
-     * The latest observed game piece poses by type.
-     */
-    private final Map<GamePieceObservationType, List<Pose3d>> latestGamePiecePoses = new EnumMap<>(
-        GamePieceObservationType.class
-    );
+    public final GamePiecePoseEstimator gamePiecePoseEstimator = new GamePiecePoseEstimator();
 
     public Vision(VisionConsumer consumer, VisionIO... io) {
         this.consumer = consumer;
@@ -171,23 +167,8 @@ public class Vision extends SubsystemBase {
                 );
             }
 
-            // Loop over game piece observations
-            Map<GamePieceObservationType, Boolean> hasGamePieceBeenCleared = new EnumMap<>(
-                GamePieceObservationType.class
-            );
-
-            for (GamePieceObservation gamePieceObservation : inputs[cameraIndex].gamePieceObservations) {
-                latestGamePiecePoses.putIfAbsent(gamePieceObservation.type(), new LinkedList<>());
-
-                // Clear previous poses if this is the first observation of this type in this cycle
-                if (Boolean.FALSE.equals(hasGamePieceBeenCleared.getOrDefault(gamePieceObservation.type(), false))) {
-                    latestGamePiecePoses.put(gamePieceObservation.type(), new LinkedList<>());
-                    hasGamePieceBeenCleared.put(gamePieceObservation.type(), true);
-                }
-
-                // Add latest pose
-                latestGamePiecePoses.get(gamePieceObservation.type()).add(gamePieceObservation.pose());
-            }
+            // Update game piece poses
+            gamePiecePoseEstimator.updateWithObservations(inputs[cameraIndex].gamePieceObservations);
 
             // Log camera datadata
             // Logger.recordOutput(
@@ -224,31 +205,6 @@ public class Vision extends SubsystemBase {
         //     allRobotPosesRejected.toArray(new Pose3d[allRobotPosesRejected.size()])
         // );
 
-        logGamePiecePoses();
-    }
-
-    /**
-     * Logs the latest observed game piece poses by type.
-     */
-    private void logGamePiecePoses() {
-        // For each game piece type, log the latest observed poses
-        for (Map.Entry<GamePieceObservationType, List<Pose3d>> entry : latestGamePiecePoses.entrySet()) {
-            GamePieceObservationType type = entry.getKey();
-            List<Pose3d> poses = entry.getValue();
-
-            Logger.recordOutput(
-                "Vision/GamePieces/" + type.className + "/LatestPoses",
-                poses.toArray(new Pose3d[poses.size()])
-            );
-        }
-    }
-
-    /**
-     * Gets the latest observed game piece poses for the given type.
-     * @param type - The game piece observation type.
-     * @return A list of the latest observed game piece poses for the given type. If no poses have been observed, returns an empty list.
-     */
-    public List<Pose3d> getLatestGamePiecePoses(GamePieceObservationType type) {
-        return latestGamePiecePoses.getOrDefault(type, List.of());
+        gamePiecePoseEstimator.logGamePiecePoses();
     }
 }
