@@ -128,7 +128,7 @@ public class TeleopSwerve extends Command {
         driveToPoseCommand = new DriveToPose(this.swerveSubsystem, () -> new Pose2d());
 
         // Set up the state machine
-        stateMachine = new StateMachine<DriveToPoseState>("Swerve/DriveToPose")
+        stateMachine = new StateMachine<DriveToPoseState>("Swerve/DriveToPose", DriveToPoseState.class)
             .withDefaultState(new StateMachineState<>(DriveToPoseState.NOT_DRIVING_TO_POSE, "Idle"))
             .withState(
                 new StateMachineState<>(

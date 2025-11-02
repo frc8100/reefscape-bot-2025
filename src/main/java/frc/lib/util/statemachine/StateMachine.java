@@ -3,11 +3,10 @@ package frc.lib.util.statemachine;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -154,12 +153,12 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
     /**
      * A map of all possible states in the state machine.
      */
-    private final Map<TStateType, StateMachineState<TStateType>> stateMap = new HashMap<>();
+    private final Map<TStateType, StateMachineState<TStateType>> stateMap;
 
     /**
      * A map of actions to perform on state changes.
      */
-    private final Map<TStateType, List<OnStateChangeAction<TStateType>>> onStateChangeActions = new HashMap<>();
+    private final Map<TStateType, List<OnStateChangeAction<TStateType>>> onStateChangeActions;
 
     /**
      * The state that has been scheduled to change to on the next update cycle.
@@ -171,9 +170,14 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      * Constructs a state machine with the specified initial state.
      * State is logged to the dashboard with the given key.
      * @param dashboardKey - The key to use for logging to the dashboard. Added as a prefix to {@link #DEFAULT_DASHBOARD_KEY}.
+     * @param stateEnumClass - The class of the enum type representing the states of the state machine. Used to initialize the internal {@link EnumMap}s. Ex. MyStateEnum.class
      */
-    public StateMachine(String dashboardKey) {
+    public StateMachine(String dashboardKey, Class<TStateType> stateEnumClass) {
         this.dashboardKey = DEFAULT_DASHBOARD_KEY + dashboardKey;
+
+        // Init maps
+        stateMap = new EnumMap<>(stateEnumClass);
+        onStateChangeActions = new EnumMap<>(stateEnumClass);
 
         recordCurrentState();
         recordScheduledStateChange();
