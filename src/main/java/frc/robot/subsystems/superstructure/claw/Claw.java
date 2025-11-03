@@ -134,7 +134,7 @@ public class Claw extends SubsystemBase {
             // Stop after a certain amount of time
             Commands.waitTime(timeout),
             // Run the outtake
-            new RunCommand(() -> io.runOuttake(direction.getDirection())) // TODO: require this
+            new RunCommand(() -> io.runOuttake(direction.getDirection()))
         ).finallyDo(
             // Stop the outtake
             // new InstantCommand(() -> io.runOuttake(0))

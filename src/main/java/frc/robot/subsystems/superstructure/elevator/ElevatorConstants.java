@@ -103,8 +103,8 @@ public final class ElevatorConstants {
     public static final AngularAcceleration ELEVATOR_MAX_ANGULAR_ACCELERATION = RadiansPerSecondPerSecond.of(20);
     public static final double AMOUNT_PER_FRAME = 0.3;
 
-    public static final LinearVelocity ELEVATOR_SIM_MAX_VELOCITY = MetersPerSecond.of(0.5);
-    public static final LinearAcceleration ELEVATOR_SIM_MAX_ACCELERATION = MetersPerSecondPerSecond.of(0.2);
+    public static final LinearVelocity ELEVATOR_SIM_MAX_VELOCITY = MetersPerSecond.of(1);
+    public static final LinearAcceleration ELEVATOR_SIM_MAX_ACCELERATION = MetersPerSecondPerSecond.of(0.65);
     
     public static final TrapezoidProfile.Constraints PROFILED_ELEVATOR_CONSTRAINTS = new TrapezoidProfile.Constraints(
         ELEVATOR_MAX_ANGULAR_VELOCITY.in(RadiansPerSecond),
