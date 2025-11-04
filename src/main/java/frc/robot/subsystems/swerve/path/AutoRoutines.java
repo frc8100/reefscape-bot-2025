@@ -481,20 +481,19 @@ public class AutoRoutines {
     public Command pathFindToLocation(Supplier<Pose2d> pose) {
         // return AutoBuilder.pathfindToPose(pose, SwerveConfig.pathConstraints);
         // return new DeferredCommand(() -> new DriveToPose(swerveSubsystem, () -> pose), Set.of(swerveSubsystem));
-        // return new DeferredCommand(
-        //     () ->
-        //         new PathfindingCommand(
-        //             pose,
-        //             SwerveConfig.pathConstraints,
-        //             swerveSubsystem::getPose,
-        //             swerveSubsystem::getChassisSpeeds,
-        //             (speeds, feedforwards) -> swerveSubsystem.runVelocityChassisSpeeds(speeds),
-        //             DriveToPose.driveController,
-        //             SwerveConfig.getRobotConfig()
-        //         ),
-        //     Set.of(swerveSubsystem)
-        // );
-
+        return new DeferredCommand(
+            () ->
+                new PathfindingCommand(
+                    pose.get(),
+                    SwerveConfig.pathConstraints,
+                    swerveSubsystem::getPose,
+                    swerveSubsystem::getChassisSpeeds,
+                    (speeds, feedforwards) -> swerveSubsystem.runVelocityChassisSpeeds(speeds),
+                    DriveToPose.driveController,
+                    SwerveConfig.getRobotConfig()
+                ),
+            Set.of(swerveSubsystem)
+        );
         // return new DeferredCommand(
         //     () ->
         //         // Use PathPlanner path finding for initial pathfinding
@@ -516,7 +515,7 @@ public class AutoRoutines {
         //     Set.of(swerveSubsystem)
         // );
 
-        return Commands.none();
+        // return Commands.none();
     }
 
     /**
