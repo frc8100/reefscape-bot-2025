@@ -61,7 +61,10 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         FULL_AUTONOMOUS_PATH_FOLLOWING,
     }
 
-    public final StateMachine<SwerveState> stateMachine = new StateMachine<SwerveState>("Swerve", SwerveState.class)
+    public final StateMachine<SwerveState, Pose2d> stateMachine = new StateMachine<SwerveState, Pose2d>(
+        "Swerve",
+        SwerveState.class
+    )
         .withDefaultState(new StateMachineState<>(SwerveState.FULL_DRIVER_CONTROL, "Manual"))
         .withState(new StateMachineState<>(SwerveState.DRIVE_TO_CORAL_STATION, "Drive to Coral Station"))
         .withState(new StateMachineState<>(SwerveState.DRIVE_TO_REEF, "Drive to Reef"))
