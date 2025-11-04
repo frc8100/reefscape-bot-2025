@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.util.statemachine.StateCycle;
 import frc.lib.util.statemachine.StateMachine;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
 import frc.robot.subsystems.superstructure.claw.Claw;
@@ -247,7 +248,7 @@ public class ButtonBindings {
             .onTrue(Commands.runOnce(swerveSubsystem::zeroGyro));
 
         // Toggle drive to coral station state
-        StateMachine.StateCycle<SwerveState> toggleDriveToCoralStation = swerveSubsystem.stateMachine.createStateCycle(
+        StateCycle<SwerveState> toggleDriveToCoralStation = swerveSubsystem.stateMachine.createStateCycle(
             List.of(SwerveState.DRIVE_TO_CORAL_STATION, SwerveState.FULL_DRIVER_CONTROL)
         );
         driverController

@@ -2,15 +2,16 @@ package frc.lib.util.statemachine;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.lib.util.statemachine.StateMachine.StatePeriodicAction;
 
 /**
  * A command that executes actions based on the current state of a StateMachine.
  */
-public class StateMachineSubsystemCommand<TStateType extends Enum<TStateType>> extends Command {
+public class StateMachineSubsystemCommand<TStateType extends Enum<TStateType>, TPayload> extends Command {
 
-    private final StateMachine<TStateType> stateMachine;
+    private final StateMachine<TStateType, TPayload> stateMachine;
 
-    public StateMachineSubsystemCommand(StateMachine<TStateType> stateMachine, Subsystem... requirements) {
+    public StateMachineSubsystemCommand(StateMachine<TStateType, TPayload> stateMachine, Subsystem... requirements) {
         this.stateMachine = stateMachine;
         addRequirements(requirements);
     }
@@ -18,10 +19,11 @@ public class StateMachineSubsystemCommand<TStateType extends Enum<TStateType>> e
     @Override
     public void execute() {
         TStateType currentState = stateMachine.getCurrentState().enumType;
-        Runnable action = stateMachine.stateActions.get(currentState);
+
+        StatePeriodicAction<TPayload> action = stateMachine.statePeriodicActions.get(currentState);
 
         if (action != null) {
-            action.run();
+            action.onPeriodic(stateMachine.getCurrentPayload());
         }
     }
 }
