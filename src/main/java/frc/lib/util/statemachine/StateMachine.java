@@ -3,7 +3,9 @@ package frc.lib.util.statemachine;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.util.statemachine.StateMachine.StateCycle.StateCycleBehavior;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -13,7 +15,9 @@ import org.littletonrobotics.junction.Logger;
 
 /**
  * A generic finite state machine for managing the states of a subsystem.
- * @param <TStateType> - The enum type representing all the possible states of the subsystem.
+ * A list of possible states is defined using an enum type.
+ * Each enum type can have additional data and behavior defined in a {@link StateMachineState} object.
+ * @param <TStateType> - The enum type representing all the possible states.
  */
 public class StateMachine<TStateType extends Enum<TStateType>> {
 
@@ -158,14 +162,26 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
     public final String dashboardKey;
 
     /**
-     * A map of all possible states in the state machine.
+     * The class of the enum type representing the states of the state machine.
+     */
+    private final Class<TStateType> stateEnumClass;
+
+    /**
+     * A map from enum states to their corresponding {@link StateMachineState} objects.
      */
     private final Map<TStateType, StateMachineState<TStateType>> stateMap;
 
     /**
      * A map of actions to perform on state changes.
+     * When the state machine changes to a state, all actions in the list for that state are executed once.
      */
     private final Map<TStateType, List<OnStateChangeAction<TStateType>>> onStateChangeActions;
+
+    /**
+     * A map from enum states to their corresponding actions to perform each period while in that state.
+     */
+    // TODO: Consider making into List<Runnable>
+    public final Map<TStateType, Runnable> stateActions;
 
     /**
      * The state that has been scheduled to change to on the next update cycle. Can be null.
@@ -186,10 +202,17 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      */
     public StateMachine(String dashboardKey, Class<TStateType> stateEnumClass) {
         this.dashboardKey = DEFAULT_DASHBOARD_KEY + dashboardKey;
+        this.stateEnumClass = stateEnumClass;
 
         // Init maps
-        stateMap = new EnumMap<>(stateEnumClass);
-        onStateChangeActions = new EnumMap<>(stateEnumClass);
+        stateMap = new EnumMap<>(this.stateEnumClass);
+        onStateChangeActions = new EnumMap<>(this.stateEnumClass);
+        stateActions = new EnumMap<>(this.stateEnumClass);
+
+        // Initialize action lists for each state
+        for (TStateType state : this.stateEnumClass.getEnumConstants()) {
+            onStateChangeActions.put(state, new ArrayList<>());
+        }
 
         recordCurrentState();
         recordScheduledStateChange();
@@ -377,7 +400,6 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      */
     public void addState(StateMachineState<TStateType> state) {
         stateMap.put(state.enumType, state);
-        onStateChangeActions.put(state.enumType, new ArrayList<>());
     }
 
     /**
@@ -470,6 +492,23 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      */
     public void addOnStateChangeAction(TStateType state, Runnable action) {
         addOnStateChangeAction(state, previousState -> action.run());
+    }
+
+    /**
+     * Adds an action to perform each period while the state machine is in the specified state.
+     * @param state - The state to add the action for.
+     * @param action - The action to perform each period while the state machine is in the specified state.
+     */
+    public void addStateAction(TStateType state, Runnable action) {
+        stateActions.put(state, action);
+    }
+
+    /**
+     * @param requirements - The subsystems required by the returned command.
+     * @return A command that runs the state machine's current state's action each period.
+     */
+    public StateMachineSubsystemCommand<TStateType> getRunnableCommand(Subsystem... requirements) {
+        return new StateMachineSubsystemCommand<>(this, requirements);
     }
 
     /**

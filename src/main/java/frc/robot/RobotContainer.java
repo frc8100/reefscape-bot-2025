@@ -221,7 +221,7 @@ public class RobotContainer {
         autoRoutines = new AutoRoutines(swerveSubsystem, elevatorSubsystem, clawSubsystem);
 
         // Set up teleop swerve command
-        new TeleopSwerve(
+        TeleopSwerve teleopSwerve = new TeleopSwerve(
             swerveSubsystem,
             // Switch between joystick and main drive controls depending on the mode
             Controls.isUsingJoystickDrive ? Controls.joystickDriveControls : Controls.mainDriveControls,
