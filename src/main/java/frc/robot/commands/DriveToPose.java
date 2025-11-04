@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Seconds;
 
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.trajectory.PathPlannerTrajectoryState;
@@ -14,7 +13,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Time;
 import frc.lib.util.PoseUtil;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveDrive;
@@ -136,6 +134,10 @@ public class DriveToPose {
     //     );
     // }
 
+    /**
+     * Calculates the chassis speeds needed to drive to the target pose.
+     * @return The chassis speeds needed to drive to the target pose.
+     */
     public ChassisSpeeds getChassisSpeeds() {
         PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
         goalState.pose = targetPoseSupplier.get();

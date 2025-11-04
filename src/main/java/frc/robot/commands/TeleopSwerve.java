@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import frc.lib.util.statemachine.StateMachine;
 import frc.lib.util.statemachine.StateMachineState;
 import frc.robot.Controls;
@@ -19,6 +20,7 @@ import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.Swerve.SwerveState;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.path.AutoRoutines;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -27,7 +29,7 @@ import org.littletonrobotics.junction.Logger;
 /**
  * The teleop swerve command.
  */
-public class TeleopSwerve extends Command {
+public class TeleopSwerve {
 
     public enum DriveToPoseState {
         /**
@@ -115,7 +117,6 @@ public class TeleopSwerve extends Command {
         boolean logValues
     ) {
         this.swerveSubsystem = swerveSubsystem;
-        addRequirements(swerveSubsystem);
 
         // Set the values from the constructor
         this.translationSupplier = translationSupplier;
@@ -167,6 +168,29 @@ public class TeleopSwerve extends Command {
         });
 
         logCurrentStates();
+
+        // Bindings
+        swerveSubsystem.stateMachine
+            .on(SwerveState.FULL_DRIVER_CONTROL)
+            .whileTrue(Commands.run(this::driveFullDriverControl, swerveSubsystem));
+
+        swerveSubsystem.stateMachine
+            .on(SwerveState.DRIVE_TO_CORAL_STATION)
+            .or(() -> swerveSubsystem.stateMachine.is(SwerveState.DRIVE_TO_REEF))
+            .onTrue(Commands.runOnce(() -> stateMachine.scheduleStateChange(DriveToPoseState.INITIAL_PATHFINDING)))
+            .onFalse(Commands.runOnce(() -> stateMachine.scheduleStateChange(DriveToPoseState.NOT_DRIVING_TO_POSE)));
+
+        // TODO: change pose based on state
+        // TODO: only set once
+        stateMachine
+            .on(DriveToPoseState.INITIAL_PATHFINDING)
+            .whileTrue(getInitialPathfindingCommand(AutoRoutines.FieldLocations.CORAL_STATION_1::getPose));
+
+        stateMachine
+            .on(DriveToPoseState.FINAL_ALIGNMENT)
+            .whileTrue(getFinalAlignmentCommand(AutoRoutines.FieldLocations.CORAL_STATION_1::getPose));
+
+        stateMachine.on(DriveToPoseState.AT_TARGET).whileTrue(getAtTargetCommand());
     }
 
     /**
@@ -259,26 +283,10 @@ public class TeleopSwerve extends Command {
         );
     }
 
-    /**
-     * The function that is called to drive.
-     */
-    @Override
-    public void execute() {
-        switch (swerveSubsystem.stateMachine.getCurrentState().enumType) {
-            case FULL_DRIVER_CONTROL:
-                // Drive based on the raw controller inputs
-                ChassisSpeeds desiredChassisSpeeds = getChassisSpeedsFromControls();
-                swerveSubsystem.runVelocityChassisSpeeds(desiredChassisSpeeds);
-                break;
-            // Semi-autonomous states
-            case DRIVE_TO_CORAL_STATION, DRIVE_TO_REEF:
-                // TODO: change pose based on state
-                // TODO: only set once
-                driveSemiAuto(AutoRoutines.FieldLocations.CORAL_STATION_1::getPose);
-                break;
-            default:
-                break;
-        }
+    private void driveFullDriverControl() {
+        // Drive based on the raw controller inputs
+        ChassisSpeeds desiredChassisSpeeds = getChassisSpeedsFromControls();
+        swerveSubsystem.runVelocityChassisSpeeds(desiredChassisSpeeds);
     }
 
     /**
@@ -300,19 +308,12 @@ public class TeleopSwerve extends Command {
         );
     }
 
-    /**
-     * Drives semi-autonomously to a target pose based on the state machine.
-     * @param targetPoseSupplier - The supplier for the target pose.
-     */
-    private void driveSemiAuto(Supplier<Pose2d> targetPoseSupplier) {
-        driveToPoseCommand.setPoseSupplier(targetPoseSupplier);
-
-        switch (stateMachine.getCurrentState().enumType) {
-            case NOT_DRIVING_TO_POSE:
+    private Command getInitialPathfindingCommand(Supplier<Pose2d> targetPoseSupplier) {
+        return new DeferredCommand(
+            () -> {
                 Logger.recordOutput(stateMachine.dashboardKey + "/TargetPose", targetPoseSupplier.get());
 
-                // Initialize pathfinding to the target pose (if not already doing so)
-                pathFindToPoseCommand = new PathfindingCommand(
+                return new PathfindingCommand(
                     targetPoseSupplier.get(),
                     SwerveConfig.pathConstraints,
                     swerveSubsystem::getPose,
@@ -328,46 +329,28 @@ public class TeleopSwerve extends Command {
                     .andThen(
                         Commands.runOnce(() -> stateMachine.scheduleStateChange(DriveToPoseState.FINAL_ALIGNMENT))
                     );
-
-                // Schedule state change to initial pathfinding so the command isn't scheduled multiple times
-                stateMachine.scheduleStateChange(DriveToPoseState.INITIAL_PATHFINDING);
-
-                pathFindToPoseCommand.schedule();
-                break;
-            case FINAL_ALIGNMENT:
-                // Run final alignment
-                swerveSubsystem.runVelocityChassisSpeeds(applyInputNudge(driveToPoseCommand.getChassisSpeeds()));
-
-                // If at target, switch state
-                if (driveToPoseCommand.atTarget.getAsBoolean()) {
-                    stateMachine.scheduleStateChange(DriveToPoseState.AT_TARGET);
-                }
-
-                logCurrentStates();
-                break;
-            case AT_TARGET:
-                // If the robot is ever not at the target, go back to final alignment
-                if (!driveToPoseCommand.atTarget.getAsBoolean()) {
-                    stateMachine.scheduleStateChange(DriveToPoseState.FINAL_ALIGNMENT);
-                }
-
-                swerveSubsystem.stop();
-                break;
-            case INITIAL_PATHFINDING:
-                // If the pathfinding command is not scheduled, something went wrong, go back to not driving to pose
-                if (pathFindToPoseCommand == null || !pathFindToPoseCommand.isScheduled()) {
-                    stateMachine.scheduleStateChange(DriveToPoseState.NOT_DRIVING_TO_POSE);
-                }
-
-                break;
-        }
+            },
+            Set.of(swerveSubsystem)
+        );
     }
 
-    @Override
-    public void end(boolean interrupted) {
-        // Drive empty values
-        if (interrupted) {
-            swerveSubsystem.drive(new Translation2d(), 0, false);
-        }
+    private Command getFinalAlignmentCommand(Supplier<Pose2d> targetPoseSupplier) {
+        // Run final alignment
+        return Commands.runOnce(() -> {
+            driveToPoseCommand.setPoseSupplier(targetPoseSupplier);
+        })
+            .andThen(
+                Commands.run(() ->
+                    swerveSubsystem.runVelocityChassisSpeeds(applyInputNudge(driveToPoseCommand.getChassisSpeeds()))
+                )
+            )
+            .until(driveToPoseCommand.atTarget)
+            .andThen(Commands.runOnce(() -> stateMachine.scheduleStateChange(DriveToPoseState.AT_TARGET)));
+    }
+
+    private Command getAtTargetCommand() {
+        return Commands.run(swerveSubsystem::stop, swerveSubsystem).until(() ->
+            !driveToPoseCommand.atTarget.getAsBoolean()
+        );
     }
 }

@@ -12,8 +12,8 @@ import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * A subsystem that can be in one of several states.
- * @param <TStateType> - The enum type representing the states of the subsystem.
+ * A generic finite state machine for managing the states of a subsystem.
+ * @param <TStateType> - The enum type representing all the possible states of the subsystem.
  */
 public class StateMachine<TStateType extends Enum<TStateType>> {
 
@@ -473,12 +473,21 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
     }
 
     /**
+     * Checks if the state machine is currently in the specified state.
+     * @param state - The state to check.
+     * @return True if the state machine is in the specified state, false otherwise.
+     */
+    public boolean is(TStateType state) {
+        return getCurrentState().enumType == state;
+    }
+
+    /**
      * Returns a trigger that is active when the state machine is in the specified state.
      * See {@link #addOnStateChangeAction} for an better way to run actions on state changes.
      * @param state - The state to create a trigger for.
      */
-    public Trigger getStateTrigger(TStateType state) {
-        return new Trigger(() -> getCurrentState().enumType == state);
+    public Trigger on(TStateType state) {
+        return new Trigger(() -> is(state));
     }
 
     /**
