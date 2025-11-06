@@ -13,6 +13,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.util.statemachine.StateMachine;
+import frc.lib.util.statemachine.StateMachineNoPayload;
 import frc.lib.util.statemachine.StateMachineState;
 import frc.robot.Controls;
 import frc.robot.subsystems.swerve.Swerve;
@@ -52,7 +53,7 @@ public class TeleopSwerve {
         AT_TARGET,
     }
 
-    public final StateMachine<DriveToPoseState> stateMachine;
+    public final StateMachine<DriveToPoseState, Object> stateMachine;
 
     /**
      * The drive to pose command used for final alignment.
@@ -127,7 +128,7 @@ public class TeleopSwerve {
         driveToPoseCommand = new DriveToPose(this.swerveSubsystem, () -> new Pose2d());
 
         // Set up the state machine
-        stateMachine = new StateMachine<DriveToPoseState>("Swerve/DriveToPose", DriveToPoseState.class)
+        stateMachine = new StateMachine<>("Swerve/DriveToPose", DriveToPoseState.class)
             .withDefaultState(new StateMachineState<>(DriveToPoseState.NOT_DRIVING_TO_POSE, "Idle"))
             .withState(
                 new StateMachineState<>(
