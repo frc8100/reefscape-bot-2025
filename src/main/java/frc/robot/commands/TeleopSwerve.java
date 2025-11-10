@@ -13,12 +13,15 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.util.statemachine.StateMachine;
+import frc.lib.util.statemachine.StateMachineNoPayload;
 import frc.lib.util.statemachine.StateMachineState;
 import frc.robot.Controls;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.Swerve.SwerveState;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.path.AutoRoutines;
+
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -52,7 +55,7 @@ public class TeleopSwerve {
         AT_TARGET,
     }
 
-    public final StateMachine<DriveToPoseState> stateMachine;
+    public final StateMachine<DriveToPoseState, Object> stateMachine;
 
     /**
      * The drive to pose command used for final alignment.
@@ -127,7 +130,7 @@ public class TeleopSwerve {
         driveToPoseCommand = new DriveToPose(this.swerveSubsystem, () -> new Pose2d());
 
         // Set up the state machine
-        stateMachine = new StateMachine<DriveToPoseState>("Swerve/DriveToPose", DriveToPoseState.class)
+        stateMachine = new StateMachine<>("Swerve/DriveToPose", DriveToPoseState.class)
             .withDefaultState(new StateMachineState<>(DriveToPoseState.NOT_DRIVING_TO_POSE, "Idle"))
             .withState(
                 new StateMachineState<>(
@@ -169,22 +172,21 @@ public class TeleopSwerve {
 
         // Bindings
         swerveSubsystem.stateMachine.addStateAction(SwerveState.FULL_DRIVER_CONTROL, this::driveFullDriverControl);
-        swerveSubsystem.stateMachine.addOnStateChangeAction(SwerveState.DRIVE_TO_CORAL_STATION, () ->
-            stateMachine.scheduleStateChange(DriveToPoseState.INITIAL_PATHFINDING)
-        );
-        swerveSubsystem.stateMachine.addOnStateChangeAction(SwerveState.DRIVE_TO_REEF, () ->
+        swerveSubsystem.stateMachine.addOnStateChangeAction(SwerveState.DRIVE_TO_POSE, () ->
             stateMachine.scheduleStateChange(DriveToPoseState.INITIAL_PATHFINDING)
         );
 
         // TODO: change pose based on state
         // TODO: only set once
         stateMachine.addStateAction(DriveToPoseState.INITIAL_PATHFINDING, () ->
-            getInitialPathfindingCommand(AutoRoutines.FieldLocations.CORAL_STATION_1::getPose)
+            // getInitialPathfindingCommand(AutoRoutines.FieldLocations.CORAL_STATION_1::getPose)
+            getInitialPathfindingCommand(swerveSubsystem.stateMachine::getCurrentPayload)
         );
 
         stateMachine.addStateAction(DriveToPoseState.FINAL_ALIGNMENT, () ->
-            getFinalAlignmentCommand(AutoRoutines.FieldLocations.CORAL_STATION_1::getPose)
-        );
+            getFinalAlignmentCommand(
+                swerveSubsystem.stateMachine::getCurrentPayload
+            ));
 
         stateMachine.addStateAction(DriveToPoseState.AT_TARGET, this::getAtTargetCommand);
     }
@@ -304,12 +306,20 @@ public class TeleopSwerve {
         );
     }
 
-    private void getInitialPathfindingCommand(Supplier<Pose2d> targetPoseSupplier) {
-        Logger.recordOutput(stateMachine.dashboardKey + "/TargetPose", targetPoseSupplier.get());
+    private void getInitialPathfindingCommand(Supplier<Optional<Pose2d>> targetPoseSupplier) {
+        if (targetPoseSupplier.get().isEmpty()) {
+            // No target pose, return to full driver control
+            // stateMachine.scheduleStateChange(DriveToPoseState.NOT_DRIVING_TO_POSE);
+            return;
+        }
+
+        Pose2d targetPose = targetPoseSupplier.get().get();
+
+        Logger.recordOutput(stateMachine.dashboardKey + "/TargetPose", targetPose);
 
         // Initialize pathfinding to the target pose (if not already doing so)
         pathFindToPoseCommand = new PathfindingCommand(
-            targetPoseSupplier.get(),
+            targetPose,
             SwerveConfig.pathConstraints,
             swerveSubsystem::getPose,
             swerveSubsystem::getChassisSpeeds,
@@ -329,8 +339,8 @@ public class TeleopSwerve {
         pathFindToPoseCommand.schedule();
     }
 
-    private void getFinalAlignmentCommand(Supplier<Pose2d> targetPoseSupplier) {
-        driveToPoseCommand.setPoseSupplier(targetPoseSupplier);
+    private void getFinalAlignmentCommand(Supplier<Optional<Pose2d>> targetPoseSupplier) {
+        driveToPoseCommand.setOptionalPoseSupplier(targetPoseSupplier);
 
         // Run final alignment
         swerveSubsystem.runVelocityChassisSpeeds(applyInputNudge(driveToPoseCommand.getChassisSpeeds()));

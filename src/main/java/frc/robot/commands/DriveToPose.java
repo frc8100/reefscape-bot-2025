@@ -16,6 +16,8 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import frc.lib.util.PoseUtil;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveDrive;
+
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
@@ -114,6 +116,14 @@ public class DriveToPose {
      */
     public void setPoseSupplier(Supplier<Pose2d> newTargetPoseSupplier) {
         this.targetPoseSupplier = newTargetPoseSupplier;
+    }
+    
+    /**
+     * Sets a new target pose supplier.
+     * @param newTargetPoseSupplier - The new target pose supplier.
+     */
+    public void setOptionalPoseSupplier(Supplier<Optional<Pose2d>> newTargetPoseSupplier) {
+        this.targetPoseSupplier = () -> newTargetPoseSupplier.get().orElse(swerveSubsystem.getPose());
     }
 
     // @Override
