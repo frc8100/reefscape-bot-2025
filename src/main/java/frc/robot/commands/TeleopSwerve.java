@@ -20,7 +20,6 @@ import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.Swerve.SwerveState;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.path.AutoRoutines;
-
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -127,7 +126,7 @@ public class TeleopSwerve {
         this.speedDial = speedDial;
         this.logValues = logValues;
 
-        driveToPoseCommand = new DriveToPose(this.swerveSubsystem, () -> new Pose2d());
+        driveToPoseCommand = new DriveToPose(this.swerveSubsystem, this.swerveSubsystem::getPose);
 
         // Set up the state machine
         stateMachine = new StateMachine<>("Swerve/DriveToPose", DriveToPoseState.class)
@@ -184,9 +183,8 @@ public class TeleopSwerve {
         );
 
         stateMachine.addStateAction(DriveToPoseState.FINAL_ALIGNMENT, () ->
-            getFinalAlignmentCommand(
-                swerveSubsystem.stateMachine::getCurrentPayload
-            ));
+            getFinalAlignmentCommand(swerveSubsystem.stateMachine::getCurrentPayload)
+        );
 
         stateMachine.addStateAction(DriveToPoseState.AT_TARGET, this::getAtTargetCommand);
     }
@@ -306,14 +304,14 @@ public class TeleopSwerve {
         );
     }
 
-    private void getInitialPathfindingCommand(Supplier<Optional<Pose2d>> targetPoseSupplier) {
+    private void getInitialPathfindingCommand(Supplier<Optional<Supplier<Pose2d>>> targetPoseSupplier) {
         if (targetPoseSupplier.get().isEmpty()) {
             // No target pose, return to full driver control
             // stateMachine.scheduleStateChange(DriveToPoseState.NOT_DRIVING_TO_POSE);
             return;
         }
 
-        Pose2d targetPose = targetPoseSupplier.get().get();
+        Pose2d targetPose = targetPoseSupplier.get().get().get();
 
         Logger.recordOutput(stateMachine.dashboardKey + "/TargetPose", targetPose);
 
@@ -339,8 +337,8 @@ public class TeleopSwerve {
         pathFindToPoseCommand.schedule();
     }
 
-    private void getFinalAlignmentCommand(Supplier<Optional<Pose2d>> targetPoseSupplier) {
-        driveToPoseCommand.setOptionalPoseSupplier(targetPoseSupplier);
+    private void getFinalAlignmentCommand(Supplier<Optional<Supplier<Pose2d>>> targetPoseSupplier) {
+        driveToPoseCommand.setOptionalPoseSupplier(targetPoseSupplier.get());
 
         // Run final alignment
         swerveSubsystem.runVelocityChassisSpeeds(applyInputNudge(driveToPoseCommand.getChassisSpeeds()));
