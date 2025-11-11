@@ -4,49 +4,28 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.DeferredCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.Subsystem;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.lib.LimelightHelpers;
 import frc.lib.util.EmptySimulationArena;
 import frc.lib.util.TunableValue;
-import frc.robot.commands.DriveToPose;
 import frc.robot.commands.SwerveSysidRoutines;
 import frc.robot.commands.TeleopSwerve;
-import frc.robot.subsystems.questnav.QuestNavIO;
 import frc.robot.subsystems.questnav.QuestNavIOReal;
 import frc.robot.subsystems.questnav.QuestNavIOSim;
 import frc.robot.subsystems.questnav.QuestNavSubsystem;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
 import frc.robot.subsystems.superstructure.claw.Claw;
-import frc.robot.subsystems.superstructure.claw.ClawConstants;
 import frc.robot.subsystems.superstructure.claw.ClawIOSpark;
 import frc.robot.subsystems.superstructure.claw.ClawSim;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
-import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSpark;
-import frc.robot.subsystems.swerve.OpponentRobotSim;
-import frc.robot.subsystems.swerve.OpponentRobotSim.OpponentRobotBehavior;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveConstants;
-import frc.robot.subsystems.swerve.SwerveDrive;
 import frc.robot.subsystems.swerve.SwerveSim;
 import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2;
 import frc.robot.subsystems.swerve.gyro.GyroIOSim;
@@ -54,21 +33,16 @@ import frc.robot.subsystems.swerve.module.ModuleIO;
 import frc.robot.subsystems.swerve.module.ModuleIOSim;
 import frc.robot.subsystems.swerve.module.ModuleIOSpark;
 import frc.robot.subsystems.swerve.path.AutoRoutines;
-import frc.robot.subsystems.swerve.path.AutoRoutines.FieldLocations;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonSim;
-import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionSim;
 import frc.robot.subsystems.vision.VisionSim.NeuralDetectorSimPipeline;
-import java.util.Set;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.Arena2025Reefscape;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeReefSimulation;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -227,6 +201,8 @@ public class RobotContainer {
             Controls.isUsingJoystickDrive ? Controls.joystickDriveControls : Controls.mainDriveControls,
             true
         );
+
+        swerveSubsystem.setDefaultCommand(swerveSubsystem.stateMachine.getRunnableCommand(swerveSubsystem));
 
         // Register named commands
         NamedCommands.registerCommand(

@@ -3,6 +3,7 @@ package frc.robot;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnField;
@@ -243,9 +244,9 @@ public class ButtonBindings {
             .onTrue(Commands.runOnce(swerveSubsystem::zeroGyro));
 
         // Toggle drive to coral station state
-        StateCycle<SwerveState, Pose2d> toggleDriveToCoralStation = swerveSubsystem.stateMachine.createStateCycleWithPayload(
+        StateCycle<SwerveState, Supplier<Pose2d>> toggleDriveToCoralStation = swerveSubsystem.stateMachine.createStateCycleWithPayload(
             List.of(
-                new StateMachine.StateWithPayload<>(SwerveState.DRIVE_TO_POSE, AutoRoutines.FieldLocations.CORAL_STATION_1.getPose()),
+                new StateMachine.StateWithPayload<>(SwerveState.DRIVE_TO_POSE, AutoRoutines.FieldLocations.CORAL_STATION_1::getPose),
                 new StateMachine.StateWithPayload<>(SwerveState.FULL_DRIVER_CONTROL, null)
             )
         );

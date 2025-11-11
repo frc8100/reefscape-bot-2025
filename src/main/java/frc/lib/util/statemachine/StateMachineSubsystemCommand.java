@@ -16,6 +16,9 @@ public class StateMachineSubsystemCommand<TStateType extends Enum<TStateType>, T
         addRequirements(requirements);
     }
 
+    /**
+     * Runs the periodic action associated with the current state of the state machine.
+     */
     @Override
     public void execute() {
         TStateType currentState = stateMachine.getCurrentState().enumType;

@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.Volt;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -68,7 +69,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
      * The state machine for the swerve subsystem.
      * The payload is the target pose for the robot when in {@link SwerveState#DRIVE_TO_POSE}.
      */
-    public final StateMachine<SwerveState, Pose2d> stateMachine = new StateMachine<SwerveState, Pose2d>(
+    public final StateMachine<SwerveState, Supplier<Pose2d>> stateMachine = new StateMachine<SwerveState, Supplier<Pose2d>>(
         "Swerve",
         SwerveState.class
     )
