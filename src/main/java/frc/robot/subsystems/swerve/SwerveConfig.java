@@ -216,7 +216,7 @@ public class SwerveConfig {
     );
 
     public static final PIDConstants PP_INITIAL_TRANSLATION_PID = new PIDConstants(4, 0.8);
-    public static final PIDConstants PP_ENDING_TRANSLATION_PID = new PIDConstants(3.8, 0.425);
+    public static final PIDConstants PP_ENDING_TRANSLATION_PID = new PIDConstants(3.8, 0.4);
     public static final PIDConstants PP_ROTATION_PID = new PIDConstants(4.0, 0.02);
 
     public static final PPHolonomicDriveController PP_INITIAL_PID_CONTROLLER = new PPHolonomicDriveController(

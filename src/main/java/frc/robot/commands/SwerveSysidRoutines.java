@@ -155,12 +155,7 @@ public class SwerveSysidRoutines {
      * 4. Update the value of driveMotorCurrentLimit to this value.
      */
     public static Command wheelSlipCurrentCharacterization(Swerve drive) {
-        return Commands.run(
-            () -> {
-                drive.runCharacterization(7);
-            },
-            drive
-        )
+        return Commands.run(() -> drive.runCharacterization(5), drive)
             .until(() -> drive.getWheelSlippingCharacterization().isPresent())
             .andThen(() -> {
                 double slipData = drive.getWheelSlippingCharacterization().get();

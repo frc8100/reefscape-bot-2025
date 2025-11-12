@@ -55,7 +55,7 @@ public interface ModuleIO {
     public abstract void setTurnOpenLoop(double output);
 
     /** Run the drive motor at the specified velocity. Used internally. */
-    public abstract void setDriveVelocity(double velocityMetersPerSecond);
+    public abstract void setDriveVelocity(double velocityMetersPerSecond, double driveFeedforwardVoltage);
 
     /** Run the turn motor to the specified rotation. Used internally. */
     public abstract void setTurnPosition(Rotation2d rotation);
@@ -64,6 +64,11 @@ public interface ModuleIO {
      * Sets the desired state for the module. Should update the turn and drive motors to reach the desired state.
      * @param desiredState - The desired state for the module.
      * @param currentRotation2d - The current rotation of the module. Used for optimization.
+     * @param driveFeedforwardVoltage - The feedforward voltage to apply to the drive motor.
      */
-    public abstract void setDesiredState(SwerveModuleState desiredState, Rotation2d currentRotation2d);
+    public abstract void setDesiredState(
+        SwerveModuleState desiredState,
+        Rotation2d currentRotation2d,
+        double driveFeedforwardVoltage
+    );
 }

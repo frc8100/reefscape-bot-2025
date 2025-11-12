@@ -125,13 +125,17 @@ public class ModuleIOSim implements ModuleIO {
     }
 
     @Override
-    public void setDesiredState(SwerveModuleState desiredState, Rotation2d currentRotation2d) {
-        setDriveVelocity(desiredState.speedMetersPerSecond);
+    public void setDesiredState(
+        SwerveModuleState desiredState,
+        Rotation2d currentRotation2d,
+        double driveFeedforwardVoltage
+    ) {
+        setDriveVelocity(desiredState.speedMetersPerSecond, driveFeedforwardVoltage);
         setTurnPosition(desiredState.angle);
     }
 
     @Override
-    public void setDriveVelocity(double speedMetersPerSecond) {
+    public void setDriveVelocity(double speedMetersPerSecond, double driveFeedforwardVoltage) {
         double velocityRadPerSec = speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters);
 
         driveClosedLoop = true;
@@ -140,7 +144,9 @@ public class ModuleIOSim implements ModuleIO {
         //     SwerveConfig.driveSimKv * velocityRadPerSec +
         //     SwerveConfig.driveSimKa * ((velocityRadPerSec - previousVelocitySetpoint) / 0.02);
 
-        driveFFVolts = driveFeedforward.calculateWithVelocities(previousVelocitySetpoint, velocityRadPerSec);
+        // driveFFVolts = driveFeedforward.calculateWithVelocities(previousVelocitySetpoint, velocityRadPerSec);
+
+        driveFFVolts = driveFeedforwardVoltage;
 
         driveController.setSetpoint(velocityRadPerSec);
 

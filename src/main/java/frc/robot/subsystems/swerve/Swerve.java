@@ -189,22 +189,27 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         previousSetpoint = setpointGenerator.generateSetpoint(previousSetpoint, speed, Constants.LOOP_PERIOD_SECONDS);
 
         SwerveModuleState[] setpointStates = previousSetpoint.moduleStates();
+        DriveFeedforwards feedforwards = previousSetpoint.feedforwards();
+
+        double[] feedforwardLinearForcesNewtons = feedforwards.linearForcesNewtons();
 
         // Log setpoints
         Logger.recordOutput("Swerve/States/Setpoints", setpointStates);
         Logger.recordOutput("Swerve/ChassisSpeeds/Setpoints", previousSetpoint.robotRelativeSpeeds());
         Logger.recordOutput("Swerve/ChassisSpeeds/SetpointsRaw", speed);
 
+        Logger.recordOutput("Swerve/States/FeedforwardLinearForces", feedforwardLinearForcesNewtons);
+
         // Set the desired state for each swerve module
-        setModuleStates(setpointStates);
+        setModuleStates(setpointStates, feedforwardLinearForcesNewtons);
     }
 
     @Override
-    public void setModuleStates(SwerveModuleState[] desiredStates) {
+    public void setModuleStates(SwerveModuleState[] desiredStates, double[] feedforwardLinearForcesNewtons) {
         // Set the desired state for each swerve module
         for (int i = 0; i < 4; i++) {
             Module mod = swerveModules[i];
-            mod.runSetpoint(desiredStates[mod.index]);
+            mod.runSetpoint(desiredStates[mod.index], feedforwardLinearForcesNewtons[mod.index]);
         }
     }
 
@@ -246,7 +251,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     public Optional<Double> getWheelSlippingCharacterization() {
         for (int i = 0; i < 4; i++) {
             // Check if the module is slipping by seeing if the velocity is nonzero
-            if (swerveModules[i].getFFCharacterizationVelocity() < 0.15) continue;
+            if (swerveModules[i].getFFCharacterizationVelocity() < 0.175) continue;
 
             return Optional.of(swerveModules[i].getWheelSlippingCharacterizationAmps());
         }

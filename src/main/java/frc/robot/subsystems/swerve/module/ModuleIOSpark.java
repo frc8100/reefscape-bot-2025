@@ -251,14 +251,18 @@ public class ModuleIOSpark implements ModuleIO {
     }
 
     @Override
-    public void setDesiredState(SwerveModuleState desiredState, Rotation2d currentRotation2d) {
+    public void setDesiredState(
+        SwerveModuleState desiredState,
+        Rotation2d currentRotation2d,
+        double driveFeedforwardVoltage
+    ) {
         setAngle(desiredState, currentRotation2d);
-        setSpeed(desiredState);
+        setSpeed(desiredState, driveFeedforwardVoltage);
     }
 
     @Override
-    public void setDriveVelocity(double speedMetersPerSecond) {
-        setSpeed(new SwerveModuleState(speedMetersPerSecond, new Rotation2d()));
+    public void setDriveVelocity(double speedMetersPerSecond, double driveFeedforwardVoltage) {
+        setSpeed(new SwerveModuleState(speedMetersPerSecond, new Rotation2d()), driveFeedforwardVoltage);
     }
 
     /**
@@ -266,12 +270,14 @@ public class ModuleIOSpark implements ModuleIO {
      * @param desiredState The desired state.
      * @param isOpenLoop Whether the module is in open loop.
      */
-    private void setSpeed(SwerveModuleState desiredState) {
+    private void setSpeed(SwerveModuleState desiredState, double driveFeedforwardVoltage) {
         double velocityRadiansPerSecond = desiredState.speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters);
 
-        double ffVolts =
-            SwerveConfig.driveKS * Math.signum(velocityRadiansPerSecond) +
-            SwerveConfig.driveKV * velocityRadiansPerSecond;
+        // double ffVolts =
+        //     SwerveConfig.driveKS * Math.signum(velocityRadiansPerSecond) +
+        //     SwerveConfig.driveKV * velocityRadiansPerSecond;
+
+        double ffVolts = driveFeedforwardVoltage;
 
         this.driveFFVolts = ffVolts;
 
