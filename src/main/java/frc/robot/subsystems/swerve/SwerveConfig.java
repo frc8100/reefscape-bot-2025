@@ -131,7 +131,7 @@ public class SwerveConfig {
     public static final boolean IS_CANCODER_INVERTED = false;
 
     // Swerve Current Limiting
-    public static final Current ANGLE_CONTINUOUS_CURRENT_LIMIT = Amps.of(20);
+    public static final Current ANGLE_CONTINUOUS_CURRENT_LIMIT = Amps.of(25);
     public static final Current ANGLE_PEAK_CURRENT_LIMIT = Amps.of(40); // unused
     public static final Time ANGLE_PEAK_CURRENT_DURATION = Seconds.of(0.1); // unused
     public static final boolean IS_ANGLE_CURRENT_LIMIT_ACTIVE = true; // unused
@@ -215,8 +215,8 @@ public class SwerveConfig {
         MAX_ANGULAR_ACCELERATION
     );
 
-    public static final PIDConstants PP_INITIAL_TRANSLATION_PID = new PIDConstants(4, 0.8);
-    public static final PIDConstants PP_ENDING_TRANSLATION_PID = new PIDConstants(3.8, 0.4);
+    public static final PIDConstants PP_INITIAL_TRANSLATION_PID = new PIDConstants(4.5, 0.1);
+    public static final PIDConstants PP_ENDING_TRANSLATION_PID = new PIDConstants(4.67, 0.075);
     public static final PIDConstants PP_ROTATION_PID = new PIDConstants(4.0, 0.02);
 
     public static final PPHolonomicDriveController PP_INITIAL_PID_CONTROLLER = new PPHolonomicDriveController(
