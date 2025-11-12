@@ -44,7 +44,6 @@ public interface SwerveDrive extends Subsystem {
             this
         );
 
-        // Pathfinding.setPathfinder(new LocalADStar());
         Pathfinding.setPathfinder(new LocalADStarAK());
         PathPlannerLogging.setLogActivePathCallback(activePath ->
             Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]))
