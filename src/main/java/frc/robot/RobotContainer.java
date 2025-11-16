@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.Seconds;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathfindingCommand;
-
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -14,7 +13,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.util.EmptySimulationArena;
 import frc.lib.util.TunableValue;
 import frc.robot.commands.SwerveSysidRoutines;
-import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.questnav.QuestNavIOReal;
 import frc.robot.subsystems.questnav.QuestNavIOSim;
 import frc.robot.subsystems.questnav.QuestNavSubsystem;
@@ -196,13 +194,6 @@ public class RobotContainer {
         autoRoutines = new AutoRoutines(swerveSubsystem, elevatorSubsystem, clawSubsystem);
 
         // Set up teleop swerve command
-        TeleopSwerve teleopSwerve = new TeleopSwerve(
-            swerveSubsystem,
-            // Switch between joystick and main drive controls depending on the mode
-            Controls.isUsingJoystickDrive ? Controls.joystickDriveControls : Controls.mainDriveControls,
-            true
-        );
-
         swerveSubsystem.setDefaultCommand(swerveSubsystem.stateMachine.getRunnableCommand(swerveSubsystem));
 
         // Register named commands

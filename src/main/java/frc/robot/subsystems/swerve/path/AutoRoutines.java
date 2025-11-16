@@ -24,7 +24,7 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.lib.util.PoseUtil;
-import frc.robot.commands.DriveToPose;
+import frc.robot.commands.DriveToPosePID;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
 import frc.robot.subsystems.superstructure.SuperstructureConstants.CriticalLevel;
 import frc.robot.subsystems.superstructure.SuperstructureConstants.CriticalLevelRaw;
@@ -489,7 +489,7 @@ public class AutoRoutines {
                     swerveSubsystem::getPose,
                     swerveSubsystem::getChassisSpeeds,
                     (speeds, feedforwards) -> swerveSubsystem.runVelocityChassisSpeeds(speeds),
-                    DriveToPose.driveController,
+                    DriveToPosePID.driveController,
                     SwerveConfig.getRobotConfig()
                 ),
             Set.of(swerveSubsystem)

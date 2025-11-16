@@ -3,18 +3,9 @@ package frc.robot.subsystems.swerve;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volt;
 
-import java.util.Optional;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Supplier;
-
-import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
-
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
-
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -34,10 +25,18 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.util.statemachine.StateMachine;
 import frc.lib.util.statemachine.StateMachineState;
 import frc.robot.Constants;
+import frc.robot.Controls;
+import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
 import frc.robot.subsystems.swerve.module.Module;
 import frc.robot.subsystems.swerve.module.ModuleIO;
+import java.util.Optional;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 /** Swerve subsystem, responsible for controlling the swerve drive. */
 public class Swerve extends SubsystemBase implements SwerveDrive {
@@ -46,6 +45,8 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
      * Lock for the odometry thread.
      */
     public static final Lock odometryLock = new ReentrantLock();
+
+    private final TeleopSwerve teleopSwerve;
 
     public enum SwerveState {
         /**
@@ -57,7 +58,21 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
          * The robot is driving to a target pose.
          * The driver has partial control over swerve and can nudge the robot in a direction.
          */
-        DRIVE_TO_POSE,
+
+        /**
+         * The robot is performing initial pathfinding to the target pose.
+         */
+        DRIVE_TO_POSE_PATHFINDING,
+
+        /**
+         * The robot is performing final alignment to the target pose using a simple PID controller.
+         */
+        DRIVE_TO_POSE_PID,
+
+        /**
+         * The robot has reached the target pose.
+         */
+        DRIVE_TO_POSE_AT_TARGET,
 
         /**
          * The robot is fully autonomous and following a pre-planned path.
@@ -69,12 +84,30 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
      * The state machine for the swerve subsystem.
      * The payload is the target pose for the robot when in {@link SwerveState#DRIVE_TO_POSE}.
      */
-    public final StateMachine<SwerveState, Supplier<Pose2d>> stateMachine = new StateMachine<SwerveState, Supplier<Pose2d>>(
-        "Swerve",
-        SwerveState.class
-    )
+    public final StateMachine<SwerveState, Supplier<Pose2d>> stateMachine = new StateMachine<
+        SwerveState,
+        Supplier<Pose2d>
+    >("Swerve", SwerveState.class)
         .withDefaultState(new StateMachineState<>(SwerveState.FULL_DRIVER_CONTROL, "Manual"))
-        .withState(new StateMachineState<>(SwerveState.DRIVE_TO_POSE, "Drive to Pose"))
+        .withState(new StateMachineState<>(SwerveState.DRIVE_TO_POSE_PATHFINDING, "Initial Pathfinding"))
+        .withState(
+            new StateMachineState<>(
+                SwerveState.DRIVE_TO_POSE_PID,
+                "PID Alignment"
+                // (SwerveState previousState) ->
+                //     previousState == SwerveState.DRIVE_TO_POSE_PATHFINDING &&
+                //     teleopSwerve.driveToPoseCommand.canSwitchToFinalAlignment.getAsBoolean()
+            )
+        )
+        .withState(
+            new StateMachineState<>(
+                SwerveState.DRIVE_TO_POSE_AT_TARGET,
+                "At Target"
+                // (SwerveState previousState) ->
+                //     previousState == SwerveState.DRIVE_TO_POSE_PID &&
+                //     teleopSwerve.driveToPoseCommand.atTarget.getAsBoolean()
+            )
+        )
         .withState(new StateMachineState<>(SwerveState.FULL_AUTONOMOUS_PATH_FOLLOWING, "Follow Path"))
         .withReturnToDefaultStateOnDisable(true);
 
@@ -165,6 +198,13 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
             getChassisSpeeds(),
             getModuleStates(),
             DriveFeedforwards.zeros(SwerveConfig.NUMBER_OF_SWERVE_MODULES)
+        );
+
+        teleopSwerve = new TeleopSwerve(
+            this,
+            // Switch between joystick and main drive controls depending on the mode
+            Controls.isUsingJoystickDrive ? Controls.joystickDriveControls : Controls.mainDriveControls,
+            true
         );
     }
 

@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 /**
  * Uses a PID controller to drive the robot to a specified pose. Does not use path finding/obstacle avoidance.
  */
-public class DriveToPose {
+public class DriveToPosePID {
 
     /**
      * The PID controller shared by all instances of this command.
@@ -48,12 +48,6 @@ public class DriveToPose {
     private Supplier<Pose2d> targetPoseSupplier;
 
     /**
-     * The current target pose. Updated every time the command is executed.
-     * Use instead of calling the supplier multiple times.
-     */
-    private Pose2d targetPose = new Pose2d();
-
-    /**
      * A trigger that is true when the robot is at the target pose.
      * Has debounce.
      */
@@ -73,12 +67,9 @@ public class DriveToPose {
      * @param swerveSubsystem - The swerve drive subsystem.
      * @param targetPoseSupplier - A supplier that provides the target pose to drive to. See {@link #targetPoseSupplier}.
      */
-    public DriveToPose(SwerveDrive swerveSubsystem, Supplier<Pose2d> targetPoseSupplier) {
+    public DriveToPosePID(SwerveDrive swerveSubsystem, Supplier<Pose2d> targetPoseSupplier) {
         this.swerveSubsystem = swerveSubsystem;
         this.targetPoseSupplier = targetPoseSupplier;
-        targetPose = targetPoseSupplier.get();
-
-        // addRequirements(swerveSubsystem);
 
         atTarget = () ->
             PoseUtil.isPosesAndVelocityNear(
@@ -127,24 +118,6 @@ public class DriveToPose {
             : swerveSubsystem::getPose;
     }
 
-    // @Override
-    public void initialize() {
-        targetPose = targetPoseSupplier.get();
-
-        // Reset controller state
-        driveController.reset(swerveSubsystem.getPose(), new ChassisSpeeds());
-    }
-
-    // @Override
-    // public void execute() {
-    //     PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
-    //     goalState.pose = targetPoseSupplier.get();
-
-    //     swerveSubsystem.runVelocityChassisSpeeds(
-    //         driveController.calculateRobotRelativeSpeeds(swerveSubsystem.getPose(), goalState)
-    //     );
-    // }
-
     /**
      * Calculates the chassis speeds needed to drive to the target pose.
      * @return The chassis speeds needed to drive to the target pose.
@@ -155,15 +128,4 @@ public class DriveToPose {
 
         return driveController.calculateRobotRelativeSpeeds(swerveSubsystem.getPose(), goalState);
     }
-    // @Override
-    // public boolean isFinished() {
-    //     return atTarget.getAsBoolean();
-    // }
-
-    // @Override
-    // public void end(boolean interrupted) {
-    //     if (interrupted) {
-    //         swerveSubsystem.stop();
-    //     }
-    // }
 }

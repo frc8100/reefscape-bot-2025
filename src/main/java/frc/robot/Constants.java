@@ -8,6 +8,11 @@ public final class Constants {
     private Constants() {}
 
     /**
+     * The current year.
+     */
+    public static final int YEAR = 2025;
+
+    /**
      * The period of the main robot loop, in seconds.
      */
     public static final double LOOP_PERIOD_SECONDS = 0.02;
@@ -38,7 +43,7 @@ public final class Constants {
     /**
      * The directory to store WPILog files during simulation.
      */
-    public static final String simLogDirectory = "C:\\Users\\Public\\wpilib\\2025\\logs";
+    public static final String simLogDirectory = "C:\\Users\\Public\\wpilib\\" + YEAR + "\\logs";
 
     /**
      * Whether or not to silence the reportJoystickUnpluggedWarning warning.
