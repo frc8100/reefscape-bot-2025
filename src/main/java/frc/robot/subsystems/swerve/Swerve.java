@@ -3,9 +3,18 @@ package frc.robot.subsystems.swerve;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volt;
 
+import java.util.Optional;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
+
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
+
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -18,7 +27,6 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -30,11 +38,6 @@ import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
 import frc.robot.subsystems.swerve.module.Module;
 import frc.robot.subsystems.swerve.module.ModuleIO;
-import java.util.Optional;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
 
 /** Swerve subsystem, responsible for controlling the swerve drive. */
 public class Swerve extends SubsystemBase implements SwerveDrive {
@@ -50,10 +53,11 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
          */
         FULL_DRIVER_CONTROL,
 
-        // Semi auto states
-        // The driver has partial control over swerve, with the robot assisting in driving to a pose.
-        DRIVE_TO_CORAL_STATION,
-        DRIVE_TO_REEF,
+        /**
+         * The robot is driving to a target pose.
+         * The driver has partial control over swerve and can nudge the robot in a direction.
+         */
+        DRIVE_TO_POSE,
 
         /**
          * The robot is fully autonomous and following a pre-planned path.
@@ -61,10 +65,16 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         FULL_AUTONOMOUS_PATH_FOLLOWING,
     }
 
-    public final StateMachine<SwerveState> stateMachine = new StateMachine<SwerveState>("Swerve", SwerveState.class)
+    /**
+     * The state machine for the swerve subsystem.
+     * The payload is the target pose for the robot when in {@link SwerveState#DRIVE_TO_POSE}.
+     */
+    public final StateMachine<SwerveState, Supplier<Pose2d>> stateMachine = new StateMachine<SwerveState, Supplier<Pose2d>>(
+        "Swerve",
+        SwerveState.class
+    )
         .withDefaultState(new StateMachineState<>(SwerveState.FULL_DRIVER_CONTROL, "Manual"))
-        .withState(new StateMachineState<>(SwerveState.DRIVE_TO_CORAL_STATION, "Drive to Coral Station"))
-        .withState(new StateMachineState<>(SwerveState.DRIVE_TO_REEF, "Drive to Reef"))
+        .withState(new StateMachineState<>(SwerveState.DRIVE_TO_POSE, "Drive to Pose"))
         .withState(new StateMachineState<>(SwerveState.FULL_AUTONOMOUS_PATH_FOLLOWING, "Follow Path"))
         .withReturnToDefaultStateOnDisable(true);
 

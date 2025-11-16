@@ -3,7 +3,9 @@ package frc.lib.util.statemachine;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.util.statemachine.StateCycle.StateCycleBehavior;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -12,120 +14,55 @@ import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * A subsystem that can be in one of several states.
- * @param <TStateType> - The enum type representing the states of the subsystem.
+ * A generic finite state machine for managing the states of a subsystem.
+ * A list of possible states is defined using an enum type.
+ * Each enum type can have additional data and behavior defined in a {@link StateMachineState} object.
+ * @param <TStateEnum> - The enum type representing all the possible states.
+ * @param <TPayload> - The type of payload data associated with each state. When a state is entered, "argument" data of this type can be passed to it.
  */
-public class StateMachine<TStateType extends Enum<TStateType>> {
+public class StateMachine<TStateEnum extends Enum<TStateEnum>, TPayload> {
 
     @FunctionalInterface
-    public interface OnStateChangeAction<TEnumType extends Enum<TEnumType>> {
+    public interface OnStateChangeAction<TStateEnum extends Enum<TStateEnum>, TPayload> {
         /**
          * A functional interface representing an action to perform when a state change occurs.
          * @param previousState - The previous state before the change.
+         * @param payload - The payload associated with the new state.
          */
-        public void onStateChange(Optional<TEnumType> previousState);
+        public void onStateChange(Optional<TStateEnum> previousState, Optional<TPayload> payload);
+    }
+
+    @FunctionalInterface
+    public interface StatePeriodicAction<TPayload> {
+        /**
+         * A functional interface representing an action to perform periodically while in a state.
+         * @param payload - The payload associated with the current state.
+         */
+        public void onPeriodic(Optional<TPayload> payload);
     }
 
     /**
-     * A cycle of states. Mainly used for controller inputs that toggle/cycle through a set of states.
+     * A record representing a state along with its associated payload.
+     * @param <TStateEnum> - The enum type representing the state.
+     * @param <TPayload> - The type of payload associated with the state.
      */
-    public static class StateCycle<TEnumType extends Enum<TEnumType>> {
-
+    public static record StateWithPayload<TStateEnum extends Enum<TStateEnum>, TPayload>(
+        TStateEnum state,
+        TPayload payload
+    ) {
         /**
-         * The behavior of the state cycle when cycling through states.
+         * @return Whether this StateWithPayload is equal to another object.
+         * If the other object is a StateWithPayload, they are equal if their states are equal.
+         * Note: payloads are not considered for equality.
          */
-        public enum StateCycleBehavior {
-            /**
-             * Rely on the current state of the state machine to determine the next state in the cycle.
-             */
-            RELY_ON_CURRENT_STATE,
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null || getClass() != obj.getClass()) return false;
 
-            /**
-             * Rely on the index of the state in the cycle to determine the next state.
-             */
-            RELY_ON_INDEX,
-        }
+            StateWithPayload<?, ?> other = (StateWithPayload<?, ?>) obj;
 
-        private final StateMachine<TEnumType> stateMachine;
-        private final List<TEnumType> states;
-        private final StateCycleBehavior behavior;
-
-        private int currentIndex = 0;
-
-        /**
-         * Creates a new StateCycle with the specified states and behavior.
-         * @param stateMachine - The state machine to cycle through.
-         * @param states - The states to cycle through.
-         * @param behavior - The behavior of the state cycle.
-         */
-        public StateCycle(StateMachine<TEnumType> stateMachine, List<TEnumType> states, StateCycleBehavior behavior) {
-            this.stateMachine = stateMachine;
-            this.states = states;
-            this.behavior = behavior;
-        }
-
-        /**
-         * Creates a new StateCycle with the specified states. Behavior defaults to {@link StateCycleBehavior#RELY_ON_CURRENT_STATE}.
-         * @param stateMachine - The state machine to cycle through.
-         * @param states - The states to cycle through.
-         */
-        public StateCycle(StateMachine<TEnumType> stateMachine, List<TEnumType> states) {
-            this(stateMachine, states, StateCycleBehavior.RELY_ON_CURRENT_STATE);
-        }
-
-        /**
-         * @return The next state in the cycle depending on the behavior.
-         * If the behavior is {@link StateCycleBehavior#RELY_ON_CURRENT_STATE} and the current state is not in the cycle, the optional will be empty.
-         * Note: If the state list has duplicates, the first occurrence will be used (for {@link StateCycleBehavior#RELY_ON_CURRENT_STATE}).
-         */
-        public Optional<TEnumType> getNextState() {
-            if (behavior == StateCycleBehavior.RELY_ON_CURRENT_STATE) {
-                TEnumType currentState = stateMachine.getCurrentState().enumType;
-                int index = states.indexOf(currentState);
-
-                // If the current state is not in the cycle, return empty
-                if (index == -1) {
-                    return Optional.empty();
-                }
-
-                currentIndex = index;
-            }
-
-            // Get the next state in the cycle
-            currentIndex = (currentIndex + 1) % states.size();
-
-            try {
-                return Optional.of(states.get(currentIndex));
-            } catch (IndexOutOfBoundsException e) {
-                // Should never happen, but just in case
-                return Optional.empty();
-            }
-        }
-
-        /**
-         * Schedules the next state in the cycle to be set in the state machine.
-         * If the behavior is {@link StateCycleBehavior#RELY_ON_CURRENT_STATE} and the current state is not in the cycle, nothing will be scheduled.
-         */
-        public void scheduleNextState() {
-            Optional<TEnumType> nextState = getNextState();
-
-            nextState.ifPresent(stateMachine::scheduleStateChange);
-        }
-
-        /**
-         * Resets the state cycle to the given index.
-         * For {@link StateCycleBehavior#RELY_ON_CURRENT_STATE}, this will have no effect.
-         */
-        public void reset(int initialIndex) {
-            currentIndex = initialIndex % states.size();
-        }
-
-        /**
-         * Resets the state cycle to the beginning.
-         * For {@link StateCycleBehavior#RELY_ON_CURRENT_STATE}, this will have no effect.
-         */
-        public void reset() {
-            reset(0);
+            return state.equals(other.state);
         }
     }
 
@@ -141,15 +78,22 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
 
     /**
      * The current state of the subsystem.
+     * Can be null if no state has been set yet.
      */
-    private StateMachineState<TStateType> currentState = null;
+    private StateMachineState<TStateEnum> currentState = null;
+
+    /**
+     * The payload associated with the current state.
+     * Can be null.
+     */
+    private TPayload currentPayload = null;
 
     /**
      * The default state of the subsystem.
      * Used to initialize the current state if it is null.
      * Also used to reset the state machine to its default state.
      */
-    private StateMachineState<TStateType> defaultState = null;
+    private StateMachineState<TStateEnum> defaultState = null;
 
     /**
      * The key used for logging to the dashboard.
@@ -158,20 +102,37 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
     public final String dashboardKey;
 
     /**
-     * A map of all possible states in the state machine.
+     * The class of the enum type representing the states of the state machine.
      */
-    private final Map<TStateType, StateMachineState<TStateType>> stateMap;
+    private final Class<TStateEnum> stateEnumClass;
+
+    /**
+     * A map from enum states to their corresponding {@link StateMachineState} objects.
+     */
+    private final Map<TStateEnum, StateMachineState<TStateEnum>> stateMap;
 
     /**
      * A map of actions to perform on state changes.
+     * When the state machine changes to a state, all actions in the list for that state are executed once.
      */
-    private final Map<TStateType, List<OnStateChangeAction<TStateType>>> onStateChangeActions;
+    private final Map<TStateEnum, List<OnStateChangeAction<TStateEnum, TPayload>>> onStateChangeActions;
+
+    /**
+     * A map from enum states to their corresponding actions to perform each period while in that state.
+     */
+    // TODO: Consider making into List<Runnable>
+    public final Map<TStateEnum, StatePeriodicAction<TPayload>> statePeriodicActions;
 
     /**
      * The state that has been scheduled to change to on the next update cycle. Can be null.
      * See {@link #scheduleStateChange}.
      */
-    private StateMachineState<TStateType> scheduledStateChange = null;
+    private StateMachineState<TStateEnum> scheduledStateChange = null;
+
+    /**
+     * The payload associated with the current {@link #scheduledStateChange}. Can be null.
+     */
+    private TPayload scheduledPayload = null;
 
     /**
      * Whether the state machine should return to the default state when disabled.
@@ -184,12 +145,19 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      * @param dashboardKey - The key to use for logging to the dashboard. Added as a prefix to {@link #DEFAULT_DASHBOARD_KEY}.
      * @param stateEnumClass - The class of the enum type representing the states of the state machine. Used to initialize the internal {@link EnumMap}s. Ex. MyStateEnum.class
      */
-    public StateMachine(String dashboardKey, Class<TStateType> stateEnumClass) {
+    public StateMachine(String dashboardKey, Class<TStateEnum> stateEnumClass, TPayload defaultPayload) {
         this.dashboardKey = DEFAULT_DASHBOARD_KEY + dashboardKey;
+        this.stateEnumClass = stateEnumClass;
 
         // Init maps
-        stateMap = new EnumMap<>(stateEnumClass);
-        onStateChangeActions = new EnumMap<>(stateEnumClass);
+        stateMap = new EnumMap<>(this.stateEnumClass);
+        onStateChangeActions = new EnumMap<>(this.stateEnumClass);
+        statePeriodicActions = new EnumMap<>(this.stateEnumClass);
+
+        // Initialize action lists for each state
+        for (TStateEnum state : this.stateEnumClass.getEnumConstants()) {
+            onStateChangeActions.put(state, new ArrayList<>());
+        }
 
         recordCurrentState();
         recordScheduledStateChange();
@@ -221,6 +189,10 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
         );
     }
 
+    public StateMachine(String dashboardKey, Class<TStateEnum> stateEnumClass) {
+        this(dashboardKey, stateEnumClass, null);
+    }
+
     /**
      * A function that runs every command scheduler cycle to handle scheduled state changes.
      */
@@ -229,9 +201,10 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
         if (scheduledStateChange == null) return;
         if (!scheduledStateChange.canChangeCondition.canChange(currentState.enumType)) return;
 
-        setStateAndUpdate(scheduledStateChange.enumType);
+        setStateAndUpdate(new StateWithPayload<>(scheduledStateChange.enumType, scheduledPayload));
 
         scheduledStateChange = null;
+        scheduledPayload = null;
         recordScheduledStateChange();
     }
 
@@ -240,7 +213,7 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      * @return The StateMachineState object corresponding to the given enum state.
      * @throws IllegalArgumentException if the state does not exist in the state machine.
      */
-    private StateMachineState<TStateType> getStateObject(TStateType state) {
+    private StateMachineState<TStateEnum> getStateObject(TStateEnum state) {
         if (!stateMap.containsKey(state)) {
             throw new IllegalArgumentException("StateMachine does not contain state: " + state);
         }
@@ -252,13 +225,13 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      * Executes all actions registered for the current state change.
      * @param previousState - The previous state before the change. Can be null if there was no previous state.
      */
-    private void executeOnStateChangeActions(TStateType previousState) {
+    private void executeOnStateChangeActions(TStateEnum previousState) {
         if (currentState == null) return;
 
-        List<OnStateChangeAction<TStateType>> actions = onStateChangeActions.get(currentState.enumType);
+        List<OnStateChangeAction<TStateEnum, TPayload>> actions = onStateChangeActions.get(currentState.enumType);
 
-        for (OnStateChangeAction<TStateType> action : actions) {
-            action.onStateChange(Optional.ofNullable(previousState));
+        for (var action : actions) {
+            action.onStateChange(Optional.ofNullable(previousState), getCurrentPayload());
         }
     }
 
@@ -291,13 +264,18 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      * Bypasses any transition requirements.
      * @param newState - The new state to set, as the enum type.
      */
-    private void setStateAndUpdate(TStateType newState) {
-        TStateType previousState = (currentState != null) ? currentState.enumType : null;
+    private void setStateAndUpdate(TStateEnum newState) {
+        TStateEnum previousState = (currentState != null) ? currentState.enumType : null;
 
         currentState = getStateObject(newState);
         recordCurrentState();
 
         executeOnStateChangeActions(previousState);
+    }
+
+    private void setStateAndUpdate(StateWithPayload<TStateEnum, TPayload> stateWithPayload) {
+        currentPayload = stateWithPayload.payload;
+        setStateAndUpdate(stateWithPayload.state);
     }
 
     /**
@@ -306,13 +284,13 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      * @return True if the state was changed, false if it was the same as the current state.
      * @throws IllegalArgumentException if the new state does not exist in the state machine.
      */
-    public boolean setState(TStateType newState) {
+    public boolean setState(TStateEnum newState) {
         // Check if the new state is the same as the current state
         if (newState == getCurrentState().enumType) {
             return false;
         }
 
-        StateMachineState<TStateType> newStateObj = getStateObject(newState);
+        StateMachineState<TStateEnum> newStateObj = getStateObject(newState);
 
         // Check if the state can be changed to the new state based on the requirements
         if (!newStateObj.canChangeCondition.canChange(currentState.enumType)) {
@@ -324,13 +302,31 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
         return true;
     }
 
+    public boolean setState(StateWithPayload<TStateEnum, TPayload> stateWithPayload) {
+        // Check if the new state is the same as the current state
+        if (stateWithPayload.state == getCurrentState().enumType) {
+            return false;
+        }
+
+        StateMachineState<TStateEnum> newStateObj = getStateObject(stateWithPayload.state);
+
+        // Check if the state can be changed to the new state based on the requirements
+        if (!newStateObj.canChangeCondition.canChange(currentState.enumType)) {
+            return false;
+        }
+
+        setStateAndUpdate(stateWithPayload);
+
+        return true;
+    }
+
     /**
      * Forces the current state of the state machine to the specified state.
      * ! IMPORTANT: Bypasses any transition requirements.
      * @param newState - The new state to set, as the enum type.
      * @throws IllegalArgumentException if the new state does not exist in the state machine.
      */
-    public void forceSetState(TStateType newState) {
+    public void forceSetState(TStateEnum newState) {
         setStateAndUpdate(newState);
     }
 
@@ -340,8 +336,8 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      * @param newState - The new state to change to, as the enum type.
      * @throws IllegalArgumentException if the new state does not exist in the state machine.
      */
-    public void scheduleStateChange(TStateType newState) {
-        StateMachineState<TStateType> newStateObj = getStateObject(newState);
+    public void scheduleStateChange(TStateEnum newState) {
+        StateMachineState<TStateEnum> newStateObj = getStateObject(newState);
 
         // If it can change now, change immediately
         if (newStateObj.canChangeCondition.canChange(currentState.enumType)) {
@@ -350,6 +346,20 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
         }
 
         scheduledStateChange = newStateObj;
+        recordScheduledStateChange();
+    }
+
+    public void scheduleStateChange(StateWithPayload<TStateEnum, TPayload> stateWithPayload) {
+        StateMachineState<TStateEnum> newStateObj = getStateObject(stateWithPayload.state);
+
+        // If it can change now, change immediately
+        if (newStateObj.canChangeCondition.canChange(currentState.enumType)) {
+            setStateAndUpdate(stateWithPayload);
+            return;
+        }
+
+        scheduledStateChange = newStateObj;
+        scheduledPayload = stateWithPayload.payload;
         recordScheduledStateChange();
     }
 
@@ -375,16 +385,15 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      * Adds a state to the state machine.
      * @param state - The state to add.
      */
-    public void addState(StateMachineState<TStateType> state) {
+    public void addState(StateMachineState<TStateEnum> state) {
         stateMap.put(state.enumType, state);
-        onStateChangeActions.put(state.enumType, new ArrayList<>());
     }
 
     /**
      * Adds a state to the state machine and returns the state machine for chaining.
      * @param state - The state to add.
      */
-    public StateMachine<TStateType> withState(StateMachineState<TStateType> state) {
+    public StateMachine<TStateEnum, TPayload> withState(StateMachineState<TStateEnum> state) {
         addState(state);
         return this;
     }
@@ -394,7 +403,7 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      * Also sets the current state to the default state if the current state is null.
      * @param defaultState - The default state to set.
      */
-    public void setDefaultState(StateMachineState<TStateType> defaultState) {
+    public void setDefaultState(StateMachineState<TStateEnum> defaultState) {
         this.defaultState = defaultState;
 
         // If currentState is null, set it to the default state
@@ -407,7 +416,7 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      * Sets and adds the default state of the state machine and returns the state machine for chaining.
      * @param defaultState - The default state to set.
      */
-    public StateMachine<TStateType> withDefaultState(StateMachineState<TStateType> defaultState) {
+    public StateMachine<TStateEnum, TPayload> withDefaultState(StateMachineState<TStateEnum> defaultState) {
         addState(defaultState);
         setDefaultState(defaultState);
         return this;
@@ -425,7 +434,7 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      * Sets whether the state machine should return to the default state when disabled, and returns the state machine for chaining.
      * @param shouldReturn - Whether the state machine should return to the default state when disabled.
      */
-    public StateMachine<TStateType> withReturnToDefaultStateOnDisable(boolean shouldReturn) {
+    public StateMachine<TStateEnum, TPayload> withReturnToDefaultStateOnDisable(boolean shouldReturn) {
         setReturnToDefaultStateOnDisable(shouldReturn);
         return this;
     }
@@ -434,7 +443,7 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      * @return The current state of the state machine.
      * @throws IllegalStateException if the state machine does not have a current state defined and no default state to fall back on.
      */
-    public StateMachineState<TStateType> getCurrentState() {
+    public StateMachineState<TStateEnum> getCurrentState() {
         if (currentState == null) {
             // Set to default state if it exists
             // This should never happen if the state machine is properly initialized
@@ -449,12 +458,19 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
     }
 
     /**
+     * @return The payload associated with the current state, if any.
+     */
+    public Optional<TPayload> getCurrentPayload() {
+        return Optional.ofNullable(currentPayload);
+    }
+
+    /**
      * Adds an action to perform when the state machine changes to the specified state.
      * @param state - The state to add the action for.
      * @param action - The action to perform when the state machine changes to the specified state.
      * @throws IllegalArgumentException if the state does not exist in the state machine.
      */
-    public void addOnStateChangeAction(TStateType state, OnStateChangeAction<TStateType> action) {
+    public void addOnStateChangeAction(TStateEnum state, OnStateChangeAction<TStateEnum, TPayload> action) {
         if (!onStateChangeActions.containsKey(state)) {
             throw new IllegalArgumentException("StateMachine does not contain state: " + state);
         }
@@ -468,8 +484,38 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      * @param action - The action to perform when the state machine changes to the specified state.
      * @throws IllegalArgumentException if the state does not exist in the state machine.
      */
-    public void addOnStateChangeAction(TStateType state, Runnable action) {
-        addOnStateChangeAction(state, previousState -> action.run());
+    public void addOnStateChangeAction(TStateEnum state, Runnable action) {
+        addOnStateChangeAction(state, (previousState, payload) -> action.run());
+    }
+
+    /**
+     * Adds an action to perform each period while the state machine is in the specified state.
+     * @param state - The state to add the action for.
+     * @param action - The action to perform each period while the state machine is in the specified state.
+     */
+    public void addStateAction(TStateEnum state, StatePeriodicAction<TPayload> action) {
+        statePeriodicActions.put(state, action);
+    }
+
+    public void addStateAction(TStateEnum state, Runnable action) {
+        addStateAction(state, payload -> action.run());
+    }
+
+    /**
+     * @param requirements - The subsystems required by the returned command.
+     * @return A command that runs the state machine's current state's action each period.
+     */
+    public StateMachineSubsystemCommand<TStateEnum, TPayload> getRunnableCommand(Subsystem... requirements) {
+        return new StateMachineSubsystemCommand<>(this, requirements);
+    }
+
+    /**
+     * Checks if the state machine is currently in the specified state.
+     * @param state - The state to check.
+     * @return True if the state machine is in the specified state, false otherwise.
+     */
+    public boolean is(TStateEnum state) {
+        return getCurrentState().enumType == state;
     }
 
     /**
@@ -477,8 +523,8 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      * See {@link #addOnStateChangeAction} for an better way to run actions on state changes.
      * @param state - The state to create a trigger for.
      */
-    public Trigger getStateTrigger(TStateType state) {
-        return new Trigger(() -> getCurrentState().enumType == state);
+    public Trigger on(TStateEnum state) {
+        return new Trigger(() -> is(state));
     }
 
     /**
@@ -487,8 +533,11 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      * @param behavior - The behavior of the state cycle.
      * @return The created StateCycle.
      */
-    public StateCycle<TStateType> createStateCycle(List<TStateType> states, StateCycle.StateCycleBehavior behavior) {
-        return new StateCycle<>(this, states, behavior);
+    public StateCycle<TStateEnum, TPayload> createStateCycle(
+        List<TStateEnum> states,
+        StateCycle.StateCycleBehavior behavior
+    ) {
+        return StateCycle.fromEnumStatesNoPayload(this, states, behavior);
     }
 
     /**
@@ -496,7 +545,20 @@ public class StateMachine<TStateType extends Enum<TStateType>> {
      * @param states - The states to cycle through.
      * @return The created StateCycle.
      */
-    public StateCycle<TStateType> createStateCycle(List<TStateType> states) {
+    public StateCycle<TStateEnum, TPayload> createStateCycle(List<TStateEnum> states) {
+        return StateCycle.fromEnumStatesNoPayload(this, states);
+    }
+
+    public StateCycle<TStateEnum, TPayload> createStateCycleWithPayload(
+        List<StateWithPayload<TStateEnum, TPayload>> states,
+        StateCycle.StateCycleBehavior behavior
+    ) {
+        return new StateCycle<>(this, states, behavior);
+    }
+
+    public StateCycle<TStateEnum, TPayload> createStateCycleWithPayload(
+        List<StateWithPayload<TStateEnum, TPayload>> states
+    ) {
         return new StateCycle<>(this, states);
     }
 }

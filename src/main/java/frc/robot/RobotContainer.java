@@ -196,14 +196,14 @@ public class RobotContainer {
         autoRoutines = new AutoRoutines(swerveSubsystem, elevatorSubsystem, clawSubsystem);
 
         // Set up teleop swerve command
-        swerveSubsystem.setDefaultCommand(
-            new TeleopSwerve(
-                swerveSubsystem,
-                // Switch between joystick and main drive controls depending on the mode
-                Controls.isUsingJoystickDrive ? Controls.joystickDriveControls : Controls.mainDriveControls,
-                true
-            )
+        TeleopSwerve teleopSwerve = new TeleopSwerve(
+            swerveSubsystem,
+            // Switch between joystick and main drive controls depending on the mode
+            Controls.isUsingJoystickDrive ? Controls.joystickDriveControls : Controls.mainDriveControls,
+            true
         );
+
+        swerveSubsystem.setDefaultCommand(swerveSubsystem.stateMachine.getRunnableCommand(swerveSubsystem));
 
         // Register named commands
         NamedCommands.registerCommand(

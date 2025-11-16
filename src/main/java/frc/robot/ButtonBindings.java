@@ -1,33 +1,30 @@
 package frc.robot;
 
+import java.util.List;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
+
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnField;
+
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.DeferredCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.util.statemachine.StateCycle;
 import frc.lib.util.statemachine.StateMachine;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
 import frc.robot.subsystems.superstructure.claw.Claw;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.Swerve.SwerveState;
-import frc.robot.subsystems.swerve.SwerveDrive;
 import frc.robot.subsystems.swerve.path.AutoRoutines;
-import java.util.List;
-import java.util.Set;
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
-import java.util.function.DoubleConsumer;
-import java.util.function.DoubleSupplier;
-import org.ironmaple.simulation.SimulatedArena;
-import org.ironmaple.simulation.gamepieces.GamePieceOnFieldSimulation;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnField;
 
 public class ButtonBindings {
 
@@ -247,9 +244,13 @@ public class ButtonBindings {
             .onTrue(Commands.runOnce(swerveSubsystem::zeroGyro));
 
         // Toggle drive to coral station state
-        StateMachine.StateCycle<SwerveState> toggleDriveToCoralStation = swerveSubsystem.stateMachine.createStateCycle(
-            List.of(SwerveState.DRIVE_TO_CORAL_STATION, SwerveState.FULL_DRIVER_CONTROL)
+        StateCycle<SwerveState, Supplier<Pose2d>> toggleDriveToCoralStation = swerveSubsystem.stateMachine.createStateCycleWithPayload(
+            List.of(
+                new StateMachine.StateWithPayload<>(SwerveState.DRIVE_TO_POSE, AutoRoutines.FieldLocations.CORAL_STATION_1::getPose),
+                new StateMachine.StateWithPayload<>(SwerveState.FULL_DRIVER_CONTROL, null)
+            )
         );
+
         driverController
             .getJoystickButton(XboxController.Button.kA)
             .onTrue(Commands.runOnce(toggleDriveToCoralStation::scheduleNextState));
