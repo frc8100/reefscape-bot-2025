@@ -76,6 +76,7 @@
     "debouncers",
     "dtheta",
     "feedforward",
+    "Feedforwards",
     "hashtable",
     "hashtables",
     "Holonomic",

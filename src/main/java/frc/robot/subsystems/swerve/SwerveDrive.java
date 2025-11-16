@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.pathfinding.Pathfinding;
+import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -43,7 +44,6 @@ public interface SwerveDrive extends Subsystem {
             this
         );
 
-        // Pathfinding.setPathfinder(new LocalADStar());
         Pathfinding.setPathfinder(new LocalADStarAK());
         PathPlannerLogging.setLogActivePathCallback(activePath ->
             Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]))
@@ -105,7 +105,7 @@ public interface SwerveDrive extends Subsystem {
      * Sets the desired states for the swerve modules. Used by SwerveControllerCommand in Auto.
      * @param desiredStates The desired states for the swerve modules.
      */
-    public void setModuleStates(SwerveModuleState[] desiredStates);
+    public void setModuleStates(SwerveModuleState[] desiredStates, double[] feedforwardLinearForcesNewtons);
 
     /**
      * @return The current pose of the robot. This is determined by the swerve odometry.

@@ -168,5 +168,8 @@ public class ClawIOSim implements ClawIO {
         inputs.outtakeSupplyCurrentAmps = outtakeMotorSim.getSupplyCurrent().in(Amps);
         inputs.outtakeTorqueCurrentAmps = outtakeMotorSim.getStatorCurrent().in(Amps);
         inputs.outtakeSetpointVelocityRadPerSec = outtakeController.getSetpoint();
+
+        // Simulate coral detection based on outtake velocity
+        inputs.isCoralInClaw = outtakeMotorSim.getVelocity().in(RadiansPerSecond) > 20;
     }
 }

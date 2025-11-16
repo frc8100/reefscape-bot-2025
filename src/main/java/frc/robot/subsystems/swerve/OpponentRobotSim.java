@@ -190,7 +190,7 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
     }
 
     @Override
-    public void setModuleStates(SwerveModuleState[] desiredStates) {
+    public void setModuleStates(SwerveModuleState[] desiredStates, double[] feedforwardLinearForcesNewtons) {
         simulatedDrive.runSwerveStates(desiredStates);
     }
 

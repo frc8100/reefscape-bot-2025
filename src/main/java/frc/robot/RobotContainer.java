@@ -4,6 +4,8 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathfindingCommand;
+
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -191,7 +193,6 @@ public class RobotContainer {
         }
 
         // Set up auto routines
-        // autoRoutines = new AutoRoutines(swerveSubsystem, elevatorSubsystem, clawSubsystem, visionSubsystem);
         autoRoutines = new AutoRoutines(swerveSubsystem, elevatorSubsystem, clawSubsystem);
 
         // Set up teleop swerve command
@@ -260,6 +261,9 @@ public class RobotContainer {
             // Sim button bindings
             buttonBindings.configureSimulationBindings();
         }
+
+        // Warmup pathfinding
+        PathfindingCommand.warmupCommand().schedule();
     }
 
     /**

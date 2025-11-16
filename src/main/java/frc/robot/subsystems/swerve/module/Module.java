@@ -14,10 +14,12 @@
 package frc.robot.subsystems.swerve.module;
 
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Newtons;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.units.measure.Force;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.robot.subsystems.swerve.SwerveConfig;
@@ -89,16 +91,35 @@ public class Module {
         turnDisconnectedAlert.set(!inputs.turnConnected);
     }
 
-    /** Runs the module with the specified setpoint state. Mutates the state to optimize it. */
-    public void runSetpoint(SwerveModuleState state) {
+    /**
+     * Runs the module with the specified setpoint state. Mutates the state to optimize it.
+     * @param state - The desired state of the module.
+     * @param feedforwardLinearForces - The feedforward linear forces to apply to the drive motor, in Newtons.
+     */
+    public void runSetpoint(SwerveModuleState state, double feedforwardLinearForcesNewtons) {
         // Optimize setpoint
         state.optimize(inputs.turnPosition);
 
-        // TODO: Cosine scale?
-        // state.cosineScale(inputs.turnPosition);
+        // Calculate ff voltage
+        // Adapted from YAGSL SwerveDrive.drive
+
+        // from the module configuration, obtain necessary information to calculate feed-forward
+        // Warning: Will not work well if motor is not what we are expecting.
+
+        // calculation:
+        double desiredGroundSpeedMPS = state.speedMetersPerSecond;
+
+        double driveFeedforwardVoltage = SwerveConfig.driveGearbox.getVoltage(
+            // Since: (1) torque = force * momentOfForce; (2) torque (on wheel) = torque (on motor) * gearRatio
+            // torque (on motor) = force * wheelRadius / gearRatio
+            (feedforwardLinearForcesNewtons * SwerveConfig.WHEEL_RADIUS.in(Meters)) / SwerveConfig.DRIVE_GEAR_RATIO,
+            // Since: (1) linear velocity = angularVelocity * wheelRadius; (2) wheelVelocity = motorVelocity / gearRatio
+            // motorAngularVelocity = linearVelocity / wheelRadius * gearRatio
+            (desiredGroundSpeedMPS / SwerveConfig.WHEEL_RADIUS.in(Meters)) * SwerveConfig.DRIVE_GEAR_RATIO
+        );
 
         // Apply setpoints
-        io.setDesiredState(state, inputs.turnPosition);
+        io.setDesiredState(state, inputs.turnPosition, driveFeedforwardVoltage);
     }
 
     /** Runs the module with the specified output while controlling to zero degrees. */

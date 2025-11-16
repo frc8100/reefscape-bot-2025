@@ -34,10 +34,10 @@ public class DriveToPose {
         SwerveConfig.PP_ROTATION_PID
     );
 
-    // TODO: Move these to a constants file
-    private static final Distance positionTolerance = Inches.of(1);
+    // Tolerances for being "at" the target pose
+    private static final Distance positionTolerance = Inches.of(1.25);
     private static final Angle angleTolerance = Degrees.of(3);
-    private static final LinearVelocity speedTolerance = InchesPerSecond.of(2);
+    private static final LinearVelocity speedTolerance = InchesPerSecond.of(4);
 
     private final SwerveDrive swerveSubsystem;
 
