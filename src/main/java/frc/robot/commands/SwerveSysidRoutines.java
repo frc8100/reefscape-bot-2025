@@ -3,20 +3,25 @@ package frc.robot.commands;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Seconds;
 
+import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveDrive;
+import frc.util.SwerveFeedForwards;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Contains more complex characterization routines.
@@ -26,27 +31,51 @@ public class SwerveSysidRoutines {
     private SwerveSysidRoutines() {}
 
     private static final double FF_START_DELAY = 2.0; // Secs
-    private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
+    private static final double FF_RAMP_RATE = 1; // Volts/Sec
     private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
     private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
 
+    private static final RobotConfig PP_CONFIG = SwerveConfig.getRobotConfig();
+
+    private static ChassisSpeeds previousSpeeds = new ChassisSpeeds();
+
+    private static record FFMeasurement(double chassisAccelMPS2, double linearForcesNewtons) {}
+
     /**
-     * Measures the velocity feedforward constants for the drive motors.
-     * <p>This command should only be used in voltage control mode.
+     * Calculates the supplied linear forces in Newtons for the given chassis speeds.
+     * Based on PathPlanner's SwerveSetpointGenerator implementation.
+     * @param newSpeeds - The current chassis speeds.
+     * @return The calculated wheel forces in Newtons.
      */
-    public static Command feedforwardCharacterization(SwerveDrive drive) {
-        List<Double> velocitySamples = new LinkedList<>();
-        List<Double> voltageSamples = new LinkedList<>();
+    private static FFMeasurement getLinearForcesNewtons(ChassisSpeeds newSpeeds) {
+        double chassisAccelX =
+            (newSpeeds.vxMetersPerSecond - previousSpeeds.vxMetersPerSecond) / Constants.LOOP_PERIOD_SECONDS;
+        double chassisAccelY =
+            (newSpeeds.vyMetersPerSecond - previousSpeeds.vyMetersPerSecond) / Constants.LOOP_PERIOD_SECONDS;
+        double chassisForceX = chassisAccelX * PP_CONFIG.massKG;
+        double chassisForceY = chassisAccelY * PP_CONFIG.massKG;
+
+        // Angular force should be 0 because driving straight
+        double angularAccel =
+            (newSpeeds.omegaRadiansPerSecond - previousSpeeds.omegaRadiansPerSecond) / Constants.LOOP_PERIOD_SECONDS;
+        double angTorque = angularAccel * PP_CONFIG.MOI;
+
+        ChassisSpeeds chassisForces = new ChassisSpeeds(chassisForceX, chassisForceY, angTorque);
+
+        Translation2d[] wheelForces = PP_CONFIG.chassisForcesToWheelForceVectors(chassisForces);
+
+        double wheelForceDist = wheelForces[0].getNorm();
+
+        // Update previous speeds
+        previousSpeeds = newSpeeds;
+
+        return new FFMeasurement(Math.hypot(chassisAccelX, chassisAccelY), wheelForceDist);
+    }
+
+    private static Command feedforwardCharacterizationRunOnce(SwerveDrive drive) {
         Timer timer = new Timer();
 
         return Commands.sequence(
-            // Reset data
-            Commands.runOnce(() -> {
-                velocitySamples.clear();
-                voltageSamples.clear();
-            }),
-            // Allow modules to orient
-            Commands.run(() -> drive.runCharacterization(0.0), drive).withTimeout(FF_START_DELAY),
             // Start timer
             Commands.runOnce(timer::restart),
             // Accelerate and gather data
@@ -54,30 +83,43 @@ public class SwerveSysidRoutines {
                 () -> {
                     double voltage = timer.get() * FF_RAMP_RATE;
                     drive.runCharacterization(voltage);
-                    velocitySamples.add(drive.getFFCharacterizationVelocity());
-                    voltageSamples.add(voltage);
+
+                    double currentVelocityRadPerSec = drive.getFFCharacterizationVelocity();
+                    double currentVelocityMPS = currentVelocityRadPerSec * SwerveConfig.WHEEL_RADIUS.in(Meters);
+
+                    ChassisSpeeds currentSpeeds = new ChassisSpeeds(currentVelocityMPS, 0.0, 0.0);
+
+                    var measurement = getLinearForcesNewtons(currentSpeeds);
+
+                    Logger.recordOutput("SysId/FFCharacterization/VelocityRadPerSec", currentVelocityRadPerSec);
+                    Logger.recordOutput("SysId/FFCharacterization/VelocitySign", Math.signum(currentVelocityRadPerSec));
+                    Logger.recordOutput(
+                        "SysId/FFCharacterization/LinearForcesFFVolts",
+                        SwerveFeedForwards.getLinearForcesFFVoltsFromRadPerSec(
+                            measurement.linearForcesNewtons,
+                            currentVelocityRadPerSec
+                        )
+                    );
+                    Logger.recordOutput("SysId/FFCharacterization/ChassisAccelMPS2", measurement.chassisAccelMPS2);
+                    Logger.recordOutput("SysId/FFCharacterization/AppliedVoltage", voltage);
                 },
                 drive
-            ).finallyDo(() -> { // When cancelled, calculate and print results
-                int n = velocitySamples.size();
-                double sumX = 0.0;
-                double sumY = 0.0;
-                double sumXY = 0.0;
-                double sumX2 = 0.0;
-                for (int i = 0; i < n; i++) {
-                    sumX += velocitySamples.get(i);
-                    sumY += voltageSamples.get(i);
-                    sumXY += velocitySamples.get(i) * voltageSamples.get(i);
-                    sumX2 += velocitySamples.get(i) * velocitySamples.get(i);
-                }
-                double kS = (sumY * sumX2 - sumX * sumXY) / (n * sumX2 - sumX * sumX);
-                double kV = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+            )
+        );
+    }
 
-                NumberFormat formatter = new DecimalFormat("#0.00000");
-                System.out.println("********** Drive FF Characterization Results **********");
-                System.out.println("\tkS: " + formatter.format(kS));
-                System.out.println("\tkV: " + formatter.format(kV));
-            })
+    /**
+     * Measures the velocity feedforward constants for the drive motors.
+     * <p>This command should only be used in voltage control mode.
+     * Export as csv using AdvantageScope and the prefix `/RealOutputs/SysId/FFCharacterization`
+     */
+    public static Command feedforwardCharacterization(SwerveDrive drive) {
+        Timer timer = new Timer();
+
+        return Commands.sequence(
+            // Allow modules to orient
+            Commands.run(() -> drive.runCharacterization(0.0), drive).withTimeout(FF_START_DELAY),
+            feedforwardCharacterizationRunOnce(drive).withTimeout(Seconds.of(7))
         );
     }
 

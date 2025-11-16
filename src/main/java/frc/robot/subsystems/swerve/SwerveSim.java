@@ -42,6 +42,11 @@ public class SwerveSim extends Swerve {
     }
 
     @Override
+    public boolean isSimulation() {
+        return true;
+    }
+
+    @Override
     @AutoLogOutput(key = "Odometry/Field")
     public Pose2d getActualPose() {
         return driveSimulation.getSimulatedDriveTrainPose();

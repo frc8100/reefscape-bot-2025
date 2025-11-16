@@ -23,6 +23,8 @@ import edu.wpi.first.units.measure.Force;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.robot.subsystems.swerve.SwerveConfig;
+import frc.robot.subsystems.swerve.SwerveDrive;
+import frc.util.SwerveFeedForwards;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -94,29 +96,18 @@ public class Module {
     /**
      * Runs the module with the specified setpoint state. Mutates the state to optimize it.
      * @param state - The desired state of the module.
-     * @param feedforwardLinearForces - The feedforward linear forces to apply to the drive motor, in Newtons.
+     * @param driveFeedforwardVoltage - The feedforward voltage to apply to the drive motor.
      */
-    public void runSetpoint(SwerveModuleState state, double feedforwardLinearForcesNewtons) {
+    public void runSetpoint(SwerveModuleState state, double driveFeedforwardVoltage) {
         // Optimize setpoint
-        state.optimize(inputs.turnPosition);
+        // state.optimize(inputs.turnPosition);
 
-        // Calculate ff voltage
-        // Adapted from YAGSL SwerveDrive.drive
+        // double desiredGroundSpeedMPS = state.speedMetersPerSecond;
 
-        // from the module configuration, obtain necessary information to calculate feed-forward
-        // Warning: Will not work well if motor is not what we are expecting.
-
-        // calculation:
-        double desiredGroundSpeedMPS = state.speedMetersPerSecond;
-
-        double driveFeedforwardVoltage = SwerveConfig.driveGearbox.getVoltage(
-            // Since: (1) torque = force * momentOfForce; (2) torque (on wheel) = torque (on motor) * gearRatio
-            // torque (on motor) = force * wheelRadius / gearRatio
-            (feedforwardLinearForcesNewtons * SwerveConfig.WHEEL_RADIUS.in(Meters)) / SwerveConfig.DRIVE_GEAR_RATIO,
-            // Since: (1) linear velocity = angularVelocity * wheelRadius; (2) wheelVelocity = motorVelocity / gearRatio
-            // motorAngularVelocity = linearVelocity / wheelRadius * gearRatio
-            (desiredGroundSpeedMPS / SwerveConfig.WHEEL_RADIUS.in(Meters)) * SwerveConfig.DRIVE_GEAR_RATIO
-        );
+        // double driveFeedforwardVoltage = SwerveFeedForwards.getLinearForcesFFVolts(
+        //     feedforwardLinearForcesNewtons,
+        //     desiredGroundSpeedMPS
+        // );
 
         // Apply setpoints
         io.setDesiredState(state, inputs.turnPosition, driveFeedforwardVoltage);

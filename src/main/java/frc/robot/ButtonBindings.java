@@ -14,7 +14,6 @@ import frc.robot.subsystems.superstructure.claw.Claw;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.Swerve.SwerveState;
-import frc.robot.subsystems.swerve.path.AutoRoutines;
 import frc.util.statemachine.StateCycle;
 import frc.util.statemachine.StateMachine;
 import java.util.List;
@@ -213,7 +212,7 @@ public class ButtonBindings {
     // }
 
     // Subsystem references
-    private final AutoRoutines autoRoutines;
+    private final RobotActions autoRoutines;
     private final Swerve swerveSubsystem;
     private final Elevator elevatorSubsystem;
     private final Claw clawSubsystem;
@@ -222,7 +221,7 @@ public class ButtonBindings {
     private final Controller driverController = new Controller(0);
     private final Controller operatorController = new Controller(1);
 
-    public ButtonBindings(AutoRoutines autoRoutines) {
+    public ButtonBindings(RobotActions autoRoutines) {
         this.autoRoutines = autoRoutines;
 
         // Get subsystems from AutoRoutines
@@ -247,7 +246,7 @@ public class ButtonBindings {
                 List.of(
                     new StateMachine.StateWithPayload<>(
                         SwerveState.DRIVE_TO_POSE_PATHFINDING,
-                        AutoRoutines.FieldLocations.CORAL_STATION_1::getPose
+                        RobotActions.FieldLocations.CORAL_STATION_1::getPose
                     ),
                     new StateMachine.StateWithPayload<>(SwerveState.FULL_DRIVER_CONTROL, null)
                 ),

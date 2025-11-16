@@ -40,14 +40,6 @@ public class ModuleIOSim implements ModuleIO {
     private double driveAppliedVolts = 0.0;
     private double turnAppliedVolts = 0.0;
 
-    private double previousVelocitySetpoint = 0.0;
-
-    private SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(
-        SwerveConfig.driveSimKs,
-        SwerveConfig.driveSimKv,
-        SwerveConfig.driveSimKa
-    );
-
     public ModuleIOSim(SwerveModuleSimulation moduleSimulation) {
         this.moduleSimulation = moduleSimulation;
         this.driveMotor = moduleSimulation
@@ -139,18 +131,10 @@ public class ModuleIOSim implements ModuleIO {
         double velocityRadPerSec = speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters);
 
         driveClosedLoop = true;
-        // driveFFVolts =
-        //     SwerveConfig.driveSimKs * Math.signum(velocityRadPerSec) +
-        //     SwerveConfig.driveSimKv * velocityRadPerSec +
-        //     SwerveConfig.driveSimKa * ((velocityRadPerSec - previousVelocitySetpoint) / 0.02);
-
-        // driveFFVolts = driveFeedforward.calculateWithVelocities(previousVelocitySetpoint, velocityRadPerSec);
 
         driveFFVolts = driveFeedforwardVoltage;
 
         driveController.setSetpoint(velocityRadPerSec);
-
-        previousVelocitySetpoint = velocityRadPerSec;
     }
 
     @Override

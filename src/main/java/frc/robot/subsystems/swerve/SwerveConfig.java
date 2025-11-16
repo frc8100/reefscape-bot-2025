@@ -166,25 +166,12 @@ public class SwerveConfig {
     public static final TunableValue driveKPTunable = new TunableValue("Drive/kP", driveKP);
     public static final TunableValue driveKDTunable = new TunableValue("Drive/kD", driveKD);
 
-    // Drive Motor Characterization Values
-    public static final double driveKS = 0.17388;
-    public static final double driveKV = 0.13632;
-
     public static final double driveSimKP = 0.2;
     public static final double driveSimKD = 0.0;
 
-    // Simple characterization:
-    // kS: 0.03197
-    // kV: 0.16211
-
-    public static final double driveSimKs = 0.03197;
-    public static final double driveSimKv = 0.16211;
-    public static final double driveSimKa = 0.0;
-
-    // SysId
-    // public static final double driveSimKs = -0.10543;
-    // public static final double driveSimKv = 0.16202;
-    // public static final double driveSimKa = 0.051283;
+    /**
+     * See {@link frc.util.SwerveFeedForwards} for feedforward values.
+     */
 
     // Swerve path constraints
     public static final LinearVelocity MAX_SPEED = MetersPerSecond.of(3.75);

@@ -1,5 +1,6 @@
 package frc.robot.subsystems.swerve;
 
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volt;
 
@@ -29,6 +30,7 @@ import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
 import frc.robot.subsystems.swerve.module.Module;
 import frc.robot.subsystems.swerve.module.ModuleIO;
+import frc.util.SwerveFeedForwards;
 import frc.util.statemachine.StateMachine;
 import frc.util.statemachine.StateMachineState;
 import java.util.Optional;
@@ -259,7 +261,25 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         // Set the desired state for each swerve module
         for (int i = 0; i < 4; i++) {
             Module mod = swerveModules[i];
-            mod.runSetpoint(desiredStates[mod.index], feedforwardLinearForcesNewtons[mod.index]);
+
+            double driveFFVolts = SwerveFeedForwards.getLinearForceFFVolts(
+                this::isSimulation,
+                desiredStates[mod.index].speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters),
+                feedforwardLinearForcesNewtons[mod.index]
+            );
+
+            // double driveFFVolts = SwerveFeedForwards.getLinearForceFFVolts(
+            //     () -> false,
+            //     desiredStates[mod.index].speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters),
+            //     feedforwardLinearForcesNewtons[mod.index]
+            // );
+
+            // double driveFFVolts = SwerveFeedForwards.getSimpleFFVolts(
+            //     this::isSimulation,
+            //     desiredStates[mod.index].speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters)
+            // );
+
+            mod.runSetpoint(desiredStates[mod.index], driveFFVolts);
         }
     }
 

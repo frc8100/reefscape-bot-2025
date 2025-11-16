@@ -1,5 +1,6 @@
 package frc.robot.subsystems.swerve;
 
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -51,6 +52,10 @@ public interface SwerveDrive extends Subsystem {
         PathPlannerLogging.setLogTargetPoseCallback(targetPose ->
             Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose)
         );
+    }
+
+    public default boolean isSimulation() {
+        return false;
     }
 
     /**

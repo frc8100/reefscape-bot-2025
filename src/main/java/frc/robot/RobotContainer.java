@@ -30,7 +30,6 @@ import frc.robot.subsystems.swerve.gyro.GyroIOSim;
 import frc.robot.subsystems.swerve.module.ModuleIO;
 import frc.robot.subsystems.swerve.module.ModuleIOSim;
 import frc.robot.subsystems.swerve.module.ModuleIOSpark;
-import frc.robot.subsystems.swerve.path.AutoRoutines;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
@@ -61,7 +60,7 @@ public class RobotContainer {
     private final Claw clawSubsystem;
     private final Elevator elevatorSubsystem;
 
-    private final AutoRoutines autoRoutines;
+    private final RobotActions autoRoutines;
 
     /**
      * The simulation of the robot's drive. Set to null if not in simulation mode.
@@ -191,7 +190,7 @@ public class RobotContainer {
         }
 
         // Set up auto routines
-        autoRoutines = new AutoRoutines(swerveSubsystem, elevatorSubsystem, clawSubsystem);
+        autoRoutines = new RobotActions(swerveSubsystem, elevatorSubsystem, clawSubsystem, visionSubsystem);
 
         // Set up teleop swerve command
         swerveSubsystem.setDefaultCommand(swerveSubsystem.stateMachine.getRunnableCommand(swerveSubsystem));
