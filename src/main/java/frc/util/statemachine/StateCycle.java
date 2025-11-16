@@ -1,4 +1,4 @@
-package frc.lib.util.statemachine;
+package frc.util.statemachine;
 
 import java.util.List;
 import java.util.Optional;

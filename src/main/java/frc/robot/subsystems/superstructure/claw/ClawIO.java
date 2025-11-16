@@ -1,7 +1,7 @@
 package frc.robot.subsystems.superstructure.claw;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.lib.util.GenericSparkIO;
+import frc.util.GenericSparkIO;
 import org.littletonrobotics.junction.AutoLog;
 
 /**

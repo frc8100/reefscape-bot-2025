@@ -4,7 +4,7 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
-import static frc.lib.util.SparkUtil.*;
+import static frc.util.SparkUtil.*;
 
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
@@ -21,8 +21,8 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.lib.util.TunableValue;
 import frc.robot.subsystems.superstructure.elevator.ElevatorConstants;
+import frc.util.TunableValue;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 

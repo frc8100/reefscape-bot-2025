@@ -22,7 +22,7 @@ import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
-import frc.lib.util.TunableValue;
+import frc.util.TunableValue;
 
 /**
  * Constants for the elevator.
@@ -105,7 +105,7 @@ public final class ElevatorConstants {
 
     public static final LinearVelocity ELEVATOR_SIM_MAX_VELOCITY = MetersPerSecond.of(1);
     public static final LinearAcceleration ELEVATOR_SIM_MAX_ACCELERATION = MetersPerSecondPerSecond.of(0.65);
-    
+
     public static final TrapezoidProfile.Constraints PROFILED_ELEVATOR_CONSTRAINTS = new TrapezoidProfile.Constraints(
         ELEVATOR_MAX_ANGULAR_VELOCITY.in(RadiansPerSecond),
         ELEVATOR_MAX_ANGULAR_ACCELERATION.in(RadiansPerSecondPerSecond)

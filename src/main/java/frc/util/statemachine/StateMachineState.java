@@ -1,4 +1,4 @@
-package frc.lib.util.statemachine;
+package frc.util.statemachine;
 
 /**
  * A possible state that a {@link StateMachine} can be in.

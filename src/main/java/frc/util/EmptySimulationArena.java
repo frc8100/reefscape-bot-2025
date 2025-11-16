@@ -1,4 +1,4 @@
-package frc.lib.util;
+package frc.util;
 
 import org.ironmaple.simulation.SimulatedArena;
 

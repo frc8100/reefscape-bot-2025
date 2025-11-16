@@ -1,4 +1,4 @@
-package frc.lib.util;
+package frc.util;
 
 import edu.wpi.first.util.WPIUtilJNI;
 
@@ -7,7 +7,7 @@ import edu.wpi.first.util.WPIUtilJNI;
  * Has queueing capabilities.
  */
 public class TimerLoop {
-    
+
     /**
      * The frequency in frames/executions per second.
      */

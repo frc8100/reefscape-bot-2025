@@ -1,7 +1,7 @@
 package frc.robot.subsystems.swerve;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.lib.RevSwerveModuleConstants;
+import frc.util.RevSwerveModuleConstants;
 
 /**
  * Contains constants related to the Swerve Drive.

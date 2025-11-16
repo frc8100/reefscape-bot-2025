@@ -2,9 +2,9 @@ package frc.robot.subsystems.superstructure.elevator;
 
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
-import frc.lib.util.GenericSparkIO;
-import frc.lib.util.GenericSparkIO.GenericSparkIOInputs;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
+import frc.util.GenericSparkIO;
+import frc.util.GenericSparkIO.GenericSparkIOInputs;
 import org.littletonrobotics.junction.AutoLog;
 
 /**

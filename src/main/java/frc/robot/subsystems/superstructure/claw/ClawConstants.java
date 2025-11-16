@@ -26,7 +26,7 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
-import frc.lib.util.TunableValue;
+import frc.util.TunableValue;
 import org.ironmaple.simulation.motorsims.SimMotorConfigs;
 
 /**

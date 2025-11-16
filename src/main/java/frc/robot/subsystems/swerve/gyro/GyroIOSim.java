@@ -4,7 +4,7 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import frc.lib.util.SparkUtil;
+import frc.util.SparkUtil;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
 
 /**

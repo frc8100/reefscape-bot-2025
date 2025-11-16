@@ -1,8 +1,8 @@
-package frc.lib.util.statemachine;
+package frc.util.statemachine;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import frc.lib.util.statemachine.StateMachine.StatePeriodicAction;
+import frc.util.statemachine.StateMachine.StatePeriodicAction;
 
 /**
  * A command that executes actions based on the current state of a StateMachine.

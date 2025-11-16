@@ -1,4 +1,4 @@
-package frc.lib.util;
+package frc.util;
 
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;

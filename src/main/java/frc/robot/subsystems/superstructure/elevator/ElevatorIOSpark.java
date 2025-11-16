@@ -4,9 +4,9 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
-import static frc.lib.util.SparkUtil.ifOk;
-import static frc.lib.util.SparkUtil.sparkStickyFault;
-import static frc.lib.util.SparkUtil.tryUntilOk;
+import static frc.util.SparkUtil.ifOk;
+import static frc.util.SparkUtil.sparkStickyFault;
+import static frc.util.SparkUtil.tryUntilOk;
 
 // import static frc.robot.subsystems.superstructure.elevator.ElevatorConstants.*;
 
@@ -27,11 +27,11 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
-import frc.lib.util.GenericSparkIO.GenericSparkIOConfig;
-import frc.lib.util.TunableValue;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
 import frc.robot.subsystems.superstructure.claw.ClawConstants;
 import frc.robot.subsystems.superstructure.claw.ClawIO.ClawIOInputs;
+import frc.util.GenericSparkIO.GenericSparkIOConfig;
+import frc.util.TunableValue;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -163,7 +163,7 @@ public class ElevatorIOSpark implements ElevatorIO {
             ElevatorConstants.ELEVATOR_KF.get()
         );
         // .outputRange(-ElevatorConstants.ELEVATOR_MAX_OUTPUT, ElevatorConstants.ELEVATOR_MAX_OUTPUT);
-        
+
         debugProfiledPIDController.setPID(
             ElevatorConstants.ELEVATOR_KP.get(),
             ElevatorConstants.ELEVATOR_KI.get(),

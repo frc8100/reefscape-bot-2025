@@ -8,8 +8,8 @@ import static frc.robot.subsystems.superstructure.elevator.ElevatorConstants.Pos
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
-import frc.lib.util.TunableValue;
 import frc.robot.subsystems.superstructure.claw.ClawConstants;
+import frc.util.TunableValue;
 
 /**
  * Contains the constants for the superstructure.
