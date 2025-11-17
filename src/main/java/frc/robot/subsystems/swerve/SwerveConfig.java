@@ -154,8 +154,8 @@ public class SwerveConfig {
     public static final TunableValue angleKPTunable = new TunableValue("Drive/angleKP", angleKP);
     public static final TunableValue angleKDTunable = new TunableValue("Drive/angleKD", angleKD);
 
-    public static final double angleSimKP = 8.0;
-    public static final double angleSimKD = 0.0;
+    public static final double angleSimKP = 20.0;
+    public static final double angleSimKD = 0.1;
 
     // Drive Motor PID Values
     public static final double driveKP = 0.01;
