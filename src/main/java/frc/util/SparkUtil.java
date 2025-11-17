@@ -34,6 +34,25 @@ public class SparkUtil {
     /** Stores whether any error was has been detected by other utility methods. */
     public static boolean sparkStickyFault = false;
 
+    /**
+     * Processes and returns a value from a Spark only if the value is valid.
+     * @return The value from the supplier if no error occurred, otherwise the value from the elseSupplier.
+     */
+    public static <T> T ifOkElse(SparkBase spark, Supplier<T> supplier, Supplier<T> elseSupplier) {
+        T value = supplier.get();
+
+        if (spark.getLastError() == REVLibError.kOk) {
+            return value;
+        } else {
+            sparkStickyFault = true;
+            return elseSupplier.get();
+        }
+    }
+
+    public static double ifOkOtherwiseZero(SparkBase spark, DoubleSupplier supplier) {
+        return ifOkElse(spark, supplier::getAsDouble, () -> 0.0);
+    }
+
     /** Processes a value from a Spark only if the value is valid. */
     public static void ifOk(SparkBase spark, DoubleSupplier supplier, DoubleConsumer consumer) {
         double value = supplier.getAsDouble();
