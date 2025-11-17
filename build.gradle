@@ -199,7 +199,7 @@ spotless {
     // }
     groovyGradle {
         target fileTree(".") {
-            include "**/*.gradle"
+            include "/*.gradle"
             exclude "**/build/**", "**/build-*/**", "**/node_modules/**"
         }
         greclipse()
@@ -214,13 +214,13 @@ spotless {
     //     }
     //     gson().indentWithSpaces(2)
     // }
-    format "misc", {
-        target fileTree(".") {
-            include "**/*.md", "**/.gitignore"
-            exclude "**/build/**", "**/build-*/**", "**/node_modules/**"
-        }
-        trimTrailingWhitespace()
-        indentWithSpaces(2)
-        endWithNewline()
-    }
+    // format "misc", {
+    //     target fileTree(".") {
+    //         include "**/*.md", "**/.gitignore"
+    //         exclude "**/build/**", "**/build-*/**", "**/node_modules/**"
+    //     }
+    //     trimTrailingWhitespace()
+    //     indentWithSpaces(2)
+    //     endWithNewline()
+    // }
 }
