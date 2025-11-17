@@ -8,34 +8,43 @@ import static edu.wpi.first.units.Units.Volts;
 
 import com.revrobotics.spark.SparkBase;
 import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Temperature;
+import edu.wpi.first.units.measure.Voltage;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.local.SparkWrapper;
 
 public interface YAMSSubsystemIO {
     /**
-     * What is record in the IO inputs for a Spark motor controller.
+     * What is recorded in the IO inputs for a Spark motor controller.
      * @param motorConnected - Whether the motor is connected.
-     * @param positionRad - The position of the motor in radians.
-     * @param velocityRadPerSec - The velocity of the motor in radians per second.
+     * @param positionAngle - The position of the mechanism in radians. Multiplied by a conversion factor from the motor rotations.
+     * @param velocity - The velocity of the motor in radians per second. Multiplied by a conversion factor from the motor rotations.
      * @param appliedVolts - The applied voltage to the motor.
-     * @param torqueCurrentAmps - The torque current of the motor in amps.
-     * @param tempCelsius - The temperature of the motor in celsius.
+     * @param torqueCurrent - The torque current of the motor in amps.
+     * @param temperature - The temperature of the motor in celsius.
      */
     public static record SparkMotorControllerData(
-        double positionRad,
-        double velocityRadPerSec,
-        double appliedVolts,
-        double torqueCurrentAmps,
-        double tempCelsius,
+        Angle positionAngle,
+        AngularVelocity velocity,
+        Voltage appliedVolts,
+        Current torqueCurrent,
+        Temperature temperature,
         boolean motorConnected
     ) {}
 
+    /**
+     * The default data for a Spark motor controller.
+     * All values are `0` and motor connected is `true`.
+     */
     public static SparkMotorControllerData defaultControllerData = new SparkMotorControllerData(
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
+        Radians.of(0),
+        RadiansPerSecond.of(0),
+        Volts.of(0),
+        Amps.of(0),
+        Celsius.of(0),
         true
     );
 
@@ -55,11 +64,11 @@ public interface YAMSSubsystemIO {
         SparkUtil.sparkStickyFault = false;
 
         return new SparkMotorControllerData(
-            SparkUtil.ifOkOtherwiseZero(spark, () -> motorController.getMechanismPosition().in(Radians)),
-            SparkUtil.ifOkOtherwiseZero(spark, () -> motorController.getMechanismVelocity().in(RadiansPerSecond)),
-            SparkUtil.ifOkOtherwiseZero(spark, () -> motorController.getVoltage().in(Volts)),
-            SparkUtil.ifOkOtherwiseZero(spark, () -> motorController.getStatorCurrent().in(Amps)),
-            SparkUtil.ifOkOtherwiseZero(spark, () -> motorController.getTemperature().in(Celsius)),
+            SparkUtil.ifOkElse(spark, motorController::getMechanismPosition, () -> Radians.of(0)),
+            SparkUtil.ifOkElse(spark, motorController::getMechanismVelocity, () -> RadiansPerSecond.of(0)),
+            SparkUtil.ifOkElse(spark, motorController::getVoltage, () -> Volts.of(0)),
+            SparkUtil.ifOkElse(spark, motorController::getStatorCurrent, () -> Amps.of(0)),
+            SparkUtil.ifOkElse(spark, motorController::getTemperature, () -> Celsius.of(0)),
             motorConnectionDebouncer.calculate(!SparkUtil.sparkStickyFault)
         );
     }

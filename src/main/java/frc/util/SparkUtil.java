@@ -20,6 +20,8 @@ import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkBaseConfig;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Unit;
 import edu.wpi.first.wpilibj.Timer;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
@@ -52,6 +54,15 @@ public class SparkUtil {
     public static double ifOkOtherwiseZero(SparkBase spark, DoubleSupplier supplier) {
         return ifOkElse(spark, supplier::getAsDouble, () -> 0.0);
     }
+
+    // @SuppressWarnings("unchecked")
+    // public static <U extends Measure<?>> U ifOkOtherwiseZero(
+    //     U baseUnit,
+    //     SparkBase spark,
+    //     Supplier<U> supplier
+    // ) {
+    //     return ifOkElse(spark, supplier, () -> (U) baseUnit.);
+    // }
 
     /** Processes a value from a Spark only if the value is valid. */
     public static void ifOk(SparkBase spark, DoubleSupplier supplier, DoubleConsumer consumer) {
