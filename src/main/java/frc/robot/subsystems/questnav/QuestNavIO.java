@@ -1,10 +1,14 @@
 package frc.robot.subsystems.questnav;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import gg.questnav.questnav.PoseFrame;
 import gg.questnav.questnav.QuestNav;
 import org.littletonrobotics.junction.AutoLog;
 
+/**
+ * IO interface for the QuestNav subsystem.
+ */
 public interface QuestNavIO {
     @AutoLog
     public static class QuestNavIOInputs {
@@ -46,7 +50,16 @@ public interface QuestNavIO {
      * Sets the current pose of the QuestNav system.
      * ! IMPORTANT: This does not have to be transformed by the robot-to-headset transform; it will be handled internally.
      * See {@link https://questnav.gg/docs/getting-started/robot-code/#setting-robot-pose}
-     * @param pose The pose to set the QuestNav system to.
+     * @param pose - The pose to set the QuestNav system to.
      */
-    public default void setPose(Pose2d pose) {}
+    public default void setPose(Pose3d pose) {}
+
+    /**
+     * Sets the current pose of the QuestNav system using a 2D pose.
+     * See {@link #setPose(Pose3d)} for important notes.
+     * @param pose - The pose to set the QuestNav system to.
+     */
+    public default void setPose(Pose2d pose) {
+        setPose(new Pose3d(pose));
+    }
 }

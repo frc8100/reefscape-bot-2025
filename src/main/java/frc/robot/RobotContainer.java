@@ -280,7 +280,7 @@ public class RobotContainer {
 
         autoChooser.addOption(
             "QuestNav Transform Measure",
-            questNavSubsystem.getMeasureTransformCommand(swerveSubsystem, Seconds.of(0.2))
+            questNavSubsystem.getMeasureTransformCommand(swerveSubsystem, Seconds.of(0.1))
         );
 
         // Actual SysId routines

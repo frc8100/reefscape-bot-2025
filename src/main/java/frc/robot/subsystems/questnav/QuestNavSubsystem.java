@@ -7,8 +7,10 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -28,85 +30,21 @@ import java.util.List;
  */
 public class QuestNavSubsystem extends SubsystemBase {
 
-    private static record MeasurementPoint(double x, double y) {}
-
     /**
-     * @return A command that measures the transform between the QuestNav and the robot's coordinate frame.
-     * @param swerveSubsystem - The swerve drive subsystem to use for movement.
-     * @param timePerMeasurement - The time to wait between measurements.
+     * A measurement point used for calculating the transform between the QuestNav and the robot's coordinate frame.
+     * See {@link #getMeasureTransformCommand(SwerveDrive, Time)}.
      */
-    public Command getMeasureTransformCommand(SwerveDrive swerveSubsystem, Time timePerMeasurement) {
-        List<MeasurementPoint> measuredPoints = new ArrayList<>();
+    private static record MeasurementPoint(double x, double y, double z) {}
 
-        Debouncer debounce = new Debouncer(timePerMeasurement.in(Seconds), DebounceType.kRising);
-
-        return Commands.runOnce(() -> {
-            // Reset poses
-            swerveSubsystem.setPose(new Pose2d());
-            io.setPose(new Pose2d());
-        }).andThen(
-            Commands.run(
-                () -> {
-                    // Spin in place
-                    swerveSubsystem.runVelocityChassisSpeeds(new ChassisSpeeds(0, 0, 1));
-
-                    if (!inputs.isTracking) {
-                        return;
-                    }
-
-                    if (!debounce.calculate(true)) {
-                        return;
-                    }
-
-                    // Take a measurement
-                    PoseFrame[] frames = inputs.unreadPoseFrames;
-                    for (PoseFrame frame : frames) {
-                        Pose2d questPose = frame.questPose();
-                        Transform2d measurement = questPose.minus(swerveSubsystem.getPose());
-
-                        measuredPoints.add(new MeasurementPoint(measurement.getX(), measurement.getY()));
-                    }
-
-                    // Reset debounce
-                    debounce.calculate(false);
-                },
-                swerveSubsystem
-            ).finallyDo(() -> {
-                // System.out.println("Measured points:");
-                // System.out.println(String.join(",", measuredPoints));
-
-                // Calculate average
-                double sumX = 0;
-                double sumY = 0;
-
-                for (MeasurementPoint point : measuredPoints) {
-                    sumX += point.x;
-                    sumY += point.y;
-                }
-
-                double avgX = sumX / measuredPoints.size();
-                double avgY = sumY / measuredPoints.size();
-
-                System.out.println(
-                    "Estimated ROBOT_TO_QUEST transform:" +
-                    " new Transform2d(" +
-                    avgX +
-                    ", " +
-                    avgY +
-                    ", " +
-                    "new Rotation2d()" +
-                    ");"
-                );
-            })
-        );
-    }
-
-    // TODO: Move these to a constants file
     /**
      * The transform from the robot's center to the headset. Used for offsetting pose data.
      */
     // TODO: Measure and set this transform
-    public static final Transform2d ROBOT_TO_QUEST = new Transform2d(0.5, 0.3, new Rotation2d());
+    public static final Transform3d ROBOT_TO_QUEST = new Transform3d(
+        new Translation3d(0.2, 0.2, 0.3),
+        // Rotational transform shouldn't matter because of setPose handling, so just leave as identity
+        new Rotation3d()
+    );
     private static final Matrix<N3, N1> QUESTNAV_STD_DEVS = VecBuilder.fill(
         0.02, // Trust down to 2cm in X direction
         0.02, // Trust down to 2cm in Y direction
@@ -177,17 +115,94 @@ public class QuestNavSubsystem extends SubsystemBase {
         // Loop over the pose data frames and send them to the pose estimator
         for (PoseFrame questFrame : questFrames) {
             // Get the pose of the Quest
-            Pose2d questPose = questFrame.questPose();
+            Pose3d questPose = questFrame.questPose3d();
             // Get timestamp for when the data was sent
             double timestamp = questFrame.dataTimestamp();
 
             // Transform by the mount pose to get your robot pose
-            Pose2d robotPose = questPose.transformBy(ROBOT_TO_QUEST.inverse());
+            Pose3d robotPose = questPose.transformBy(ROBOT_TO_QUEST.inverse());
 
             // You can put some sort of filtering here if you would like!
 
             // Add the measurement to our estimator
-            consumer.accept(robotPose, timestamp, QUESTNAV_STD_DEVS);
+            consumer.accept(robotPose.toPose2d(), timestamp, QUESTNAV_STD_DEVS);
         }
+    }
+
+    /**
+     * @return A command that measures the transform between the QuestNav and the robot's coordinate frame.
+     * @param swerveSubsystem - The swerve drive subsystem to use for movement.
+     * @param timePerMeasurement - The time to wait between measurements.
+     */
+    public Command getMeasureTransformCommand(SwerveDrive swerveSubsystem, Time timePerMeasurement) {
+        List<MeasurementPoint> measuredPoints = new ArrayList<>();
+
+        Debouncer debounce = new Debouncer(timePerMeasurement.in(Seconds), DebounceType.kRising);
+
+        return Commands.runOnce(() -> {
+            // Reset poses
+            swerveSubsystem.setPose(new Pose2d());
+            io.setPose(new Pose2d());
+        }).andThen(
+            Commands.run(
+                () -> {
+                    // Spin in place
+                    swerveSubsystem.runVelocityChassisSpeeds(new ChassisSpeeds(0, 0, 1));
+
+                    if (!inputs.isTracking) {
+                        return;
+                    }
+
+                    if (!debounce.calculate(true)) {
+                        return;
+                    }
+
+                    // Take a measurement
+                    PoseFrame[] frames = inputs.unreadPoseFrames;
+                    for (PoseFrame frame : frames) {
+                        Pose3d questPose = frame.questPose3d();
+                        Transform3d measurement = questPose.minus(new Pose3d(swerveSubsystem.getPose()));
+
+                        measuredPoints.add(
+                            new MeasurementPoint(measurement.getX(), measurement.getY(), measurement.getZ())
+                        );
+                    }
+
+                    // Reset debounce
+                    debounce.calculate(false);
+                },
+                swerveSubsystem
+            ).finallyDo(() -> {
+                // Calculate average
+                double sumX = 0;
+                double sumY = 0;
+                double sumZ = 0;
+
+                for (MeasurementPoint point : measuredPoints) {
+                    sumX += point.x;
+                    sumY += point.y;
+                    sumZ += point.z;
+                }
+
+                double avgX = sumX / measuredPoints.size();
+                double avgY = sumY / measuredPoints.size();
+                double avgZ = sumZ / measuredPoints.size();
+
+                System.out.println(
+                    "Estimated ROBOT_TO_QUEST transform from " +
+                    measuredPoints.size() +
+                    " measurements:" +
+                    " new Transform3d(" +
+                    avgX +
+                    ", " +
+                    avgY +
+                    ", " +
+                    avgZ +
+                    ", " +
+                    "new Rotation3d()" +
+                    ");"
+                );
+            })
+        );
     }
 }

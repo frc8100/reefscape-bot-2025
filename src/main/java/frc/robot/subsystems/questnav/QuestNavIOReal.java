@@ -1,11 +1,17 @@
 package frc.robot.subsystems.questnav;
 
-import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import gg.questnav.questnav.PoseFrame;
 import gg.questnav.questnav.QuestNav;
 
+/**
+ * Real implementation of the QuestNav IO interface.
+ */
 public class QuestNavIOReal implements QuestNavIO {
 
+    /**
+     * Instance of the QuestNav class for interfacing with the QuestNav hardware.
+     */
     private QuestNav questNav = new QuestNav();
 
     @Override
@@ -26,7 +32,7 @@ public class QuestNavIOReal implements QuestNavIO {
     }
 
     @Override
-    public void setPose(Pose2d pose) {
+    public void setPose(Pose3d pose) {
         // Transform the pose to the headset's frame of reference
         pose = pose.transformBy(QuestNavSubsystem.ROBOT_TO_QUEST);
 

@@ -1,6 +1,7 @@
 package frc.robot.subsystems.questnav;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import gg.questnav.questnav.PoseFrame;
@@ -27,7 +28,7 @@ public class QuestNavIOSim implements QuestNavIO {
 
         inputs.unreadPoseFrames = new PoseFrame[] {
             new PoseFrame(
-                simulatedPoseSupplier.get().transformBy(QuestNavSubsystem.ROBOT_TO_QUEST),
+                new Pose3d(simulatedPoseSupplier.get()).transformBy(QuestNavSubsystem.ROBOT_TO_QUEST),
                 Timer.getTimestamp(),
                 Timer.getTimestamp(),
                 frameCounter
