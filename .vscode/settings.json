@@ -89,6 +89,7 @@
     "setpoint",
     "setpoints",
     "teleop",
+    "unitless",
     "wpilibj"
 ],
   "wpilib.skipSelectSimulateExtension": false

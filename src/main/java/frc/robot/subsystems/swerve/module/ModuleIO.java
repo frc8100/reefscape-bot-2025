@@ -15,25 +15,20 @@ package frc.robot.subsystems.swerve.module;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import frc.util.CoupledYAMSSubsystemIO;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface ModuleIO {
     @AutoLog
     public static class ModuleIOInputs {
 
-        public boolean driveConnected = false;
-        public double drivePositionRad = 0.0;
-        public double driveVelocityRadPerSec = 0.0;
-        public double driveAppliedVolts = 0.0;
-        public double driveCurrentAmps = 0.0;
+        public CoupledYAMSSubsystemIO.SparkMotorControllerDataUnitless driveMotorData =
+            CoupledYAMSSubsystemIO.defaultControllerDataUnitless;
         public double driveFFVolts = 0.0;
 
-        public boolean turnConnected = false;
-        public Rotation2d turnPosition = new Rotation2d();
-        public double turnPositionRaw = 0.0;
-        public double turnVelocityRadPerSec = 0.0;
-        public double turnAppliedVolts = 0.0;
-        public double turnCurrentAmps = 0.0;
+        public CoupledYAMSSubsystemIO.SparkMotorControllerDataUnitless turnMotorData =
+            CoupledYAMSSubsystemIO.defaultControllerDataUnitless;
+        public Rotation2d turnAbsolutePosition = new Rotation2d();
 
         public double[] odometryTimestamps = new double[] {};
         public double[] odometryDrivePositionsRad = new double[] {};

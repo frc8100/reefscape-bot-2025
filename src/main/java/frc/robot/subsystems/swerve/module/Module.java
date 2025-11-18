@@ -89,8 +89,8 @@ public class Module {
         }
 
         // Update alerts
-        driveDisconnectedAlert.set(!inputs.driveConnected);
-        turnDisconnectedAlert.set(!inputs.turnConnected);
+        driveDisconnectedAlert.set(!inputs.driveMotorData.motorConnected());
+        turnDisconnectedAlert.set(!inputs.turnMotorData.motorConnected());
     }
 
     /**
@@ -99,18 +99,8 @@ public class Module {
      * @param driveFeedforwardVoltage - The feedforward voltage to apply to the drive motor.
      */
     public void runSetpoint(SwerveModuleState state, double driveFeedforwardVoltage) {
-        // Optimize setpoint
-        // state.optimize(inputs.turnPosition);
-
-        // double desiredGroundSpeedMPS = state.speedMetersPerSecond;
-
-        // double driveFeedforwardVoltage = SwerveFeedForwards.getLinearForcesFFVolts(
-        //     feedforwardLinearForcesNewtons,
-        //     desiredGroundSpeedMPS
-        // );
-
         // Apply setpoints
-        io.setDesiredState(state, inputs.turnPosition, driveFeedforwardVoltage);
+        io.setDesiredState(state, inputs.turnAbsolutePosition, driveFeedforwardVoltage);
     }
 
     /** Runs the module with the specified output while controlling to zero degrees. */
@@ -127,17 +117,17 @@ public class Module {
 
     /** Returns the current turn angle of the module. */
     public Rotation2d getAngle() {
-        return inputs.turnPosition;
+        return inputs.turnAbsolutePosition;
     }
 
     /** Returns the current drive position of the module in meters. */
     public double getPositionMeters() {
-        return inputs.drivePositionRad * SwerveConfig.WHEEL_RADIUS.in(Meters);
+        return inputs.driveMotorData.positionAngleRad() * SwerveConfig.WHEEL_RADIUS.in(Meters);
     }
 
     /** Returns the current drive velocity of the module in meters per second. */
     public double getVelocityMetersPerSec() {
-        return inputs.driveVelocityRadPerSec * SwerveConfig.WHEEL_RADIUS.in(Meters);
+        return inputs.driveMotorData.velocityRadPerSec() * SwerveConfig.WHEEL_RADIUS.in(Meters);
     }
 
     /** Returns the module position (turn angle and drive position). */
@@ -162,16 +152,16 @@ public class Module {
 
     /** Returns the module position in radians. */
     public double getWheelRadiusCharacterizationPosition() {
-        return inputs.drivePositionRad;
+        return inputs.driveMotorData.positionAngleRad();
     }
 
     /** Returns the module velocity in rad/sec. */
     public double getFFCharacterizationVelocity() {
-        return inputs.driveVelocityRadPerSec;
+        return inputs.driveMotorData.velocityRadPerSec();
     }
 
     /** Returns the current draw in amps. */
     public double getWheelSlippingCharacterizationAmps() {
-        return inputs.driveCurrentAmps;
+        return inputs.driveMotorData.torqueCurrentAmps();
     }
 }

@@ -39,6 +39,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
 import frc.robot.subsystems.swerve.SparkOdometryThread;
 import frc.robot.subsystems.swerve.SwerveConfig;
+import frc.util.CoupledYAMSSubsystemIO;
 import frc.util.RevSwerveModuleConstants;
 import frc.util.SparkUtil;
 import frc.util.TunableValue;
@@ -203,16 +204,22 @@ public class ModuleIOSpark implements ModuleIO {
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
         // Update drive inputs
-        SparkUtil.sparkStickyFault = false;
-        SparkUtil.ifOk(driveMotor, relDriveEncoder::getPosition, value -> inputs.drivePositionRad = value);
-        SparkUtil.ifOk(driveMotor, relDriveEncoder::getVelocity, value -> inputs.driveVelocityRadPerSec = value);
-        SparkUtil.ifOk(
+        // SparkUtil.sparkStickyFault = false;
+        // SparkUtil.ifOk(driveMotor, relDriveEncoder::getPosition, value -> inputs.drivePositionRad = value);
+        // SparkUtil.ifOk(driveMotor, relDriveEncoder::getVelocity, value -> inputs.driveVelocityRadPerSec = value);
+        // SparkUtil.ifOk(
+        //     driveMotor,
+        //     new DoubleSupplier[] { driveMotor::getAppliedOutput, driveMotor::getBusVoltage },
+        //     values -> inputs.driveAppliedVolts = values[0] * values[1]
+        // );
+        // SparkUtil.ifOk(driveMotor, driveMotor::getOutputCurrent, value -> inputs.driveCurrentAmps = value);
+        // inputs.driveConnected = driveConnectedDebounce.calculate(!SparkUtil.sparkStickyFault);
+
+        inputs.driveMotorData = CoupledYAMSSubsystemIO.getDataFromSparkUnitless(
             driveMotor,
-            new DoubleSupplier[] { driveMotor::getAppliedOutput, driveMotor::getBusVoltage },
-            values -> inputs.driveAppliedVolts = values[0] * values[1]
+            relDriveEncoder,
+            driveConnectedDebounce
         );
-        SparkUtil.ifOk(driveMotor, driveMotor::getOutputCurrent, value -> inputs.driveCurrentAmps = value);
-        inputs.driveConnected = driveConnectedDebounce.calculate(!SparkUtil.sparkStickyFault);
 
         // Update turn inputs
 
@@ -220,16 +227,23 @@ public class ModuleIOSpark implements ModuleIO {
         turnAbsolutePosition.refresh();
         // turnRelativePosition.refresh();
 
-        SparkUtil.sparkStickyFault = false;
-        inputs.turnPosition = getAngle();
-        SparkUtil.ifOk(angleMotor, relAngleEncoder::getVelocity, value -> inputs.turnVelocityRadPerSec = value);
-        SparkUtil.ifOk(
+        // SparkUtil.sparkStickyFault = false;
+        inputs.turnAbsolutePosition = getAngle();
+
+        // SparkUtil.ifOk(angleMotor, relAngleEncoder::getVelocity, value -> inputs.turnVelocityRadPerSec = value);
+        // SparkUtil.ifOk(
+        //     angleMotor,
+        //     new DoubleSupplier[] { angleMotor::getAppliedOutput, angleMotor::getBusVoltage },
+        //     values -> inputs.turnAppliedVolts = values[0] * values[1]
+        // );
+        // SparkUtil.ifOk(angleMotor, angleMotor::getOutputCurrent, value -> inputs.turnCurrentAmps = value);
+        // inputs.turnConnected = turnConnectedDebounce.calculate(!SparkUtil.sparkStickyFault);
+
+        inputs.turnMotorData = CoupledYAMSSubsystemIO.getDataFromSparkUnitless(
             angleMotor,
-            new DoubleSupplier[] { angleMotor::getAppliedOutput, angleMotor::getBusVoltage },
-            values -> inputs.turnAppliedVolts = values[0] * values[1]
+            relAngleEncoder,
+            turnConnectedDebounce
         );
-        SparkUtil.ifOk(angleMotor, angleMotor::getOutputCurrent, value -> inputs.turnCurrentAmps = value);
-        inputs.turnConnected = turnConnectedDebounce.calculate(!SparkUtil.sparkStickyFault);
 
         // Update odometry inputs
         inputs.odometryTimestamps = timestampQueue.stream().mapToDouble((Double value) -> value).toArray();

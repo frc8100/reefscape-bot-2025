@@ -9,21 +9,17 @@ import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.ArmConfig;
 import yams.mechanisms.positional.Arm;
-import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.local.SparkWrapper;
 
 /**
  * A test of YAMS
@@ -49,33 +45,30 @@ public class TestArmSubsystem extends SubsystemBase {
         .withClosedLoopRampRate(Seconds.of(0.25))
         .withOpenLoopRampRate(Seconds.of(0.25));
 
-    // Vendor motor controller object
-    private final SparkMax spark = new SparkMax(4, MotorType.kBrushless);
+    private final ArmConfig armCfg;
+    private final Arm arm;
 
-    // Create our SmartMotorController from our Spark and config with the NEO.
-    private final SmartMotorController sparkSmartMotorController = new SparkWrapper(
-        spark,
-        DCMotor.getNEO(1),
-        motorConfig
-    );
+    private final TestArmSubsystemIO io;
+    private final TestArmSubsystemIOInputsAutoLogged inputs = new TestArmSubsystemIOInputsAutoLogged();
 
-    private final ArmConfig armCfg = new ArmConfig(sparkSmartMotorController)
-        // Soft limit is applied to the SmartMotorControllers PID
-        .withSoftLimits(Degrees.of(-20), Degrees.of(10))
-        // Hard limit is applied to the simulation.
-        .withHardLimit(Degrees.of(-30), Degrees.of(40))
-        // Starting position is where your arm starts
-        .withStartingPosition(Degrees.of(-5))
-        // Length and mass of your arm for sim.
-        .withLength(Feet.of(3))
-        .withMass(Pounds.of(1));
-    // Telemetry name and verbosity for the arm.
-    // .withTelemetry("Arm", TelemetryVerbosity.HIGH);
+    // TODO: add support for empty IO implementations
+    public TestArmSubsystem() {
+        io = new TestArmSubsystemIO(motorConfig);
 
-    // Arm Mechanism
-    private final Arm arm = new Arm(armCfg);
+        // Configure arm
+        armCfg = new ArmConfig(io.getMotorController())
+            // Soft limit is applied to the SmartMotorControllers PID
+            .withSoftLimits(Degrees.of(-20), Degrees.of(10))
+            // Hard limit is applied to the simulation.
+            .withHardLimit(Degrees.of(-30), Degrees.of(40))
+            // Starting position is where your arm starts
+            .withStartingPosition(Degrees.of(-5))
+            // Length and mass of your arm for sim.
+            .withLength(Feet.of(3))
+            .withMass(Pounds.of(1));
 
-    public TestArmSubsystem() {}
+        arm = new Arm(armCfg);
+    }
 
     /**
      * Set the angle of the arm.
@@ -98,6 +91,12 @@ public class TestArmSubsystem extends SubsystemBase {
      */
     public Command sysId() {
         return arm.sysId(Volts.of(7), Volts.of(2).per(Seconds), Seconds.of(4));
+    }
+
+    @Override
+    public void periodic() {
+        io.updateInputs(inputs);
+        Logger.processInputs("TestArmSubsystem", inputs);
     }
 
     @Override

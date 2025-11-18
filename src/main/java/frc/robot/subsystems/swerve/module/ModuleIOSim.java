@@ -20,6 +20,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.robot.subsystems.swerve.SwerveConfig;
+import frc.util.CoupledYAMSSubsystemIO;
 import frc.util.SparkUtil;
 import java.util.Arrays;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
@@ -74,19 +75,27 @@ public class ModuleIOSim implements ModuleIO {
         turnMotor.requestVoltage(Volts.of(turnAppliedVolts));
 
         // Update drive inputs
-        inputs.driveConnected = true;
-        inputs.drivePositionRad = moduleSimulation.getDriveWheelFinalPosition().in(Radians);
-        inputs.driveVelocityRadPerSec = moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond);
-        inputs.driveAppliedVolts = driveAppliedVolts;
+        inputs.driveMotorData = new CoupledYAMSSubsystemIO.SparkMotorControllerDataUnitless(
+            moduleSimulation.getDriveWheelFinalPosition().in(Radians),
+            moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond),
+            driveAppliedVolts,
+            Math.abs(moduleSimulation.getDriveMotorStatorCurrent().in(Amps)),
+            0.0, // Temperature not simulated
+            true
+        );
+
         inputs.driveFFVolts = driveFFVolts;
-        inputs.driveCurrentAmps = Math.abs(moduleSimulation.getDriveMotorStatorCurrent().in(Amps));
 
         // Update turn inputs
-        inputs.turnConnected = true;
-        inputs.turnPosition = moduleSimulation.getSteerAbsoluteFacing();
-        inputs.turnVelocityRadPerSec = moduleSimulation.getSteerAbsoluteEncoderSpeed().in(RadiansPerSecond);
-        inputs.turnAppliedVolts = turnAppliedVolts;
-        inputs.turnCurrentAmps = Math.abs(moduleSimulation.getSteerMotorStatorCurrent().in(Amps));
+        inputs.turnMotorData = new CoupledYAMSSubsystemIO.SparkMotorControllerDataUnitless(
+            moduleSimulation.getSteerRelativeEncoderPosition().in(Radians),
+            moduleSimulation.getSteerAbsoluteEncoderSpeed().in(RadiansPerSecond),
+            turnAppliedVolts,
+            Math.abs(moduleSimulation.getSteerMotorStatorCurrent().in(Amps)),
+            0.0, // Temperature not simulated
+            true
+        );
+        inputs.turnAbsolutePosition = moduleSimulation.getSteerAbsoluteFacing();
 
         // Update odometry inputs
         inputs.odometryTimestamps = SparkUtil.getSimulationOdometryTimeStamps();

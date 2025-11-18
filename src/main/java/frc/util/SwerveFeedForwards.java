@@ -7,10 +7,9 @@ import java.util.function.BooleanSupplier;
 
 public class SwerveFeedForwards {
 
-    private SwerveFeedForwards() {}
-
     /**
      * Constants for linear force feedforward calculations.
+     * See {@link #getLinearForcesFFVoltsFromRadPerSec} for details on calculating the feedforward voltage from linear forces.
      * Satisfies the equation: V_applied = kS * sign(velocityRadiansPerSecond) + kV * velocityRadiansPerSecond + kF * calculatedLinearForceFFVolts
      */
     public static record LinearForceFeedForwardConstants(double kS, double kV, double kF) {}
@@ -85,59 +84,52 @@ public class SwerveFeedForwards {
         );
     }
 
+    private final SimpleFeedForwardConstants simpleFFConstants;
+    private final LinearForceFeedForwardConstants linearForceFFConstants;
+
     /**
-     * Calculates the required voltage for the given simple feedforward constants and desired velocity.
-     * @param ffConstants - The simple feedforward constants.
-     * @param velocityRadPerSec - The desired velocity in radians per second.
-     * @return The required voltage to achieve the desired velocity.
+     * Creates a new SwerveFeedForwards for the given simulation state.
+     * @param isSimulationSupplier - Supplier that returns true if in simulation, false otherwise.
      */
-    public static double getSimpleFFVolts(SimpleFeedForwardConstants ffConstants, double velocityRadPerSec) {
-        return ffConstants.kS * Math.signum(velocityRadPerSec) + ffConstants.kV * velocityRadPerSec;
+    public SwerveFeedForwards(BooleanSupplier isSimulationSupplier) {
+        // debug
+        if (isSimulationSupplier.getAsBoolean()) {
+            System.out.println("Using SIMULATION SwerveFeedForwards");
+        } else {
+            System.out.println("Using REAL SwerveFeedForwards");
+        }
+
+        this.simpleFFConstants = isSimulationSupplier.getAsBoolean()
+            ? simpleDriveFFConstantsSim
+            : simpleDriveFFConstants;
+        this.linearForceFFConstants = isSimulationSupplier.getAsBoolean()
+            ? linearForceDriveFFConstantsSim
+            : linearForceDriveFFConstants;
     }
 
     /**
      * Calculates the required voltage for the given simple feedforward constants and desired velocity.
-     * @param isSimulationSupplier - Supplier that returns true if in simulation, false otherwise.
      * @param velocityRadPerSec - The desired velocity in radians per second.
      * @return The required voltage to achieve the desired velocity.
      */
-    public static double getSimpleFFVolts(BooleanSupplier isSimulationSupplier, double velocityRadPerSec) {
-        SimpleFeedForwardConstants ffConstants = isSimulationSupplier.getAsBoolean()
-            ? simpleDriveFFConstantsSim
-            : simpleDriveFFConstants;
-
-        return getSimpleFFVolts(ffConstants, velocityRadPerSec);
+    public double getSimpleFFVolts(double velocityRadPerSec) {
+        return (
+            simpleDriveFFConstants.kS * Math.signum(velocityRadPerSec) + simpleDriveFFConstants.kV * velocityRadPerSec
+        );
     }
 
     /**
      * Calculates the required voltage for the given linear force feedforward constants, desired velocity, and feedforward linear forces.
-     * @param ffConstants - The linear force feedforward constants.
      * @param desiredVelocityRadPerSec - The desired velocity in radians per second.
      * @param feedforwardLinearForcesNewtons - The desired linear forces in Newtons.
      * @return The required voltage to achieve the desired velocity and forces.
      */
-    public static double getLinearForceFFVolts(
-        LinearForceFeedForwardConstants ffConstants,
-        double desiredVelocityRadPerSec,
-        double feedforwardLinearForcesNewtons
-    ) {
+    public double getLinearForceFFVolts(double desiredVelocityRadPerSec, double feedforwardLinearForcesNewtons) {
         return (
-            ffConstants.kS * Math.signum(desiredVelocityRadPerSec) +
-            ffConstants.kV * desiredVelocityRadPerSec +
-            ffConstants.kF *
+            linearForceFFConstants.kS * Math.signum(desiredVelocityRadPerSec) +
+            linearForceFFConstants.kV * desiredVelocityRadPerSec +
+            linearForceFFConstants.kF *
             getLinearForcesFFVoltsFromRadPerSec(feedforwardLinearForcesNewtons, desiredVelocityRadPerSec)
         );
-    }
-
-    public static double getLinearForceFFVolts(
-        BooleanSupplier isSimulationSupplier,
-        double desiredVelocityRadPerSec,
-        double feedforwardLinearForcesNewtons
-    ) {
-        LinearForceFeedForwardConstants ffConstants = isSimulationSupplier.getAsBoolean()
-            ? linearForceDriveFFConstantsSim
-            : linearForceDriveFFConstants;
-
-        return getLinearForceFFVolts(ffConstants, desiredVelocityRadPerSec, feedforwardLinearForcesNewtons);
     }
 }

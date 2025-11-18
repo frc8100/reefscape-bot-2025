@@ -113,6 +113,8 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         .withState(new StateMachineState<>(SwerveState.FULL_AUTONOMOUS_PATH_FOLLOWING, "Follow Path"))
         .withReturnToDefaultStateOnDisable(true);
 
+    private final SwerveFeedForwards swerveFeedForwards = new SwerveFeedForwards(this::isSimulation);
+
     private final SwerveSetpointGenerator setpointGenerator = new SwerveSetpointGenerator(
         SwerveConfig.getRobotConfig(),
         SwerveConfig.MAX_ANGULAR_VELOCITY_OF_SWERVE_MODULE
@@ -262,20 +264,12 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         for (int i = 0; i < 4; i++) {
             Module mod = swerveModules[i];
 
-            double driveFFVolts = SwerveFeedForwards.getLinearForceFFVolts(
-                this::isSimulation,
+            double driveFFVolts = swerveFeedForwards.getLinearForceFFVolts(
                 desiredStates[mod.index].speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters),
                 feedforwardLinearForcesNewtons[mod.index]
             );
 
-            // double driveFFVolts = SwerveFeedForwards.getLinearForceFFVolts(
-            //     () -> false,
-            //     desiredStates[mod.index].speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters),
-            //     feedforwardLinearForcesNewtons[mod.index]
-            // );
-
-            // double driveFFVolts = SwerveFeedForwards.getSimpleFFVolts(
-            //     this::isSimulation,
+            // double driveFFVolts = swerveFeedForwards.getSimpleFFVolts(
             //     desiredStates[mod.index].speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters)
             // );
 
