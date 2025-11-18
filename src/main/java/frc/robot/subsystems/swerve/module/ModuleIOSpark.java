@@ -66,13 +66,14 @@ public class ModuleIOSpark implements ModuleIO {
 
     /**
      * The angle motor. This motor is used to control the angle of the module.
-     * Includes the integrated encoder {@link #relAngleEncoder} and an absolute CANcoder {@link #angleCANcoder}.
+     * Includes the integrated encoder {@link #relativeAngleEncoder} and an absolute CANcoder {@link #angleCANcoder}.
      */
     private final SparkMax angleMotor;
 
     private final CANcoder angleCANcoder;
-    private final RelativeEncoder relAngleEncoder;
+    private final RelativeEncoder relativeAngleEncoder;
     private final SparkClosedLoopController angleClosedLoopController;
+
     /**
      * A PID controller that uses CANCoder angles exclusively, in degrees.
      */
@@ -116,7 +117,7 @@ public class ModuleIOSpark implements ModuleIO {
 
         // Create and configure the angle motor
         angleMotor = new SparkMax(moduleConstants.angleMotorID, MotorType.kBrushless);
-        relAngleEncoder = angleMotor.getEncoder();
+        relativeAngleEncoder = angleMotor.getEncoder();
         angleClosedLoopController = angleMotor.getClosedLoopController();
         SparkUtil.configure(angleMotor, SwerveConfig.getAngleMotorConfig());
 
@@ -140,7 +141,7 @@ public class ModuleIOSpark implements ModuleIO {
         angleCANcoder.optimizeBusUtilization();
 
         // Reset the module to absolute position
-        resetToAbsolute();
+        syncMotorEncoderToAbsoluteEncoder();
 
         // Create odometry queues
         timestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
@@ -193,33 +194,21 @@ public class ModuleIOSpark implements ModuleIO {
         return new SwerveModuleState(relDriveEncoder.getVelocity() * SwerveConfig.WHEEL_RADIUS.in(Meters), getAngle());
     }
 
-    /**
-     * Resets the motor relative angle encoder to the current CANCoder absolute position reading.
-     */
-    private void resetToAbsolute() {
+    @Override
+    public void syncMotorEncoderToAbsoluteEncoder() {
         double absolutePosition = getAngle().getDegrees();
-        relAngleEncoder.setPosition(absolutePosition);
+        relativeAngleEncoder.setPosition(absolutePosition);
     }
 
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
         // Update drive inputs
-        // SparkUtil.sparkStickyFault = false;
-        // SparkUtil.ifOk(driveMotor, relDriveEncoder::getPosition, value -> inputs.drivePositionRad = value);
-        // SparkUtil.ifOk(driveMotor, relDriveEncoder::getVelocity, value -> inputs.driveVelocityRadPerSec = value);
-        // SparkUtil.ifOk(
-        //     driveMotor,
-        //     new DoubleSupplier[] { driveMotor::getAppliedOutput, driveMotor::getBusVoltage },
-        //     values -> inputs.driveAppliedVolts = values[0] * values[1]
-        // );
-        // SparkUtil.ifOk(driveMotor, driveMotor::getOutputCurrent, value -> inputs.driveCurrentAmps = value);
-        // inputs.driveConnected = driveConnectedDebounce.calculate(!SparkUtil.sparkStickyFault);
-
         inputs.driveMotorData = CoupledYAMSSubsystemIO.getDataFromSparkUnitless(
             driveMotor,
             relDriveEncoder,
             driveConnectedDebounce
         );
+        inputs.driveFFVolts = driveFFVolts;
 
         // Update turn inputs
 
@@ -227,21 +216,10 @@ public class ModuleIOSpark implements ModuleIO {
         turnAbsolutePosition.refresh();
         // turnRelativePosition.refresh();
 
-        // SparkUtil.sparkStickyFault = false;
         inputs.turnAbsolutePosition = getAngle();
-
-        // SparkUtil.ifOk(angleMotor, relAngleEncoder::getVelocity, value -> inputs.turnVelocityRadPerSec = value);
-        // SparkUtil.ifOk(
-        //     angleMotor,
-        //     new DoubleSupplier[] { angleMotor::getAppliedOutput, angleMotor::getBusVoltage },
-        //     values -> inputs.turnAppliedVolts = values[0] * values[1]
-        // );
-        // SparkUtil.ifOk(angleMotor, angleMotor::getOutputCurrent, value -> inputs.turnCurrentAmps = value);
-        // inputs.turnConnected = turnConnectedDebounce.calculate(!SparkUtil.sparkStickyFault);
-
         inputs.turnMotorData = CoupledYAMSSubsystemIO.getDataFromSparkUnitless(
             angleMotor,
-            relAngleEncoder,
+            relativeAngleEncoder,
             turnConnectedDebounce
         );
 
@@ -287,19 +265,13 @@ public class ModuleIOSpark implements ModuleIO {
     private void setSpeed(SwerveModuleState desiredState, double driveFeedforwardVoltage) {
         double velocityRadiansPerSecond = desiredState.speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters);
 
-        // double ffVolts =
-        //     SwerveConfig.driveKS * Math.signum(velocityRadiansPerSecond) +
-        //     SwerveConfig.driveKV * velocityRadiansPerSecond;
-
-        double ffVolts = driveFeedforwardVoltage;
-
-        this.driveFFVolts = ffVolts;
+        this.driveFFVolts = driveFeedforwardVoltage;
 
         driveClosedLoopController.setReference(
             velocityRadiansPerSecond,
             ControlType.kVelocity,
             ClosedLoopSlot.kSlot0,
-            ffVolts,
+            driveFeedforwardVoltage,
             ArbFFUnits.kVoltage
         );
     }

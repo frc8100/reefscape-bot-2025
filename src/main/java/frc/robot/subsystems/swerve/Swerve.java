@@ -2,6 +2,7 @@ package frc.robot.subsystems.swerve;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volt;
 
 import com.pathplanner.lib.util.DriveFeedforwards;
@@ -21,7 +22,9 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Controls;
@@ -171,6 +174,12 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         new SysIdRoutine.Mechanism(voltage -> runCharacterization(voltage.in(Volt)), null, this)
     );
 
+    /**
+     * A trigger that syncs the motor encoders to the absolute encoders when the robot is still for a certain time.
+     */
+    private final Trigger syncMotorEncodersToAbsoluteEncoderTrigger = new Trigger(() -> getVelocityMagnitudeAsDouble() < SwerveConfig.STILL_MPS)
+        .debounce(SwerveConfig.TIME_AFTER_STILL_SYNC_ENCODERS.in(Seconds));
+
     /** Creates a new Swerve subsystem. */
     public Swerve(GyroIO gyroIO, ModuleIO[] moduleIOs) {
         // Create the swerve modules
@@ -210,6 +219,13 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
             Controls.isUsingJoystickDrive ? Controls.joystickDriveControls : Controls.mainDriveControls,
             true
         );
+
+        // Sync motor encoders to absolute encoders when the robot is still
+        syncMotorEncodersToAbsoluteEncoderTrigger.onTrue(Commands.runOnce(() -> {
+            for (Module module : swerveModules) {
+                module.syncMotorEncoderToAbsoluteEncoder();
+            }
+        }));
     }
 
     /**

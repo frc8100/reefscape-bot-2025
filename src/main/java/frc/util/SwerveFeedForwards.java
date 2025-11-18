@@ -21,7 +21,7 @@ public class SwerveFeedForwards {
     public static record SimpleFeedForwardConstants(double kS, double kV) {}
 
     // Drive Motor Characterization Values
-    public static final SimpleFeedForwardConstants simpleDriveFFConstants = new SimpleFeedForwardConstants(
+    public static final SimpleFeedForwardConstants simpleDriveFFConstantsReal = new SimpleFeedForwardConstants(
         0.17388,
         0.13632
     );
@@ -31,7 +31,7 @@ public class SwerveFeedForwards {
     );
 
     // TODO: Tune these values
-    public static final LinearForceFeedForwardConstants linearForceDriveFFConstants =
+    public static final LinearForceFeedForwardConstants linearForceDriveFFConstantsReal =
         new LinearForceFeedForwardConstants(0, 0, 1);
     public static final LinearForceFeedForwardConstants linearForceDriveFFConstantsSim =
         new LinearForceFeedForwardConstants(0.0752, 0.0436, 0.8849);
@@ -101,10 +101,10 @@ public class SwerveFeedForwards {
 
         this.simpleFFConstants = isSimulationSupplier.getAsBoolean()
             ? simpleDriveFFConstantsSim
-            : simpleDriveFFConstants;
+            : simpleDriveFFConstantsReal;
         this.linearForceFFConstants = isSimulationSupplier.getAsBoolean()
             ? linearForceDriveFFConstantsSim
-            : linearForceDriveFFConstants;
+            : linearForceDriveFFConstantsReal;
     }
 
     /**
@@ -114,7 +114,7 @@ public class SwerveFeedForwards {
      */
     public double getSimpleFFVolts(double velocityRadPerSec) {
         return (
-            simpleDriveFFConstants.kS * Math.signum(velocityRadPerSec) + simpleDriveFFConstants.kV * velocityRadPerSec
+            simpleFFConstants.kS * Math.signum(velocityRadPerSec) + simpleFFConstants.kV * velocityRadPerSec
         );
     }
 

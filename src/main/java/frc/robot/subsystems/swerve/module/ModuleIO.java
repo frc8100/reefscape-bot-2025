@@ -66,4 +66,9 @@ public interface ModuleIO {
         Rotation2d currentRotation2d,
         double driveFeedforwardVoltage
     );
+
+    /**
+     * Resets the motor relative angle encoder to the current absolute encoder (CANCoder on real hardware) position reading.
+     */
+    public default void syncMotorEncoderToAbsoluteEncoder() {}
 }

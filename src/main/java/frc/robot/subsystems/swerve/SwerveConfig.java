@@ -131,16 +131,26 @@ public class SwerveConfig {
     public static final boolean IS_CANCODER_INVERTED = false;
 
     // Swerve Current Limiting
-    public static final Current ANGLE_CONTINUOUS_CURRENT_LIMIT = Amps.of(25);
+    public static final Current ANGLE_CONTINUOUS_CURRENT_LIMIT = Amps.of(22.5);
     public static final Current ANGLE_PEAK_CURRENT_LIMIT = Amps.of(40); // unused
     public static final Time ANGLE_PEAK_CURRENT_DURATION = Seconds.of(0.1); // unused
     public static final boolean IS_ANGLE_CURRENT_LIMIT_ACTIVE = true; // unused
 
     // TODO: tune these values (https://docs.revrobotics.com/brushless/home/faq#neo-v1.1)
-    public static final Current DRIVE_CONTINUOUS_CURRENT_LIMIT = Amps.of(42.5);
+    public static final Current DRIVE_CONTINUOUS_CURRENT_LIMIT = Amps.of(40);
     public static final Current DRIVE_PEAK_CURRENT_LIMIT = Amps.of(60); // unused
     public static final Time DRIVE_PEAK_CURRENT_DURATION = Seconds.of(0.1); // unused
     public static final boolean IS_DRIVE_CURRENT_LIMIT_ACTIVE = true; // unused
+
+    /**
+     * The time to wait after the robot is still before syncing the swerve module encoders.
+     */
+    public static final Time TIME_AFTER_STILL_SYNC_ENCODERS = Seconds.of(0.5);
+
+    /**
+     * The speed below which the robot is considered "still" (in m/s).
+     */
+    public static final double STILL_MPS = 0.075;
 
     // TODO: Change these to UPPER_SNAKE_CASE
 

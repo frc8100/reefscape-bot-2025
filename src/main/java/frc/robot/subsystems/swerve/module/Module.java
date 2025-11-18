@@ -14,17 +14,12 @@
 package frc.robot.subsystems.swerve.module;
 
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Newtons;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.units.measure.Force;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.robot.subsystems.swerve.SwerveConfig;
-import frc.robot.subsystems.swerve.SwerveDrive;
-import frc.util.SwerveFeedForwards;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -113,6 +108,13 @@ public class Module {
     public void stop() {
         io.setDriveOpenLoop(0.0);
         io.setTurnOpenLoop(0.0);
+    }
+
+    /**
+     * Resets the motor relative angle encoder to the current absolute encoder position reading.
+     */
+    public void syncMotorEncoderToAbsoluteEncoder() {
+        io.syncMotorEncoderToAbsoluteEncoder();
     }
 
     /** Returns the current turn angle of the module. */
