@@ -19,6 +19,8 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -212,9 +214,10 @@ public class ModuleIOSpark implements ModuleIO {
 
         // Update turn inputs
 
-        // Refresh CANCoder signal
-        turnAbsolutePosition.refresh();
-        // turnRelativePosition.refresh();
+        // Refresh CANCoder signals
+        inputs.canCoderConnected = BaseStatusSignal.refreshAll(turnAbsolutePosition, turnRelativePosition).equals(
+            StatusCode.OK
+        );
 
         inputs.turnAbsolutePosition = getAngle();
         inputs.turnMotorData = CoupledYAMSSubsystemIO.getDataFromSparkUnitless(
@@ -300,11 +303,10 @@ public class ModuleIOSpark implements ModuleIO {
         Rotation2d angle = desiredState.angle;
         double degReference = angle.getDegrees();
 
+        // TODO: Use spark encoder
         // angleClosedLoopController.setReference(degReference, ControlType.kPosition, ClosedLoopSlot.kSlot0);
 
         anglePidControllerUsingCANCoder.setSetpoint(degReference);
-
-        turnRelativePosition.refresh();
 
         double requestedVoltage = MathUtil.clamp(
             anglePidControllerUsingCANCoder.calculate(getRelativeAngle().getDegrees()),

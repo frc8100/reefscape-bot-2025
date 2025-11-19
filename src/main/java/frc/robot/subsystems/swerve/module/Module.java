@@ -14,6 +14,7 @@
 package frc.robot.subsystems.swerve.module;
 
 import static edu.wpi.first.units.Units.Meters;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -43,6 +44,7 @@ public class Module {
     /** Alerts for disconnected motors. */
     private final Alert driveDisconnectedAlert;
     private final Alert turnDisconnectedAlert;
+    private final Alert cancoderDisconnectedAlert;
 
     /** The odometry positions received this cycle. This is processed in {@link SparkSwerveOdometryThread}. */
     private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[] {};
@@ -58,6 +60,10 @@ public class Module {
         );
         turnDisconnectedAlert = new Alert(
             "Disconnected turn motor on module " + Integer.toString(index) + ".",
+            AlertType.kError
+        );
+        cancoderDisconnectedAlert = new Alert(
+            "Disconnected CANCoder on module " + Integer.toString(index) + ".",
             AlertType.kError
         );
     }
@@ -86,6 +92,7 @@ public class Module {
         // Update alerts
         driveDisconnectedAlert.set(!inputs.driveMotorData.motorConnected());
         turnDisconnectedAlert.set(!inputs.turnMotorData.motorConnected());
+        cancoderDisconnectedAlert.set(!inputs.canCoderConnected);
     }
 
     /**

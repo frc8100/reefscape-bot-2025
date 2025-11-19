@@ -24,14 +24,39 @@ public interface ModuleIO {
 
         public CoupledYAMSSubsystemIO.SparkMotorControllerDataUnitless driveMotorData =
             CoupledYAMSSubsystemIO.defaultControllerDataUnitless;
+
+        /**
+         * The feedforward voltage applied to the drive motor.
+         */
         public double driveFFVolts = 0.0;
 
         public CoupledYAMSSubsystemIO.SparkMotorControllerDataUnitless turnMotorData =
             CoupledYAMSSubsystemIO.defaultControllerDataUnitless;
+
+        /**
+         * The current absolute position of the turn module.
+         */
         public Rotation2d turnAbsolutePosition = new Rotation2d();
 
+        /**
+         * Whether the CANCoder is connected or not.
+         * On simulated hardware, this is always true.
+         */
+        public boolean canCoderConnected = true;
+
+        /**
+         * The odometry timestamps received this cycle.
+         */
         public double[] odometryTimestamps = new double[] {};
+
+        /**
+         * The odometry drive positions received this cycle, in radians.
+         */
         public double[] odometryDrivePositionsRad = new double[] {};
+
+        /**
+         * The odometry turn positions received this cycle.
+         */
         public Rotation2d[] odometryTurnPositions = new Rotation2d[] {};
     }
 
