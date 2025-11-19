@@ -33,13 +33,25 @@ public interface GyroIO {
         public boolean connected = false;
 
         /**
-         * The yaw position of the gyro. Measured as a Rotation2d.
+         * The yaw position of the gyro as a Rotation2d.
          * A positive yaw is a counterclockwise rotation.
          */
         public Rotation2d yawPosition = new Rotation2d();
 
         /**
-         * The change in yaw position of the gyro. Measured in radians per second.
+         * The pitch position of the gyro in radians.
+         * Not measured in simulation.
+         */
+        public double pitchRad = 0.0;
+
+        /**
+         * The roll position of the gyro in radians.
+         * Not measured in simulation.
+         */
+        public double rollRad = 0.0;
+
+        /**
+         * The change in yaw position of the gyro in radians per second.
          */
         public double yawVelocityRadPerSec = 0.0;
 
