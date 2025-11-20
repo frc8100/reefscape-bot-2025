@@ -177,8 +177,9 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     /**
      * A trigger that syncs the motor encoders to the absolute encoders when the robot is still for a certain time.
      */
-    private final Trigger syncMotorEncodersToAbsoluteEncoderTrigger = new Trigger(() -> getVelocityMagnitudeAsDouble() < SwerveConfig.STILL_MPS)
-        .debounce(SwerveConfig.TIME_AFTER_STILL_SYNC_ENCODERS.in(Seconds));
+    private final Trigger syncMotorEncodersToAbsoluteEncoderTrigger = new Trigger(
+        () -> getVelocityMagnitudeAsDouble() < SwerveConfig.STILL_MPS
+    ).debounce(SwerveConfig.TIME_AFTER_STILL_SYNC_ENCODERS.in(Seconds));
 
     /** Creates a new Swerve subsystem. */
     public Swerve(GyroIO gyroIO, ModuleIO[] moduleIOs) {
@@ -221,11 +222,13 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         );
 
         // Sync motor encoders to absolute encoders when the robot is still
-        syncMotorEncodersToAbsoluteEncoderTrigger.onTrue(Commands.runOnce(() -> {
-            for (Module module : swerveModules) {
-                module.syncMotorEncoderToAbsoluteEncoder();
-            }
-        }));
+        syncMotorEncodersToAbsoluteEncoderTrigger.onTrue(
+            Commands.runOnce(() -> {
+                for (Module module : swerveModules) {
+                    module.syncMotorEncoderToAbsoluteEncoder();
+                }
+            })
+        );
     }
 
     /**
@@ -250,8 +253,16 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         runVelocityChassisSpeeds(desiredChassisSpeeds);
     }
 
+    @SuppressWarnings("unused")
     @Override
     public void runVelocityChassisSpeeds(ChassisSpeeds speed) {
+        // Apply anti-tipping correction
+        if (SwerveConfig.IS_ANTI_TIPPING_ENABLED && gyroInputs.isTipping) {
+            ChassisSpeeds antiTippingSpeeds = gyroInputs.velocityAntiTipping;
+
+            speed = antiTippingSpeeds;
+        }
+
         // Convert the chassis speeds to swerve module states
 
         // Note: it is important to not discretize speeds before or after

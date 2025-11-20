@@ -13,6 +13,9 @@
 
 package frc.robot.subsystems.swerve.gyro;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
@@ -25,6 +28,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import frc.robot.subsystems.swerve.SparkOdometryThread;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveConstants;
+import frc.util.AntiTipping;
 import java.util.Queue;
 
 /** IO implementation for Pigeon 2. */
@@ -34,22 +38,42 @@ public class GyroIOPigeon2 implements GyroIO {
 
     // Status signals
     private final StatusSignal<Angle> yaw = pigeon.getYaw();
+    private final StatusSignal<AngularVelocity> yawVelocity = pigeon.getAngularVelocityZWorld();
     private final StatusSignal<Angle> pitch = pigeon.getPitch();
     private final StatusSignal<Angle> roll = pigeon.getRoll();
-    private final StatusSignal<AngularVelocity> yawVelocity = pigeon.getAngularVelocityZWorld();
 
+    // Odometry queues
     private final Queue<Double> yawPositionQueue;
     private final Queue<Double> yawTimestampQueue;
 
     private Rotation2d yawOffset = new Rotation2d();
 
+    // Anti-tipping
+    private final AntiTipping antiTipping = new AntiTipping(
+        SwerveConfig.ANTI_TIPPING_KP,
+        SwerveConfig.TIPPING_THRESHOLD.in(Degrees),
+        SwerveConfig.MAX_ANTI_TIP_VELOCITY.in(MetersPerSecond)
+    );
+
     public GyroIOPigeon2() {
+        // Configure the pigeon
         pigeon.getConfigurator().apply(new Pigeon2Configuration());
         pigeon.getConfigurator().setYaw(0.0);
+
         yaw.setUpdateFrequency(SwerveConfig.ODOMETRY_FREQUENCY_HZ);
         yawVelocity.setUpdateFrequency(SwerveConfig.STATUS_SIGNAL_FREQUENCY_HZ);
+
+        // Only update pitch and roll if configured to do so
+        pitch.setUpdateFrequency(
+            SwerveConfig.IS_GYRO_RECORD_PITCH_ROLL_TIPPING_STATE ? SwerveConfig.STATUS_SIGNAL_FREQUENCY_HZ : 0
+        );
+        roll.setUpdateFrequency(
+            SwerveConfig.IS_GYRO_RECORD_PITCH_ROLL_TIPPING_STATE ? SwerveConfig.STATUS_SIGNAL_FREQUENCY_HZ : 0
+        );
+
         pigeon.optimizeBusUtilization();
 
+        // Register odometry signals
         yawTimestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
         yawPositionQueue = SparkOdometryThread.getInstance().registerSignal(yaw::getValueAsDouble);
     }
@@ -57,13 +81,27 @@ public class GyroIOPigeon2 implements GyroIO {
     @Override
     public void updateInputs(GyroIOInputs inputs) {
         // Refresh all signals and set connected status
-        inputs.connected = BaseStatusSignal.refreshAll(yaw, yawVelocity, pitch, roll).equals(StatusCode.OK);
+        if (SwerveConfig.IS_GYRO_RECORD_PITCH_ROLL_TIPPING_STATE) {
+            // If anti-tipping is enabled, refresh pitch and roll as well
+            inputs.connected = BaseStatusSignal.refreshAll(yaw, yawVelocity, pitch, roll).equals(StatusCode.OK);
+        } else {
+            inputs.connected = BaseStatusSignal.refreshAll(yaw, yawVelocity).equals(StatusCode.OK);
+        }
 
         // Update from status signals
         inputs.yawPosition = Rotation2d.fromDegrees(yaw.getValueAsDouble());
         inputs.yawVelocityRadPerSec = Units.degreesToRadians(yawVelocity.getValueAsDouble());
-        inputs.pitchRad = Units.degreesToRadians(pitch.getValueAsDouble());
-        inputs.rollRad = Units.degreesToRadians(roll.getValueAsDouble());
+
+        if (SwerveConfig.IS_GYRO_RECORD_PITCH_ROLL_TIPPING_STATE) {
+            // Update pitch and roll only if configured to do so
+            inputs.pitchDegrees = pitch.getValueAsDouble();
+            inputs.rollDegrees = roll.getValueAsDouble();
+
+            // Update anti-tipping
+            antiTipping.calculate(inputs.pitchDegrees, inputs.rollDegrees);
+            inputs.isTipping = antiTipping.isTipping();
+            inputs.velocityAntiTipping = antiTipping.getVelocityAntiTipping();
+        }
 
         // Update odometry caches
         inputs.odometryYawTimestamps = yawTimestampQueue.stream().mapToDouble((Double value) -> value).toArray();

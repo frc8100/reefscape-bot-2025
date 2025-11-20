@@ -14,6 +14,7 @@
 package frc.robot.subsystems.swerve.gyro;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.AutoLogOutput;
 
@@ -39,21 +40,26 @@ public interface GyroIO {
         public Rotation2d yawPosition = new Rotation2d();
 
         /**
-         * The pitch position of the gyro in radians.
-         * Not measured in simulation.
-         */
-        public double pitchRad = 0.0;
-
-        /**
-         * The roll position of the gyro in radians.
-         * Not measured in simulation.
-         */
-        public double rollRad = 0.0;
-
-        /**
          * The change in yaw position of the gyro in radians per second.
          */
         public double yawVelocityRadPerSec = 0.0;
+
+        /**
+         * The pitch position of the gyro in degrees.
+         * Note: using degrees because {@link frc.util.AntiTipping} uses degrees.
+         * Not measured in simulation.
+         */
+        public double pitchDegrees = 0.0;
+
+        /**
+         * The roll position of the gyro in degrees (see {@link #pitchDegrees}).
+         * Not measured in simulation.
+         */
+        public double rollDegrees = 0.0;
+
+        public boolean isTipping = false;
+
+        public ChassisSpeeds velocityAntiTipping = new ChassisSpeeds();
 
         /**
          * The timestamps of the odometry yaw positions.

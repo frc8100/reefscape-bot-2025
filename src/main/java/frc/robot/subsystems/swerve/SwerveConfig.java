@@ -1,6 +1,17 @@
 package frc.robot.subsystems.swerve;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Pounds;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
@@ -21,6 +32,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -36,8 +48,7 @@ import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 
 /**
- * Swerve configuration class. This class contains all the constants and configurations for the
- * swerve drive.
+ * Contains constants and configurations for the swerve drive (for CAN IDs, see {@link frc.robot.subsystems.swerve.SwerveConstants})
  */
 public class SwerveConfig {
 
@@ -78,11 +89,25 @@ public class SwerveConfig {
     public static final boolean IS_GYRO_INVERTED = false;
 
     // Drivetrain constants
-    public static final Distance TRACK_WIDTH = Inches.of(22.75);
-    public static final Distance WHEEL_BASE = Inches.of(22.75);
+    /**
+     * The distance between the two front modules (between FL-FR or BL-BR).
+     */
+    public static final Distance FRONT_MODULE_BASE = Inches.of(22.75);
+
+    /**
+     * The distance between the two side modules (between FL-BL or FR-BR).
+     */
+    public static final Distance SIDE_LENGTH = Inches.of(22.75);
+
+    /**
+     * The radius from the center of the robot to any of the swerve modules.
+     */
     public static final Distance DRIVE_BASE_RADIUS = Meters.of(
-        Math.hypot(TRACK_WIDTH.in(Meters) / 2.0, WHEEL_BASE.in(Meters) / 2.0)
+        Math.hypot(FRONT_MODULE_BASE.in(Meters) / 2.0, SIDE_LENGTH.in(Meters) / 2.0)
     );
+
+    public static final Distance FRONT_BUMPER_LENGTH = Inches.of(28);
+    public static final Distance BACK_BUMPER_LENGTH = Inches.of(28);
 
     public static final Distance WHEEL_RADIUS = Inches.of(2.0);
     public static final Distance WHEEL_CIRCUMFERENCE = WHEEL_RADIUS.times(2 * Math.PI);
@@ -91,16 +116,17 @@ public class SwerveConfig {
      * The locations of the swerve modules relative to the center of the robot. Used in {@link SwerveDriveKinematics}
      */
     public static final Translation2d[] MODULE_TRANSLATIONS = new Translation2d[] {
-        new Translation2d(WHEEL_BASE.div(2), TRACK_WIDTH.div(2)),
-        new Translation2d(WHEEL_BASE.div(2), TRACK_WIDTH.div(-2)),
-        new Translation2d(WHEEL_BASE.div(-2), TRACK_WIDTH.div(2)),
-        new Translation2d(WHEEL_BASE.div(-2), TRACK_WIDTH.div(-2)),
+        new Translation2d(SIDE_LENGTH.div(2), FRONT_MODULE_BASE.div(2)),
+        new Translation2d(SIDE_LENGTH.div(2), FRONT_MODULE_BASE.div(-2)),
+        new Translation2d(SIDE_LENGTH.div(-2), FRONT_MODULE_BASE.div(2)),
+        new Translation2d(SIDE_LENGTH.div(-2), FRONT_MODULE_BASE.div(-2)),
     };
 
     // Standard deviations for the PoseEstimator
     public static final Matrix<N3, N1> stateStdDevs = VecBuilder.fill(0.1, 0.1, 0.1);
     public static final Matrix<N3, N1> visionStdDevs = VecBuilder.fill(0.9, 0.9, 0.9);
 
+    // SDS MK4i with L2 drive gearing
     public static final double DRIVE_GEAR_RATIO = 6.75;
     public static final double ANGLE_GEAR_RATIO = ((150.0 / 7.0) / 1.0);
 
@@ -125,12 +151,12 @@ public class SwerveConfig {
      */
     public static final double ANGLE_ENCODER_VELOCITY_FACTOR = ANGLE_ENCODER_POSITION_FACTOR / 60;
 
-    // Motor Inverts
+    // Motor inverts
     public static final boolean IS_ANGLE_MOTOR_INVERTED = true;
     public static final boolean IS_DRIVE_MOTOR_INVERTED = false;
     public static final boolean IS_CANCODER_INVERTED = false;
 
-    // Swerve Current Limiting
+    // Current limiting
     public static final Current ANGLE_CONTINUOUS_CURRENT_LIMIT = Amps.of(22.5);
     public static final Current ANGLE_PEAK_CURRENT_LIMIT = Amps.of(40); // unused
     public static final Time ANGLE_PEAK_CURRENT_DURATION = Seconds.of(0.1); // unused
@@ -199,6 +225,24 @@ public class SwerveConfig {
 
     public static final AngularAcceleration MAX_ANGULAR_ACCELERATION = RadiansPerSecondPerSecond.of(3.0);
 
+    // Tipping config
+    /**
+     * Whether the output from anti-tipping is enabled.
+     */
+    // TODO: Test
+    public static final boolean IS_ANTI_TIPPING_ENABLED = false;
+
+    /**
+     * Whether the gyro should record pitch and roll, and calculate tipping state.
+     * If anti-tipping is disabled and this is enabled, information will be recorded but not used.
+     */
+    public static final boolean IS_GYRO_RECORD_PITCH_ROLL_TIPPING_STATE = IS_ANTI_TIPPING_ENABLED;
+
+    // m/s per degree of pitch/roll
+    public static final double ANTI_TIPPING_KP = 0.04;
+    public static final Angle TIPPING_THRESHOLD = Degrees.of(3.0);
+    public static final LinearVelocity MAX_ANTI_TIP_VELOCITY = MetersPerSecond.of(2.75);
+
     // Path Planner Values
     public static final Mass ROBOT_MASS = Pounds.of(100);
     public static final double WHEEL_COF = 1.2;
@@ -245,6 +289,7 @@ public class SwerveConfig {
      */
     public static final DriveTrainSimulationConfig mapleSimConfig = DriveTrainSimulationConfig.Default()
         .withCustomModuleTranslations(MODULE_TRANSLATIONS)
+        .withBumperSize(FRONT_BUMPER_LENGTH, BACK_BUMPER_LENGTH)
         .withRobotMass(ROBOT_MASS)
         .withGyro(COTS.ofPigeon2())
         .withSwerveModule(
@@ -313,10 +358,10 @@ public class SwerveConfig {
             .positionWrappingInputRange(-180, 180);
 
         angleConfig.signals
-            .absoluteEncoderPositionAlwaysOn(true)
-            .absoluteEncoderPositionPeriodMs((int) (1000.0 / SwerveConfig.ODOMETRY_FREQUENCY_HZ))
-            .absoluteEncoderVelocityAlwaysOn(true)
-            .absoluteEncoderVelocityPeriodMs(20)
+            .primaryEncoderPositionAlwaysOn(true)
+            .primaryEncoderPositionPeriodMs((int) (1000.0 / SwerveConfig.ODOMETRY_FREQUENCY_HZ))
+            .primaryEncoderVelocityAlwaysOn(true)
+            .primaryEncoderVelocityPeriodMs(20)
             .appliedOutputPeriodMs(20)
             .busVoltagePeriodMs(20)
             .outputCurrentPeriodMs(20);

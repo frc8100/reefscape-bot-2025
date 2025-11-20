@@ -46,12 +46,10 @@ import frc.util.RevSwerveModuleConstants;
 import frc.util.SparkUtil;
 import frc.util.TunableValue;
 import java.util.Queue;
-import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * Module IO implementation for Spark Flex drive motor controller, Spark Max turn motor controller,
- * and duty cycle absolute encoder.
+ * Module IO implementation for Spark Max drive and angle motors with a CANcoder for absolute angle.
  */
 public class ModuleIOSpark implements ModuleIO {
 
@@ -63,7 +61,9 @@ public class ModuleIOSpark implements ModuleIO {
      */
     private final String dashboardKey;
 
-    /** The angle offset. Used to zero the module to a specific angle. */
+    /**
+     * The angle offset. Used to zero the module to a specific angle.
+     */
     private final Rotation2d angleOffset;
 
     /**
@@ -174,6 +174,11 @@ public class ModuleIOSpark implements ModuleIO {
             SwerveConfig.angleKPTunable.get(),
             SwerveConfig.angleKI,
             SwerveConfig.angleKDTunable.get()
+        );
+
+        // Print raw turn angle
+        System.out.println(
+            "Module " + moduleNumber + " Raw CANCoder Angle (radians): " + turnAbsolutePosition.getValue().in(Radians)
         );
     }
 
