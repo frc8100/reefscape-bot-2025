@@ -1,13 +1,26 @@
 package frc.robot.subsystems.swerve;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.util.RevSwerveModuleConstants;
 
 /**
  * Contains constants related to the Swerve Drive.
  * Mainly includes CAN IDs and angle offsets.
  */
 public final class SwerveConstants {
+
+    /**
+     * Swerve Module Constants to be used when creating swerve modules.
+     * @param driveMotorID - The CAN ID of the drive motor.
+     * @param angleMotorID - The CAN ID of the angle motor.
+     * @param canCoderID - The CAN ID of the CANCoder.
+     * @param angleOffset - The angle offset of the module.
+     */
+    public static record RobotSwerveModuleConstants(
+        int driveMotorID,
+        int angleMotorID,
+        int canCoderID,
+        Rotation2d angleOffset
+    ) {}
 
     private SwerveConstants() {}
 
@@ -27,7 +40,7 @@ public final class SwerveConstants {
             public static final int ANGLE_MOTOR_ID = 3;
             public static final int CANCODER_ID = 14;
             public static final Rotation2d ANGLE_OFFSET = new Rotation2d(2.922 + Math.PI - 0.626);
-            public static final RevSwerveModuleConstants constants = new RevSwerveModuleConstants(
+            public static final RobotSwerveModuleConstants constants = new RobotSwerveModuleConstants(
                 DRIVE_MOTOR_ID,
                 ANGLE_MOTOR_ID,
                 CANCODER_ID,
@@ -44,7 +57,7 @@ public final class SwerveConstants {
             public static final int ANGLE_MOTOR_ID = 2;
             public static final int CANCODER_ID = 13;
             public static final Rotation2d ANGLE_OFFSET = new Rotation2d(2.635 - 0.222 - 0.845);
-            public static final RevSwerveModuleConstants constants = new RevSwerveModuleConstants(
+            public static final RobotSwerveModuleConstants constants = new RobotSwerveModuleConstants(
                 DRIVE_MOTOR_ID,
                 ANGLE_MOTOR_ID,
                 CANCODER_ID,
@@ -61,7 +74,7 @@ public final class SwerveConstants {
             public static final int ANGLE_MOTOR_ID = 10;
             public static final int CANCODER_ID = 15;
             public static final Rotation2d ANGLE_OFFSET = new Rotation2d(1.267 + Math.PI - 0.004);
-            public static final RevSwerveModuleConstants constants = new RevSwerveModuleConstants(
+            public static final RobotSwerveModuleConstants constants = new RobotSwerveModuleConstants(
                 DRIVE_MOTOR_ID,
                 ANGLE_MOTOR_ID,
                 CANCODER_ID,
@@ -78,7 +91,7 @@ public final class SwerveConstants {
             public static final int ANGLE_MOTOR_ID = 8;
             public static final int CANCODER_ID = 16;
             public static final Rotation2d ANGLE_OFFSET = new Rotation2d(-3.053 - 0.021);
-            public static final RevSwerveModuleConstants constants = new RevSwerveModuleConstants(
+            public static final RobotSwerveModuleConstants constants = new RobotSwerveModuleConstants(
                 DRIVE_MOTOR_ID,
                 ANGLE_MOTOR_ID,
                 CANCODER_ID,
