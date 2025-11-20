@@ -1,15 +1,12 @@
 package frc.util;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import frc.robot.Constants;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
@@ -35,7 +32,6 @@ public class TunableValue implements DoubleSupplier {
      * This is used to update the tunable numbers when the config is changed.
      */
     private static final List<RefreshConfigConsumer> refreshConfigConsumers = new ArrayList<>();
-
     private static final List<TunableValue> tunableValuesWithConsumers = new ArrayList<>();
 
     /**
@@ -49,10 +45,11 @@ public class TunableValue implements DoubleSupplier {
     /**
      * Refreshes all the consumers in the list of consumers that need to be refreshed when the config is updated.
      */
-    public static final Command refreshConfig = new DeferredCommand(
-        () ->
-            Commands.runOnce(() -> {
-                // debug
+    public static Command getRefreshConfigCommand() {
+        return new Command() {
+            @Override
+            public void execute() {
+                // Print info
                 System.out.println(
                     "Refreshing config for " +
                     refreshConfigConsumers.size() +
@@ -63,11 +60,24 @@ public class TunableValue implements DoubleSupplier {
 
                 refreshConfigConsumers.forEach(RefreshConfigConsumer::accept);
                 tunableValuesWithConsumers.forEach(tunableValue -> tunableValue.onRefresh.accept(tunableValue.get()));
+            }
 
-                refreshConfigConsumers.clear();
-            }),
-        Set.of()
-    );
+            @Override
+            public String getName() {
+                return "TunableValue Refresh Config Command";
+            }
+
+            @Override
+            public boolean isFinished() {
+                return true;
+            }
+
+            @Override
+            public boolean runsWhenDisabled() {
+                return true;
+            }
+        };
+    }
 
     /**
      * The base key for the tuning table in NetworkTables.
@@ -132,6 +142,9 @@ public class TunableValue implements DoubleSupplier {
     public TunableValue(String dashboardKey, double defaultValue, DoubleConsumer onRefresh) {
         this(dashboardKey, defaultValue);
         this.onRefresh = onRefresh;
+
+        // Add to list of tunable values with consumers
+        tunableValuesWithConsumers.add(this);
     }
 
     /**

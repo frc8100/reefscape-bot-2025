@@ -240,7 +240,7 @@ public class RobotContainer {
         autoChooser.addOption("runOuttakeUntilCoralIsNotInClaw", clawSubsystem.runOuttakeUntilCoralIsNotInClaw());
 
         // Command to refresh the config
-        SmartDashboard.putData("Refresh Tunable Config", TunableValue.refreshConfig);
+        SmartDashboard.putData("Refresh Tunable Config", TunableValue.getRefreshConfigCommand());
 
         // Configure the button bindings
         ButtonBindings buttonBindings = new ButtonBindings(autoRoutines);
