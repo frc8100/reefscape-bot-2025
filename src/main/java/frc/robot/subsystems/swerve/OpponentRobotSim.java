@@ -45,46 +45,33 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
 
         /**
          * Use teleop swerve.
-         * Enables more resource-intensive
+         * More resource-intensive
          */
         TELEOP_SWERVE,
+
+        /**
+         * Continuously follow the main robot.
+         */
+        FOLLOW_MAIN_ROBOT,
     }
 
-    /** List of opponent robot poses */
+    /**
+     * List of opponent robot poses.
+     */
     private static ArrayList<Supplier<Pose2d>> opponentRobotPoses = new ArrayList<>();
 
-    /** @return The list of opponent robot poses */
+    /**
+     * @return The list of opponent robot poses for logging
+     */
     @AutoLogOutput(key = "Odometry/OpponentRobotPoses")
     public static Pose2d[] getOpponentRobotPoses() {
         return opponentRobotPoses.stream().map(Supplier::get).toArray(Pose2d[]::new);
     }
 
-    /* If an opponent robot is not on the field, it is placed in a queening position for performance. */
-    public static final Pose2d[] ROBOT_QUEENING_POSITIONS = new Pose2d[] {
-        new Pose2d(-6, 0, new Rotation2d()),
-        new Pose2d(-5, 0, new Rotation2d()),
-        new Pose2d(-4, 0, new Rotation2d()),
-        new Pose2d(-3, 0, new Rotation2d()),
-        new Pose2d(-2, 0, new Rotation2d()),
-    };
+    public final OpponentRobotBehavior behavior;
 
-    public OpponentRobotBehavior behavior = OpponentRobotBehavior.FOLLOW_PATH;
-
-    /** PathPlanner configuration */
-    // private static final RobotConfig PP_CONFIG = new RobotConfig(
-    //         55, // Robot mass in kg
-    //         8,  // Robot MOI
-    //         new ModuleConfig(
-    //                 Units.inchesToMeters(2), 3.5, 1.2, DCMotor.getFalcon500(1).withReduction(8.14), 60, 1), // Swerve
-    // module config
-    //         0.6 // Track length and width
-    // );
-
-    private static final RobotConfig PP_CONFIG = SwerveConfig.getRobotConfig();
-
-    private static final PathConstraints PATH_CONSTRAINTS = SwerveConfig.pathConstraints;
-
-    /** PathPlanner PID settings */
+    private final RobotConfig pathPlannerConfig = SwerveConfig.getRobotConfig();
+    private final PathConstraints pathPlannerPathConstraints = SwerveConfig.pathConstraints;
     private final PPHolonomicDriveController driveController = new PPHolonomicDriveController(
         new PIDConstants(5.0, 0.02),
         new PIDConstants(7.0, 0.05)
@@ -92,21 +79,8 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
 
     private final SelfControlledSwerveDriveSimulation simulatedDrive;
 
-    // private Pose2d queeningPose;
-    // private int id;
-
     public OpponentRobotSim(Pose2d startingPose, OpponentRobotBehavior behavior) {
         this.behavior = behavior;
-
-        // Set the queening pose based on the ID
-        // try {
-        //     this.id = id;
-        //     this.queeningPose = ROBOT_QUEENING_POSITIONS[id];
-        // } catch (ArrayIndexOutOfBoundsException e) {
-        //     this.id = 0;
-        //     this.queeningPose = ROBOT_QUEENING_POSITIONS[0];
-        //     System.out.println("OpponentRobotSim: Invalid ID " + id + ", defaulting to 0");
-        // }
 
         // Create the SelfControlledSwerveDriveSimulation instance
         this.simulatedDrive = new SelfControlledSwerveDriveSimulation(
@@ -133,7 +107,7 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
             // Chassis speeds output
             (speeds, feedforwards) -> simulatedDrive.runChassisSpeeds(speeds, new Translation2d(), false, false),
             driveController,
-            PP_CONFIG,
+            pathPlannerConfig,
             // Flip path based on alliance side
             () -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue).equals(DriverStation.Alliance.Red),
             this
@@ -146,12 +120,12 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
     public Command opponentRobotPathfindToPose(Pose2d targetPose) {
         return new PathfindingCommand(
             targetPose,
-            PATH_CONSTRAINTS,
+            pathPlannerPathConstraints,
             simulatedDrive::getActualPoseInSimulationWorld,
             simulatedDrive::getActualSpeedsRobotRelative,
             (speeds, feedforwards) -> simulatedDrive.runChassisSpeeds(speeds, new Translation2d(), false, false),
             driveController,
-            PP_CONFIG,
+            pathPlannerConfig,
             this
         );
     }
@@ -162,12 +136,12 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
     public Command opponentRobotPathfindToPoseSupplier(Supplier<Pose2d> poseSupplier) {
         return new PathfindingCommand(
             poseSupplier.get(),
-            PATH_CONSTRAINTS,
+            pathPlannerPathConstraints,
             simulatedDrive::getActualPoseInSimulationWorld,
             simulatedDrive::getActualSpeedsRobotRelative,
             (speeds, feedforwards) -> simulatedDrive.runChassisSpeeds(speeds, new Translation2d(), false, false),
             driveController,
-            PP_CONFIG,
+            pathPlannerConfig,
             this
         )
             // Create a new command to recursively pathfind to the next pose every 1 second
@@ -260,7 +234,6 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
         double timestampSeconds,
         Matrix<N3, N1> visionMeasurementStdDevs
     ) {
-        // Unimplemented
         simulatedDrive.addVisionEstimation(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
     }
 
