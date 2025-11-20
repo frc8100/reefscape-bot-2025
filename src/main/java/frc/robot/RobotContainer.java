@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.SwerveSysidRoutines;
+import frc.robot.subsystems.CANIdConnections;
 import frc.robot.subsystems.questnav.QuestNavIOReal;
 import frc.robot.subsystems.questnav.QuestNavIOSim;
 import frc.robot.subsystems.questnav.QuestNavSubsystem;
@@ -23,7 +24,7 @@ import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSpark;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveConfig;
-import frc.robot.subsystems.swerve.SwerveConstants;
+import frc.robot.subsystems.swerve.SwerveModuleSpecificConstants;
 import frc.robot.subsystems.swerve.SwerveSim;
 import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2;
 import frc.robot.subsystems.swerve.gyro.GyroIOSim;
@@ -81,10 +82,26 @@ public class RobotContainer {
                 swerveSubsystem = new Swerve(
                     new GyroIOPigeon2(),
                     new ModuleIO[] {
-                        new ModuleIOSpark(0, SwerveConstants.Swerve.Mod0.constants),
-                        new ModuleIOSpark(1, SwerveConstants.Swerve.Mod1.constants),
-                        new ModuleIOSpark(2, SwerveConstants.Swerve.Mod2.constants),
-                        new ModuleIOSpark(3, SwerveConstants.Swerve.Mod3.constants),
+                        new ModuleIOSpark(
+                            0,
+                            CANIdConnections.FRONT_LEFT_MODULE_CAN_IDS,
+                            SwerveModuleSpecificConstants.FRONT_LEFT_MODULE_CONSTANTS
+                        ),
+                        new ModuleIOSpark(
+                            1,
+                            CANIdConnections.FRONT_RIGHT_MODULE_CAN_IDS,
+                            SwerveModuleSpecificConstants.FRONT_RIGHT_MODULE_CONSTANTS
+                        ),
+                        new ModuleIOSpark(
+                            2,
+                            CANIdConnections.BACK_LEFT_MODULE_CAN_IDS,
+                            SwerveModuleSpecificConstants.BACK_LEFT_MODULE_CONSTANTS
+                        ),
+                        new ModuleIOSpark(
+                            3,
+                            CANIdConnections.BACK_RIGHT_MODULE_CAN_IDS,
+                            SwerveModuleSpecificConstants.BACK_RIGHT_MODULE_CONSTANTS
+                        ),
                     }
                 );
 

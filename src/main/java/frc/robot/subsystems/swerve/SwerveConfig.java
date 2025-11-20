@@ -48,7 +48,7 @@ import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 
 /**
- * Contains constants and configurations for the swerve drive (for CAN IDs, see {@link frc.robot.subsystems.swerve.SwerveConstants})
+ * Contains constants and configurations for the swerve drive (for CAN IDs, see {@link frc.robot.subsystems.swerve.SwerveModuleSpecificConstants})
  */
 public class SwerveConfig {
 

@@ -39,9 +39,10 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
+import frc.robot.subsystems.CANIdConnections.SwerveModuleCanIDs;
 import frc.robot.subsystems.swerve.SparkOdometryThread;
 import frc.robot.subsystems.swerve.SwerveConfig;
-import frc.robot.subsystems.swerve.SwerveConstants.RobotSwerveModuleConstants;
+import frc.robot.subsystems.swerve.SwerveModuleSpecificConstants.RobotSwerveModuleConstants;
 import frc.util.CoupledYAMSSubsystemIO;
 import frc.util.SparkUtil;
 import frc.util.TunableValue;
@@ -111,20 +112,20 @@ public class ModuleIOSpark implements ModuleIO {
      * @param moduleNumber The module number.
      * @param moduleConstants The module constants.
      */
-    public ModuleIOSpark(int moduleNumber, RobotSwerveModuleConstants moduleConstants) {
+    public ModuleIOSpark(int moduleNumber, SwerveModuleCanIDs canIDs, RobotSwerveModuleConstants moduleConstants) {
         // Set the module number and angle offset
         this.moduleNumber = moduleNumber;
         this.dashboardKey = "Swerve/Module" + moduleNumber;
         this.angleOffset = moduleConstants.angleOffset();
 
         // Create and configure the angle motor
-        angleMotor = new SparkMax(moduleConstants.angleMotorID(), MotorType.kBrushless);
+        angleMotor = new SparkMax(canIDs.angleMotorID(), MotorType.kBrushless);
         relativeAngleEncoder = angleMotor.getEncoder();
         angleClosedLoopController = angleMotor.getClosedLoopController();
         SparkUtil.configure(angleMotor, SwerveConfig.getAngleMotorConfig());
 
         // Create and configure the drive motor
-        driveMotor = new SparkMax(moduleConstants.driveMotorID(), MotorType.kBrushless);
+        driveMotor = new SparkMax(canIDs.driveMotorID(), MotorType.kBrushless);
         relDriveEncoder = driveMotor.getEncoder();
         driveClosedLoopController = driveMotor.getClosedLoopController();
         SparkUtil.configure(driveMotor, SwerveConfig.getDriveMotorConfig());
@@ -132,7 +133,7 @@ public class ModuleIOSpark implements ModuleIO {
         SparkUtil.tryUntilOk(driveMotor, 5, () -> relDriveEncoder.setPosition(0.0));
 
         // Create and configure the CANCoder
-        angleCANcoder = new CANcoder(moduleConstants.canCoderID());
+        angleCANcoder = new CANcoder(canIDs.canCoderID());
         angleCANcoder.getConfigurator().refresh(new CANcoderConfiguration());
         angleCANcoder.getConfigurator().apply(SwerveConfig.getCANcoderConfig());
 

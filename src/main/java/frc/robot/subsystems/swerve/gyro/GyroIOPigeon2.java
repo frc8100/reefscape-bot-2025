@@ -25,16 +25,16 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import frc.robot.subsystems.CANIdConnections;
 import frc.robot.subsystems.swerve.SparkOdometryThread;
 import frc.robot.subsystems.swerve.SwerveConfig;
-import frc.robot.subsystems.swerve.SwerveConstants;
 import frc.util.AntiTipping;
 import java.util.Queue;
 
 /** IO implementation for Pigeon 2. */
 public class GyroIOPigeon2 implements GyroIO {
 
-    private final Pigeon2 pigeon = new Pigeon2(SwerveConstants.PIGEON_ID);
+    private final Pigeon2 pigeon = new Pigeon2(CANIdConnections.PIGEON_ID);
 
     // Status signals
     private final StatusSignal<Angle> yaw = pigeon.getYaw();
