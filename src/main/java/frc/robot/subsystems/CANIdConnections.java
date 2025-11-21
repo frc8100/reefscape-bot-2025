@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +42,22 @@ public class CANIdConnections {
     public static final SwerveModuleCanIDs BACK_RIGHT_MODULE_CAN_IDS = new SwerveModuleCanIDs(1, 8, 16);
 
     /**
+     * Gets the CAN IDs for a module based on its index.
+     * @param index - The index of the module (0-3). In FL, FR, BL, BR order.
+     * @return The CAN IDs for the module.
+     * @throws IllegalArgumentException - If the index is not between 0 and 3.
+     */
+    public static SwerveModuleCanIDs getModuleCANIdsFromIndex(int index) {
+        return switch (index) {
+            case 0 -> FRONT_LEFT_MODULE_CAN_IDS;
+            case 1 -> FRONT_RIGHT_MODULE_CAN_IDS;
+            case 2 -> BACK_LEFT_MODULE_CAN_IDS;
+            case 3 -> BACK_RIGHT_MODULE_CAN_IDS;
+            default -> throw new IllegalArgumentException("Invalid module index: " + index);
+        };
+    }
+
+    /**
      * List of all CAN IDs in the order the CAN bus is wired, starting from the PDP and ending at the RoboRIO.
      * This is used to detect connection disruptions.
      */
@@ -59,6 +77,12 @@ public class CANIdConnections {
         BACK_RIGHT_MODULE_CAN_IDS.angleMotorID,
         BACK_RIGHT_MODULE_CAN_IDS.canCoderID
     );
+
+    /**
+     * Alert for CAN bus disruptions (two or more consecutive disconnected CAN IDs).
+     * Empty message; will be set in {@link #periodic()}
+     */
+    public static final Alert canBusDisruptionAlert = new Alert("", AlertType.kError);
 
     /**
      * Gets a list connections that are disrupted based on the list of disconnected CAN IDs.
@@ -94,5 +118,46 @@ public class CANIdConnections {
         }
 
         return disruptions;
+    }
+
+    /**
+     * Periodically checks the connection status of all registered CAN ID alerts and updates the CAN bus disruption alert accordingly.
+     */
+    public static void periodic() {
+        // TODO: maybe optimize by caching disconnected IDs instead of computing
+        List<Integer> disconnectedIds = new ArrayList<>();
+
+        for (CANIdAlert alert : canIdAlerts) {
+            if (!alert.isConnected()) {
+                // Add the CAN ID to the disconnected list
+                disconnectedIds.add(alert.canId);
+            }
+        }
+
+        List<Integer> disruptions = getDisruptions(disconnectedIds);
+
+        // If no disruptions, clear alert and return
+        if (disruptions.isEmpty()) {
+            canBusDisruptionAlert.set(false);
+            return;
+        }
+
+        StringBuilder disruptionMessage = new StringBuilder("CAN bus disruption detected at connections: ");
+
+        // Set alert based on disruptions
+        for (int i = 0; i < disruptions.size(); i++) {
+            int disruptionIndex = disruptions.get(i);
+
+            disruptionMessage.append(disruptionIndex);
+
+            if (i < disruptions.size() - 1) {
+                disruptionMessage.append(", ");
+            }
+        }
+
+        // Finalize and set alert
+        disruptionMessage.append(".");
+        canBusDisruptionAlert.setText(disruptionMessage.toString());
+        canBusDisruptionAlert.set(true);
     }
 }

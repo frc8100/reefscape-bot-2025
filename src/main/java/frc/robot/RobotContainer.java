@@ -82,26 +82,10 @@ public class RobotContainer {
                 swerveSubsystem = new Swerve(
                     new GyroIOPigeon2(),
                     new ModuleIO[] {
-                        new ModuleIOSpark(
-                            0,
-                            CANIdConnections.FRONT_LEFT_MODULE_CAN_IDS,
-                            SwerveModuleSpecificConstants.FRONT_LEFT_MODULE_CONSTANTS
-                        ),
-                        new ModuleIOSpark(
-                            1,
-                            CANIdConnections.FRONT_RIGHT_MODULE_CAN_IDS,
-                            SwerveModuleSpecificConstants.FRONT_RIGHT_MODULE_CONSTANTS
-                        ),
-                        new ModuleIOSpark(
-                            2,
-                            CANIdConnections.BACK_LEFT_MODULE_CAN_IDS,
-                            SwerveModuleSpecificConstants.BACK_LEFT_MODULE_CONSTANTS
-                        ),
-                        new ModuleIOSpark(
-                            3,
-                            CANIdConnections.BACK_RIGHT_MODULE_CAN_IDS,
-                            SwerveModuleSpecificConstants.BACK_RIGHT_MODULE_CONSTANTS
-                        ),
+                        new ModuleIOSpark(0),
+                        new ModuleIOSpark(1),
+                        new ModuleIOSpark(2),
+                        new ModuleIOSpark(3),
                     }
                 );
 

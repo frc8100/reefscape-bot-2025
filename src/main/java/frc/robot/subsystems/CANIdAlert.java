@@ -18,6 +18,12 @@ public class CANIdAlert {
     public static final Time DEFAULT_DEBOUNCE_TIME = Seconds.of(0.5);
 
     /**
+     * The default alert type for CAN connection alerts.
+     * Currently set to {@link AlertType#kWarning} to make CAN bus disruptions (several disconnected devices) able to be set to {@link AlertType#kError} to make them more visible.
+     */
+    public static final AlertType DEFAULT_ALERT_TYPE = AlertType.kWarning;
+
+    /**
      * A debouncer to prevent alert flapping.
      */
     private final Debouncer connectionDebouncer = new Debouncer(DEFAULT_DEBOUNCE_TIME.in(Seconds));
@@ -27,18 +33,31 @@ public class CANIdAlert {
      */
     private final Alert disconnectionAlert;
 
+    /**
+     * The CAN ID of the device being monitored.
+     */
+    public final int canId;
+
+    /**
+     * The current connection status of the CAN device.
+     * Set using a debouncer.
+     */
     private boolean isConnected = true;
 
     /**
      * Creates a CAN ID alert for the given CAN ID and device name.
      * @param canId - The CAN ID of the device.
-     * @param deviceName - The name of the device.
+     * @param deviceName - The name of the device. Used in the alert message.
      */
     public CANIdAlert(int canId, String deviceName) {
+        this.canId = canId;
+
         this.disconnectionAlert = new Alert(
             "Disconnected CAN device: " + deviceName + " (ID " + Integer.toString(canId) + ").",
-            AlertType.kError
+            DEFAULT_ALERT_TYPE
         );
+
+        CANIdConnections.registerCANIdAlert(this);
     }
 
     /**
@@ -49,5 +68,13 @@ public class CANIdAlert {
         this.isConnected = connectionDebouncer.calculate(currentlyConnected);
 
         disconnectionAlert.set(!isConnected);
+    }
+
+    /**
+     * Returns whether the CAN device is currently connected.
+     * @return True if connected, false otherwise.
+     */
+    public boolean isConnected() {
+        return isConnected;
     }
 }

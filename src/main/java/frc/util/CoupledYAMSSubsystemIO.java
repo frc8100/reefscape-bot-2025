@@ -77,10 +77,7 @@ public interface CoupledYAMSSubsystemIO {
      * @param motorConnectionDebouncer - The debouncer for the motor connection status.
      * @return The data from the motor controller.
      */
-    public static SparkMotorControllerData getDataFromMotorController(
-        SparkWrapper motorController,
-        Debouncer motorConnectionDebouncer
-    ) {
+    public static SparkMotorControllerData getDataFromMotorController(SparkWrapper motorController) {
         SparkBase spark = (SparkBase) motorController.getMotorController();
 
         // Reset spark sticky fault
@@ -92,7 +89,7 @@ public interface CoupledYAMSSubsystemIO {
             SparkUtil.ifOkElseValue(spark, motorController::getVoltage, Volts.zero()),
             SparkUtil.ifOkElseValue(spark, motorController::getStatorCurrent, Amps.zero()),
             SparkUtil.ifOkElseValue(spark, motorController::getTemperature, Celsius.zero()),
-            motorConnectionDebouncer.calculate(!SparkUtil.sparkStickyFault)
+            !SparkUtil.sparkStickyFault
         );
     }
 
@@ -100,13 +97,11 @@ public interface CoupledYAMSSubsystemIO {
      * Gets the data from a Spark motor controller in unitless form.
      * @param motorController - The motor controller to get data from.
      * @param relativeEncoder - The relative encoder to get position and velocity from.
-     * @param motorConnectionDebouncer - The debouncer for the motor connection status.
      * @return The data from the motor controller in unitless form.
      */
     public static SparkMotorControllerDataUnitless getDataFromSparkUnitless(
         SparkBase motorController,
-        RelativeEncoder relativeEncoder,
-        Debouncer motorConnectionDebouncer
+        RelativeEncoder relativeEncoder
     ) {
         // Reset spark sticky fault
         SparkUtil.sparkStickyFault = false;
@@ -121,7 +116,7 @@ public interface CoupledYAMSSubsystemIO {
             ),
             SparkUtil.ifOkElseValue(motorController, motorController::getOutputCurrent, 0.0),
             SparkUtil.ifOkElseValue(motorController, motorController::getMotorTemperature, 0.0),
-            motorConnectionDebouncer.calculate(!SparkUtil.sparkStickyFault)
+            !SparkUtil.sparkStickyFault
         );
     }
 

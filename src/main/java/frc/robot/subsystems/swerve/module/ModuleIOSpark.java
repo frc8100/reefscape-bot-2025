@@ -39,9 +39,11 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
+import frc.robot.subsystems.CANIdConnections;
 import frc.robot.subsystems.CANIdConnections.SwerveModuleCanIDs;
 import frc.robot.subsystems.swerve.SparkOdometryThread;
 import frc.robot.subsystems.swerve.SwerveConfig;
+import frc.robot.subsystems.swerve.SwerveModuleSpecificConstants;
 import frc.robot.subsystems.swerve.SwerveModuleSpecificConstants.RobotSwerveModuleConstants;
 import frc.util.CoupledYAMSSubsystemIO;
 import frc.util.SparkUtil;
@@ -84,11 +86,11 @@ public class ModuleIOSpark implements ModuleIO {
 
     /**
      * The drive motor. This motor is used to control the speed of the module.
-     * Includes an integrated encoder {@link #relDriveEncoder}.
+     * Includes an integrated encoder {@link #relativeDriveEncoder}.
      */
     private final SparkMax driveMotor;
 
-    private final RelativeEncoder relDriveEncoder;
+    private final RelativeEncoder relativeDriveEncoder;
     private final SparkClosedLoopController driveClosedLoopController;
 
     // Status signal queues from CANcoder
@@ -100,17 +102,26 @@ public class ModuleIOSpark implements ModuleIO {
     private final Queue<Double> drivePositionQueue;
     private final Queue<Double> turnPositionQueue;
 
-    // Connection debouncers
-    private final Debouncer driveConnectedDebounce = new Debouncer(0.5);
-    private final Debouncer turnConnectedDebounce = new Debouncer(0.5);
-
     // Inputs (cached)
     private double driveFFVolts = 0.0;
 
     /**
+     * Creates a new Swerve Module. Automatically gets CAN IDs and module constants based on module number.
+     * @param moduleNumber - The module number.
+     */
+    public ModuleIOSpark(int moduleNumber) {
+        this(
+            moduleNumber,
+            CANIdConnections.getModuleCANIdsFromIndex(moduleNumber),
+            SwerveModuleSpecificConstants.getModuleConstantsFromIndex(moduleNumber)
+        );
+    }
+
+    /**
      * Creates a new Swerve Module.
-     * @param moduleNumber The module number.
-     * @param moduleConstants The module constants.
+     * @param moduleNumber - The module number.
+     * @param canIDs - The CAN IDs for the module.
+     * @param moduleConstants - The module-specific constants.
      */
     public ModuleIOSpark(int moduleNumber, SwerveModuleCanIDs canIDs, RobotSwerveModuleConstants moduleConstants) {
         // Set the module number and angle offset
@@ -126,11 +137,11 @@ public class ModuleIOSpark implements ModuleIO {
 
         // Create and configure the drive motor
         driveMotor = new SparkMax(canIDs.driveMotorID(), MotorType.kBrushless);
-        relDriveEncoder = driveMotor.getEncoder();
+        relativeDriveEncoder = driveMotor.getEncoder();
         driveClosedLoopController = driveMotor.getClosedLoopController();
         SparkUtil.configure(driveMotor, SwerveConfig.getDriveMotorConfig());
 
-        SparkUtil.tryUntilOk(driveMotor, 5, () -> relDriveEncoder.setPosition(0.0));
+        SparkUtil.tryUntilOk(driveMotor, 5, () -> relativeDriveEncoder.setPosition(0.0));
 
         // Create and configure the CANCoder
         angleCANcoder = new CANcoder(canIDs.canCoderID());
@@ -148,7 +159,8 @@ public class ModuleIOSpark implements ModuleIO {
 
         // Create odometry queues
         timestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
-        drivePositionQueue = SparkOdometryThread.getInstance().registerSignal(driveMotor, relDriveEncoder::getPosition);
+        drivePositionQueue = SparkOdometryThread.getInstance()
+            .registerSignal(driveMotor, relativeDriveEncoder::getPosition);
         turnPositionQueue = SparkOdometryThread.getInstance().registerSignal(() -> getAngle().getRadians());
 
         TunableValue.addRefreshConfigConsumer(this::onRefresh);
@@ -199,7 +211,10 @@ public class ModuleIOSpark implements ModuleIO {
 
     @Override
     public SwerveModuleState getState() {
-        return new SwerveModuleState(relDriveEncoder.getVelocity() * SwerveConfig.WHEEL_RADIUS.in(Meters), getAngle());
+        return new SwerveModuleState(
+            relativeDriveEncoder.getVelocity() * SwerveConfig.WHEEL_RADIUS.in(Meters),
+            getAngle()
+        );
     }
 
     @Override
@@ -211,11 +226,7 @@ public class ModuleIOSpark implements ModuleIO {
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
         // Update drive inputs
-        inputs.driveMotorData = CoupledYAMSSubsystemIO.getDataFromSparkUnitless(
-            driveMotor,
-            relDriveEncoder,
-            driveConnectedDebounce
-        );
+        inputs.driveMotorData = CoupledYAMSSubsystemIO.getDataFromSparkUnitless(driveMotor, relativeDriveEncoder);
         inputs.driveFFVolts = driveFFVolts;
 
         // Update turn inputs
@@ -226,11 +237,7 @@ public class ModuleIOSpark implements ModuleIO {
         );
 
         inputs.turnAbsolutePosition = getAngle();
-        inputs.turnMotorData = CoupledYAMSSubsystemIO.getDataFromSparkUnitless(
-            angleMotor,
-            relativeAngleEncoder,
-            turnConnectedDebounce
-        );
+        inputs.turnMotorData = CoupledYAMSSubsystemIO.getDataFromSparkUnitless(angleMotor, relativeAngleEncoder);
 
         // Update odometry inputs
         inputs.odometryTimestamps = timestampQueue.stream().mapToDouble((Double value) -> value).toArray();

@@ -20,7 +20,6 @@ public class TestArmSubsystemIO implements CoupledYAMSSubsystemIO {
 
     private final SparkMax spark = new SparkMax(4, MotorType.kBrushless);
     private final SparkWrapper sparkSmartMotorController;
-    private final Debouncer motorConnectionDebouncer = new Debouncer(0.5);
 
     public TestArmSubsystemIO(SmartMotorControllerConfig motorConfig) {
         sparkSmartMotorController = new SparkWrapper(spark, DCMotor.getNEO(1), motorConfig);
@@ -33,9 +32,6 @@ public class TestArmSubsystemIO implements CoupledYAMSSubsystemIO {
 
     /** Updates the set of loggable inputs. */
     public void updateInputs(TestArmSubsystemIOInputs inputs) {
-        inputs.motorData = CoupledYAMSSubsystemIO.getDataFromMotorController(
-            sparkSmartMotorController,
-            motorConnectionDebouncer
-        );
+        inputs.motorData = CoupledYAMSSubsystemIO.getDataFromMotorController(sparkSmartMotorController);
     }
 }

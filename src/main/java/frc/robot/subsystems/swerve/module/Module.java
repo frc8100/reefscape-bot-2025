@@ -20,6 +20,9 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import frc.robot.subsystems.CANIdAlert;
+import frc.robot.subsystems.CANIdConnections;
+import frc.robot.subsystems.CANIdConnections.SwerveModuleCanIDs;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import org.littletonrobotics.junction.Logger;
 
@@ -41,10 +44,10 @@ public class Module {
     /** The index of the module. */
     public final int index;
 
-    /** Alerts for disconnected motors. */
-    private final Alert driveDisconnectedAlert;
-    private final Alert turnDisconnectedAlert;
-    private final Alert cancoderDisconnectedAlert;
+    // Alerts for disconnected motors
+    private final CANIdAlert driveDisconnectedAlert;
+    private final CANIdAlert turnDisconnectedAlert;
+    private final CANIdAlert cancoderDisconnectedAlert;
 
     /** The odometry positions received this cycle. This is processed in {@link SparkSwerveOdometryThread}. */
     private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[] {};
@@ -54,18 +57,11 @@ public class Module {
         this.io = io;
         this.index = index;
 
-        driveDisconnectedAlert = new Alert(
-            "Disconnected drive motor on module " + Integer.toString(index) + ".",
-            AlertType.kError
-        );
-        turnDisconnectedAlert = new Alert(
-            "Disconnected turn motor on module " + Integer.toString(index) + ".",
-            AlertType.kError
-        );
-        cancoderDisconnectedAlert = new Alert(
-            "Disconnected CANCoder on module " + Integer.toString(index) + ".",
-            AlertType.kError
-        );
+        SwerveModuleCanIDs canIds = CANIdConnections.getModuleCANIdsFromIndex(index);
+
+        driveDisconnectedAlert = new CANIdAlert(canIds.driveMotorID(), "DriveMotor" + Integer.toString(index));
+        turnDisconnectedAlert = new CANIdAlert(canIds.angleMotorID(), "TurnMotor" + Integer.toString(index));
+        cancoderDisconnectedAlert = new CANIdAlert(canIds.canCoderID(), "CANCoder" + Integer.toString(index));
     }
 
     /** Updates the inputs to the module. */
@@ -90,9 +86,9 @@ public class Module {
         }
 
         // Update alerts
-        driveDisconnectedAlert.set(!inputs.driveMotorData.motorConnected());
-        turnDisconnectedAlert.set(!inputs.turnMotorData.motorConnected());
-        cancoderDisconnectedAlert.set(!inputs.canCoderConnected);
+        driveDisconnectedAlert.updateConnectionStatus(inputs.driveMotorData.motorConnected());
+        turnDisconnectedAlert.updateConnectionStatus(inputs.turnMotorData.motorConnected());
+        cancoderDisconnectedAlert.updateConnectionStatus(inputs.canCoderConnected);
     }
 
     /**
