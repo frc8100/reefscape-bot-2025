@@ -123,19 +123,6 @@ public class GyroIOPigeon2 implements GyroIO {
     }
 
     @Override
-    public void zeroFieldRelativeGyro(double deg) {
-        // Invert the gyro if necessary
-        if (SwerveConfig.IS_GYRO_INVERTED) {
-            deg = -deg;
-        }
-
-        // Set the angle offset
-        // pigeon.setYaw(deg);
-
-        yawOffset = getGyroHeading().minus(Rotation2d.fromDegrees(deg));
-    }
-
-    @Override
     public Rotation2d getGyroHeading() {
         // If the gyro is inverted, return the inverted yaw
         if (SwerveConfig.IS_GYRO_INVERTED) {
@@ -144,10 +131,5 @@ public class GyroIOPigeon2 implements GyroIO {
 
         // Otherwise, return the yaw as-is
         return Rotation2d.fromDegrees(yaw.getValueAsDouble());
-    }
-
-    @Override
-    public Rotation2d getGyroHeadingForFieldRelative() {
-        return getGyroHeading().minus(yawOffset);
     }
 }

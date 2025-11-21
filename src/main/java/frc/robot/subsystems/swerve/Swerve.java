@@ -169,6 +169,11 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
     private final SwerveDrivePoseEstimator poseEstimator;
 
+    /**
+     * The yaw offset for field-oriented driving.
+     */
+    private Rotation2d yawOffset = new Rotation2d();
+
     protected SysIdRoutine sysId = new SysIdRoutine(
         new SysIdRoutine.Config(null, null, null, state -> Logger.recordOutput("Swerve/SysIdState", state.toString())),
         new SysIdRoutine.Mechanism(voltage -> runCharacterization(voltage.in(Volt)), null, this)
@@ -365,6 +370,8 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     @Override
     public void setPose(Pose2d pose) {
         poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+
+        gyroIO.zeroGyro(pose.getRotation().getDegrees());
     }
 
     @Override
@@ -418,12 +425,13 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
     @Override
     public void zeroGyro(double deg) {
-        gyroIO.zeroFieldRelativeGyro(deg);
+        // TODO: should be plus or minus here?
+        yawOffset = poseEstimator.getEstimatedPosition().getRotation().plus(Rotation2d.fromDegrees(deg));
     }
 
     @Override
     public Rotation2d getHeadingForFieldOriented() {
-        return gyroIO.getGyroHeadingForFieldRelative();
+        return poseEstimator.getEstimatedPosition().getRotation().minus(yawOffset);
     }
 
     @Override

@@ -17,8 +17,6 @@ public class GyroIOSim implements GyroIO {
      */
     private final GyroSimulation gyroSimulation;
 
-    private Rotation2d yawOffset = new Rotation2d();
-
     /**
      * Creates a new GyroIOSim given the gyro simulation to use.
      */
@@ -44,17 +42,7 @@ public class GyroIOSim implements GyroIO {
     }
 
     @Override
-    public Rotation2d getGyroHeadingForFieldRelative() {
-        return getGyroHeading().minus(yawOffset);
-    }
-
-    @Override
     public void zeroGyro(double deg) {
         gyroSimulation.setRotation(Rotation2d.fromDegrees(deg));
-    }
-
-    @Override
-    public void zeroFieldRelativeGyro(double deg) {
-        yawOffset = getGyroHeading().minus(Rotation2d.fromDegrees(deg));
     }
 }
