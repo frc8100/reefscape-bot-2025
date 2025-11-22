@@ -31,8 +31,10 @@ public class SwerveFeedForwards {
     );
 
     // TODO: Tune these values
+
+    // kS and kV will be automatically handled by SparkMax in real hardware
     public static final LinearForceFeedForwardConstants linearForceDriveFFConstantsReal =
-        new LinearForceFeedForwardConstants(0, 0, 1);
+        new LinearForceFeedForwardConstants(0.17388, 0.13632, 0);
     public static final LinearForceFeedForwardConstants linearForceDriveFFConstantsSim =
         new LinearForceFeedForwardConstants(0.0752, 0.0436, 0.8849);
 
@@ -84,27 +86,31 @@ public class SwerveFeedForwards {
         );
     }
 
+    // Instance feedforward constants
     private final SimpleFeedForwardConstants simpleFFConstants;
     private final LinearForceFeedForwardConstants linearForceFFConstants;
+
+    /**
+     * Indicates whether the feedforwards are for simulation or real hardware.
+     */
+    public final boolean isSimulation;
 
     /**
      * Creates a new SwerveFeedForwards for the given simulation state.
      * @param isSimulationSupplier - Supplier that returns true if in simulation, false otherwise.
      */
     public SwerveFeedForwards(BooleanSupplier isSimulationSupplier) {
-        // debug
-        if (isSimulationSupplier.getAsBoolean()) {
+        this.isSimulation = isSimulationSupplier.getAsBoolean();
+
+        if (isSimulation) {
             System.out.println("Using SIMULATION SwerveFeedForwards");
         } else {
             System.out.println("Using REAL SwerveFeedForwards");
         }
 
-        this.simpleFFConstants = isSimulationSupplier.getAsBoolean()
-            ? simpleDriveFFConstantsSim
-            : simpleDriveFFConstantsReal;
-        this.linearForceFFConstants = isSimulationSupplier.getAsBoolean()
-            ? linearForceDriveFFConstantsSim
-            : linearForceDriveFFConstantsReal;
+        // Select appropriate constants
+        this.simpleFFConstants = isSimulation ? simpleDriveFFConstantsSim : simpleDriveFFConstantsReal;
+        this.linearForceFFConstants = isSimulation ? linearForceDriveFFConstantsSim : linearForceDriveFFConstantsReal;
     }
 
     /**
@@ -113,18 +119,30 @@ public class SwerveFeedForwards {
      * @return The required voltage to achieve the desired velocity.
      */
     public double getSimpleFFVolts(double velocityRadPerSec) {
-        return (
-            simpleFFConstants.kS * Math.signum(velocityRadPerSec) + simpleFFConstants.kV * velocityRadPerSec
-        );
+        // If real, automatically handed by SparkMax
+        if (!isSimulation) {
+            return 0.0;
+        }
+
+        return (simpleFFConstants.kS * Math.signum(velocityRadPerSec) + simpleFFConstants.kV * velocityRadPerSec);
     }
 
     /**
      * Calculates the required voltage for the given linear force feedforward constants, desired velocity, and feedforward linear forces.
+     * If in real hardware, only the kF portion is calculated and returned as kS and kV are handled by the SparkMax.
      * @param desiredVelocityRadPerSec - The desired velocity in radians per second.
      * @param feedforwardLinearForcesNewtons - The desired linear forces in Newtons.
      * @return The required voltage to achieve the desired velocity and forces.
      */
     public double getLinearForceFFVolts(double desiredVelocityRadPerSec, double feedforwardLinearForcesNewtons) {
+        // If real, kS and kV are automatically handled by SparkMax
+        if (!isSimulation) {
+            return (
+                linearForceFFConstants.kF *
+                getLinearForcesFFVoltsFromRadPerSec(feedforwardLinearForcesNewtons, desiredVelocityRadPerSec)
+            );
+        }
+
         return (
             linearForceFFConstants.kS * Math.signum(desiredVelocityRadPerSec) +
             linearForceFFConstants.kV * desiredVelocityRadPerSec +

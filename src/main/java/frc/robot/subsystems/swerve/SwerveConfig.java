@@ -42,6 +42,7 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Time;
+import frc.util.SwerveFeedForwards;
 import frc.util.TunableValue;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
@@ -130,27 +131,6 @@ public class SwerveConfig {
     public static final double DRIVE_GEAR_RATIO = 6.75;
     public static final double ANGLE_GEAR_RATIO = ((150.0 / 7.0) / 1.0);
 
-    // Encoder setup
-    /**
-     * Factor to convert the drive encoder position from rotations to wheel radians.
-     */
-    public static final double DRIVE_ENCODER_POSITION_FACTOR = (2 * Math.PI) / (DRIVE_GEAR_RATIO);
-
-    /**
-     * Factor to convert the drive encoder velocity from RPM to wheel radians per second.
-     */
-    public static final double DRIVE_ENCODER_VELOCITY_FACTOR = DRIVE_ENCODER_POSITION_FACTOR / 60;
-
-    /**
-     * Factor to convert the angle encoder position from rotations to degrees
-     */
-    public static final double ANGLE_ENCODER_POSITION_FACTOR = 360 / ANGLE_GEAR_RATIO;
-
-    /**
-     * Factor to convert the angle encoder position from RPM to deg/sec
-     */
-    public static final double ANGLE_ENCODER_VELOCITY_FACTOR = ANGLE_ENCODER_POSITION_FACTOR / 60;
-
     // Motor inverts
     public static final boolean IS_ANGLE_MOTOR_INVERTED = true;
     public static final boolean IS_DRIVE_MOTOR_INVERTED = false;
@@ -185,7 +165,6 @@ public class SwerveConfig {
     public static final double angleKP = 0.1;
     public static final double angleKI = 0;
     public static final double angleKD = 0;
-    public static final double angleKF = 0;
 
     public static final TunableValue angleKPTunable = new TunableValue("Drive/angleKP", angleKP);
     public static final TunableValue angleKDTunable = new TunableValue("Drive/angleKD", angleKD);
@@ -197,7 +176,6 @@ public class SwerveConfig {
     public static final double driveKP = 0.01;
     public static final double driveKI = 0.0;
     public static final double driveKD = 0.005;
-    public static final double driveKF = 0.0;
 
     public static final TunableValue driveKPTunable = new TunableValue("Drive/kP", driveKP);
     public static final TunableValue driveKDTunable = new TunableValue("Drive/kD", driveKD);
@@ -346,13 +324,14 @@ public class SwerveConfig {
             .idleMode(SwerveConfig.angleIdleMode);
 
         angleConfig.encoder
-            .positionConversionFactor(SwerveConfig.ANGLE_ENCODER_POSITION_FACTOR)
-            // The velocity conversion factor is in degrees/sec
-            .velocityConversionFactor(SwerveConfig.ANGLE_ENCODER_VELOCITY_FACTOR);
+            // Rotations to degrees
+            .positionConversionFactor(360.0 / (ANGLE_GEAR_RATIO))
+            // RPM to degrees per second
+            .velocityConversionFactor((360.0 / (ANGLE_GEAR_RATIO)) / 60.0);
 
         // Configure the PID controller for the angle motor
         angleConfig.closedLoop
-            .pidf(SwerveConfig.angleKP, SwerveConfig.angleKI, SwerveConfig.angleKD, SwerveConfig.angleKF)
+            .pid(SwerveConfig.angleKP, SwerveConfig.angleKI, SwerveConfig.angleKD)
             .outputRange(-SwerveConfig.MAX_ANGLE_POWER, SwerveConfig.MAX_ANGLE_POWER)
             .positionWrappingEnabled(true)
             .positionWrappingInputRange(-180, 180);
@@ -384,15 +363,21 @@ public class SwerveConfig {
 
         // Set the position and velocity conversion factors based on the SwerveConfig
         driveConfig.encoder
-            .positionConversionFactor(SwerveConfig.DRIVE_ENCODER_POSITION_FACTOR)
-            .velocityConversionFactor(SwerveConfig.DRIVE_ENCODER_VELOCITY_FACTOR)
+            // Rotations to wheel radians
+            .positionConversionFactor((2 * Math.PI) / (DRIVE_GEAR_RATIO))
+            // RPM to wheel radians per second
+            .velocityConversionFactor(((2 * Math.PI) / (DRIVE_GEAR_RATIO)) / 60.0)
             .uvwMeasurementPeriod(10)
             .uvwAverageDepth(2);
 
         // Configure the PID controller for the drive motor
         driveConfig.closedLoop
-            .pidf(SwerveConfig.driveKP, SwerveConfig.driveKI, SwerveConfig.driveKD, SwerveConfig.driveKF)
+            .pid(SwerveConfig.driveKP, SwerveConfig.driveKI, SwerveConfig.driveKD)
             .outputRange(-SwerveConfig.MAX_DRIVE_POWER, SwerveConfig.MAX_DRIVE_POWER);
+
+        driveConfig.closedLoop.feedForward
+            .kS(SwerveFeedForwards.linearForceDriveFFConstantsReal.kS())
+            .kV(SwerveFeedForwards.linearForceDriveFFConstantsReal.kV());
 
         driveConfig.signals
             .primaryEncoderPositionAlwaysOn(true)

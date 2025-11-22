@@ -176,12 +176,10 @@ public final class ClawConstants {
     public static final TunableValue ANGLE_KP = new TunableValue("Claw/KP", 0.7);
     public static final TunableValue ANGLE_KI = new TunableValue("Claw/KI", 0.0);
     public static final TunableValue ANGLE_KD = new TunableValue("Claw/KD", 0.1);
-    public static final TunableValue ANGLE_KF = new TunableValue("Claw/KF", 0.0);
 
     public static final TunableValue PROFILED_ANGLE_KP = new TunableValue("Claw/P_KP", 0.7);
     public static final TunableValue PROFILED_ANGLE_KI = new TunableValue("Claw/P_KI", 0.0);
     public static final TunableValue PROFILED_ANGLE_KD = new TunableValue("Claw/P_KD", 0.1);
-    public static final TunableValue PROFILED_ANGLE_KF = new TunableValue("Claw/P_KF", 0.0);
     public static final TrapezoidProfile.Constraints PROFILED_ANGLE_CONSTRAINTS = new TrapezoidProfile.Constraints(
         MAX_ANGLE_SPEED.in(RadiansPerSecond),
         MAX_ANGLE_ACCELERATION.in(RadiansPerSecondPerSecond)

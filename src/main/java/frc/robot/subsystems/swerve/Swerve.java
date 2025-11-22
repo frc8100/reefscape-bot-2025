@@ -301,10 +301,6 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
                 feedforwardLinearForcesNewtons[mod.index]
             );
 
-            // double driveFFVolts = swerveFeedForwards.getSimpleFFVolts(
-            //     desiredStates[mod.index].speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters)
-            // );
-
             mod.runSetpoint(desiredStates[mod.index], driveFFVolts);
         }
     }

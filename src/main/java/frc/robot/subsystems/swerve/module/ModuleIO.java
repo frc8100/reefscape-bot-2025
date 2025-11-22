@@ -96,4 +96,6 @@ public interface ModuleIO {
      * Resets the motor relative angle encoder to the current absolute encoder (CANCoder on real hardware) position reading.
      */
     public default void syncMotorEncoderToAbsoluteEncoder() {}
+
+    public default double getDriveFeedForwardVoltage(double feedforwardLinearForcesNewtons) { return 0.0; }
 }

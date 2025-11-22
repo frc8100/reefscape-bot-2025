@@ -18,8 +18,6 @@ import static edu.wpi.first.units.Units.Meters;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.robot.subsystems.CANIdAlert;
 import frc.robot.subsystems.CANIdConnections;
 import frc.robot.subsystems.CANIdConnections.SwerveModuleCanIDs;

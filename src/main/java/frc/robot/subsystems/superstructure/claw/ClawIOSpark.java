@@ -124,11 +124,10 @@ public class ClawIOSpark implements ClawIO {
 
         // Apply PID config for the angle motor
         angleConfig.closedLoop
-            .pidf(
+            .pid(
                 ClawConstants.ANGLE_KP.get(),
                 ClawConstants.ANGLE_KI.get(),
-                ClawConstants.ANGLE_KD.get(),
-                ClawConstants.ANGLE_KF.get()
+                ClawConstants.ANGLE_KD.get()
             )
             .outputRange(-ClawConstants.MAX_ANGLE_POWER, ClawConstants.MAX_ANGLE_POWER);
 
@@ -183,11 +182,10 @@ public class ClawIOSpark implements ClawIO {
     @Override
     public void refreshConfig() {
         // Refresh the config for the motor
-        angleConfig.closedLoop.pidf(
+        angleConfig.closedLoop.pid(
             ClawConstants.ANGLE_KP.get(),
             ClawConstants.ANGLE_KI.get(),
-            ClawConstants.ANGLE_KD.get(),
-            ClawConstants.ANGLE_KF.get()
+            ClawConstants.ANGLE_KD.get()
         );
 
         angleProfiledClosedLoopController.setPID(

@@ -115,12 +115,10 @@ public final class ElevatorConstants {
     // public static final double ELEVATOR_KP = 0.1;
     // public static final double ELEVATOR_KI = 0.0;
     // public static final double ELEVATOR_KD = 0.0;
-    // public static final double ELEVATOR_KF = 0.0;
 
     public static final TunableValue ELEVATOR_KP = new TunableValue("Elevator/KP", 0.7);
     public static final TunableValue ELEVATOR_KI = new TunableValue("Elevator/KI", 0.0);
     public static final TunableValue ELEVATOR_KD = new TunableValue("Elevator/KD", 0.0);
-    public static final TunableValue ELEVATOR_KF = new TunableValue("Elevator/KF", 0.0);
 
     // TODO: Tune these values
     public static final Mass ELEVATOR_MASS = Kilograms.of(5.0);

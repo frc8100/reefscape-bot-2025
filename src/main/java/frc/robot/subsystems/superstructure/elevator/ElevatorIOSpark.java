@@ -100,11 +100,10 @@ public class ElevatorIOSpark implements ElevatorIO {
         leaderConfig = new LeaderMotorConfig().getConfig();
 
         leaderConfig.closedLoop
-            .pidf(
+            .pid(
                 ElevatorConstants.ELEVATOR_KP.get(),
                 ElevatorConstants.ELEVATOR_KI.get(),
-                ElevatorConstants.ELEVATOR_KD.get(),
-                ElevatorConstants.ELEVATOR_KF.get()
+                ElevatorConstants.ELEVATOR_KD.get()
             )
             .outputRange(-ElevatorConstants.ELEVATOR_MAX_OUTPUT, ElevatorConstants.ELEVATOR_MAX_OUTPUT);
 
@@ -156,11 +155,10 @@ public class ElevatorIOSpark implements ElevatorIO {
     @Override
     public void refreshConfig() {
         // Refresh the config for the motor
-        leaderConfig.closedLoop.pidf(
+        leaderConfig.closedLoop.pid(
             ElevatorConstants.ELEVATOR_KP.get(),
             ElevatorConstants.ELEVATOR_KI.get(),
-            ElevatorConstants.ELEVATOR_KD.get(),
-            ElevatorConstants.ELEVATOR_KF.get()
+            ElevatorConstants.ELEVATOR_KD.get()
         );
         // .outputRange(-ElevatorConstants.ELEVATOR_MAX_OUTPUT, ElevatorConstants.ELEVATOR_MAX_OUTPUT);
 
