@@ -10,9 +10,10 @@ public class SwerveFeedForwards {
     /**
      * Constants for linear force feedforward calculations.
      * See {@link #getLinearForcesFFVoltsFromRadPerSec} for details on calculating the feedforward voltage from linear forces.
-     * Satisfies the equation: V_applied = kS * sign(velocityRadiansPerSecond) + kV * velocityRadiansPerSecond + kF * calculatedLinearForceFFVolts
+     * Satisfies the equation: V_applied = kS * sign(velocityRadiansPerSecond) + kV * velocityRadiansPerSecond + kA * accelerationRadiansPerSecond2 + kF * calculatedLinearForceFFVolts.
+     * kA has no effect in simulation as acceleration is not used in the calculation.
      */
-    public static record LinearForceFeedForwardConstants(double kS, double kV, double kF) {}
+    public static record LinearForceFeedForwardConstants(double kS, double kV, double kA, double kF) {}
 
     /**
      * Constants for simple feedforward calculations.
@@ -34,9 +35,9 @@ public class SwerveFeedForwards {
 
     // kS and kV will be automatically handled by SparkMax in real hardware
     public static final LinearForceFeedForwardConstants linearForceDriveFFConstantsReal =
-        new LinearForceFeedForwardConstants(0.17388, 0.13632, 0);
+        new LinearForceFeedForwardConstants(0.17388, 0.13632, 0, 0);
     public static final LinearForceFeedForwardConstants linearForceDriveFFConstantsSim =
-        new LinearForceFeedForwardConstants(0.0752, 0.0436, 0.8849);
+        new LinearForceFeedForwardConstants(0.0752, 0.0436, 0, 0.8849);
 
     // SysId
     // public static final double driveSimKs = -0.10543;
@@ -129,13 +130,13 @@ public class SwerveFeedForwards {
 
     /**
      * Calculates the required voltage for the given linear force feedforward constants, desired velocity, and feedforward linear forces.
-     * If in real hardware, only the kF portion is calculated and returned as kS and kV are handled by the SparkMax.
+     * If in real hardware, only the kF portion is calculated and returned as kS, kV, and kA are handled by the SparkMax.
      * @param desiredVelocityRadPerSec - The desired velocity in radians per second.
      * @param feedforwardLinearForcesNewtons - The desired linear forces in Newtons.
      * @return The required voltage to achieve the desired velocity and forces.
      */
     public double getLinearForceFFVolts(double desiredVelocityRadPerSec, double feedforwardLinearForcesNewtons) {
-        // If real, kS and kV are automatically handled by SparkMax
+        // If real, kS, kV, and kA are automatically handled by SparkMax
         if (!isSimulation) {
             return (
                 linearForceFFConstants.kF *

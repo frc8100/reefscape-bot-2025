@@ -31,7 +31,6 @@ public class SwerveSysidRoutines {
     private SwerveSysidRoutines() {}
 
     private static final double FF_START_DELAY = 2.0; // Secs
-    private static final double FF_RAMP_RATE = 1; // Volts/Sec
     private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
     private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
 
@@ -40,6 +39,14 @@ public class SwerveSysidRoutines {
     private static ChassisSpeeds previousSpeeds = new ChassisSpeeds();
 
     private static record FFMeasurement(double chassisAccelMPS2, double linearForcesNewtons) {}
+
+    /**
+     * A functional interface that supplies a voltage based on the elapsed time in seconds.
+     */
+    @FunctionalInterface
+    private interface VoltageSupplierFromTime {
+        double getVoltage(double timeSeconds);
+    }
 
     /**
      * Calculates the supplied linear forces in Newtons for the given chassis speeds.
@@ -72,16 +79,24 @@ public class SwerveSysidRoutines {
         return new FFMeasurement(Math.hypot(chassisAccelX, chassisAccelY), wheelForceDist);
     }
 
-    private static Command feedforwardCharacterizationRunOnce(SwerveDrive drive) {
+    /**
+     * @return A command that runs a single feedforward characterization test with the given voltage supplier.
+     */
+    private static Command feedforwardCharacterizationRunOnce(
+        SwerveDrive drive,
+        VoltageSupplierFromTime voltageSupplier
+    ) {
         Timer timer = new Timer();
 
         return Commands.sequence(
+            // Reorient modules to face forward
+            getFeedforwardCharacterizationReorientCommand(drive),
             // Start timer
             Commands.runOnce(timer::restart),
             // Accelerate and gather data
             Commands.run(
                 () -> {
-                    double voltage = timer.get() * FF_RAMP_RATE;
+                    double voltage = voltageSupplier.getVoltage(timer.get());
                     drive.runCharacterization(voltage);
 
                     double currentVelocityRadPerSec = drive.getFFCharacterizationVelocity();
@@ -104,22 +119,32 @@ public class SwerveSysidRoutines {
                     Logger.recordOutput("SysId/FFCharacterization/AppliedVoltage", voltage);
                 },
                 drive
+            ).andThen(
+                Commands.runOnce(() -> {
+                    drive.runCharacterization(0.0);
+                    previousSpeeds = new ChassisSpeeds();
+                })
             )
         );
     }
 
+    private static Command getFeedforwardCharacterizationReorientCommand(SwerveDrive drive) {
+        return Commands.run(() -> drive.runCharacterization(0.0), drive).withTimeout(FF_START_DELAY);
+    }
+
     /**
-     * Measures the velocity feedforward constants for the drive motors.
-     * <p>This command should only be used in voltage control mode.
+     * Measures data for feedforward characterization.
      * Export as csv using AdvantageScope and the prefix `/RealOutputs/SysId/FFCharacterization`
+     * and analyze using the python script at `regression/drive_ff_characterization.py`.
      */
     public static Command feedforwardCharacterization(SwerveDrive drive) {
-        Timer timer = new Timer();
-
         return Commands.sequence(
-            // Allow modules to orient
-            Commands.run(() -> drive.runCharacterization(0.0), drive).withTimeout(FF_START_DELAY),
-            feedforwardCharacterizationRunOnce(drive).withTimeout(Seconds.of(7))
+            // Tests with voltage ramping
+            feedforwardCharacterizationRunOnce(drive, (double seconds) -> seconds * 1.0).withTimeout(Seconds.of(5)),
+            feedforwardCharacterizationRunOnce(drive, (double seconds) -> seconds * -1.0).withTimeout(Seconds.of(5)),
+            // Tests with constant voltage
+            feedforwardCharacterizationRunOnce(drive, (double seconds) -> 7.0).withTimeout(Seconds.of(3)),
+            feedforwardCharacterizationRunOnce(drive, (double seconds) -> -7.0).withTimeout(Seconds.of(3))
         );
     }
 
