@@ -16,8 +16,6 @@ package frc.robot.subsystems.swerve.module;
 import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.util.CoupledYAMSSubsystemIO;
@@ -58,9 +56,8 @@ public class ModuleIOSim implements ModuleIO {
     public void updateInputs(ModuleIOInputs inputs) {
         // Run closed-loop control
         if (driveClosedLoop) {
-            driveAppliedVolts =
-                driveFFVolts +
-                driveController.calculate(moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond));
+            driveAppliedVolts = driveFFVolts +
+            driveController.calculate(moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond));
         } else {
             driveController.reset();
         }
@@ -126,18 +123,8 @@ public class ModuleIOSim implements ModuleIO {
     }
 
     @Override
-    public void setDesiredState(
-        SwerveModuleState desiredState,
-        Rotation2d currentRotation2d,
-        double driveFeedforwardVoltage
-    ) {
-        setDriveVelocity(desiredState.speedMetersPerSecond, driveFeedforwardVoltage);
-        setTurnPosition(desiredState.angle);
-    }
-
-    @Override
-    public void setDriveVelocity(double speedMetersPerSecond, double driveFeedforwardVoltage) {
-        double velocityRadPerSec = speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters);
+    public void setDriveVelocity(SwerveModuleState desiredState, double driveFeedforwardVoltage) {
+        double velocityRadPerSec = desiredState.speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters);
 
         driveClosedLoop = true;
 
@@ -147,8 +134,8 @@ public class ModuleIOSim implements ModuleIO {
     }
 
     @Override
-    public void setTurnPosition(Rotation2d rotation) {
+    public void setTurnPosition(SwerveModuleState desiredState) {
         turnClosedLoop = true;
-        turnController.setSetpoint(rotation.getRadians());
+        turnController.setSetpoint(desiredState.angle.getRadians());
     }
 }

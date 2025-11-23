@@ -75,10 +75,10 @@ public interface ModuleIO {
     public abstract void setTurnOpenLoop(double output);
 
     /** Run the drive motor at the specified velocity. Used internally. */
-    public abstract void setDriveVelocity(double velocityMetersPerSecond, double driveFeedforwardVoltage);
+    public abstract void setDriveVelocity(SwerveModuleState desiredState, double driveFeedforwardVoltage);
 
     /** Run the turn motor to the specified rotation. Used internally. */
-    public abstract void setTurnPosition(Rotation2d rotation);
+    public abstract void setTurnPosition(SwerveModuleState desiredState);
 
     /**
      * Sets the desired state for the module. Should update the turn and drive motors to reach the desired state.
@@ -86,16 +86,21 @@ public interface ModuleIO {
      * @param currentRotation2d - The current rotation of the module. Used for optimization.
      * @param driveFeedforwardVoltage - The feedforward voltage to apply to the drive motor.
      */
-    public abstract void setDesiredState(
+    public default void setDesiredState(
         SwerveModuleState desiredState,
         Rotation2d currentRotation2d,
         double driveFeedforwardVoltage
-    );
+    ) {
+        setDriveVelocity(desiredState, driveFeedforwardVoltage);
+        setTurnPosition(desiredState);
+    }
 
     /**
      * Resets the motor relative angle encoder to the current absolute encoder (CANCoder on real hardware) position reading.
      */
     public default void syncMotorEncoderToAbsoluteEncoder() {}
 
-    public default double getDriveFeedForwardVoltage(double feedforwardLinearForcesNewtons) { return 0.0; }
+    public default double getDriveFeedForwardVoltage(double feedforwardLinearForcesNewtons) {
+        return 0.0;
+    }
 }

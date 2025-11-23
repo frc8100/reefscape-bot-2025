@@ -35,7 +35,6 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
@@ -259,31 +258,12 @@ public class ModuleIOSpark implements ModuleIO {
     }
 
     @Override
-    public void setDesiredState(
-        SwerveModuleState desiredState,
-        Rotation2d currentRotation2d,
-        double driveFeedforwardVoltage
-    ) {
-        setAngle(desiredState, currentRotation2d);
-        setSpeed(desiredState, driveFeedforwardVoltage);
-    }
-
-    @Override
-    public void setDriveVelocity(double speedMetersPerSecond, double driveFeedforwardVoltage) {
-        setSpeed(new SwerveModuleState(speedMetersPerSecond, new Rotation2d()), driveFeedforwardVoltage);
-    }
-
-    /**
-     * Sets the speed of the module.
-     * @param desiredState The desired state.
-     * @param isOpenLoop Whether the module is in open loop.
-     */
-    private void setSpeed(SwerveModuleState desiredState, double driveFeedforwardVoltage) {
+    public void setDriveVelocity(SwerveModuleState desiredState, double driveFeedforwardVoltage) {
         double velocityRadiansPerSecond = desiredState.speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters);
 
         this.driveFFVolts = driveFeedforwardVoltage;
 
-        driveClosedLoopController.setReference(
+        driveClosedLoopController.setSetpoint(
             velocityRadiansPerSecond,
             ControlType.kVelocity,
             ClosedLoopSlot.kSlot0,
@@ -293,19 +273,10 @@ public class ModuleIOSpark implements ModuleIO {
     }
 
     @Override
-    public void setTurnPosition(Rotation2d rotation) {
-        // TODO: update this
-        setAngle(new SwerveModuleState(0, rotation), getAngle());
-    }
-
-    /**
-     * Sets the angle of the module.
-     * @param desiredState The desired state.
-     */
-    private void setAngle(SwerveModuleState desiredState, Rotation2d currentRotation2d) {
+    public void setTurnPosition(SwerveModuleState desiredState) {
         // Stop the motor if the speed is less than 1%. Prevents Jittering
         if (
-            Math.abs(currentRotation2d.minus(desiredState.angle).getDegrees()) < 0.5 &&
+            Math.abs(getAngle().minus(desiredState.angle).getDegrees()) < 0.5 &&
             Math.abs(desiredState.speedMetersPerSecond) <= (SwerveConfig.MAX_SPEED.in(MetersPerSecond) * 0.01)
         ) {
             angleMotor.stopMotor();
