@@ -244,11 +244,11 @@ public class ButtonBindings {
         StateCycle<SwerveState, Supplier<Pose2d>> toggleDriveToCoralStation =
             swerveSubsystem.stateMachine.createStateCycleWithPayload(
                 List.of(
+                    new StateMachine.StateWithPayload<>(SwerveState.FULL_DRIVER_CONTROL, null),
                     new StateMachine.StateWithPayload<>(
                         SwerveState.DRIVE_TO_POSE_PATHFINDING,
                         RobotActions.FieldLocations.CORAL_STATION_1::getPose
-                    ),
-                    new StateMachine.StateWithPayload<>(SwerveState.FULL_DRIVER_CONTROL, null)
+                    )
                 ),
                 StateCycle.StateCycleBehavior.RELY_ON_INDEX
             );
