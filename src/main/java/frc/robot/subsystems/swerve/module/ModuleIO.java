@@ -22,16 +22,20 @@ public interface ModuleIO {
     @AutoLog
     public static class ModuleIOInputs {
 
-        public CoupledYAMSSubsystemIO.SparkMotorControllerDataUnitless driveMotorData =
-            CoupledYAMSSubsystemIO.defaultControllerDataUnitless;
+        public CoupledYAMSSubsystemIO.SparkMotorControllerData driveMotorData =
+            new CoupledYAMSSubsystemIO.SparkMotorControllerData();
+
+        public boolean driveMotorConnected = true;
 
         /**
          * The feedforward voltage applied to the drive motor.
          */
         public double driveFFVolts = 0.0;
 
-        public CoupledYAMSSubsystemIO.SparkMotorControllerDataUnitless turnMotorData =
-            CoupledYAMSSubsystemIO.defaultControllerDataUnitless;
+        public CoupledYAMSSubsystemIO.SparkMotorControllerData turnMotorData =
+            new CoupledYAMSSubsystemIO.SparkMotorControllerData();
+
+        public boolean turnMotorConnected = true;
 
         /**
          * The current absolute position of the turn module.

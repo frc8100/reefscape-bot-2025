@@ -15,7 +15,9 @@ public class TestArmSubsystemIO implements CoupledYAMSSubsystemIO {
     @AutoLog
     public static class TestArmSubsystemIOInputs {
 
-        public CoupledYAMSSubsystemIO.SparkMotorControllerData motorData = CoupledYAMSSubsystemIO.defaultControllerData;
+        public CoupledYAMSSubsystemIO.SparkMotorControllerData motorData =
+            new CoupledYAMSSubsystemIO.SparkMotorControllerData();
+        public boolean isMotorConnected = true;
     }
 
     private final SparkMax spark = new SparkMax(4, MotorType.kBrushless);
@@ -32,6 +34,9 @@ public class TestArmSubsystemIO implements CoupledYAMSSubsystemIO {
 
     /** Updates the set of loggable inputs. */
     public void updateInputs(TestArmSubsystemIOInputs inputs) {
-        inputs.motorData = CoupledYAMSSubsystemIO.getDataFromMotorController(sparkSmartMotorController);
+        inputs.isMotorConnected = CoupledYAMSSubsystemIO.updateDataFromWrappedMotorController(
+            inputs.motorData,
+            sparkSmartMotorController
+        );
     }
 }

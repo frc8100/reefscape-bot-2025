@@ -228,7 +228,11 @@ public class ModuleIOSpark implements ModuleIO {
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
         // Update drive inputs
-        inputs.driveMotorData = CoupledYAMSSubsystemIO.getDataFromSparkUnitless(driveMotor, relativeDriveEncoder);
+        inputs.driveMotorConnected = CoupledYAMSSubsystemIO.updateDataFromSpark(
+            inputs.driveMotorData,
+            driveMotor,
+            relativeDriveEncoder
+        );
         inputs.driveFFVolts = driveFFVolts;
 
         // Update turn inputs
@@ -239,7 +243,11 @@ public class ModuleIOSpark implements ModuleIO {
         );
 
         inputs.turnAbsolutePosition = getAngle();
-        inputs.turnMotorData = CoupledYAMSSubsystemIO.getDataFromSparkUnitless(angleMotor, relativeAngleEncoder);
+        inputs.turnMotorConnected = CoupledYAMSSubsystemIO.updateDataFromSpark(
+            inputs.turnMotorData,
+            angleMotor,
+            relativeAngleEncoder
+        );
 
         // Update odometry inputs
         inputs.odometryDrivePositionsRad = drivePositionQueue.stream().mapToDouble((Double value) -> value).toArray();

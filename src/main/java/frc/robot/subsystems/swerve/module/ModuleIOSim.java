@@ -18,7 +18,6 @@ import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.robot.subsystems.swerve.SwerveConfig;
-import frc.util.CoupledYAMSSubsystemIO;
 import java.util.Arrays;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController;
@@ -71,26 +70,16 @@ public class ModuleIOSim implements ModuleIO {
         turnMotor.requestVoltage(Volts.of(turnAppliedVolts));
 
         // Update drive inputs
-        inputs.driveMotorData = new CoupledYAMSSubsystemIO.SparkMotorControllerDataUnitless(
-            moduleSimulation.getDriveWheelFinalPosition().in(Radians),
-            moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond),
-            driveAppliedVolts,
-            Math.abs(moduleSimulation.getDriveMotorStatorCurrent().in(Amps)),
-            0.0, // Temperature not simulated
-            true
-        );
-
+        inputs.driveMotorData.positionAngle.mut_replace(moduleSimulation.getDriveWheelFinalPosition());
+        inputs.driveMotorData.velocity.mut_replace(moduleSimulation.getDriveWheelFinalSpeed());
+        inputs.driveMotorData.appliedVolts.mut_replace(driveAppliedVolts, Volts);
+        inputs.driveMotorData.torqueCurrent.mut_replace(moduleSimulation.getDriveMotorStatorCurrent());
         inputs.driveFFVolts = driveFFVolts;
 
         // Update turn inputs
-        inputs.turnMotorData = new CoupledYAMSSubsystemIO.SparkMotorControllerDataUnitless(
-            moduleSimulation.getSteerRelativeEncoderPosition().in(Radians),
-            moduleSimulation.getSteerAbsoluteEncoderSpeed().in(RadiansPerSecond),
-            turnAppliedVolts,
-            Math.abs(moduleSimulation.getSteerMotorStatorCurrent().in(Amps)),
-            0.0, // Temperature not simulated
-            true
-        );
+        inputs.turnMotorData.positionAngle.mut_replace(moduleSimulation.getSteerRelativeEncoderPosition());
+        inputs.turnMotorData.velocity.mut_replace(moduleSimulation.getSteerAbsoluteEncoderSpeed());
+        inputs.turnMotorData.appliedVolts.mut_replace(turnAppliedVolts, Volts);
         inputs.turnAbsolutePosition = moduleSimulation.getSteerAbsoluteFacing();
 
         // Update odometry inputs

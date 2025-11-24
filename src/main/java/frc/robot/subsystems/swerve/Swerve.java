@@ -1,7 +1,10 @@
 package frc.robot.subsystems.swerve;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volt;
 
@@ -329,7 +332,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     public double[] getWheelRadiusCharacterizationPositions() {
         double[] values = new double[4];
         for (int i = 0; i < 4; i++) {
-            values[i] = swerveModules[i].getWheelRadiusCharacterizationPosition();
+            values[i] = swerveModules[i].getWheelRadiusCharacterizationPosition().in(Radians);
         }
         return values;
     }
@@ -338,7 +341,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     public double getFFCharacterizationVelocity() {
         double output = 0.0;
         for (int i = 0; i < 4; i++) {
-            output += swerveModules[i].getFFCharacterizationVelocity() / 4.0;
+            output += swerveModules[i].getFFCharacterizationVelocity().in(RadiansPerSecond) / 4.0;
         }
         return output;
     }
@@ -346,9 +349,9 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     public Optional<Double> getWheelSlippingCharacterization() {
         for (int i = 0; i < 4; i++) {
             // Check if the module is slipping by seeing if the velocity is nonzero
-            if (swerveModules[i].getFFCharacterizationVelocity() < 0.175) continue;
+            if (swerveModules[i].getFFCharacterizationVelocity().in(RadiansPerSecond) < 0.175) continue;
 
-            return Optional.of(swerveModules[i].getWheelSlippingCharacterizationAmps());
+            return Optional.of(swerveModules[i].getWheelSlippingCharacterization().in(Amps));
         }
 
         return Optional.empty();

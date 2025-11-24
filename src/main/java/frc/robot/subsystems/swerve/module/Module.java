@@ -14,10 +14,15 @@
 package frc.robot.subsystems.swerve.module;
 
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
 import frc.robot.subsystems.CANIdAlert;
 import frc.robot.subsystems.CANIdConnections;
 import frc.robot.subsystems.CANIdConnections.SwerveModuleCanIDs;
@@ -84,8 +89,8 @@ public class Module {
         }
 
         // Update alerts
-        driveDisconnectedAlert.updateConnectionStatus(inputs.driveMotorData.motorConnected());
-        turnDisconnectedAlert.updateConnectionStatus(inputs.turnMotorData.motorConnected());
+        driveDisconnectedAlert.updateConnectionStatus(inputs.driveMotorConnected);
+        turnDisconnectedAlert.updateConnectionStatus(inputs.turnMotorConnected);
         cancoderDisconnectedAlert.updateConnectionStatus(inputs.canCoderConnected);
     }
 
@@ -125,12 +130,12 @@ public class Module {
 
     /** Returns the current drive position of the module in meters. */
     public double getPositionMeters() {
-        return inputs.driveMotorData.positionAngleRad() * SwerveConfig.WHEEL_RADIUS.in(Meters);
+        return inputs.driveMotorData.positionAngle.in(Radians) * SwerveConfig.WHEEL_RADIUS.in(Meters);
     }
 
     /** Returns the current drive velocity of the module in meters per second. */
     public double getVelocityMetersPerSec() {
-        return inputs.driveMotorData.velocityRadPerSec() * SwerveConfig.WHEEL_RADIUS.in(Meters);
+        return inputs.driveMotorData.velocity.in(RadiansPerSecond) * SwerveConfig.WHEEL_RADIUS.in(Meters);
     }
 
     /** Returns the module position (turn angle and drive position). */
@@ -148,18 +153,18 @@ public class Module {
         return odometryPositions;
     }
 
-    /** Returns the module position in radians. */
-    public double getWheelRadiusCharacterizationPosition() {
-        return inputs.driveMotorData.positionAngleRad();
+    /** Returns the module position. */
+    public Angle getWheelRadiusCharacterizationPosition() {
+        return inputs.driveMotorData.positionAngle;
     }
 
-    /** Returns the module velocity in rad/sec. */
-    public double getFFCharacterizationVelocity() {
-        return inputs.driveMotorData.velocityRadPerSec();
+    /** Returns the module velocity. */
+    public AngularVelocity getFFCharacterizationVelocity() {
+        return inputs.driveMotorData.velocity;
     }
 
-    /** Returns the current draw in amps. */
-    public double getWheelSlippingCharacterizationAmps() {
-        return inputs.driveMotorData.torqueCurrentAmps();
+    /** Returns the current draw. */
+    public Current getWheelSlippingCharacterization() {
+        return inputs.driveMotorData.torqueCurrent;
     }
 }
