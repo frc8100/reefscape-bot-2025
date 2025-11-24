@@ -14,6 +14,7 @@
 package frc.robot.subsystems.swerve.gyro;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -88,15 +89,15 @@ public class GyroIOPigeon2 implements GyroIO {
 
         // Update from status signals
         inputs.yawPosition = Rotation2d.fromDegrees(yaw.getValueAsDouble());
-        inputs.yawVelocityRadPerSec = Units.degreesToRadians(yawVelocity.getValueAsDouble());
+        inputs.yawVelocityRadPerSec.mut_replace(yawVelocity.getValueAsDouble(), DegreesPerSecond);
 
         if (SwerveConfig.IS_GYRO_RECORD_PITCH_ROLL_TIPPING_STATE) {
             // Update pitch and roll only if configured to do so
-            inputs.pitchDegrees = pitch.getValueAsDouble();
-            inputs.rollDegrees = roll.getValueAsDouble();
+            inputs.pitchRadians.mut_replace(pitch.getValueAsDouble(), Degrees);
+            inputs.rollRadians.mut_replace(roll.getValueAsDouble(), Degrees);
 
             // Update anti-tipping
-            antiTipping.calculate(inputs.pitchDegrees, inputs.rollDegrees);
+            antiTipping.calculate(inputs.pitchRadians, inputs.rollRadians);
             inputs.isTipping = antiTipping.isTipping();
             inputs.velocityAntiTipping = antiTipping.getVelocityAntiTipping();
         }

@@ -23,6 +23,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Distance;
 import frc.robot.subsystems.CANIdAlert;
 import frc.robot.subsystems.CANIdConnections;
 import frc.robot.subsystems.CANIdConnections.SwerveModuleCanIDs;

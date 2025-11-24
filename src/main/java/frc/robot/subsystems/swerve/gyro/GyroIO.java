@@ -13,8 +13,13 @@
 
 package frc.robot.subsystems.swerve.gyro;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.MutAngle;
+import edu.wpi.first.units.measure.MutAngularVelocity;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.AutoLogOutput;
 
@@ -41,20 +46,19 @@ public interface GyroIO {
         /**
          * The change in yaw position of the gyro in radians per second.
          */
-        public double yawVelocityRadPerSec = 0.0;
+        public MutAngularVelocity yawVelocityRadPerSec = RadiansPerSecond.mutable(0.0);
 
         /**
-         * The pitch position of the gyro in degrees.
-         * Note: using degrees because {@link frc.util.AntiTipping} uses degrees.
+         * The pitch position of the gyro.
          * Not measured in simulation.
          */
-        public double pitchDegrees = 0.0;
+        public MutAngle pitchRadians = Degrees.mutable(0.0);
 
         /**
-         * The roll position of the gyro in degrees (see {@link #pitchDegrees}).
+         * The roll position of the gyro.
          * Not measured in simulation.
          */
-        public double rollDegrees = 0.0;
+        public MutAngle rollRadians = Degrees.mutable(0.0);
 
         public boolean isTipping = false;
 

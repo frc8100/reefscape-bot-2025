@@ -1,5 +1,9 @@
 package frc.util;
 
+import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.config.SparkBaseConfig;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import java.util.ArrayList;
@@ -17,6 +21,57 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
  * value not in dashboard.
  */
 public class TunableValue implements DoubleSupplier {
+
+    /**
+     * A class for a tuning PID controller for a Spark motor controller.
+     */
+    public static class SparkPIDTunable {
+
+        public final TunableValue kP;
+        public final TunableValue kD;
+
+        private final SparkBase motorController;
+        private final SparkBaseConfig currentConfig;
+
+        private final String name;
+
+        public SparkPIDTunable(
+            String name,
+            SparkBase motorController,
+            SparkBaseConfig currentConfig,
+            double defaultP,
+            double defaultD
+        ) {
+            this.name = name;
+            this.motorController = motorController;
+            this.currentConfig = currentConfig;
+
+            kP = new TunableValue(name + "/kP", defaultP);
+            kD = new TunableValue(name + "/kD", defaultD);
+
+            TunableValue.addRefreshConfigConsumer(this::onRefresh);
+        }
+
+        /**
+         * Refreshes the PID values from the tunable numbers and updates the motor controller configuration.
+         */
+        private void onRefresh() {
+            // If neither value has changed, do nothing
+            if (!hasAnyChanged(kP, kD)) {
+                return;
+            }
+
+            currentConfig.closedLoop.p(kP.get()).d(kD.get());
+
+            motorController.configure(
+                currentConfig,
+                ResetMode.kNoResetSafeParameters,
+                PersistMode.kNoPersistParameters
+            );
+
+            System.out.println("Updated Spark PID for " + name + ": kP=" + kP.get() + ", kD=" + kD.get());
+        }
+    }
 
     /**
      * A functional interface for a consumer that refreshes its config.
@@ -108,7 +163,7 @@ public class TunableValue implements DoubleSupplier {
      * A map of unique identifiers to the last value that was read for that identifier.
      * This is used to determine if the value has changed since the last time it was read.
      */
-    private Map<Integer, Double> lastHasChangedValues = new HashMap<>();
+    private double lastValue = Double.NaN;
 
     /**
      * A consumer to run when the value is refreshed.
@@ -152,12 +207,17 @@ public class TunableValue implements DoubleSupplier {
      * @param defaultValue The default value
      */
     public void initDefault(double defaultValue) {
-        if (!hasDefault) {
-            hasDefault = true;
-            this.defaultValue = defaultValue;
-            if (Constants.tuningMode) {
-                dashboardNumber = new LoggedNetworkNumber(key, defaultValue);
-            }
+        // If it already has a default, do nothing
+        if (hasDefault) {
+            return;
+        }
+
+        hasDefault = true;
+        this.defaultValue = defaultValue;
+        lastValue = defaultValue;
+
+        if (Constants.tuningMode) {
+            dashboardNumber = new LoggedNetworkNumber(key, defaultValue);
         }
     }
 
@@ -175,18 +235,26 @@ public class TunableValue implements DoubleSupplier {
 
     /**
      * Checks whether the number has changed since our last check
-     * @param id Unique identifier for the caller to avoid conflicts when shared between multiple objects. Recommended approach is to pass the result of "hashCode()"
      * @return True if the number has changed since the last time this method was called, false otherwise.
      */
-    public boolean hasChanged(int id) {
+    public boolean hasChanged() {
         double currentValue = get();
-        Double lastValue = lastHasChangedValues.get(id);
-        if (lastValue == null || currentValue != lastValue) {
-            lastHasChangedValues.put(id, currentValue);
+
+        if (currentValue != lastValue) {
+            lastValue = currentValue;
             return true;
         }
 
         return false;
+    }
+
+    /**
+     * Checks whether any of the tunableNumbers have changed
+     * @param tunableNumbers - All tunable numbers to check
+     * @return True if any of the tunable numbers have changed since the last time this method was called, false otherwise.
+     */
+    public static boolean hasAnyChanged(TunableValue... tunableNumbers) {
+        return Arrays.stream(tunableNumbers).anyMatch(TunableValue::hasChanged);
     }
 
     /**
@@ -195,15 +263,15 @@ public class TunableValue implements DoubleSupplier {
      * @param action Callback to run when any of the tunable numbers have changed. Access tunable numbers in order inputted in method
      * @param tunableNumbers All tunable numbers to check
      */
-    public static void ifChanged(int id, Consumer<double[]> action, TunableValue... tunableNumbers) {
-        if (Arrays.stream(tunableNumbers).anyMatch(tunableNumber -> tunableNumber.hasChanged(id))) {
+    public static void ifChanged(Consumer<double[]> action, TunableValue... tunableNumbers) {
+        if (hasAnyChanged(tunableNumbers)) {
             action.accept(Arrays.stream(tunableNumbers).mapToDouble(TunableValue::get).toArray());
         }
     }
 
     /** Runs action if any of the tunableNumbers have changed */
-    public static void ifChanged(int id, Runnable action, TunableValue... tunableNumbers) {
-        ifChanged(id, values -> action.run(), tunableNumbers);
+    public static void ifChanged(Runnable action, TunableValue... tunableNumbers) {
+        ifChanged(values -> action.run(), tunableNumbers);
     }
 
     @Override

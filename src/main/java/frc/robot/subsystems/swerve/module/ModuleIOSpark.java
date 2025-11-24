@@ -17,23 +17,17 @@ package frc.robot.subsystems.swerve.module;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Radians;
 
-import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -48,7 +42,6 @@ import frc.util.CoupledYAMSSubsystemIO;
 import frc.util.SparkUtil;
 import frc.util.TunableValue;
 import java.util.Queue;
-import org.littletonrobotics.junction.Logger;
 
 /**
  * Module IO implementation for Spark Max drive and angle motors with a CANcoder for absolute angle.
@@ -94,7 +87,6 @@ public class ModuleIOSpark implements ModuleIO {
 
     // Status signal queues from CANcoder
     private final StatusSignal<Angle> turnAbsolutePosition;
-    private final StatusSignal<Angle> turnRelativePosition;
 
     // Queue inputs from odometry thread
     private final Queue<Double> drivePositionQueue;
@@ -102,6 +94,10 @@ public class ModuleIOSpark implements ModuleIO {
 
     // Inputs (cached)
     private double driveFFVolts = 0.0;
+
+    // Tunable values
+    private final TunableValue.SparkPIDTunable drivePidTunable;
+    private final TunableValue.SparkPIDTunable anglePidTunable;
 
     /**
      * Creates a new Swerve Module. Automatically gets CAN IDs and module constants based on module number.
@@ -139,8 +135,6 @@ public class ModuleIOSpark implements ModuleIO {
         driveClosedLoopController = driveMotor.getClosedLoopController();
         SparkUtil.configure(driveMotor, SwerveConfig.getDriveMotorConfig());
 
-        SparkUtil.tryUntilOk(driveMotor, 5, () -> relativeDriveEncoder.setPosition(0.0));
-
         // Create and configure the CANCoder
         angleCANcoder = new CANcoder(canIDs.canCoderID());
         angleCANcoder.getConfigurator().refresh(new CANcoderConfiguration());
@@ -152,9 +146,7 @@ public class ModuleIOSpark implements ModuleIO {
         angleCANcoder.getConfigurator().apply(cancoderConfig);
 
         turnAbsolutePosition = angleCANcoder.getAbsolutePosition();
-        turnAbsolutePosition.setUpdateFrequency(SwerveConfig.STATUS_SIGNAL_FREQUENCY_HZ);
-        turnRelativePosition = angleCANcoder.getPosition();
-        turnRelativePosition.setUpdateFrequency(SwerveConfig.STATUS_SIGNAL_FREQUENCY_HZ);
+        turnAbsolutePosition.setUpdateFrequency(SwerveConfig.ODOMETRY_FREQUENCY_HZ);
         angleCANcoder.optimizeBusUtilization();
 
         // Reset the module to absolute position
@@ -165,35 +157,40 @@ public class ModuleIOSpark implements ModuleIO {
             .registerSparkSignal(driveMotor, relativeDriveEncoder::getPosition);
         turnPositionQueue = OdometryThread.getInstance().registerPhoenixAngleRotationsSignal(turnAbsolutePosition);
 
-        TunableValue.addRefreshConfigConsumer(this::onRefresh);
-
         anglePidControllerUsingCANCoder = new PIDController(
             SwerveConfig.angleKP,
             SwerveConfig.angleKI,
             SwerveConfig.angleKD
         );
-        anglePidControllerUsingCANCoder.enableContinuousInput(-180, 180);
-        anglePidControllerUsingCANCoder.setSetpoint(getAngle().getDegrees());
+        anglePidControllerUsingCANCoder.enableContinuousInput(-Math.PI, Math.PI);
+        anglePidControllerUsingCANCoder.setSetpoint(getAngle().getRadians());
+
+        // Create tunable values
+        drivePidTunable = new TunableValue.SparkPIDTunable(
+            this.dashboardKey,
+            driveMotor,
+            SwerveConfig.getDriveMotorConfig(),
+            SwerveConfig.driveKP,
+            SwerveConfig.driveKD
+        );
+        anglePidTunable = new TunableValue.SparkPIDTunable(
+            this.dashboardKey,
+            angleMotor,
+            SwerveConfig.getAngleMotorConfig(),
+            SwerveConfig.angleKP,
+            SwerveConfig.angleKD
+        );
+
+        TunableValue.addRefreshConfigConsumer(this::onRefresh);
     }
 
     /**
      * Refreshes the motor configurations from TunableValues.
      */
     private void onRefresh() {
-        var newConfig = SwerveConfig.getDriveMotorConfig();
-        newConfig.closedLoop.p(SwerveConfig.driveKPTunable.get()).d(SwerveConfig.driveKDTunable.get());
-
-        driveMotor.configure(newConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
-
-        anglePidControllerUsingCANCoder.setPID(
-            SwerveConfig.angleKPTunable.get(),
-            SwerveConfig.angleKI,
-            SwerveConfig.angleKDTunable.get()
-        );
-
         // Print raw turn angle
         System.out.println(
-            "Module " + moduleNumber + " Raw CANCoder Angle (radians): " + turnAbsolutePosition.getValue().in(Radians)
+            "Module " + moduleNumber + " Raw CANCoder Angle (radians): " + getAngle().plus(angleOffset).getRadians()
         );
     }
 
@@ -201,14 +198,7 @@ public class ModuleIOSpark implements ModuleIO {
      * @return The angle of the module, gotten from the CANCoder.
      */
     private Rotation2d getAngle() {
-        return new Rotation2d(turnAbsolutePosition.getValue().in(Radians));
-    }
-
-    /**
-     * @return The relative angle of the module, gotten from the CANCoder.
-     */
-    private Rotation2d getRelativeAngle() {
-        return new Rotation2d(turnRelativePosition.getValue().in(Radians));
+        return Rotation2d.fromRotations(turnAbsolutePosition.getValueAsDouble());
     }
 
     @Override
@@ -221,7 +211,7 @@ public class ModuleIOSpark implements ModuleIO {
 
     @Override
     public void syncMotorEncoderToAbsoluteEncoder() {
-        double absolutePosition = getAngle().getDegrees();
+        double absolutePosition = getAngle().getRadians();
         relativeAngleEncoder.setPosition(absolutePosition);
     }
 
@@ -231,22 +221,22 @@ public class ModuleIOSpark implements ModuleIO {
         inputs.driveMotorConnected = CoupledYAMSSubsystemIO.updateDataFromSpark(
             inputs.driveMotorData,
             driveMotor,
-            relativeDriveEncoder
+            relativeDriveEncoder,
+            driveClosedLoopController
         );
         inputs.driveFFVolts = driveFFVolts;
 
+        // Check CANCoder connection
+        // CANCoder signals should be already refreshed from the odometry thread
+        inputs.canCoderConnected = turnAbsolutePosition.getStatus().isOK();
+
         // Update turn inputs
-
-        // Refresh CANCoder signals
-        inputs.canCoderConnected = BaseStatusSignal.refreshAll(turnAbsolutePosition, turnRelativePosition).equals(
-            StatusCode.OK
-        );
-
         inputs.turnAbsolutePosition = getAngle();
         inputs.turnMotorConnected = CoupledYAMSSubsystemIO.updateDataFromSpark(
             inputs.turnMotorData,
             angleMotor,
-            relativeAngleEncoder
+            relativeAngleEncoder,
+            angleClosedLoopController
         );
 
         // Update odometry inputs
@@ -294,23 +284,20 @@ public class ModuleIOSpark implements ModuleIO {
 
         // Set the angle using the PID controller
         Rotation2d angle = desiredState.angle;
-        double degReference = angle.getDegrees();
+        double radReference = angle.getRadians();
+        angleClosedLoopController.setSetpoint(radReference, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+        // anglePidControllerUsingCANCoder.setSetpoint(radReference);
 
-        // TODO: Use spark encoder
-        // angleClosedLoopController.setReference(degReference, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+        // double requestedVoltage = MathUtil.clamp(
+        //     anglePidControllerUsingCANCoder.calculate(getRelativeAngle().getRadians()),
+        //     -11,
+        //     11
+        // );
 
-        anglePidControllerUsingCANCoder.setSetpoint(degReference);
+        // angleMotor.setVoltage(requestedVoltage);
 
-        double requestedVoltage = MathUtil.clamp(
-            anglePidControllerUsingCANCoder.calculate(getRelativeAngle().getDegrees()),
-            -11,
-            11
-        );
-
-        angleMotor.setVoltage(requestedVoltage);
-
-        Logger.recordOutput(dashboardKey + "/RequestedVoltage", requestedVoltage);
-        Logger.recordOutput(dashboardKey + "/PIDSetpoint", anglePidControllerUsingCANCoder.getSetpoint());
-        Logger.recordOutput(dashboardKey + "/Current", getRelativeAngle().getDegrees());
+        // Logger.recordOutput(dashboardKey + "/RequestedVoltage", requestedVoltage);
+        // Logger.recordOutput(dashboardKey + "/PIDSetpoint", anglePidControllerUsingCANCoder.getSetpoint());
+        // Logger.recordOutput(dashboardKey + "/Current", getRelativeAngle().getRadians());
     }
 }

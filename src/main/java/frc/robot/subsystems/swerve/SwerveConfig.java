@@ -10,6 +10,7 @@ import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -155,9 +156,9 @@ public class SwerveConfig {
 
     // Angle Motor PID Values
     // TODO: tune
-    public static final double angleKP = 0.1;
-    public static final double angleKI = 0;
-    public static final double angleKD = 0;
+    public static final double angleKP = 10.0;
+    public static final double angleKI = 0.0;
+    public static final double angleKD = 0.0;
 
     public static final TunableValue angleKPTunable = new TunableValue("Drive/angleKP", angleKP);
     public static final TunableValue angleKDTunable = new TunableValue("Drive/angleKD", angleKD);
@@ -184,7 +185,7 @@ public class SwerveConfig {
     public static final LinearVelocity MAX_SPEED = MetersPerSecond.of(3.75);
     public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(7);
     // ! IMPORTANT: The actual max angular velocity is much higher
-    public static final AngularVelocity MAX_ANGULAR_VELOCITY_OF_ROBOT = RadiansPerSecond.of(6.0);
+    public static final AngularVelocity MAX_ANGULAR_VELOCITY_OF_ROBOT = RadiansPerSecond.of(7.0);
 
     public static final AngularVelocity MAX_ANGULAR_VELOCITY_OF_SWERVE_MODULE = RadiansPerSecond.of(7.5);
 
@@ -192,7 +193,7 @@ public class SwerveConfig {
      * The angular velocity used during teleop driving.
      * When the controller axis (for rotation) is at maximum, this angular velocity will be used.
      */
-    public static final AngularVelocity ANGULAR_VELOCITY_FOR_TELEOP = RadiansPerSecond.of(6.0);
+    public static final AngularVelocity ANGULAR_VELOCITY_FOR_TELEOP = RotationsPerSecond.of(1);
 
     public static final AngularAcceleration MAX_ANGULAR_ACCELERATION = RadiansPerSecondPerSecond.of(3.0);
 
@@ -316,20 +317,21 @@ public class SwerveConfig {
         angleConfig
             .smartCurrentLimit((int) SwerveConfig.ANGLE_CONTINUOUS_CURRENT_LIMIT.in(Amps))
             .inverted(SwerveConfig.IS_ANGLE_MOTOR_INVERTED)
-            .idleMode(SparkBaseConfig.IdleMode.kBrake);
+            .idleMode(SparkBaseConfig.IdleMode.kBrake)
+            .openLoopRampRate(0.2);
 
         angleConfig.encoder
             // Rotations to degrees
-            .positionConversionFactor(360.0 / (ANGLE_GEAR_RATIO))
-            // RPM to degrees per second
-            .velocityConversionFactor((360.0 / (ANGLE_GEAR_RATIO)) / 60.0);
+            .positionConversionFactor((2 * Math.PI) / (ANGLE_GEAR_RATIO))
+            // RPM to radians per second
+            .velocityConversionFactor(((2 * Math.PI) / (ANGLE_GEAR_RATIO)) / 60.0);
 
         // Configure the PID controller for the angle motor
         angleConfig.closedLoop
             .pid(SwerveConfig.angleKP, SwerveConfig.angleKI, SwerveConfig.angleKD)
             .outputRange(-SwerveConfig.MAX_ANGLE_POWER, SwerveConfig.MAX_ANGLE_POWER)
             .positionWrappingEnabled(true)
-            .positionWrappingInputRange(-180, 180);
+            .positionWrappingInputRange(-Math.PI, Math.PI);
 
         angleConfig.signals
             .primaryEncoderPositionAlwaysOn(true)
@@ -354,7 +356,8 @@ public class SwerveConfig {
         driveConfig
             .smartCurrentLimit((int) SwerveConfig.DRIVE_CONTINUOUS_CURRENT_LIMIT.in(Amps))
             .inverted(SwerveConfig.IS_DRIVE_MOTOR_INVERTED)
-            .idleMode(SparkBaseConfig.IdleMode.kBrake);
+            .idleMode(SparkBaseConfig.IdleMode.kBrake)
+            .openLoopRampRate(0.2);
 
         // Set the position and velocity conversion factors based on the SwerveConfig
         driveConfig.encoder
@@ -372,7 +375,8 @@ public class SwerveConfig {
 
         driveConfig.closedLoop.feedForward
             .kS(SwerveFeedForwards.linearForceDriveFFConstantsReal.kS())
-            .kV(SwerveFeedForwards.linearForceDriveFFConstantsReal.kV());
+            .kV(SwerveFeedForwards.linearForceDriveFFConstantsReal.kV())
+            .kA(SwerveFeedForwards.linearForceDriveFFConstantsReal.kA());
 
         driveConfig.signals
             .primaryEncoderPositionAlwaysOn(true)

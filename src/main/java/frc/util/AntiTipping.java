@@ -6,10 +6,13 @@
 // The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 package frc.util;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.Angle;
 import java.util.function.Supplier;
 
 /**
@@ -121,6 +124,10 @@ public class AntiTipping {
 
         // WPILib convention: Y axis inverted
         speeds = new ChassisSpeeds(correctionVector.getX(), -correctionVector.getY(), 0);
+    }
+
+    public void calculate(Angle pitchAngle, Angle rollAngle) {
+        calculate(pitchAngle.in(Degrees), rollAngle.in(Degrees));
     }
 
     /** Returns the most recent pitch value in degrees. */

@@ -364,15 +364,8 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     }
 
     @Override
-    public Pose2d getActualPose() {
-        return getPose();
-    }
-
-    @Override
     public void setPose(Pose2d pose) {
         poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
-
-        gyroIO.zeroGyro(pose.getRotation().getDegrees());
     }
 
     @Override
@@ -439,12 +432,12 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
     @Override
     public void zeroGyro(double deg) {
-        yawOffset = poseEstimator.getEstimatedPosition().getRotation().plus(Rotation2d.fromDegrees(deg));
+        yawOffset = getPose().getRotation().plus(Rotation2d.fromDegrees(deg));
     }
 
     @Override
     public Rotation2d getHeadingForFieldOriented() {
-        return poseEstimator.getEstimatedPosition().getRotation().minus(yawOffset);
+        return getPose().getRotation().minus(yawOffset);
     }
 
     @Override
