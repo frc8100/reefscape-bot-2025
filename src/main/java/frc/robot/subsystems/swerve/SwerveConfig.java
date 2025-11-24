@@ -78,13 +78,9 @@ public class SwerveConfig {
     public static final double NUDGE_TRANSLATION_INPUT_MULTIPLIER = 0.5;
     public static final double NUDGE_ROTATION_INPUT_MULTIPLIER = 0.5;
 
-    // Behavior of the motors when the robot is disabled/idling
-    public static final SparkBaseConfig.IdleMode driveIdleMode = SparkBaseConfig.IdleMode.kBrake;
-    public static final SparkBaseConfig.IdleMode angleIdleMode = SparkBaseConfig.IdleMode.kBrake;
-
     // Percent output value limit for angle and drive motors
-    public static final double MAX_DRIVE_POWER = 0.9;
-    public static final double MAX_ANGLE_POWER = 0.85;
+    public static final double MAX_DRIVE_POWER = 0.925;
+    public static final double MAX_ANGLE_POWER = 0.9;
 
     // Always ensure Gyro is CCW+ CW-
     public static final boolean IS_GYRO_INVERTED = false;
@@ -98,17 +94,21 @@ public class SwerveConfig {
     /**
      * The distance between the two side modules (between FL-BL or FR-BR).
      */
-    public static final Distance SIDE_LENGTH = Inches.of(22.75);
+    public static final Distance SIDE_MODULE_BASE = Inches.of(22.75);
 
     /**
      * The radius from the center of the robot to any of the swerve modules.
      */
     public static final Distance DRIVE_BASE_RADIUS = Meters.of(
-        Math.hypot(FRONT_MODULE_BASE.in(Meters) / 2.0, SIDE_LENGTH.in(Meters) / 2.0)
+        Math.hypot(FRONT_MODULE_BASE.in(Meters) / 2.0, SIDE_MODULE_BASE.in(Meters) / 2.0)
     );
 
-    public static final Distance FRONT_BUMPER_LENGTH = Inches.of(28);
-    public static final Distance BACK_BUMPER_LENGTH = Inches.of(28);
+    public static final Distance FRONT_FRAME_LENGTH = Inches.of(28);
+    public static final Distance SIDE_FRAME_LENGTH = Inches.of(28);
+
+    // TODO: measure this
+    public static final Distance FRONT_BUMPER_LENGTH = Inches.of(32);
+    public static final Distance SIDE_BUMPER_LENGTH = Inches.of(32);
 
     public static final Distance WHEEL_RADIUS = Inches.of(2.0);
     public static final Distance WHEEL_CIRCUMFERENCE = WHEEL_RADIUS.times(2 * Math.PI);
@@ -117,10 +117,10 @@ public class SwerveConfig {
      * The locations of the swerve modules relative to the center of the robot. Used in {@link SwerveDriveKinematics}
      */
     public static final Translation2d[] MODULE_TRANSLATIONS = new Translation2d[] {
-        new Translation2d(SIDE_LENGTH.div(2), FRONT_MODULE_BASE.div(2)),
-        new Translation2d(SIDE_LENGTH.div(2), FRONT_MODULE_BASE.div(-2)),
-        new Translation2d(SIDE_LENGTH.div(-2), FRONT_MODULE_BASE.div(2)),
-        new Translation2d(SIDE_LENGTH.div(-2), FRONT_MODULE_BASE.div(-2)),
+        new Translation2d(SIDE_MODULE_BASE.div(2), FRONT_MODULE_BASE.div(2)),
+        new Translation2d(SIDE_MODULE_BASE.div(2), FRONT_MODULE_BASE.div(-2)),
+        new Translation2d(SIDE_MODULE_BASE.div(-2), FRONT_MODULE_BASE.div(2)),
+        new Translation2d(SIDE_MODULE_BASE.div(-2), FRONT_MODULE_BASE.div(-2)),
     };
 
     // Standard deviations for the PoseEstimator
@@ -138,20 +138,13 @@ public class SwerveConfig {
 
     // Current limiting
     public static final Current ANGLE_CONTINUOUS_CURRENT_LIMIT = Amps.of(22.5);
-    public static final Current ANGLE_PEAK_CURRENT_LIMIT = Amps.of(40); // unused
-    public static final Time ANGLE_PEAK_CURRENT_DURATION = Seconds.of(0.1); // unused
-    public static final boolean IS_ANGLE_CURRENT_LIMIT_ACTIVE = true; // unused
-
     // TODO: tune these values (https://docs.revrobotics.com/brushless/home/faq#neo-v1.1)
     public static final Current DRIVE_CONTINUOUS_CURRENT_LIMIT = Amps.of(40);
-    public static final Current DRIVE_PEAK_CURRENT_LIMIT = Amps.of(60); // unused
-    public static final Time DRIVE_PEAK_CURRENT_DURATION = Seconds.of(0.1); // unused
-    public static final boolean IS_DRIVE_CURRENT_LIMIT_ACTIVE = true; // unused
 
     /**
      * The time to wait after the robot is still before syncing the swerve module encoders.
      */
-    public static final Time TIME_AFTER_STILL_SYNC_ENCODERS = Seconds.of(0.5);
+    public static final Time TIME_AFTER_STILL_SYNC_ENCODERS = Seconds.of(0.35);
 
     /**
      * The speed below which the robot is considered "still" (in m/s).
@@ -267,7 +260,7 @@ public class SwerveConfig {
      */
     public static final DriveTrainSimulationConfig mapleSimConfig = DriveTrainSimulationConfig.Default()
         .withCustomModuleTranslations(MODULE_TRANSLATIONS)
-        .withBumperSize(FRONT_BUMPER_LENGTH, BACK_BUMPER_LENGTH)
+        .withBumperSize(FRONT_BUMPER_LENGTH, SIDE_BUMPER_LENGTH)
         .withRobotMass(ROBOT_MASS)
         .withGyro(COTS.ofPigeon2())
         .withSwerveModule(
@@ -297,13 +290,15 @@ public class SwerveConfig {
     public static CANcoderConfiguration getCANcoderConfig() {
         CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
 
-        // The main way to configure the CANcoder is through MagnetSensorConfigs
+        // Invert the sensor direction if necessary
         MagnetSensorConfigs magnetSenorConfig = new MagnetSensorConfigs()
             .withSensorDirection(
                 IS_CANCODER_INVERTED
                     ? SensorDirectionValue.Clockwise_Positive
                     : SensorDirectionValue.CounterClockwise_Positive
             );
+
+        // TODO: maybe apply angle offset here?
 
         canCoderConfig.withMagnetSensor(magnetSenorConfig);
 
@@ -321,7 +316,7 @@ public class SwerveConfig {
         angleConfig
             .smartCurrentLimit((int) SwerveConfig.ANGLE_CONTINUOUS_CURRENT_LIMIT.in(Amps))
             .inverted(SwerveConfig.IS_ANGLE_MOTOR_INVERTED)
-            .idleMode(SwerveConfig.angleIdleMode);
+            .idleMode(SparkBaseConfig.IdleMode.kBrake);
 
         angleConfig.encoder
             // Rotations to degrees
@@ -359,7 +354,7 @@ public class SwerveConfig {
         driveConfig
             .smartCurrentLimit((int) SwerveConfig.DRIVE_CONTINUOUS_CURRENT_LIMIT.in(Amps))
             .inverted(SwerveConfig.IS_DRIVE_MOTOR_INVERTED)
-            .idleMode(SwerveConfig.driveIdleMode);
+            .idleMode(SparkBaseConfig.IdleMode.kBrake);
 
         // Set the position and velocity conversion factors based on the SwerveConfig
         driveConfig.encoder
