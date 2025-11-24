@@ -58,6 +58,11 @@ public final class Constants {
     public static final boolean tuningMode = true;
 
     /**
+     * Whether to enable CTRE SignalLogger
+     */
+    public static final boolean enableSignalLogger = false;
+
+    /**
      * An enum of modes for the robot.
      */
     public enum Mode {

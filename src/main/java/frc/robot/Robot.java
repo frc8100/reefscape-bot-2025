@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -56,8 +57,8 @@ public class Robot extends LoggedRobot {
                 : isSimulation() ? Constants.Mode.SIM : Constants.Mode.REPLAY;
         }
 
-        // joystickUnpluggedWarning
         DriverStation.silenceJoystickConnectionWarning(Constants.silenceJoystickUnpluggedWarning);
+        SignalLogger.enableAutoLogging(Constants.enableSignalLogger);
 
         // Set up data receivers & replay source
         switch (Constants.currentMode) {
@@ -67,7 +68,7 @@ public class Robot extends LoggedRobot {
                 Logger.addDataReceiver(new NT4Publisher());
                 break;
             case SIM:
-                // If SysId is enabled, log to a WPILOG file
+                // If enabled, log to a WPILOG file
                 if (Constants.storeSimLogs) {
                     Logger.addDataReceiver(new WPILOGWriter(Constants.simLogDirectory));
                 }
