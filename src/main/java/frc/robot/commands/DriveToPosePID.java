@@ -13,6 +13,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
+import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import frc.util.PoseUtil;
@@ -67,7 +68,7 @@ public class DriveToPosePID {
      * @param swerveSubsystem - The swerve drive subsystem.
      * @param targetPoseSupplier - A supplier that provides the target pose to drive to. See {@link #targetPoseSupplier}.
      */
-    public DriveToPosePID(SwerveDrive swerveSubsystem, Supplier<Pose2d> targetPoseSupplier) {
+    public DriveToPosePID(Swerve swerveSubsystem, Supplier<Pose2d> targetPoseSupplier) {
         this.swerveSubsystem = swerveSubsystem;
         this.targetPoseSupplier = targetPoseSupplier;
 

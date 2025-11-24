@@ -20,6 +20,8 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.MutLinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -195,9 +197,6 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
         this.gyroIO = gyroIO;
 
-        // Start odometry thread
-        SparkOdometryThread.getInstance().start();
-
         poseEstimator = new SwerveDrivePoseEstimator(
             kinematics,
             rawGyroRotation,
@@ -209,6 +208,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
         zeroGyro(180);
         configurePathPlannerAutoBuilder();
+
         // Set up custom logging to add the current path to a field 2d widget
         // PathPlannerLogging.setLogActivePathCallback(poses -> field.getObject("path").setPoses(poses));
         // SmartDashboard.putData("Field", field);
@@ -234,6 +234,9 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
                 }
             })
         );
+
+        // Start odometry thread
+        OdometryThread.getInstance().start();
     }
 
     /**
@@ -358,7 +361,6 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     }
 
     @Override
-    @AutoLogOutput(key = "Odometry/Field")
     public Pose2d getActualPose() {
         return getPose();
     }
@@ -411,17 +413,29 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         return kinematics.toChassisSpeeds(getModuleStates());
     }
 
+    private MutLinearVelocity cachedVelocityMagnitude = MetersPerSecond.mutable(0);
+
+    /**
+     * @return The magnitude of the robot's velocity. Calculated from {@link #getChassisSpeeds()}.
+     */
+    public LinearVelocity getVelocityMagnitude() {
+        cachedVelocityMagnitude.mut_replace(getVelocityMagnitudeAsDouble(), MetersPerSecond);
+
+        return cachedVelocityMagnitude;
+    }
+
     /**
      * @return The velocity magnitude of the robot in meters per second.
      */
     @AutoLogOutput(key = "Swerve/ChassisSpeeds/Magnitude")
     public double getVelocityMagnitudeAsDouble() {
-        return getVelocityMagnitude().in(MetersPerSecond);
+        ChassisSpeeds speeds = getChassisSpeeds();
+
+        return Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
     }
 
     @Override
     public void zeroGyro(double deg) {
-        // TODO: should be plus or minus here?
         yawOffset = poseEstimator.getEstimatedPosition().getRotation().plus(Rotation2d.fromDegrees(deg));
     }
 
@@ -451,18 +465,22 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         }
 
         // Update odometry
-        double[] sampleTimestamps = swerveModules[0].getOdometryTimestamps(); // All signals are sampled together
+        double[] sampleTimestamps = gyroInputs.odometryYawTimestamps; // All signals are sampled together
         int sampleCount = sampleTimestamps.length;
+
         for (int i = 0; i < sampleCount; i++) {
             // Read wheel positions and deltas from each module
             SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
             SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
+
             for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
                 modulePositions[moduleIndex] = swerveModules[moduleIndex].getOdometryPositions()[i];
                 moduleDeltas[moduleIndex] = new SwerveModulePosition(
                     modulePositions[moduleIndex].distanceMeters - lastModulePositions[moduleIndex].distanceMeters,
                     modulePositions[moduleIndex].angle
                 );
+
+                // Update last positions
                 lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
             }
 

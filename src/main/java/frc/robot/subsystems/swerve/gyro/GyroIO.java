@@ -35,7 +35,6 @@ public interface GyroIO {
 
         /**
          * The yaw position of the gyro as a Rotation2d.
-         * A positive yaw is a counterclockwise rotation.
          */
         public Rotation2d yawPosition = new Rotation2d();
 

@@ -158,14 +158,6 @@ public interface SwerveDrive extends Subsystem {
     public ChassisSpeeds getChassisSpeeds();
 
     /**
-     * @return The magnitude of the robot's velocity. Calculated from {@link #getChassisSpeeds()}.
-     */
-    public default LinearVelocity getVelocityMagnitude() {
-        ChassisSpeeds speeds = getChassisSpeeds();
-        return MetersPerSecond.of(Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond));
-    }
-
-    /**
      * Zeros the gyro.
      * @param deg The angle to zero the gyro to. Raw, without invert.
      */

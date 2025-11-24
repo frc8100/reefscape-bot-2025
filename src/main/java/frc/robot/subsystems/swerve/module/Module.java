@@ -71,7 +71,7 @@ public class Module {
         // Calculate positions for odometry
 
         // All signals are sampled together
-        int sampleCount = inputs.odometryTimestamps.length;
+        int sampleCount = inputs.odometryDrivePositionsRad.length;
         odometryPositions = new SwerveModulePosition[sampleCount];
 
         // For each sample, convert the drive position to meters and pair it with the turn angle
@@ -96,7 +96,7 @@ public class Module {
      */
     public void runSetpoint(SwerveModuleState state, double driveFeedforwardVoltage) {
         // Apply setpoints
-        io.setDesiredState(state, inputs.turnAbsolutePosition, driveFeedforwardVoltage);
+        io.setDesiredState(state, getAngle(), driveFeedforwardVoltage);
     }
 
     /** Runs the module with the specified output while controlling to zero degrees. */
@@ -146,11 +146,6 @@ public class Module {
     /** Returns the module positions received this cycle. */
     public SwerveModulePosition[] getOdometryPositions() {
         return odometryPositions;
-    }
-
-    /** Returns the timestamps of the samples received this cycle. */
-    public double[] getOdometryTimestamps() {
-        return inputs.odometryTimestamps;
     }
 
     /** Returns the module position in radians. */

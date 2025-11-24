@@ -19,7 +19,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.util.CoupledYAMSSubsystemIO;
-import frc.util.SparkUtil;
 import java.util.Arrays;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController;
@@ -95,7 +94,6 @@ public class ModuleIOSim implements ModuleIO {
         inputs.turnAbsolutePosition = moduleSimulation.getSteerAbsoluteFacing();
 
         // Update odometry inputs
-        inputs.odometryTimestamps = SparkUtil.getSimulationOdometryTimeStamps();
         inputs.odometryDrivePositionsRad = Arrays.stream(moduleSimulation.getCachedDriveWheelFinalPositions())
             .mapToDouble(angle -> angle.in(Radians))
             .toArray();

@@ -40,7 +40,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
 import frc.robot.subsystems.CANIdConnections;
 import frc.robot.subsystems.CANIdConnections.SwerveModuleCanIDs;
-import frc.robot.subsystems.swerve.SparkOdometryThread;
+import frc.robot.subsystems.swerve.OdometryThread;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveModuleSpecificConstants;
 import frc.robot.subsystems.swerve.SwerveModuleSpecificConstants.RobotSwerveModuleConstants;
@@ -97,9 +97,8 @@ public class ModuleIOSpark implements ModuleIO {
     private final StatusSignal<Angle> turnRelativePosition;
 
     // Queue inputs from odometry thread
-    private final Queue<Double> timestampQueue;
     private final Queue<Double> drivePositionQueue;
-    private final Queue<Double> turnPositionQueue;
+    private final Queue<Rotation2d> turnPositionQueue;
 
     // Inputs (cached)
     private double driveFFVolts = 0.0;
@@ -145,7 +144,12 @@ public class ModuleIOSpark implements ModuleIO {
         // Create and configure the CANCoder
         angleCANcoder = new CANcoder(canIDs.canCoderID());
         angleCANcoder.getConfigurator().refresh(new CANcoderConfiguration());
-        angleCANcoder.getConfigurator().apply(SwerveConfig.getCANcoderConfig());
+
+        // Apply the angle offset to the CANCoder configuration
+        var cancoderConfig = SwerveConfig.getCANcoderConfig();
+        // TODO: invert or not invert?
+        cancoderConfig.MagnetSensor.MagnetOffset = -angleOffset.getRotations();
+        angleCANcoder.getConfigurator().apply(cancoderConfig);
 
         turnAbsolutePosition = angleCANcoder.getAbsolutePosition();
         turnAbsolutePosition.setUpdateFrequency(SwerveConfig.STATUS_SIGNAL_FREQUENCY_HZ);
@@ -157,10 +161,9 @@ public class ModuleIOSpark implements ModuleIO {
         syncMotorEncoderToAbsoluteEncoder();
 
         // Create odometry queues
-        timestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
-        drivePositionQueue = SparkOdometryThread.getInstance()
-            .registerSignal(driveMotor, relativeDriveEncoder::getPosition);
-        turnPositionQueue = SparkOdometryThread.getInstance().registerSignal(() -> getAngle().getRadians());
+        drivePositionQueue = OdometryThread.getInstance()
+            .registerSparkSignal(driveMotor, relativeDriveEncoder::getPosition);
+        turnPositionQueue = OdometryThread.getInstance().registerPhoenixAngleRotationsSignal(turnAbsolutePosition);
 
         TunableValue.addRefreshConfigConsumer(this::onRefresh);
 
@@ -195,17 +198,17 @@ public class ModuleIOSpark implements ModuleIO {
     }
 
     /**
-     * @return The angle of the module, gotten from the CANCoder. Includes angle offset.
+     * @return The angle of the module, gotten from the CANCoder.
      */
     private Rotation2d getAngle() {
-        return new Rotation2d(turnAbsolutePosition.getValue().in(Radians)).minus(angleOffset);
+        return new Rotation2d(turnAbsolutePosition.getValue().in(Radians));
     }
 
     /**
-     * @return The relative angle of the module, gotten from the CANCoder. Includes angle offset.
+     * @return The relative angle of the module, gotten from the CANCoder.
      */
     private Rotation2d getRelativeAngle() {
-        return new Rotation2d(turnRelativePosition.getValue().in(Radians)).minus(angleOffset);
+        return new Rotation2d(turnRelativePosition.getValue().in(Radians));
     }
 
     @Override
@@ -239,10 +242,8 @@ public class ModuleIOSpark implements ModuleIO {
         inputs.turnMotorData = CoupledYAMSSubsystemIO.getDataFromSparkUnitless(angleMotor, relativeAngleEncoder);
 
         // Update odometry inputs
-        inputs.odometryTimestamps = timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
         inputs.odometryDrivePositionsRad = drivePositionQueue.stream().mapToDouble((Double value) -> value).toArray();
-        inputs.odometryTurnPositions = turnPositionQueue.stream().map(Rotation2d::new).toArray(Rotation2d[]::new);
-        timestampQueue.clear();
+        inputs.odometryTurnPositions = turnPositionQueue.toArray(new Rotation2d[0]);
         drivePositionQueue.clear();
         turnPositionQueue.clear();
     }

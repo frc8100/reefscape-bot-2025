@@ -45,11 +45,6 @@ public interface ModuleIO {
         public boolean canCoderConnected = true;
 
         /**
-         * The odometry timestamps received this cycle.
-         */
-        public double[] odometryTimestamps = new double[] {};
-
-        /**
          * The odometry drive positions received this cycle, in radians.
          */
         public double[] odometryDrivePositionsRad = new double[] {};

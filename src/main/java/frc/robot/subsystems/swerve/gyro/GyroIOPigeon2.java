@@ -26,7 +26,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import frc.robot.subsystems.CANIdConnections;
-import frc.robot.subsystems.swerve.SparkOdometryThread;
+import frc.robot.subsystems.swerve.OdometryThread;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.util.AntiTipping;
 import java.util.Queue;
@@ -43,10 +43,8 @@ public class GyroIOPigeon2 implements GyroIO {
     private final StatusSignal<Angle> roll = pigeon.getRoll();
 
     // Odometry queues
-    private final Queue<Double> yawPositionQueue;
+    private final Queue<Rotation2d> yawPositionQueue;
     private final Queue<Double> yawTimestampQueue;
-
-    private Rotation2d yawOffset = new Rotation2d();
 
     // Anti-tipping
     private final AntiTipping antiTipping = new AntiTipping(
@@ -74,8 +72,8 @@ public class GyroIOPigeon2 implements GyroIO {
         pigeon.optimizeBusUtilization();
 
         // Register odometry signals
-        yawTimestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
-        yawPositionQueue = SparkOdometryThread.getInstance().registerSignal(yaw::getValueAsDouble);
+        yawTimestampQueue = OdometryThread.getInstance().getTimestampQueue();
+        yawPositionQueue = OdometryThread.getInstance().registerPhoenixAngleDegreesSignal(yaw);
     }
 
     @Override
@@ -105,7 +103,7 @@ public class GyroIOPigeon2 implements GyroIO {
 
         // Update odometry caches
         inputs.odometryYawTimestamps = yawTimestampQueue.stream().mapToDouble((Double value) -> value).toArray();
-        inputs.odometryYawPositions = yawPositionQueue.stream().map(Rotation2d::fromDegrees).toArray(Rotation2d[]::new);
+        inputs.odometryYawPositions = yawPositionQueue.toArray(new Rotation2d[0]);
 
         yawTimestampQueue.clear();
         yawPositionQueue.clear();
