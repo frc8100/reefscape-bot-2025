@@ -27,9 +27,11 @@ import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.vision.Vision;
 import frc.util.PoseUtil;
 import frc.util.statemachine.StateMachine;
+import frc.util.statemachine.StateMachine.StateWithPayload;
 import frc.util.statemachine.StateMachineState;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -225,7 +227,11 @@ public class RobotActions {
      */
     // TODO: update when seasons starts
     public enum GlobalState {
-        TEST,
+        IDLE,
+
+        INTAKE_CORAL_FROM_STATION,
+
+        SCORE_CORAL,
 
         /**
          * Climbing. No scoring actions allowed.
@@ -233,11 +239,38 @@ public class RobotActions {
         ENDGAME,
     }
 
-    public final StateMachine<GlobalState, Object> globalStateMachine = new StateMachine<GlobalState, Object>(
-        "Global",
-        GlobalState.class
-    )
-        .withDefaultState(new StateMachineState<>(GlobalState.TEST, "Test"))
+    /**
+     * Payload for global states.
+     * Specific states should extend this class to add more data.
+     */
+    public sealed interface GlobalPayload permits ScoreCoralPayload, IntakeCoralPayload, IdlePayload {}
+
+    /**
+     * Payload for scoring coral.
+     * @param targetReefLocation - The location of the reef to score on.
+     * @param targetLevel - The level to score on.
+     */
+    public record ScoreCoralPayload(FieldLocations targetReefLocation, SuperstructureConstants.Level targetLevel)
+        implements GlobalPayload {}
+
+    /**
+     * Payload for intaking coral.
+     * @param targetCoralStation - The coral station to intake from.
+     */
+    public record IntakeCoralPayload(FieldLocations targetCoralStation) implements GlobalPayload {}
+
+    /**
+     * Payload for idle state.
+     */
+    public record IdlePayload() implements GlobalPayload {}
+
+    public final StateMachine<GlobalState, GlobalPayload> globalStateMachine = new StateMachine<
+        GlobalState,
+        GlobalPayload
+    >(GlobalState.class, "Global")
+        .withDefaultState(new StateMachineState<>(GlobalState.IDLE, "Idle"))
+        .withState(new StateMachineState<>(GlobalState.INTAKE_CORAL_FROM_STATION, "IntakeCoralStation"))
+        .withState(new StateMachineState<>(GlobalState.SCORE_CORAL, "ScoreCoral"))
         .withState(new StateMachineState<>(GlobalState.ENDGAME, "Endgame"));
 
     // References to subsystems
@@ -260,6 +293,24 @@ public class RobotActions {
         this.elevatorSubsystem = elevatorSubsystem;
         this.clawSubsystem = clawSubsystem;
         this.visionSubsystem = visionSubsystem;
+
+        // test
+        globalStateMachine.onStateChange(
+            GlobalState.INTAKE_CORAL_FROM_STATION,
+            IntakeCoralPayload.class,
+            (previousState, payload) -> {
+                // debug
+                System.out.println("Switched to INTAKE_CORAL_FROM_STATION state with payload:");
+                System.out.println("Target Coral Station: " + payload.targetCoralStation());
+
+                swerveSubsystem.stateMachine.scheduleStateChange(
+                    new StateWithPayload<>(
+                        Swerve.SwerveState.DRIVE_TO_POSE_PATHFINDING,
+                        payload.targetCoralStation()::getPose
+                    )
+                );
+            }
+        );
     }
 
     /**

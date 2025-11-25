@@ -1,7 +1,9 @@
 package frc.util.statemachine;
 
+import edu.wpi.first.wpilibj.util.Color;
+
 /**
- * A possible state that a {@link StateMachine} can be in.
+ * A possible state that a {@link StateMachine} can be in. Contains additional metadata about the state.
  * @param <TEnumType> - The enum type representing the states of the state machine.
  */
 public class StateMachineState<TEnumType extends Enum<TEnumType>> {
@@ -22,6 +24,7 @@ public class StateMachineState<TEnumType extends Enum<TEnumType>> {
 
     /**
      * The name of the state, used for logging and debugging.
+     * Convention is to use PascalCase for state names.
      */
     public final String name;
 
@@ -29,25 +32,37 @@ public class StateMachineState<TEnumType extends Enum<TEnumType>> {
      * A supplier that determines if the state can be changed to this state.
      * By default, it always returns true.
      */
-    public final StateChangeCondition<TEnumType> canChangeCondition;
+    public StateChangeCondition<TEnumType> canChangeCondition = previousState -> true;
 
     /**
-     * Constructs a StateMachineState with the specified enum type, name, and change condition.
-     * @param enumType - The enum type representing the state.
-     * @param name - The name of the state.
-     * @param canChangeCondition - A condition that determines if the state can be changed to this state.
+     * The color associated with this state for visualization.
      */
-    public StateMachineState(TEnumType enumType, String name, StateChangeCondition<TEnumType> canChangeCondition) {
-        this.enumType = enumType;
-        this.name = name;
-        this.canChangeCondition = canChangeCondition;
-    }
+    public Color color = Color.kBlack;
 
     /**
      * Constructs a StateMachineState with the specified enum type and name.
+     * @param enumType - The enum type representing the state.
+     * @param name - The name of the state. Should be in PascalCase.
      */
     public StateMachineState(TEnumType enumType, String name) {
-        this(enumType, name, previousState -> true);
+        this.enumType = enumType;
+        this.name = name;
+    }
+
+    /**
+     * Sets the condition that determines if the state can be changed to this state.
+     */
+    public StateMachineState<TEnumType> withCanChangeCondition(StateChangeCondition<TEnumType> condition) {
+        this.canChangeCondition = condition;
+        return this;
+    }
+
+    /**
+     * Sets the color associated with this state.
+     */
+    public StateMachineState<TEnumType> withColor(Color color) {
+        this.color = color;
+        return this;
     }
 
     @Override

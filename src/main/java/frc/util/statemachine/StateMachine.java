@@ -33,12 +33,33 @@ public class StateMachine<TStateEnum extends Enum<TStateEnum>, TPayload> {
     }
 
     @FunctionalInterface
+    public interface OnStateChangeActionNoOptional<TStateEnum extends Enum<TStateEnum>, TPayload> {
+        /**
+         * A functional interface representing an action to perform when a state change occurs.
+         * Does not use Optional for the payload.
+         * @param previousState - The previous state before the change.
+         * @param payload - The payload associated with the new state.
+         */
+        public void onStateChange(Optional<TStateEnum> previousState, TPayload payload);
+    }
+
+    @FunctionalInterface
     public interface StatePeriodicAction<TPayload> {
         /**
          * A functional interface representing an action to perform periodically while in a state.
          * @param payload - The payload associated with the current state.
          */
         public void onPeriodic(Optional<TPayload> payload);
+    }
+
+    @FunctionalInterface
+    public interface StatePeriodicActionNoOptional<TPayload> {
+        /**
+         * A functional interface representing an action to perform periodically while in a state.
+         * Does not use Optional for the payload.
+         * @param payload - The payload associated with the current state.
+         */
+        public void onPeriodic(TPayload payload);
     }
 
     /**
@@ -120,7 +141,6 @@ public class StateMachine<TStateEnum extends Enum<TStateEnum>, TPayload> {
     /**
      * A map from enum states to their corresponding actions to perform each period while in that state.
      */
-    // TODO: Consider making into List<Runnable>
     public final Map<TStateEnum, StatePeriodicAction<TPayload>> statePeriodicActions;
 
     /**
@@ -142,10 +162,10 @@ public class StateMachine<TStateEnum extends Enum<TStateEnum>, TPayload> {
     /**
      * Constructs a state machine with the specified initial state.
      * State is logged to the dashboard with the given key.
+     * @param stateEnumClass - The class of the enum type representing the states of the state machine. Used to initialize the internal {@link EnumMap}s. Ex. {@code MyStateEnum.class}
      * @param dashboardKey - The key to use for logging to the dashboard. Added as a prefix to {@link #DEFAULT_DASHBOARD_KEY}.
-     * @param stateEnumClass - The class of the enum type representing the states of the state machine. Used to initialize the internal {@link EnumMap}s. Ex. MyStateEnum.class
      */
-    public StateMachine(String dashboardKey, Class<TStateEnum> stateEnumClass, TPayload defaultPayload) {
+    public StateMachine(Class<TStateEnum> stateEnumClass, String dashboardKey) {
         this.dashboardKey = DEFAULT_DASHBOARD_KEY + dashboardKey;
         this.stateEnumClass = stateEnumClass;
 
@@ -166,31 +186,31 @@ public class StateMachine<TStateEnum extends Enum<TStateEnum>, TPayload> {
         CommandScheduler.getInstance().getDefaultButtonLoop().bind(this::commandSchedulerLoop);
 
         // Disable handling
-        onDriverStationDisable.onTrue(
-            Commands.runOnce(() -> {
-                if (
-                    shouldReturnToDefaultStateOnDisable &&
-                    defaultState != null &&
-                    (currentState == null || !currentState.equals(defaultState))
-                ) {
-                    System.out.println(
-                        "[StateMachine \"" +
-                        dashboardKey +
-                        "\"] Returning to default state on disable: " +
-                        defaultState.enumType
-                    );
-
-                    setStateAndUpdate(defaultState.enumType);
-
-                    scheduledStateChange = null;
-                    recordScheduledStateChange();
-                }
-            }).ignoringDisable(true)
-        );
+        onDriverStationDisable.onTrue(Commands.runOnce(this::disableHandle).ignoringDisable(true));
     }
 
-    public StateMachine(String dashboardKey, Class<TStateEnum> stateEnumClass) {
-        this(dashboardKey, stateEnumClass, null);
+    /**
+     * Handles returning to the default state when the robot is disabled, if enabled.
+     */
+    private void disableHandle() {
+        // Return to default state if enabled and not already in default state
+        if (
+            shouldReturnToDefaultStateOnDisable &&
+            defaultState != null &&
+            (currentState == null || !currentState.equals(defaultState))
+        ) {
+            System.out.println(
+                "[StateMachine \"" +
+                dashboardKey +
+                "\"] Returning to default state on disable: " +
+                defaultState.enumType
+            );
+
+            setStateAndUpdate(defaultState.enumType);
+
+            scheduledStateChange = null;
+            recordScheduledStateChange();
+        }
     }
 
     /**
@@ -465,12 +485,33 @@ public class StateMachine<TStateEnum extends Enum<TStateEnum>, TPayload> {
     }
 
     /**
+     * Attempts to get the current payload as the specified class.
+     * Useful for state machines specifying payload types with values that are only used in certain states.
+     * The {@link TPayload} type can be a common superclass or interface of multiple payload types.
+     * This method can cast that common type to a more specific type (that is a subclass or implementation of the common type).
+     * @param <T> - The class type to cast the payload to.
+     * @param payloadClass - The class to cast the payload to. Ex. {@code MyPayloadClass.class}
+     * @return An Optional containing the payload cast to the specified class, or an empty Optional if the payload is null or cannot be cast.
+     */
+    public <T extends TPayload> Optional<T> getCurrentPayloadAs(Class<T> payloadClass) {
+        if (currentPayload == null) {
+            return Optional.empty();
+        }
+
+        if (!payloadClass.isInstance(currentPayload)) {
+            return Optional.empty();
+        }
+
+        return Optional.of(payloadClass.cast(currentPayload));
+    }
+
+    /**
      * Adds an action to perform when the state machine changes to the specified state.
      * @param state - The state to add the action for.
      * @param action - The action to perform when the state machine changes to the specified state.
      * @throws IllegalArgumentException if the state does not exist in the state machine.
      */
-    public void addOnStateChangeAction(TStateEnum state, OnStateChangeAction<TStateEnum, TPayload> action) {
+    public void onStateChange(TStateEnum state, OnStateChangeAction<TStateEnum, TPayload> action) {
         if (!onStateChangeActions.containsKey(state)) {
             throw new IllegalArgumentException("StateMachine does not contain state: " + state);
         }
@@ -480,12 +521,46 @@ public class StateMachine<TStateEnum extends Enum<TStateEnum>, TPayload> {
 
     /**
      * Adds an action to perform when the state machine changes to the specified state.
+     * If the payload is null or cannot be cast, the action is not performed.
+     * @param <T> - The class type to cast the payload to.
+     * @param state - The state to add the action for.
+     * @param payloadClass - The class to cast the payload to. Ex. {@code MyPayloadClass.class}
+     * @param action - The action to perform when the state machine changes to the specified state.
+     */
+    public <T extends TPayload> void onStateChange(
+        TStateEnum state,
+        Class<T> payloadClass,
+        OnStateChangeActionNoOptional<TStateEnum, T> action
+    ) {
+        onStateChange(state, (previousState, payload) -> {
+            if (payloadClass.isInstance(payload.orElse(null))) {
+                action.onStateChange(previousState, payloadClass.cast(payload.get()));
+            } else {
+                // Log warning about payload type mismatch
+                DriverStation.reportWarning(
+                    "[StateMachine \"" +
+                    dashboardKey +
+                    "\"] onStateChange action for state " +
+                    state +
+                    " skipped due to payload type mismatch or null payload. Expected: " +
+                    payloadClass.getName() +
+                    " but got: " +
+                    (payload.isPresent() ? payload.get().getClass().getName() : "null"),
+                    false
+                );
+            }
+        });
+    }
+
+    /**
+     * Adds an action to perform when the state machine changes to the specified state.
+     * Does not use the payload.
      * @param state - The state to add the action for.
      * @param action - The action to perform when the state machine changes to the specified state.
      * @throws IllegalArgumentException if the state does not exist in the state machine.
      */
-    public void addOnStateChangeAction(TStateEnum state, Runnable action) {
-        addOnStateChangeAction(state, (previousState, payload) -> action.run());
+    public void onStateChange(TStateEnum state, Runnable action) {
+        onStateChange(state, (previousState, payload) -> action.run());
     }
 
     /**
@@ -493,12 +568,38 @@ public class StateMachine<TStateEnum extends Enum<TStateEnum>, TPayload> {
      * @param state - The state to add the action for.
      * @param action - The action to perform each period while the state machine is in the specified state.
      */
-    public void addStateAction(TStateEnum state, StatePeriodicAction<TPayload> action) {
+    public void whileState(TStateEnum state, StatePeriodicAction<TPayload> action) {
         statePeriodicActions.put(state, action);
     }
 
-    public void addStateAction(TStateEnum state, Runnable action) {
-        addStateAction(state, payload -> action.run());
+    /**
+     * Adds an action to perform each period while the state machine is in the specified state.
+     * If the payload is null or cannot be cast, the action is not performed and skipped for that period.
+     * @param <T> - The class type to cast the payload to.
+     * @param state - The state to add the action for.
+     * @param payloadClass - The class to cast the payload to. Ex. {@code MyPayloadClass.class}
+     * @param action - The action to perform each period while the state machine is in the specified state.
+     */
+    public <T extends TPayload> void whileState(
+        TStateEnum state,
+        Class<T> payloadClass,
+        StatePeriodicActionNoOptional<T> action
+    ) {
+        whileState(state, payload -> {
+            if (payloadClass.isInstance(payload.orElse(null))) {
+                action.onPeriodic(payloadClass.cast(payload.get()));
+            }
+        });
+    }
+
+    /**
+     * Adds an action to perform each period while the state machine is in the specified state.
+     * Does not use the payload.
+     * @param state - The state to add the action for.
+     * @param action - The action to perform each period while the state machine is in the specified state.
+     */
+    public void whileState(TStateEnum state, Runnable action) {
+        whileState(state, payload -> action.run());
     }
 
     /**

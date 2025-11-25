@@ -97,28 +97,12 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     public final StateMachine<SwerveState, Supplier<Pose2d>> stateMachine = new StateMachine<
         SwerveState,
         Supplier<Pose2d>
-    >("Swerve", SwerveState.class)
+    >(SwerveState.class, "Swerve")
         .withDefaultState(new StateMachineState<>(SwerveState.FULL_DRIVER_CONTROL, "Manual"))
-        .withState(new StateMachineState<>(SwerveState.DRIVE_TO_POSE_PATHFINDING, "Initial Pathfinding"))
-        .withState(
-            new StateMachineState<>(
-                SwerveState.DRIVE_TO_POSE_PID,
-                "PID Alignment"
-                // (SwerveState previousState) ->
-                //     previousState == SwerveState.DRIVE_TO_POSE_PATHFINDING &&
-                //     teleopSwerve.driveToPoseCommand.canSwitchToFinalAlignment.getAsBoolean()
-            )
-        )
-        .withState(
-            new StateMachineState<>(
-                SwerveState.DRIVE_TO_POSE_AT_TARGET,
-                "At Target"
-                // (SwerveState previousState) ->
-                //     previousState == SwerveState.DRIVE_TO_POSE_PID &&
-                //     teleopSwerve.driveToPoseCommand.atTarget.getAsBoolean()
-            )
-        )
-        .withState(new StateMachineState<>(SwerveState.FULL_AUTONOMOUS_PATH_FOLLOWING, "Follow Path"))
+        .withState(new StateMachineState<>(SwerveState.DRIVE_TO_POSE_PATHFINDING, "InitialPathfinding"))
+        .withState(new StateMachineState<>(SwerveState.DRIVE_TO_POSE_PID, "PIDAlignment"))
+        .withState(new StateMachineState<>(SwerveState.DRIVE_TO_POSE_AT_TARGET, "AtTarget"))
+        .withState(new StateMachineState<>(SwerveState.FULL_AUTONOMOUS_PATH_FOLLOWING, "FollowPath"))
         .withReturnToDefaultStateOnDisable(true);
 
     private final SwerveFeedForwards swerveFeedForwards = new SwerveFeedForwards(this::isSimulation);
