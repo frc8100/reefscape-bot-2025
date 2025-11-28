@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -7,10 +8,13 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.subsystems.superstructure.claw.ClawConstants;
 
-/** Declares control key bindings */
-public class Controls {
+/**
+ * Declares the key values for different values.
+ * The behavior for these keys are handed in {@link ButtonBindings}.
+ */
+public class ControlConstants {
 
-    private Controls() {}
+    private ControlConstants() {}
 
     /**
      * The driver controller, on port 0. Note: although this uses the {@link Joystick} class, it is compatible with {@link XboxController}.
@@ -18,7 +22,7 @@ public class Controls {
     public static final Joystick mainDriverController = new Joystick(0);
 
     public static final Drive mainDriveControls = new Drive(mainDriverController);
-    public static final Drive joystickDriveControls = new JoystickDrive(Controls.mainDriverController);
+    public static final Drive joystickDriveControls = new JoystickDrive(ControlConstants.mainDriverController);
 
     /**
      * Whether or not to use the joystick drive.
@@ -28,7 +32,7 @@ public class Controls {
     /** The drive controls */
     public static class Drive {
 
-        private Joystick driverController;
+        private GenericHID driverController;
 
         /**
          * Creates a new drive controls object.
@@ -67,51 +71,29 @@ public class Controls {
 
         // Driver Buttons
         /**
-         * When pressed, zeroes the gyro. Default is {@link XboxController.Button#kY} (top button).
+         * When pressed, zeroes the gyro.
          * Press when robot is facing towards the drive station to align the robot's forward direction with the field.
          */
-        public int zeroGyroButton = XboxController.Button.kY.value;
+        public final int zeroGyroButton = XboxController.Button.kY.value;
 
-        /**
-         * When held, dampens the robot movement. This will decrease the robot's speed a lot.
-         */
-        public int dampenButton = XboxController.Button.kRightBumper.value;
         /**
          * When held, slows the robot down to {@link #slowMultiplier}
          */
-        public int slowButton = XboxController.Button.kLeftBumper.value;
+        public final int slowButton = XboxController.Button.kRightBumper.value;
 
-        public double slowMultiplier = 0.5;
+        public final double slowMultiplier = 0.5;
 
         /**
          * When held, makes the robot move robot centric.
          */
-        public int robotCentricButton = XboxController.Button.kX.value;
-
-        /**
-         * Aligns the robot to the reef.
-         */
-        public int alignToLeftReefUsingVision = XboxController.Button.kB.value;
-        public int alignToRightReefUsingVision = XboxController.Button.kX.value;
-
-        /**
-         * Aligns the robot to the nearest left reef.
-         */
-        // public int pathfindToNearestLeftReef = XboxController.Button.kB.value;
-
-        /**
-         * Aligns the robot to the nearest right reef.
-         */
-        // public int pathfindToNearestRightReef = XboxController.Button.kA.value;
-
-        // public int pathfindToNearestCoralStation = XboxController.Button.kX.value;
+        public final int robotCentricButton = XboxController.Button.kX.value;
 
         public POVButton robotRelativeMoveForward;
 
         /**
          * @return The translation (x)
          */
-        public double getTranslationAxis() {
+        public double getTranslationValue() {
             return invertDriveControls
                 ? -driverController.getRawAxis(translationAxis)
                 : driverController.getRawAxis(translationAxis);
@@ -120,7 +102,7 @@ public class Controls {
         /**
          * @return The strafe (y)
          */
-        public double getStrafeAxis() {
+        public double getStrafeValue() {
             return invertDriveControls
                 ? -driverController.getRawAxis(strafeAxis)
                 : driverController.getRawAxis(strafeAxis);
@@ -129,7 +111,7 @@ public class Controls {
         /**
          * @return The rotation
          */
-        public double getRotationAxis() {
+        public double getRotationValue() {
             return invertDriveControls
                 ? -driverController.getRawAxis(rotationAxis)
                 : driverController.getRawAxis(rotationAxis);
@@ -139,16 +121,7 @@ public class Controls {
          * @return Whether the controls are robot centric. Default is `false`.
          */
         public boolean isRobotCentric() {
-            // TODO
-            // return isCurrentlyRobotCentric;
             return false;
-        }
-
-        /**
-         * @return Whether the robot movement is dampened.
-         */
-        public boolean isDampen() {
-            return driverController.getRawButton(dampenButton);
         }
 
         /**
@@ -224,16 +197,6 @@ public class Controls {
 
         public static final double getUpOrDown() {
             return -clawController.getRawAxis(upDownAxis) * (clawController.getRawButton(slowButton) ? slowAmount : 1);
-            // Get controller input
-            // double intakeInput = clawController.getRawAxis(upDownAxis);
-            // double outtakeInput = clawController.getRawAxis(outtakeAxis);
-
-            // // Get the larger of them
-            // if (intakeInput >= outtakeInput) {
-            //     return 1;
-            // } else {
-            //     return -1;
-            // }
         }
 
         public static final int zeroEncoder = XboxController.Button.kLeftBumper.value;
@@ -265,16 +228,6 @@ public class Controls {
                 -elevatorController.getRawAxis(upDownAxis) *
                 (elevatorController.getRawButton(slowButton) ? slowAmount : 1)
             );
-            // Get controller input
-            // double intakeInput = clawController.getRawAxis(upDownAxis);
-            // double outtakeInput = clawController.getRawAxis(outtakeAxis);
-
-            // // Get the larger of them
-            // if (intakeInput >= outtakeInput) {
-            //     return 1;
-            // } else {
-            //     return -1;
-            // }
         }
     }
 
@@ -291,29 +244,11 @@ public class Controls {
          */
         public static final Joystick superstructureController = Claw.clawController;
 
-        /**
-         * The button to make the superstructure go to L4. Default is right on the D-pad.
-         */
         public static final POVButton moveToL4 = new POVButton(superstructureController, 90);
-
-        /**
-         * The button to make the superstructure go to L3. Default is down on the D-pad.
-         */
         public static final POVButton moveToL3 = new POVButton(superstructureController, 180);
-
-        /**
-         * The button to make the superstructure go to L2. Default is left on the D-pad.
-         */
         public static final POVButton moveToL2 = new POVButton(superstructureController, 270);
-
-        /**
-         * The button to make the superstructure go to L1. Default is up on the D-pad.
-         */
         public static final POVButton moveToL1 = new POVButton(superstructureController, 0);
 
-        /**
-         * The button to intake algae from L2
-         */
         public static final int intakeAlgaeFromL2 = XboxController.Button.kA.value;
         public static final int intakeAlgaeFromL3 = XboxController.Button.kB.value;
 

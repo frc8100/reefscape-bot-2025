@@ -14,6 +14,7 @@ import frc.robot.subsystems.superstructure.claw.Claw;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.Swerve.SwerveState;
+import frc.robot.subsystems.vision.Vision;
 import frc.util.statemachine.StateCycle;
 import frc.util.statemachine.StateMachine;
 import java.util.List;
@@ -24,20 +25,6 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnField;
 
 public class ButtonBindings {
-
-    // private enum ButtonBindingType {
-    //     /**
-    //      * A button that can be pressed or released.
-    //      * @see XboxController.Button
-    //      */
-    //     BUTTON,
-
-    //     /**
-    //      * An axis that can be a set to a value between -1 and 1.
-    //      * @see XboxController.Axis
-    //      */
-    //     AXIS,
-    // }
 
     /**
      * A wrapper around GenericHID for creating button bindings.
@@ -67,8 +54,6 @@ public class ButtonBindings {
             }
         }
 
-        // public final GenericHID controller;
-
         /**
          * Creates a controller on the specified port.
          * @param port - The port the controller is connected to as listed in the Driver Station.
@@ -76,24 +61,6 @@ public class ButtonBindings {
         public Controller(int port) {
             super(port);
         }
-
-        /**
-         * Creates a button binding on this controller.
-         * See {@link ButtonBindingDeclaration} for usage.
-         */
-        // public ButtonBindingDeclaration createBinding(
-        //     XboxController.Button buttonValue,
-        //     Consumer<Trigger> buttonTriggerConsumer
-        // ) {
-        //     return new ButtonBindingDeclaration(this, buttonValue, buttonTriggerConsumer);
-        // }
-        // public void createBinding(int buttonValue, Consumer<Trigger> buttonTriggerConsumer) {
-        //     buttonTriggerConsumer.accept(new JoystickButton(this, buttonValue));
-        // }
-
-        // public void createBinding(XboxController.Button buttonValue, Consumer<Trigger> buttonTriggerConsumer) {
-        //     createBinding(buttonValue.value, buttonTriggerConsumer);
-        // }
 
         public Trigger getJoystickButton(int buttonValue) {
             return new JoystickButton(this, buttonValue);
@@ -110,14 +77,6 @@ public class ButtonBindings {
         public Trigger getPOVButton(POVButtonDirection direction) {
             return getPOVButton(direction.angle);
         }
-
-        /**
-         * Creates a button binding on this controller without a consumer.
-         * See {@link ButtonBindingDeclaration} for usage.
-         */
-        // public ButtonBindingDeclaration createBinding(XboxController.Button buttonValue) {
-        //     return new ButtonBindingDeclaration(this, buttonValue);
-        // }
 
         /**
          * @param button - The button to get the state of.
@@ -141,82 +100,16 @@ public class ButtonBindings {
          * @return A DoubleConsumer that sets the value of the axis between -1 and 1.
          */
         public DoubleSupplier getAxisSupplier(XboxController.Axis axis, boolean invert) {
-            return () -> (invert ? -1 : 1) * this.getRawAxis(axis.value);
+            return invert ? () -> (-1 * this.getRawAxis(axis.value)) : () -> this.getRawAxis(axis.value);
         }
     }
-
-    /**
-     * A wrapper for declaring button bindings in an enum.
-     * Ex.
-     * {@code new ButtonBindingDeclaration(joystick, XboxController.Button.A, (trigger) -> trigger.onTrue(new Command()))}
-     * Equivalent to:
-     * {@code new JoystickButton(joystick, XboxController.Button.A.value).onTrue(new Command())}
-     */
-    // this is more verbose than just using JoystickButton directly
-    // public static class ButtonBindingDeclaration {
-
-    //     /**
-    //      * The ID of the button on the joystick.
-    //      * @see XboxController.Button
-    //      */
-    //     private final int id;
-
-    //     /**
-    //      * A consumer that accepts a Trigger to bind commands to.
-    //      * Ex. {@code (Trigger) -> trigger.onTrue(new Command())}
-    //      */
-    //     private final Consumer<Trigger> buttonTriggerConsumer;
-
-    //     /**
-    //      * The controller to query for the button state.
-    //      */
-    //     private final GenericHID joystick;
-
-    //     /**
-    //      * The Trigger that represents the button state.
-    //      * Note that {@link JoystickButton} extends {@link Trigger}.
-    //      * @see JoystickButton
-    //      */
-    //     private final Trigger trigger;
-
-    //     /**
-    //      * @return A BooleanSupplier that returns true when the button is pressed.
-    //      */
-    //     public BooleanSupplier getAsBooleanSupplier() {
-    //         return () -> joystick.getRawButton(id);
-    //     }
-
-    //     /**
-    //      * Creates a button binding declaration. Invokes the provided consumer with a Trigger.
-    //      */
-    //     public ButtonBindingDeclaration(
-    //         GenericHID joystick,
-    //         XboxController.Button buttonValue,
-    //         Consumer<Trigger> buttonTriggerConsumer
-    //     ) {
-    //         this.joystick = joystick;
-    //         this.id = buttonValue.value;
-    //         this.buttonTriggerConsumer = buttonTriggerConsumer;
-    //         this.trigger = new JoystickButton(joystick, id);
-
-    //         // Immediately accept the trigger to bind commands to it
-    //         buttonTriggerConsumer.accept(trigger);
-    //     }
-
-    //     /**
-    //      * Creates a button binding declaration without a consumer.
-    //      */
-    //     public ButtonBindingDeclaration(GenericHID joystick, XboxController.Button buttonValue) {
-    //         this(joystick, buttonValue, trigger -> {});
-    //     }
-    // }
 
     // Subsystem references
     private final RobotActions autoRoutines;
     private final Swerve swerveSubsystem;
     private final Elevator elevatorSubsystem;
     private final Claw clawSubsystem;
-    // private final Vision visionSubsystem;
+    private final Vision visionSubsystem;
 
     private final Controller driverController = new Controller(0);
     private final Controller operatorController = new Controller(1);
@@ -228,7 +121,7 @@ public class ButtonBindings {
         this.swerveSubsystem = autoRoutines.swerveSubsystem;
         this.elevatorSubsystem = autoRoutines.elevatorSubsystem;
         this.clawSubsystem = autoRoutines.clawSubsystem;
-        // this.visionSubsystem = autoRoutines.visionSubsystem;
+        this.visionSubsystem = autoRoutines.visionSubsystem;
     }
 
     /**
@@ -237,7 +130,7 @@ public class ButtonBindings {
     public void configureButtonBindings() {
         // Driver controller bindings
         driverController
-            .getJoystickButton(Controls.mainDriveControls.zeroGyroButton)
+            .getJoystickButton(ControlConstants.mainDriveControls.zeroGyroButton)
             .onTrue(Commands.runOnce(swerveSubsystem::zeroGyro));
 
         // Toggle drive to coral station state
@@ -259,24 +152,16 @@ public class ButtonBindings {
 
         // Claw
         operatorController
-            .getJoystickButton(Controls.Claw.zeroEncoder)
+            .getJoystickButton(ControlConstants.Claw.zeroEncoder)
             .onTrue(Commands.runOnce(() -> clawSubsystem.io.zeroEncoder(0)));
         operatorController
-            .getJoystickButton(Controls.Superstructure.clawOuttakeForL4)
+            .getJoystickButton(ControlConstants.Superstructure.clawOuttakeForL4)
             .whileTrue(autoRoutines.doClawMovementsForL4());
 
         // Elevator
         operatorController
-            .getJoystickButton(Controls.Elevator.zeroEncoder)
+            .getJoystickButton(ControlConstants.Elevator.zeroEncoder)
             .onTrue(Commands.runOnce(() -> elevatorSubsystem.io.zeroEncoder(0)));
-
-        // elevatorSubsystem.whenElevatorIsAtBottom.onTrue(
-        //     // Reset elevator positions when hitting the limit switches
-        //     Commands.runOnce(() -> {
-        //         elevatorSubsystem.io.zeroEncoder(0);
-        //         elevatorSubsystem.io.resetSetpointToCurrentPosition();
-        //     })
-        // );
 
         // Superstructure
         operatorController
@@ -294,12 +179,14 @@ public class ButtonBindings {
 
         // Algae presets
         operatorController
-            .getJoystickButton(Controls.Superstructure.intakeAlgaeFromL2)
+            .getJoystickButton(ControlConstants.Superstructure.intakeAlgaeFromL2)
             .whileTrue(autoRoutines.intakeAlgae(SuperstructureConstants.Level.ALGAE_L2));
         operatorController
-            .getJoystickButton(Controls.Superstructure.intakeAlgaeFromL3)
+            .getJoystickButton(ControlConstants.Superstructure.intakeAlgaeFromL3)
             .whileTrue(autoRoutines.intakeAlgae(SuperstructureConstants.Level.ALGAE_L3));
-        operatorController.getJoystickButton(Controls.Superstructure.launchAlgae).whileTrue(autoRoutines.launchAlgae());
+        operatorController
+            .getJoystickButton(ControlConstants.Superstructure.launchAlgae)
+            .whileTrue(autoRoutines.launchAlgae());
     }
 
     public void configureSimulationBindings() {
@@ -323,9 +210,12 @@ public class ButtonBindings {
      */
     public void assignDefaultCommands() {
         clawSubsystem.setDefaultCommand(
-            clawSubsystem.getRunAndAngleCommand(Controls.Claw::getIntakeOrOuttake, Controls.Claw::getUpOrDown)
+            clawSubsystem.getRunAndAngleCommand(
+                ControlConstants.Claw::getIntakeOrOuttake,
+                ControlConstants.Claw::getUpOrDown
+            )
         );
 
-        elevatorSubsystem.setDefaultCommand(elevatorSubsystem.getUpOrDown(Controls.Elevator::getUpOrDown));
+        elevatorSubsystem.setDefaultCommand(elevatorSubsystem.getUpOrDown(ControlConstants.Elevator::getUpOrDown));
     }
 }
