@@ -13,6 +13,11 @@ public class CANIdConnections {
     private CANIdConnections() {}
 
     /**
+     * The alert group for CAN ID alerts.
+     */
+    public static final String ALERT_GROUP = "CANAlerts";
+
+    /**
      * List of CAN ID alerts for monitoring CAN device connections.
      */
     private static final List<CANIdAlert> canIdAlerts = new ArrayList<>();
@@ -82,7 +87,7 @@ public class CANIdConnections {
      * Alert for CAN bus disruptions (two or more consecutive disconnected CAN IDs).
      * Empty message; will be set in {@link #periodic()}
      */
-    public static final Alert canBusDisruptionAlert = new Alert("", AlertType.kError);
+    public static final Alert canBusDisruptionAlert = new Alert(ALERT_GROUP, "", AlertType.kError);
 
     /**
      * Gets a list connections that are disrupted based on the list of disconnected CAN IDs.

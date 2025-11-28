@@ -53,6 +53,7 @@ public class CANIdAlert {
         this.canId = canId;
 
         this.disconnectionAlert = new Alert(
+            CANIdConnections.ALERT_GROUP,
             "Disconnected CAN device: " + deviceName + " (ID " + Integer.toString(canId) + ").",
             DEFAULT_ALERT_TYPE
         );
