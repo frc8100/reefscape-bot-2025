@@ -26,6 +26,7 @@ import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.vision.Vision;
 import frc.util.PoseUtil;
+import frc.util.objective.ObjectiveTracker;
 import frc.util.statemachine.StateMachine;
 import frc.util.statemachine.StateMachine.StateWithPayload;
 import frc.util.statemachine.StateMachineState;
@@ -225,7 +226,6 @@ public class RobotActions {
     /**
      * List of global states for the robot.
      */
-    // TODO: update when seasons starts
     public enum GlobalState {
         IDLE,
 
@@ -273,6 +273,8 @@ public class RobotActions {
         .withState(new StateMachineState<>(GlobalState.SCORE_CORAL, "ScoreCoral"))
         .withState(new StateMachineState<>(GlobalState.ENDGAME, "Endgame"));
 
+    public final ObjectiveTracker objectiveTracker = new ObjectiveTracker(this);
+
     // References to subsystems
     // Public because of use in configuring controls
     public final Swerve swerveSubsystem;
@@ -311,6 +313,24 @@ public class RobotActions {
                 );
             }
         );
+
+        globalStateMachine.onStateChange(GlobalState.SCORE_CORAL, ScoreCoralPayload.class, (previousState, payload) -> {
+            // debug
+            System.out.println("Switched to SCORE_CORAL state with payload:");
+            System.out.println("Target Branch: " + payload.targetReefLocation());
+            System.out.println("Target Level: " + payload.targetLevel());
+
+            swerveSubsystem.stateMachine.scheduleStateChange(
+                new StateWithPayload<>(
+                    Swerve.SwerveState.DRIVE_TO_POSE_PATHFINDING,
+                    payload.targetReefLocation()::getPose
+                )
+            );
+        });
+    }
+
+    public boolean isCoralIntakeComplete() {
+        return clawSubsystem.isCoralInClaw();
     }
 
     /**

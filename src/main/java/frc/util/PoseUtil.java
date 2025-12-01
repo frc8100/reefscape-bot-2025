@@ -51,13 +51,30 @@ public final class PoseUtil {
      * @return true if the poses are within the specified tolerance, false otherwise.
      */
     public static boolean isNear(Pose2d pose1, Pose2d pose2, Distance distanceTolerance, Angle angleTolerance) {
+        return isNear(pose1, pose2, distanceTolerance.in(Meters), angleTolerance.in(Radians));
+    }
+
+    /**
+     * Checks if two poses are within a specified tolerance of each other.
+     * @param pose1 - The first pose.
+     * @param pose2 - The second pose.
+     * @param distanceTolerance - The maximum allowed distance between the two poses.
+     * @param angleTolerance - The maximum allowed angle difference between the two poses.
+     * @return true if the poses are within the specified tolerance, false otherwise.
+     */
+    public static boolean isNear(
+        Pose2d pose1,
+        Pose2d pose2,
+        double distanceToleranceMeters,
+        double angleToleranceRadians
+    ) {
         return (
-            Math.abs(pose1.getX() - pose2.getX()) < distanceTolerance.in(Meters) &&
-            Math.abs(pose1.getY() - pose2.getY()) < distanceTolerance.in(Meters) &&
+            Math.abs(pose1.getX() - pose2.getX()) < distanceToleranceMeters &&
+            Math.abs(pose1.getY() - pose2.getY()) < distanceToleranceMeters &&
             MathUtil.isNear(
                 pose1.getRotation().getRadians(),
                 pose2.getRotation().getRadians(),
-                angleTolerance.in(Radians),
+                angleToleranceRadians,
                 -Math.PI,
                 Math.PI
             )

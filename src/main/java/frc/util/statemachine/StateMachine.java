@@ -1,6 +1,7 @@
 package frc.util.statemachine;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -12,6 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
+// "An idiot admires complexity, a genius admires simplicity"
 
 /**
  * A generic finite state machine for managing the states of a subsystem.
@@ -352,35 +356,50 @@ public class StateMachine<TStateEnum extends Enum<TStateEnum>, TPayload> {
 
     /**
      * Schedules a state change to the specified state on the next update cycle.
-     * If the state can be changed immediately, it will be changed immediately.
+     * If the state can be changed immediately, it will be changed immediately and this will return true.
      * @param newState - The new state to change to, as the enum type.
+     * @return Whether the state change was changed immediately.
      * @throws IllegalArgumentException if the new state does not exist in the state machine.
      */
-    public void scheduleStateChange(TStateEnum newState) {
+    public boolean scheduleStateChange(TStateEnum newState) {
         StateMachineState<TStateEnum> newStateObj = getStateObject(newState);
 
         // If it can change now, change immediately
         if (newStateObj.canChangeCondition.canChange(currentState.enumType)) {
             setStateAndUpdate(newState);
-            return;
+            return true;
         }
 
         scheduledStateChange = newStateObj;
         recordScheduledStateChange();
+        return false;
     }
 
-    public void scheduleStateChange(StateWithPayload<TStateEnum, TPayload> stateWithPayload) {
+    public boolean scheduleStateChange(StateWithPayload<TStateEnum, TPayload> stateWithPayload) {
         StateMachineState<TStateEnum> newStateObj = getStateObject(stateWithPayload.state);
 
         // If it can change now, change immediately
         if (newStateObj.canChangeCondition.canChange(currentState.enumType)) {
             setStateAndUpdate(stateWithPayload);
-            return;
+            return true;
         }
 
         scheduledStateChange = newStateObj;
         scheduledPayload = stateWithPayload.payload;
         recordScheduledStateChange();
+        return false;
+    }
+
+    public Command scheduleStateChangeCommand(TStateEnum newState) {
+        if (scheduleStateChange(newState)) {
+            // Finished immediately
+            return Commands.none();
+        } else {
+            return Commands.waitUntil(
+                () -> scheduledStateChange == null && currentState != null && currentState.enumType == newState
+            );
+            // CommandScheduler.getInstance().clearComposedCommands();
+        }
     }
 
     /**
@@ -389,6 +408,13 @@ public class StateMachine<TStateEnum extends Enum<TStateEnum>, TPayload> {
     public void unscheduleStateChange() {
         scheduledStateChange = null;
         recordScheduledStateChange();
+    }
+
+    /**
+     * @return Whether any states are currently scheduled.
+     */
+    public boolean isAnyStateScheduled() {
+        return scheduledStateChange != null;
     }
 
     /**

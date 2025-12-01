@@ -32,7 +32,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
-import frc.robot.Controls;
+import frc.robot.ControlConstants;
 import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
@@ -194,7 +194,6 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         );
 
         zeroGyro(180);
-        configurePathPlannerAutoBuilder();
 
         // Set up custom logging to add the current path to a field 2d widget
         // PathPlannerLogging.setLogActivePathCallback(poses -> field.getObject("path").setPoses(poses));
@@ -209,7 +208,9 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         teleopSwerve = new TeleopSwerve(
             this,
             // Switch between joystick and main drive controls depending on the mode
-            Controls.isUsingJoystickDrive ? Controls.joystickDriveControls : Controls.mainDriveControls,
+            ControlConstants.isUsingJoystickDrive
+                ? ControlConstants.joystickDriveControls
+                : ControlConstants.mainDriveControls,
             true
         );
 
@@ -219,11 +220,16 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
                 for (Module module : swerveModules) {
                     module.syncMotorEncoderToAbsoluteEncoder();
                 }
+
+                // debug
+                System.out.println("Swerve motor encoders synced");
             })
         );
 
         // Start odometry thread
         OdometryThread.getInstance().start();
+
+        stop();
     }
 
     /**
@@ -275,6 +281,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         Logger.recordOutput("Swerve/ChassisSpeeds/SetpointsRaw", speed);
 
         Logger.recordOutput("Swerve/States/FeedforwardLinearForces", feedforwardLinearForcesNewtons);
+        Logger.recordOutput("Swerve/States/FeedforwardTorqueCurrent", feedforwards.torqueCurrentsAmps());
 
         // Set the desired state for each swerve module
         setModuleStates(setpointStates, feedforwardLinearForcesNewtons);
@@ -393,7 +400,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         return kinematics.toChassisSpeeds(getModuleStates());
     }
 
-    private MutLinearVelocity cachedVelocityMagnitude = MetersPerSecond.mutable(0);
+    private final MutLinearVelocity cachedVelocityMagnitude = MetersPerSecond.mutable(0);
 
     /**
      * @return The magnitude of the robot's velocity. Calculated from {@link #getChassisSpeeds()}.
@@ -435,30 +442,37 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         }
         odometryLock.unlock();
 
+        // Stop moving when disabled
         if (DriverStation.isDisabled()) {
-            // Stop moving when disabled
             stop();
-
-            // Log empty setpoint states when disabled
-            Logger.recordOutput("Swerve/States/Setpoints", new SwerveModuleState[] {});
-            Logger.recordOutput("Swerve/States/SetpointsOptimized", new SwerveModuleState[] {});
         }
 
         // Update odometry
         double[] sampleTimestamps = gyroInputs.odometryYawTimestamps; // All signals are sampled together
         int sampleCount = sampleTimestamps.length;
 
-        for (int i = 0; i < sampleCount; i++) {
+        for (int sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
             // Read wheel positions and deltas from each module
             SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
-            SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
+            SwerveModulePosition[] moduleDeltas;
+
+            if (!gyroInputs.connected) {
+                moduleDeltas = new SwerveModulePosition[4];
+            } else {
+                // Not used when gyro is connected
+                moduleDeltas = null;
+            }
 
             for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
-                modulePositions[moduleIndex] = swerveModules[moduleIndex].getOdometryPositions()[i];
-                moduleDeltas[moduleIndex] = new SwerveModulePosition(
-                    modulePositions[moduleIndex].distanceMeters - lastModulePositions[moduleIndex].distanceMeters,
-                    modulePositions[moduleIndex].angle
-                );
+                modulePositions[moduleIndex] = swerveModules[moduleIndex].getOdometryPositions()[sampleIndex];
+
+                // Only calculate module deltas if gyro is disconnected
+                if (!gyroInputs.connected) {
+                    moduleDeltas[moduleIndex] = new SwerveModulePosition(
+                        modulePositions[moduleIndex].distanceMeters - lastModulePositions[moduleIndex].distanceMeters,
+                        modulePositions[moduleIndex].angle
+                    );
+                }
 
                 // Update last positions
                 lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
@@ -467,7 +481,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
             // Update gyro angle
             if (gyroInputs.connected) {
                 // Use the real gyro angle
-                rawGyroRotation = gyroInputs.odometryYawPositions[i];
+                rawGyroRotation = gyroInputs.odometryYawPositions[sampleIndex];
             } else {
                 // Use the angle delta from the kinematics and module deltas
                 Twist2d twist = kinematics.toTwist2d(moduleDeltas);
@@ -475,7 +489,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
             }
 
             // Apply update
-            poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+            poseEstimator.updateWithTime(sampleTimestamps[sampleIndex], rawGyroRotation, modulePositions);
         }
     }
 }

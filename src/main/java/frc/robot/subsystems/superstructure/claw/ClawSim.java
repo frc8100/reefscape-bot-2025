@@ -6,7 +6,7 @@ import static edu.wpi.first.units.Units.Radians;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.Controls;
+import frc.robot.ControlConstants;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.swerve.SwerveSim;
 import org.ironmaple.simulation.SimulatedArena;

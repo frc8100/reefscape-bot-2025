@@ -23,7 +23,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.subsystems.questnav.QuestNavSubsystem;
 import frc.util.LocalADStarAK;
+import gg.questnav.questnav.QuestNav;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -33,16 +35,22 @@ public interface SwerveDrive extends Subsystem {
     /**
      * Configures the path planner auto builder and records the path and trajectory setpoint to the logger.
      */
-    public default void configurePathPlannerAutoBuilder() {
+    public static void configurePathPlannerAutoBuilder(
+        SwerveDrive swerveSubsystem,
+        QuestNavSubsystem questNavSubsystem
+    ) {
         AutoBuilder.configure(
-            this::getPose,
-            this::setPose,
-            this::getChassisSpeeds,
-            this::runVelocityChassisSpeeds,
+            swerveSubsystem::getPose,
+            (Pose2d newPose) -> {
+                swerveSubsystem.setPose(newPose);
+                questNavSubsystem.setPose(newPose);
+            },
+            swerveSubsystem::getChassisSpeeds,
+            swerveSubsystem::runVelocityChassisSpeeds,
             SwerveConfig.PP_INITIAL_PID_CONTROLLER,
             SwerveConfig.getRobotConfig(),
             () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
-            this
+            swerveSubsystem
         );
 
         Pathfinding.setPathfinder(new LocalADStarAK());

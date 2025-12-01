@@ -12,7 +12,7 @@ public class QuestNavIOReal implements QuestNavIO {
     /**
      * Instance of the QuestNav class for interfacing with the QuestNav hardware.
      */
-    private QuestNav questNav = new QuestNav();
+    private final QuestNav questNav = new QuestNav();
 
     @Override
     public void updateInputs(QuestNavIOInputs inputs) {

@@ -7,6 +7,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -24,6 +25,7 @@ import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSpark;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveConfig;
+import frc.robot.subsystems.swerve.SwerveDrive;
 import frc.robot.subsystems.swerve.SwerveModuleSpecificConstants;
 import frc.robot.subsystems.swerve.SwerveSim;
 import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2;
@@ -61,16 +63,15 @@ public class RobotContainer {
     private final Claw clawSubsystem;
     private final Elevator elevatorSubsystem;
 
-    private final RobotActions autoRoutines;
+    private final RobotActions robotActions;
 
     /**
      * The simulation of the robot's drive. Set to null if not in simulation mode.
      */
     private SwerveDriveSimulation driveSimulation = null;
 
-    // Dashboard inputs
     /**
-     * Chooses the auto command
+     * Chooses the auto command.
      */
     private final LoggedDashboardChooser<Command> autoChooser;
 
@@ -190,8 +191,10 @@ public class RobotContainer {
                 break;
         }
 
+        SwerveDrive.configurePathPlannerAutoBuilder(swerveSubsystem, questNavSubsystem);
+
         // Set up auto routines
-        autoRoutines = new RobotActions(swerveSubsystem, elevatorSubsystem, clawSubsystem, visionSubsystem);
+        robotActions = new RobotActions(swerveSubsystem, elevatorSubsystem, clawSubsystem, visionSubsystem);
 
         // Set up teleop swerve command
         swerveSubsystem.setDefaultCommand(swerveSubsystem.stateMachine.getRunnableCommand(swerveSubsystem));
@@ -199,27 +202,27 @@ public class RobotContainer {
         // Register named commands
         NamedCommands.registerCommand(
             "ResetSuperstructure",
-            autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.INITIAL_POSITION)
+            robotActions.setUpSuperstructure(SuperstructureConstants.Level.INITIAL_POSITION)
         );
 
         NamedCommands.registerCommand(
             "SetupSuperstructureL1Auto",
-            autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L1_AUTO)
+            robotActions.setUpSuperstructure(SuperstructureConstants.Level.L1_AUTO)
         );
         NamedCommands.registerCommand(
             "SetupSuperstructureL2",
-            autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L2)
+            robotActions.setUpSuperstructure(SuperstructureConstants.Level.L2)
         );
         NamedCommands.registerCommand(
             "SetupSuperstructureL3",
-            autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L3)
+            robotActions.setUpSuperstructure(SuperstructureConstants.Level.L3)
         );
         NamedCommands.registerCommand(
             "SetupSuperstructureL4",
-            autoRoutines.setUpSuperstructure(SuperstructureConstants.Level.L4)
+            robotActions.setUpSuperstructure(SuperstructureConstants.Level.L4)
         );
 
-        NamedCommands.registerCommand("ScoreL4", autoRoutines.doClawMovementsForL4());
+        NamedCommands.registerCommand("ScoreL4", robotActions.doClawMovementsForL4());
         NamedCommands.registerCommand("ScoreCoral", clawSubsystem.runOuttakeUntilCoralIsNotInClaw());
 
         NamedCommands.registerCommand("IntakeCoral", clawSubsystem.runIntakeUntilCoralIsInClaw());
@@ -231,20 +234,19 @@ public class RobotContainer {
             setupSysIdRoutines();
         }
 
-        // TODO: Temporary
-        autoChooser.addOption("Coral and Go To All Reefs Test", autoRoutines.getCoralAndGoToAllReefsTest());
+        autoChooser.addOption("Coral and Go To All Reefs Test", robotActions.getCoralAndGoToAllReefsTest());
 
-        autoChooser.addDefaultOption("Actually move forward", autoRoutines.actuallyMoveForward());
-        autoChooser.addOption("Push another robot forward", autoRoutines.pushAnotherRobotForward());
+        autoChooser.addDefaultOption("Actually move forward", robotActions.actuallyMoveForward());
+        autoChooser.addOption("Push another robot forward", robotActions.pushAnotherRobotForward());
 
         autoChooser.addOption("runIntakeUntilCoralIsInClaw", clawSubsystem.runIntakeUntilCoralIsInClaw());
         autoChooser.addOption("runOuttakeUntilCoralIsNotInClaw", clawSubsystem.runOuttakeUntilCoralIsNotInClaw());
 
         // Command to refresh the config
-        SmartDashboard.putData("Refresh Tunable Config", TunableValue.getRefreshConfigCommand());
+        SmartDashboard.putData("RefreshTunableConfig", TunableValue.getRefreshConfigCommand());
 
         // Configure the button bindings
-        ButtonBindings buttonBindings = new ButtonBindings(autoRoutines);
+        ButtonBindings buttonBindings = new ButtonBindings(robotActions);
         buttonBindings.configureButtonBindings();
         buttonBindings.assignDefaultCommands();
 
@@ -254,7 +256,7 @@ public class RobotContainer {
         }
 
         // Warmup pathfinding
-        PathfindingCommand.warmupCommand().schedule();
+        CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
     }
 
     /**

@@ -11,8 +11,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.Controls;
+import frc.robot.ControlConstants;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.Swerve.SwerveState;
 import frc.robot.subsystems.swerve.SwerveConfig;
@@ -41,38 +42,35 @@ public class TeleopSwerve {
 
     /**
      * The translation input (x), as a double from 0-1.
-     * Should be a controller/joystick input.
      */
-    private DoubleSupplier translationSupplier;
+    private final DoubleSupplier translationSupplier;
 
     /**
      * The strafe input (y), as a double from 0-1.
-     * Should be a controller/joystick input.
      */
-    private DoubleSupplier strafeSupplier;
+    private final DoubleSupplier strafeSupplier;
 
     /**
      * The rotation input, as a double from 0-1.
-     * Should be a controller/joystick input.
      */
-    private DoubleSupplier rotationSupplier;
+    private final DoubleSupplier rotationSupplier;
 
     /**
      * Whether the swerve is robot centric.
      * Default is always `false`.
      */
-    private BooleanSupplier robotCentricSupplier;
+    private final BooleanSupplier robotCentricSupplier;
 
     /**
      * The speed multiplier, as a double.
      * Default is `1`
      */
-    private DoubleSupplier speedDial;
+    private final DoubleSupplier speedDial;
 
     /**
      * Whether to log values of the drive. Default is `true`
      */
-    private boolean logValues;
+    private final boolean logValues;
 
     /**
      * Creates the TeleopSwerve command.
@@ -117,14 +115,14 @@ public class TeleopSwerve {
     }
 
     /**
-     * Creates the TeleopSwerve command given a {@link Controls.Drive} object.
+     * Creates the TeleopSwerve command given a {@link ControlConstants.Drive} object.
      */
-    public TeleopSwerve(Swerve swerveSubsystem, Controls.Drive driveControls, boolean logValues) {
+    public TeleopSwerve(Swerve swerveSubsystem, ControlConstants.Drive driveControls, boolean logValues) {
         this(
             swerveSubsystem,
-            driveControls::getTranslationAxis,
-            driveControls::getStrafeAxis,
-            driveControls::getRotationAxis,
+            driveControls::getTranslationValue,
+            driveControls::getStrafeValue,
+            driveControls::getRotationValue,
             driveControls::isRobotCentric,
             driveControls::getSpeedMultiplier,
             logValues
@@ -180,6 +178,7 @@ public class TeleopSwerve {
         // Convert to Translation2d to rotate around
         Translation2d previousTranslation = new Translation2d(previous.vxMetersPerSecond, previous.vyMetersPerSecond);
 
+        // TODO: Maybe combine into one Rotation2d construction instead of calling .minus()
         Rotation2d rotateBy =
             // Use atan2 directly to avoid "x and y components of Rotation2d are zero" error
             new Rotation2d(Math.atan2(inputtedNudge.vyMetersPerSecond, inputtedNudge.vxMetersPerSecond))
@@ -217,20 +216,8 @@ public class TeleopSwerve {
      */
     private void logCurrentStates() {
         Logger.recordOutput(
-            swerveSubsystem.stateMachine.dashboardKey + "/AtTarget",
-            driveToPoseCommand.atTarget.getAsBoolean()
-        );
-        Logger.recordOutput(
-            swerveSubsystem.stateMachine.dashboardKey + "/IsTranslationNear",
-            driveToPoseCommand.debugPoseTranslationsNear.getAsBoolean()
-        );
-        Logger.recordOutput(
-            swerveSubsystem.stateMachine.dashboardKey + "/IsRotationNear",
-            driveToPoseCommand.debugPoseRotationsNear.getAsBoolean()
-        );
-        Logger.recordOutput(
-            swerveSubsystem.stateMachine.dashboardKey + "/IsVelocityNear",
-            driveToPoseCommand.debugVelocityNear.getAsBoolean()
+            swerveSubsystem.stateMachine.dashboardKey + "/Targets",
+            driveToPoseCommand.getAtTargetsRecords()
         );
     }
 
@@ -262,7 +249,7 @@ public class TeleopSwerve {
                 Commands.runOnce(() -> swerveSubsystem.stateMachine.scheduleStateChange(SwerveState.DRIVE_TO_POSE_PID))
             );
 
-        pathFindToPoseCommand.schedule();
+        CommandScheduler.getInstance().schedule(pathFindToPoseCommand);
     }
 
     private void handleFinalAlignment(Optional<Supplier<Pose2d>> targetPoseSupplier) {

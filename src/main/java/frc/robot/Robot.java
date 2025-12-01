@@ -78,7 +78,8 @@ public class Robot extends LoggedRobot {
                 break;
             case REPLAY:
                 // Replaying a log, set up replay source
-                setUseTiming(false); // Run as fast as possible
+                // false to run as fast as possible
+                setUseTiming(false);
                 String logPath = LogFileUtil.findReplayLog();
                 Logger.setReplaySource(new WPILOGReader(logPath));
                 Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
@@ -91,8 +92,7 @@ public class Robot extends LoggedRobot {
         // Start AdvantageKit logger
         Logger.start();
 
-        // Instantiate our RobotContainer. This will perform all our button bindings,
-        // and put our autonomous chooser on the dashboard.
+        // Instantiate RobotContainer
         robotContainer = new RobotContainer();
     }
 
@@ -140,7 +140,7 @@ public class Robot extends LoggedRobot {
 
         // Schedule the autonomous command
         if (autonomousCommand != null) {
-            autonomousCommand.schedule();
+            CommandScheduler.getInstance().schedule(autonomousCommand);
         }
     }
 

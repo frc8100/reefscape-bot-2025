@@ -84,6 +84,22 @@ public class QuestNavSubsystem extends SubsystemBase {
         this.io = io;
     }
 
+    /**
+     * Sets the current pose using a 2D pose.
+     * See {@link QuestNavIO#setPose(Pose3d)} for more details.
+     */
+    public void setPose(Pose2d pose) {
+        io.setPose(pose);
+    }
+
+    /**
+     * Sets the current pose using a 3D pose.
+     * See {@link QuestNavIO#setPose(Pose3d)} for more details.
+     */
+    public void setPose(Pose3d pose) {
+        io.setPose(pose);
+    }
+
     @Override
     public void periodic() {
         // Update the IO inputs
