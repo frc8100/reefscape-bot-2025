@@ -110,8 +110,16 @@ public class ObjectiveTracker extends SubsystemBase {
          */
         public ObjectiveStatus status = ObjectiveStatus.PENDING;
 
+        /**
+         * The command supplier for this objective.
+         * ! Important: The command supplied by this must not already be wrapped or composed.
+         */
         public final ObjectiveCommandSupplier commandSupplier;
 
+        /**
+         * The command associated with this objective.
+         * Initialized when the objective is added to the tracker; null until then.
+         */
         public Command command = null;
 
         public Objective(String name, ObjectiveCommandSupplier commandSupplier) {
@@ -119,11 +127,25 @@ public class ObjectiveTracker extends SubsystemBase {
             this.commandSupplier = commandSupplier;
         }
 
+        /**
+         * Initializes the command for this objective.
+         * @param stateMachine - The global state machine of the robot.
+         * @param completeObjectiveCallback - The callback to call when the objective is completed.
+         */
         public void initCommand(
             StateMachine<RobotActions.GlobalState, RobotActions.GlobalPayload> stateMachine,
             Consumer<Objective> completeObjectiveCallback
         ) {
-            command = commandSupplier.getCommand(stateMachine).finallyDo(() -> completeObjectiveCallback.accept(this));
+            try {
+                command = commandSupplier
+                    .getCommand(stateMachine)
+                    .finallyDo(() -> completeObjectiveCallback.accept(this));
+            } catch (IllegalArgumentException e) {
+                /**
+                 * Thrown in {@link CommandScheduler#registerComposedCommands(Command)} if the command is already wrapped or composed.
+                 */
+                e.printStackTrace();
+            }
         }
 
         /**
@@ -253,10 +275,18 @@ public class ObjectiveTracker extends SubsystemBase {
         objective.initCommand(robotActions.globalStateMachine, this::completeObjective);
     }
 
+    /**
+     * Adds an objective to be tracked at the end of the list.
+     * @param objective - The objective to add.
+     */
     public void addObjective(Objective objective) {
         addObjective(objective, -1);
     }
 
+    /**
+     * Marks an objective as completed and removes it from tracking.
+     * @param objective - The objective to complete.
+     */
     public void completeObjective(Objective objective) {
         objective.status = ObjectiveStatus.COMPLETED;
         listOfObjectives.remove(objective);
@@ -265,6 +295,9 @@ public class ObjectiveTracker extends SubsystemBase {
         scheduleNextObjective();
     }
 
+    /**
+     * Schedules the next pending objective, if one exists.
+     */
     public void scheduleNextObjective() {
         Objective objectiveToScheduleNext = getNextScheduledObjective();
 
@@ -277,10 +310,18 @@ public class ObjectiveTracker extends SubsystemBase {
 
         currentlyScheduledObjective = objectiveToScheduleNext;
         if (currentlyScheduledObjective.command != null) {
-            CommandScheduler.getInstance().schedule(currentlyScheduledObjective.command);
+            try {
+                CommandScheduler.getInstance().schedule(currentlyScheduledObjective.command);
+            } catch (IllegalArgumentException e) {
+                // Command is composed
+                e.printStackTrace();
+            }
         }
     }
 
+    /**
+     * @return The next objective that is pending, or null if none exist.
+     */
     public Objective getNextScheduledObjective() {
         for (int i = 0; i < listOfObjectives.size(); i++) {
             Objective objective = listOfObjectives.get(i);
@@ -293,6 +334,9 @@ public class ObjectiveTracker extends SubsystemBase {
         return null;
     }
 
+    /**
+     * Periodically checks and schedules the next objective if none is currently scheduled.
+     */
     @Override
     public void periodic() {
         if (currentlyScheduledObjective == null) {
