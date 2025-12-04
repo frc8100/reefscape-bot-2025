@@ -3,7 +3,9 @@ package frc.robot.commands;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathfindingCommand;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -222,7 +224,7 @@ public class TeleopSwerve {
     }
 
     private void handleInitialPathfinding(Optional<Supplier<Pose2d>> targetPoseSupplier) {
-        if (targetPoseSupplier.isEmpty()) {
+        if (pathFindToPoseCommand != null || targetPoseSupplier.isEmpty()) {
             // No target pose, return to full driver control
             return;
         }
@@ -240,13 +242,16 @@ public class TeleopSwerve {
             (ChassisSpeeds speeds, DriveFeedforwards feedforwards) ->
                 swerveSubsystem.runVelocityChassisSpeeds(applyInputNudge(speeds)),
             SwerveConfig.PP_INITIAL_PID_CONTROLLER,
-            SwerveConfig.getRobotConfig(),
-            swerveSubsystem
+            // new PPHolonomicDriveController(SwerveConfig.PP_INITIAL_TRANSLATION_PID, SwerveConfig.PP_ROTATION_PID),
+            SwerveConfig.getRobotConfig()
         )
             // End when we can switch to final alignment
             .raceWith(Commands.waitUntil(driveToPoseCommand.canSwitchToFinalAlignment))
             .andThen(
-                Commands.runOnce(() -> swerveSubsystem.stateMachine.scheduleStateChange(SwerveState.DRIVE_TO_POSE_PID))
+                Commands.runOnce(() -> {
+                    swerveSubsystem.stateMachine.scheduleStateChange(SwerveState.DRIVE_TO_POSE_PID);
+                    pathFindToPoseCommand = null;
+                })
             );
 
         CommandScheduler.getInstance().schedule(pathFindToPoseCommand);

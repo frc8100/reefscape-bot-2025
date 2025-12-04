@@ -241,7 +241,7 @@ public class SwerveConfig {
     public static final DCMotor driveGearbox = DCMotor.getNEO(1);
     public static final DCMotor turnGearbox = DCMotor.getNEO(1);
 
-    private static final RobotConfig pathPlannerConfig = new RobotConfig(
+    public static final RobotConfig pathPlannerConfig = new RobotConfig(
         ROBOT_MASS,
         ROBOT_MOI,
         new ModuleConfig(

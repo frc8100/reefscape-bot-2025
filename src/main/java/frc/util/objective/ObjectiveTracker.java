@@ -1,6 +1,7 @@
 package frc.util.objective;
 
 import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -309,7 +310,11 @@ public class ObjectiveTracker extends SubsystemBase {
         currentlyScheduledObjective = null;
 
         currentlyScheduledObjective = objectiveToScheduleNext;
+
         if (currentlyScheduledObjective.command != null) {
+            objectiveToScheduleNext.status = ObjectiveStatus.SCHEDULED;
+            updateObjectiveAlertsAndIndices();
+
             try {
                 CommandScheduler.getInstance().schedule(currentlyScheduledObjective.command);
             } catch (IllegalArgumentException e) {
@@ -339,6 +344,11 @@ public class ObjectiveTracker extends SubsystemBase {
      */
     @Override
     public void periodic() {
+        // Only run if enabled
+        if (DriverStation.isDisabled()) {
+            return;
+        }
+
         if (currentlyScheduledObjective == null) {
             scheduleNextObjective();
         }
