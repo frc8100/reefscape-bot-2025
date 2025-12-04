@@ -53,7 +53,7 @@ public class Elevator extends SubsystemBase {
      */
     @AutoLogOutput(key = "Elevator/IsElevatorAtTarget")
     public boolean isElevatorAtTarget() {
-        return io.isAtTarget();
+        return inputs.isAtTarget;
     }
 
     /**
@@ -62,10 +62,6 @@ public class Elevator extends SubsystemBase {
     @AutoLogOutput(key = "Elevator/IsElevatorAtBottom")
     public boolean isElevatorAtBottom() {
         return inputs.isAtBottom;
-    }
-
-    public boolean isElevatorAtTargetNotNearer() {
-        return io.isAtTargetNotNearer();
     }
 
     // TODO: refactor
@@ -167,7 +163,7 @@ public class Elevator extends SubsystemBase {
         // @formatter:off
         return (
             getPositionCommand(level)
-                .andThen(Commands.waitUntil(this::isElevatorAtTargetNotNearer))
+                .andThen(Commands.waitUntil(() -> inputs.isAtTargetNotNearer))
         );
         // @formatter:on
     }

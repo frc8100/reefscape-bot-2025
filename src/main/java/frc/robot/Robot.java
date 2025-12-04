@@ -29,7 +29,7 @@ import org.littletonrobotics.urcl.URCL;
 public class Robot extends LoggedRobot {
 
     private Command autonomousCommand;
-    private RobotContainer robotContainer;
+    private final RobotContainer robotContainer;
 
     public Robot() {
         // Record metadata
@@ -52,9 +52,7 @@ public class Robot extends LoggedRobot {
 
         // Set the current mode automatically if it is not replay
         if (Constants.currentMode != Constants.Mode.REPLAY) {
-            Constants.currentMode = isReal()
-                ? Constants.Mode.REAL
-                : isSimulation() ? Constants.Mode.SIM : Constants.Mode.REPLAY;
+            Constants.currentMode = isReal() ? Constants.Mode.REAL : Constants.Mode.SIM;
         }
 
         DriverStation.silenceJoystickConnectionWarning(Constants.silenceJoystickUnpluggedWarning);
@@ -182,6 +180,11 @@ public class Robot extends LoggedRobot {
     /** This function is called periodically whilst in simulation. */
     @Override
     public void simulationPeriodic() {
+        // Skip if not in simulation mode
+        if (Constants.currentMode != Constants.Mode.SIM) {
+            return;
+        }
+
         SimulatedArena.getInstance().simulationPeriodic();
         robotContainer.simulationPeriodic();
 

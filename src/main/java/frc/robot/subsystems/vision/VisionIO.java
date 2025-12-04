@@ -20,7 +20,6 @@ import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-
 import limelight.Limelight;
 import limelight.networktables.target.pipeline.NeuralDetector;
 import org.littletonrobotics.junction.AutoLog;
@@ -43,7 +42,7 @@ public interface VisionIO {
          * A queue of unread pose observations.
          */
         public PoseObservation[] poseObservations = new PoseObservation[0];
-        
+
         /**
          * The tag ids used for the pose observations.
          */
@@ -95,12 +94,4 @@ public interface VisionIO {
      * Updates the inputs of the vision IO.
      */
     public default void updateInputs(VisionIOInputs inputs) {}
-
-    /**
-     * @return A list of all Photon pipeline results from this camera.
-     * If photon vision is not used, this is an empty list.
-     */
-    public default List<PhotonPipelineResult> getPhotonPipelineResults() {
-        return new LinkedList<>();
-    }
 }

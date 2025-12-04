@@ -175,7 +175,6 @@ public class ClawIOSpark implements ClawIO {
         TunableValue.addRefreshConfigConsumer(this::refreshConfig);
     }
 
-    @Override
     public void refreshConfig() {
         // Refresh the config for the motor
         angleConfig.closedLoop.pid(

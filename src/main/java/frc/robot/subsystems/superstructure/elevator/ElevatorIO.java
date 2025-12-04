@@ -22,8 +22,14 @@ public interface ElevatorIO extends GenericSparkIO<ElevatorIO.ElevatorIOInputs> 
          */
         public boolean isAtBottom = false;
 
-        // public boolean isAtTop = false;
-        // public double positionMeters = 0.0;
+        /**
+         * Whether or not the elevator is at the target position
+         */
+        public boolean isAtTarget = false;
+
+        // what is this even for
+        // technical debt smh
+        public boolean isAtTargetNotNearer = false;
 
         /**
          * The height of the elevator in meters.
@@ -53,24 +59,15 @@ public interface ElevatorIO extends GenericSparkIO<ElevatorIO.ElevatorIOInputs> 
     /**
      * Stops the elevator.
      */
-    public abstract void stop();
-
-    /**
-     * @return Whether the elevator is at the target position, within a tolerance.
-     */
-    public abstract boolean isAtTarget();
-
-    public default boolean isAtTargetNotNearer() {
-        return isAtTarget();
-    }
+    public default void stop() {}
 
     /**
      * Sets the desired elevator position.
      * @param position - The desired elevator position.
      */
-    public abstract void setPosition(Distance position);
+    public default void setPosition(Distance position) {}
 
-    public abstract void setPosition(Angle angle);
+    public default void setPosition(Angle angle) {}
 
     /**
      * Sets the desired elevator position given a level. Can be used to get the radian position for SPARK io.
@@ -92,11 +89,11 @@ public interface ElevatorIO extends GenericSparkIO<ElevatorIO.ElevatorIOInputs> 
      * Runs the elevator motor at the given input.
      * @param motorInput - The input to the motor from -1 to 1.
      */
-    public abstract void runMotor(double motorInput);
+    public default void runMotor(double motorInput) {}
 
     /**
      * Zeros the elevator encoder.
      * @param value - The value to set the encoder to.
      */
-    public abstract void zeroEncoder(double value);
+    public default void zeroEncoder(double value) {}
 }

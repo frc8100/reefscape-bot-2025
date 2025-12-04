@@ -48,25 +48,25 @@ public interface ClawIO extends GenericSparkIO<ClawIO.ClawIOInputs> {
     /**
      * Stops both motors.
      */
-    public abstract void stop();
+    public default void stop() {}
 
     /**
      * Sets the desired turn position.
      * @param rotation - The desired turn position.
      */
-    public abstract void setTurnPosition(Rotation2d rotation);
+    public default void setTurnPosition(Rotation2d rotation) {}
 
     /**
      * Increases the desired turn position.
      * @param rotation - The desired turn position.
      */
-    public abstract void increaseTurnPosition(double valueToIncreaseBy);
+    public default void increaseTurnPosition(double valueToIncreaseBy) {}
 
     /**
      * Runs the outtake motor at the specified percent output.
      * @param motorInput - The percent output to run the motor at, from [-1, 1] without deadband.
      */
-    public abstract void runOuttake(double motorInput);
+    public default void runOuttake(double motorInput) {}
 
     /**
      * Periodic function to be called by the subsystem.

@@ -35,11 +35,6 @@ public class GyroIOSim implements GyroIO {
     }
 
     @Override
-    public Rotation2d getGyroHeading() {
-        return gyroSimulation.getGyroReading();
-    }
-
-    @Override
     public void zeroGyro(double deg) {
         gyroSimulation.setRotation(Rotation2d.fromDegrees(deg));
     }

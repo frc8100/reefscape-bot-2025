@@ -127,24 +127,5 @@ public interface GenericSparkIO<TInputs> {
      * Updates the inputs for the IO. Should be called periodically, and should mutate the inputs.
      * @param inputs - The inputs to update.
      */
-    public void updateInputs(TInputs inputs);
-
-    /**
-     * Runs the motor.
-     * @param motorInput - Percent input, from [-1, 1] without deadband.
-     */
-    // public void runMotor(double motorInput);
-
-    /**
-     * Stops the motor.
-     */
-    // public void stop();
-
-    /**
-     * Called when a tunable value is changed.
-     */
-    // TODO: technical debt
-    public default void refreshConfig() {
-        // Do nothing
-    }
+    public default void updateInputs(TInputs inputs) {}
 }

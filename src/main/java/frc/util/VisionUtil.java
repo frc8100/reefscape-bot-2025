@@ -52,17 +52,17 @@ public class VisionUtil {
         Translation3d targetCam = new Translation3d(xCamMeters, yCamMeters, 0.0);
 
         // Transform camera-relative to robot-relative
-        Translation3d targetRobot = robotToCamera.plus(new Transform3d(targetCam, new Rotation3d())).getTranslation();
+        Translation3d targetRobot = robotToCamera.plus(new Transform3d(targetCam, Rotation3d.kZero)).getTranslation();
 
         // Get robot pose and apply transform robot-relative to field
         Translation2d targetFieldTranslation = robotPose
-            .transformBy(new Transform2d(new Translation2d(targetRobot.getX(), targetRobot.getY()), new Rotation2d()))
+            .transformBy(new Transform2d(new Translation2d(targetRobot.getX(), targetRobot.getY()), Rotation2d.kZero))
             .getTranslation();
 
         // TODO: investigate this
         OpenCVHelp.solvePNP_SQPNP(null, null, null, null);
 
         // Return the target pose
-        return new Pose3d(new Pose2d(targetFieldTranslation, new Rotation2d()));
+        return new Pose3d(new Pose2d(targetFieldTranslation, Rotation2d.kZero));
     }
 }

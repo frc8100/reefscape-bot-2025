@@ -152,7 +152,6 @@ public class ElevatorIOSpark implements ElevatorIO {
         TunableValue.addRefreshConfigConsumer(this::refreshConfig);
     }
 
-    @Override
     public void refreshConfig() {
         // Refresh the config for the motor
         leaderConfig.closedLoop.pid(
@@ -245,24 +244,6 @@ public class ElevatorIOSpark implements ElevatorIO {
     }
 
     @Override
-    public boolean isAtTarget() {
-        return MathUtil.isNear(
-            leaderEncoder.getPosition(),
-            radianSetpoint,
-            ElevatorConstants.ELEVATOR_RAD_TOLERANCE.in(Radians)
-        );
-    }
-
-    @Override
-    public boolean isAtTargetNotNearer() {
-        return MathUtil.isNear(
-            leaderEncoder.getPosition(),
-            radianSetpoint,
-            ElevatorConstants.ELEVATOR_RAD_TOLERANCE_NOT_NEARER.in(Radians)
-        );
-    }
-
-    @Override
     public void updateInputs(ElevatorIOInputs inputs) {
         // Clamp
         radianSetpoint = MathUtil.clamp(
@@ -272,6 +253,16 @@ public class ElevatorIOSpark implements ElevatorIO {
         );
 
         inputs.setpoint = radianSetpoint;
+        inputs.isAtTarget = MathUtil.isNear(
+            leaderEncoder.getPosition(),
+            radianSetpoint,
+            ElevatorConstants.ELEVATOR_RAD_TOLERANCE.in(Radians)
+        );
+        inputs.isAtTargetNotNearer = MathUtil.isNear(
+            leaderEncoder.getPosition(),
+            radianSetpoint,
+            ElevatorConstants.ELEVATOR_RAD_TOLERANCE_NOT_NEARER.in(Radians)
+        );
 
         debugProfiledPIDController.setGoal(radianSetpoint);
         inputs.trapezoidalVoltage = debugProfiledPIDController.calculate(leaderEncoder.getPosition());

@@ -198,7 +198,7 @@ public class ButtonBindings {
                     SimulatedArena.getInstance()
                         .addGamePiece(
                             new ReefscapeCoralOnField(
-                                swerveSubsystem.getActualPose().plus(new Transform2d(1.0, 0.0, new Rotation2d()))
+                                swerveSubsystem.getActualPose().plus(new Transform2d(1.0, 0.0, Rotation2d.kZero))
                             )
                         )
                 )

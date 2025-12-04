@@ -21,7 +21,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutAngularVelocity;
 import org.littletonrobotics.junction.AutoLog;
-import org.littletonrobotics.junction.AutoLogOutput;
 
 /**
  * The IO interface for the gyro. Can be implemented by the real gyro or a simulated gyro.
@@ -80,17 +79,11 @@ public interface GyroIO {
      * Updates the gyro inputs. Automatically called by the robot loop.
      * @param inputs - The gyro inputs to update.
      */
-    public abstract void updateInputs(GyroIOInputs inputs);
+    public default void updateInputs(GyroIOInputs inputs) {}
 
     /**
      * Zeros the angle of the gyro.
      * @param deg - The angle to zero the gyro to.
      */
     public default void zeroGyro(double deg) {}
-
-    /**
-     * @return The current gyro heading of the robot.
-     */
-    @AutoLogOutput(key = "Gyro/Heading")
-    public abstract Rotation2d getGyroHeading();
 }

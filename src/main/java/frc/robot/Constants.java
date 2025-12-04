@@ -69,7 +69,7 @@ public final class Constants {
         /** Running on a real robot. */
         REAL,
 
-        /** Running a physics simulator. */
+        /** Running a simulator. */
         SIM,
 
         /** Replaying from a log file. */

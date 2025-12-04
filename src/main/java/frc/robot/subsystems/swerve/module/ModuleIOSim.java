@@ -54,8 +54,9 @@ public class ModuleIOSim implements ModuleIO {
     public void updateInputs(ModuleIOInputs inputs) {
         // Run closed-loop control
         if (driveClosedLoop) {
-            driveAppliedVolts = driveFFVolts +
-            driveController.calculate(moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond));
+            driveAppliedVolts =
+                driveFFVolts +
+                driveController.calculate(moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond));
         } else {
             driveController.reset();
         }
@@ -87,14 +88,6 @@ public class ModuleIOSim implements ModuleIO {
             .mapToDouble(angle -> angle.in(Radians))
             .toArray();
         inputs.odometryTurnPositions = moduleSimulation.getCachedSteerAbsolutePositions();
-    }
-
-    @Override
-    public SwerveModuleState getState() {
-        return new SwerveModuleState(
-            moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond) * SwerveConfig.WHEEL_RADIUS.in(Meters),
-            moduleSimulation.getSteerAbsoluteFacing()
-        );
     }
 
     @Override

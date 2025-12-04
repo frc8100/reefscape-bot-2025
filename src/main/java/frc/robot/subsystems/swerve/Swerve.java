@@ -448,7 +448,8 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         }
 
         // Update odometry
-        double[] sampleTimestamps = gyroInputs.odometryYawTimestamps; // All signals are sampled together
+        // All signals are sampled together; only need to get timestamps once
+        double[] sampleTimestamps = gyroInputs.odometryYawTimestamps;
         int sampleCount = sampleTimestamps.length;
 
         for (int sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
@@ -456,10 +457,10 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
             SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
             SwerveModulePosition[] moduleDeltas;
 
+            // Deltas not used when gyro is connected
             if (!gyroInputs.connected) {
                 moduleDeltas = new SwerveModulePosition[4];
             } else {
-                // Not used when gyro is connected
                 moduleDeltas = null;
             }
 
@@ -467,7 +468,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
                 modulePositions[moduleIndex] = swerveModules[moduleIndex].getOdometryPositions()[sampleIndex];
 
                 // Only calculate module deltas if gyro is disconnected
-                if (!gyroInputs.connected) {
+                if (!gyroInputs.connected && moduleDeltas != null) {
                     moduleDeltas[moduleIndex] = new SwerveModulePosition(
                         modulePositions[moduleIndex].distanceMeters - lastModulePositions[moduleIndex].distanceMeters,
                         modulePositions[moduleIndex].angle

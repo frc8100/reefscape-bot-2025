@@ -202,14 +202,6 @@ public class ModuleIOSpark implements ModuleIO {
     }
 
     @Override
-    public SwerveModuleState getState() {
-        return new SwerveModuleState(
-            relativeDriveEncoder.getVelocity() * SwerveConfig.WHEEL_RADIUS.in(Meters),
-            getAngle()
-        );
-    }
-
-    @Override
     public void syncMotorEncoderToAbsoluteEncoder() {
         double absolutePosition = getAngle().getRadians();
         relativeAngleEncoder.setPosition(absolutePosition);

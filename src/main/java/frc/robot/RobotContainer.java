@@ -13,14 +13,17 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.SwerveSysidRoutines;
 import frc.robot.subsystems.CANIdConnections;
+import frc.robot.subsystems.questnav.QuestNavIO;
 import frc.robot.subsystems.questnav.QuestNavIOReal;
 import frc.robot.subsystems.questnav.QuestNavIOSim;
 import frc.robot.subsystems.questnav.QuestNavSubsystem;
 import frc.robot.subsystems.superstructure.SuperstructureConstants;
 import frc.robot.subsystems.superstructure.claw.Claw;
+import frc.robot.subsystems.superstructure.claw.ClawIO;
 import frc.robot.subsystems.superstructure.claw.ClawIOSpark;
 import frc.robot.subsystems.superstructure.claw.ClawSim;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
+import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSpark;
 import frc.robot.subsystems.swerve.Swerve;
@@ -28,6 +31,7 @@ import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import frc.robot.subsystems.swerve.SwerveModuleSpecificConstants;
 import frc.robot.subsystems.swerve.SwerveSim;
+import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOPigeon2;
 import frc.robot.subsystems.swerve.gyro.GyroIOSim;
 import frc.robot.subsystems.swerve.module.ModuleIO;
@@ -188,6 +192,17 @@ public class RobotContainer {
                 // opponentRobotDriveControls
                 //         .getJoystickButtonOf(opponentRobotDriveControls.zeroGyroButton)
                 //         .onTrue(new InstantCommand(() -> opponentRobotSim1.zeroGyro()));
+                break;
+            case REPLAY:
+                // Replay mode, instantiate dummy IO implementations
+                swerveSubsystem = new Swerve(
+                    new GyroIO() {},
+                    new ModuleIO[] { new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {} }
+                );
+                visionSubsystem = new Vision(swerveSubsystem::addVisionMeasurement, new VisionIO() {});
+                questNavSubsystem = new QuestNavSubsystem(swerveSubsystem::addVisionMeasurement, new QuestNavIO() {});
+                clawSubsystem = new Claw(new ClawIO() {});
+                elevatorSubsystem = new Elevator(new ElevatorIO() {});
                 break;
         }
 
