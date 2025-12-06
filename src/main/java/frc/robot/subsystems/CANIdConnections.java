@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import frc.robot.CANIdConstants;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,65 +24,32 @@ public class CANIdConnections {
     private static final List<CANIdAlert> canIdAlerts = new ArrayList<>();
 
     /**
+     * List of CAN IDs that were last detected as disconnected.
+     */
+    private static final List<Integer> lastDisconnectedIds = new ArrayList<>();
+
+    /**
+     * List of connection disruptions last detected.
+     */
+    private static final List<Integer> lastDisruptions = new ArrayList<>();
+
+    /**
+     * Initial part of the disruption message for {@link #disruptionMessageBuilder}.
+     */
+    private static final String INITIAL_DISRUPTION_MESSAGE = "CAN bus disruption detected at connections: ";
+
+    /**
+     * StringBuilder for building disruption messages.
+     */
+    private static final StringBuilder disruptionMessageBuilder = new StringBuilder(INITIAL_DISRUPTION_MESSAGE);
+
+    /**
      * Registers a CAN ID alert to be monitored.
      * @param alert - The CAN ID alert to register.
      */
     public static void registerCANIdAlert(CANIdAlert alert) {
         canIdAlerts.add(alert);
     }
-
-    public static final int PIGEON_ID = 17;
-
-    /**
-     * Swerve Module CAN IDs to be used when creating swerve modules.
-     * @param driveMotorID - The CAN ID of the drive motor.
-     * @param angleMotorID - The CAN ID of the angle motor.
-     * @param canCoderID - The CAN ID of the CANCoder.
-     */
-    public static record SwerveModuleCanIDs(int driveMotorID, int angleMotorID, int canCoderID) {}
-
-    // Swerve Module CAN IDs
-    public static final SwerveModuleCanIDs FRONT_LEFT_MODULE_CAN_IDS = new SwerveModuleCanIDs(12, 3, 14);
-    public static final SwerveModuleCanIDs FRONT_RIGHT_MODULE_CAN_IDS = new SwerveModuleCanIDs(5, 2, 13);
-    public static final SwerveModuleCanIDs BACK_LEFT_MODULE_CAN_IDS = new SwerveModuleCanIDs(4, 10, 15);
-    public static final SwerveModuleCanIDs BACK_RIGHT_MODULE_CAN_IDS = new SwerveModuleCanIDs(1, 8, 16);
-
-    /**
-     * Gets the CAN IDs for a module based on its index.
-     * @param index - The index of the module (0-3). In FL, FR, BL, BR order.
-     * @return The CAN IDs for the module.
-     * @throws IllegalArgumentException - If the index is not between 0 and 3.
-     */
-    public static SwerveModuleCanIDs getModuleCANIdsFromIndex(int index) {
-        return switch (index) {
-            case 0 -> FRONT_LEFT_MODULE_CAN_IDS;
-            case 1 -> FRONT_RIGHT_MODULE_CAN_IDS;
-            case 2 -> BACK_LEFT_MODULE_CAN_IDS;
-            case 3 -> BACK_RIGHT_MODULE_CAN_IDS;
-            default -> throw new IllegalArgumentException("Invalid module index: " + index);
-        };
-    }
-
-    /**
-     * List of all CAN IDs in the order the CAN bus is wired, starting from the PDP and ending at the RoboRIO.
-     * This is used to detect connection disruptions.
-     */
-    // TODO: set this
-    public static final List<Integer> canIdConnectionsInOrder = List.of(
-        PIGEON_ID,
-        FRONT_LEFT_MODULE_CAN_IDS.driveMotorID,
-        FRONT_LEFT_MODULE_CAN_IDS.angleMotorID,
-        FRONT_LEFT_MODULE_CAN_IDS.canCoderID,
-        FRONT_RIGHT_MODULE_CAN_IDS.driveMotorID,
-        FRONT_RIGHT_MODULE_CAN_IDS.angleMotorID,
-        FRONT_RIGHT_MODULE_CAN_IDS.canCoderID,
-        BACK_LEFT_MODULE_CAN_IDS.driveMotorID,
-        BACK_LEFT_MODULE_CAN_IDS.angleMotorID,
-        BACK_LEFT_MODULE_CAN_IDS.canCoderID,
-        BACK_RIGHT_MODULE_CAN_IDS.driveMotorID,
-        BACK_RIGHT_MODULE_CAN_IDS.angleMotorID,
-        BACK_RIGHT_MODULE_CAN_IDS.canCoderID
-    );
 
     /**
      * Alert for CAN bus disruptions (two or more consecutive disconnected CAN IDs).
@@ -90,79 +58,77 @@ public class CANIdConnections {
     public static final Alert canBusDisruptionAlert = new Alert(ALERT_GROUP, "", AlertType.kError);
 
     /**
-     * Gets a list connections that are disrupted based on the list of disconnected CAN IDs.
-     * A disruption is when two or more consecutive CAN IDs are disconnected.
+     * Gets a list connections that are disrupted based on the list of disconnected CAN IDs {@link #lastDisconnectedIds}.
+     * {@link #lastDisruptions} is updated in place. {@link #lastDisconnectedIds} should be updated before calling this method.
+     *
+     * <p> A disruption is when two or more consecutive CAN IDs are disconnected.
      * If three or more consecutive CAN IDs are disconnected, that counts as one disruption starting at the first disconnected CAN ID.
      * A disruption at index `i` means that the connection between `canIdConnectionsInOrder[i - 1]` and `canIdConnectionsInOrder[i]` is disrupted.
      * (Connection 0 is between the PDP and the first CAN ID in the list.)
-     * @param disconnectedIds - The list of disconnected CAN IDs.
      * @return A list of indices where disruptions occur.
      */
-    public static List<Integer> getDisruptions(List<Integer> disconnectedIds) {
-        List<Integer> disruptions = new ArrayList<>();
+    public static void updateLastDisruptions() {
+        lastDisruptions.clear();
 
         /**
          * The number of consecutive disconnected CAN IDs seen so far.
          */
         int consecutive = 0;
 
-        for (int i = 0; i < canIdConnectionsInOrder.size(); i++) {
-            int canId = canIdConnectionsInOrder.get(i);
+        for (int i = 0; i < CANIdConstants.canIdConnectionsInOrder.length; i++) {
+            int canId = CANIdConstants.canIdConnectionsInOrder[i];
 
-            if (disconnectedIds.contains(canId)) {
+            if (lastDisconnectedIds.contains(canId)) {
                 consecutive++;
 
                 // Start of a new disruption
                 if (consecutive == 2) {
-                    disruptions.add(i);
+                    lastDisruptions.add(i);
                 }
             } else {
                 // Reset consecutive count
                 consecutive = 0;
             }
         }
-
-        return disruptions;
     }
 
     /**
      * Periodically checks the connection status of all registered CAN ID alerts and updates the CAN bus disruption alert accordingly.
      */
     public static void periodic() {
-        // TODO: maybe optimize by caching disconnected IDs instead of computing
-        List<Integer> disconnectedIds = new ArrayList<>();
-
+        lastDisconnectedIds.clear();
         for (CANIdAlert alert : canIdAlerts) {
             if (!alert.isConnected()) {
                 // Add the CAN ID to the disconnected list
-                disconnectedIds.add(alert.canId);
+                lastDisconnectedIds.add(alert.canId);
             }
         }
 
-        List<Integer> disruptions = getDisruptions(disconnectedIds);
+        updateLastDisruptions();
 
         // If no disruptions, clear alert and return
-        if (disruptions.isEmpty()) {
+        if (lastDisruptions.isEmpty()) {
             canBusDisruptionAlert.set(false);
             return;
         }
 
-        StringBuilder disruptionMessage = new StringBuilder("CAN bus disruption detected at connections: ");
+        // Reset disruption message builder
+        disruptionMessageBuilder.setLength(INITIAL_DISRUPTION_MESSAGE.length());
 
         // Set alert based on disruptions
-        for (int i = 0; i < disruptions.size(); i++) {
-            int disruptionIndex = disruptions.get(i);
+        for (int i = 0; i < lastDisruptions.size(); i++) {
+            int disruptionIndex = lastDisruptions.get(i);
 
-            disruptionMessage.append(disruptionIndex);
+            disruptionMessageBuilder.append(disruptionIndex);
 
-            if (i < disruptions.size() - 1) {
-                disruptionMessage.append(", ");
+            if (i < lastDisruptions.size() - 1) {
+                disruptionMessageBuilder.append(", ");
             }
         }
 
         // Finalize and set alert
-        disruptionMessage.append(".");
-        canBusDisruptionAlert.setText(disruptionMessage.toString());
+        disruptionMessageBuilder.append(".");
+        canBusDisruptionAlert.setText(disruptionMessageBuilder.toString());
         canBusDisruptionAlert.set(true);
     }
 }

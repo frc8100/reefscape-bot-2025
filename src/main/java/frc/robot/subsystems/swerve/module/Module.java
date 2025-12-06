@@ -23,10 +23,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Distance;
+import frc.robot.CANIdConstants;
 import frc.robot.subsystems.CANIdAlert;
-import frc.robot.subsystems.CANIdConnections;
-import frc.robot.subsystems.CANIdConnections.SwerveModuleCanIDs;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import org.littletonrobotics.junction.Logger;
 
@@ -61,7 +59,7 @@ public class Module {
         this.io = io;
         this.index = index;
 
-        SwerveModuleCanIDs canIds = CANIdConnections.getModuleCANIdsFromIndex(index);
+        CANIdConstants.SwerveModuleCanIDs canIds = CANIdConstants.getModuleCANIdsFromIndex(index);
 
         driveDisconnectedAlert = new CANIdAlert(canIds.driveMotorID(), "DriveMotor" + Integer.toString(index));
         turnDisconnectedAlert = new CANIdAlert(canIds.angleMotorID(), "TurnMotor" + Integer.toString(index));

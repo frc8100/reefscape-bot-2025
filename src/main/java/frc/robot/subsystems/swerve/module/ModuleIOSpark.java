@@ -32,8 +32,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
-import frc.robot.subsystems.CANIdConnections;
-import frc.robot.subsystems.CANIdConnections.SwerveModuleCanIDs;
+import frc.robot.CANIdConstants;
 import frc.robot.subsystems.swerve.OdometryThread;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import frc.robot.subsystems.swerve.SwerveModuleSpecificConstants;
@@ -106,7 +105,7 @@ public class ModuleIOSpark implements ModuleIO {
     public ModuleIOSpark(int moduleNumber) {
         this(
             moduleNumber,
-            CANIdConnections.getModuleCANIdsFromIndex(moduleNumber),
+            CANIdConstants.getModuleCANIdsFromIndex(moduleNumber),
             SwerveModuleSpecificConstants.getModuleConstantsFromIndex(moduleNumber)
         );
     }
@@ -117,7 +116,11 @@ public class ModuleIOSpark implements ModuleIO {
      * @param canIDs - The CAN IDs for the module.
      * @param moduleConstants - The module-specific constants.
      */
-    public ModuleIOSpark(int moduleNumber, SwerveModuleCanIDs canIDs, RobotSwerveModuleConstants moduleConstants) {
+    public ModuleIOSpark(
+        int moduleNumber,
+        CANIdConstants.SwerveModuleCanIDs canIDs,
+        RobotSwerveModuleConstants moduleConstants
+    ) {
         // Set the module number and angle offset
         this.moduleNumber = moduleNumber;
         this.dashboardKey = "Swerve/Module" + moduleNumber;
