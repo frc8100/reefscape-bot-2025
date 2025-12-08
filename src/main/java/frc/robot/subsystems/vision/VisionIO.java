@@ -15,15 +15,9 @@ package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
-import limelight.Limelight;
-import limelight.networktables.target.pipeline.NeuralDetector;
 import org.littletonrobotics.junction.AutoLog;
-import org.photonvision.targeting.PhotonPipelineResult;
 
 /**
  * The IO layer for a single vision camera.
@@ -49,7 +43,7 @@ public interface VisionIO {
         public int[] tagIds = new int[0];
 
         /**
-         * A que of unread game piece observations.
+         * A queue of unread game piece observations.
          */
         public GamePieceObservation[] gamePieceObservations = new GamePieceObservation[0];
     }
