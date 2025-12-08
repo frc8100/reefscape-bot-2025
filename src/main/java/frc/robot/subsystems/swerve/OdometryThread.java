@@ -98,6 +98,8 @@ public class OdometryThread {
             sparks.add(spark);
             sparkSignals.add(signal);
             sparkQueues.add(queue);
+
+            sparkValuesCached = new double[sparkSignals.size()];
         } finally {
             Swerve.odometryLock.unlock();
         }
@@ -166,6 +168,8 @@ public class OdometryThread {
         return timestampQueue;
     }
 
+    private double[] sparkValuesCached = new double[0];
+
     /**
      * Updates all registered signals and saves their values to their respective queues.
      */
@@ -195,10 +199,9 @@ public class OdometryThread {
             double timestamp = RobotController.getFPGATime() / 1e6;
 
             // Read Spark values, mark invalid in case of error
-            double[] sparkValues = new double[sparkSignals.size()];
             boolean isValid = true;
             for (int i = 0; i < sparkSignals.size(); i++) {
-                sparkValues[i] = sparkSignals.get(i).getAsDouble();
+                sparkValuesCached[i] = sparkSignals.get(i).getAsDouble();
                 if (sparks.get(i).getLastError() != REVLibError.kOk) {
                     isValid = false;
                 }
@@ -207,7 +210,7 @@ public class OdometryThread {
             // If valid, add values to queues
             if (isValid) {
                 for (int i = 0; i < sparkSignals.size(); i++) {
-                    sparkQueues.get(i).offer(sparkValues[i]);
+                    sparkQueues.get(i).offer(sparkValuesCached[i]);
                 }
                 for (int i = 0; i < phoenixAngleRotationsSignals.length; i++) {
                     phoenixAngleRotationsQueues
@@ -222,6 +225,8 @@ public class OdometryThread {
 
                 timestampQueue.offer(timestamp);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             Swerve.odometryLock.unlock();
         }

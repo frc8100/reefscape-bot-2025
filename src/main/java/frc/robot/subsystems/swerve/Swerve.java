@@ -256,6 +256,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         runVelocityChassisSpeeds(desiredChassisSpeeds);
     }
 
+    // TODO: Maybe have this method just set a setpoint variable and have all the calculations in periodic (if this is run multiple times in a loop, calculation could be off)
     @SuppressWarnings("unused")
     @Override
     public void runVelocityChassisSpeeds(ChassisSpeeds speed) {
@@ -370,36 +371,27 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
     }
 
+    private final SwerveModuleState[] cachedModuleStates = new SwerveModuleState[4];
+
     @Override
     @AutoLogOutput(key = "Swerve/States/Measured")
     public SwerveModuleState[] getModuleStates() {
-        SwerveModuleState[] states = new SwerveModuleState[4];
-
-        // Get the state of each module
-        for (int i = 0; i < 4; i++) {
-            Module mod = swerveModules[i];
-            states[mod.index] = mod.getState();
-        }
-
-        return states;
+        return cachedModuleStates;
     }
+
+    private final SwerveModulePosition[] cachedModulePositions = new SwerveModulePosition[4];
 
     @Override
     public SwerveModulePosition[] getModulePositions() {
-        SwerveModulePosition[] positions = new SwerveModulePosition[4];
-
-        for (int i = 0; i < 4; i++) {
-            Module mod = swerveModules[i];
-            positions[i] = mod.getPosition();
-        }
-
-        return positions;
+        return cachedModulePositions;
     }
+
+    private ChassisSpeeds cachedSpeeds = new ChassisSpeeds();
 
     @Override
     @AutoLogOutput(key = "Swerve/ChassisSpeeds/Measured")
     public ChassisSpeeds getChassisSpeeds() {
-        return kinematics.toChassisSpeeds(getModuleStates());
+        return cachedSpeeds;
     }
 
     private final MutLinearVelocity cachedVelocityMagnitude = MetersPerSecond.mutable(0);
@@ -408,8 +400,6 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
      * @return The magnitude of the robot's velocity. Calculated from {@link #getChassisSpeeds()}.
      */
     public LinearVelocity getVelocityMagnitude() {
-        cachedVelocityMagnitude.mut_replace(getVelocityMagnitudeAsDouble(), MetersPerSecond);
-
         return cachedVelocityMagnitude;
     }
 
@@ -470,6 +460,16 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         // Stop moving when disabled
         if (DriverStation.isDisabled()) {
             stop();
+        }
+
+        // Update cached values
+        cachedSpeeds = kinematics.toChassisSpeeds(getModuleStates());
+        cachedVelocityMagnitude.mut_replace(getVelocityMagnitudeAsDouble(), MetersPerSecond);
+
+        for (int i = 0; i < 4; i++) {
+            Module mod = swerveModules[i];
+            cachedModuleStates[mod.index] = mod.getState();
+            cachedModulePositions[i] = mod.getPosition();
         }
 
         // Update odometry
