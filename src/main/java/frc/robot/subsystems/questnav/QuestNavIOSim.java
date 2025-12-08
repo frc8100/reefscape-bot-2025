@@ -8,10 +8,8 @@ import static edu.wpi.first.units.Units.Radians;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.Timer;
-import frc.robot.subsystems.swerve.SwerveDrive;
+import frc.robot.subsystems.swerve.Swerve;
 import gg.questnav.questnav.PoseFrame;
 import java.util.Random;
 import java.util.function.Supplier;
@@ -22,16 +20,21 @@ import java.util.function.Supplier;
 public class QuestNavIOSim implements QuestNavIO {
 
     // Noise parameters
-    private static final Distance TRANSLATION_NOISE_STDDEV_METERS = Centimeters.of(0.5);
-    private static final Distance Z_NOISE_STDDEV_METERS = Centimeters.of(0.25);
-    private static final Angle ROTATION_NOISE_STDDEV_RADIANS = Degrees.of(1.0);
+    private static final double TRANSLATION_NOISE_STDDEV_METERS_PER_METERS_PER_SECOND = Centimeters.of(0.2).in(Meters);
+    private static final double TRANSLATION_NOISE_STDDEV_METERS_BASE = Centimeters.of(0.1).in(Meters);
+    private static final double Z_NOISE_STDDEV_METERS = Centimeters.of(0.2).in(Meters);
+
+    private static final double ROTATION_NOISE_STDDEV_RADIANS_PER_METERS_PER_SECOND = Degrees.of(0.35).in(Radians);
+    private static final double ROTATION_NOISE_STDDEV_RADIANS_BASE = Degrees.of(0.15).in(Radians);
 
     private final Random random = new Random();
 
-    private Supplier<Pose2d> simulatedPoseSupplier;
+    private final Supplier<Pose2d> simulatedPoseSupplier;
+    private final Swerve swerveSubsystem;
     private int frameCounter = 1;
 
-    public QuestNavIOSim(SwerveDrive swerveSubsystem) {
+    public QuestNavIOSim(Swerve swerveSubsystem) {
+        this.swerveSubsystem = swerveSubsystem;
         simulatedPoseSupplier = swerveSubsystem::getActualPose;
     }
 
@@ -42,10 +45,19 @@ public class QuestNavIOSim implements QuestNavIO {
         Pose2d pose2d = simulatedPoseSupplier.get();
 
         // Add some noise to the simulated pose
-        double noiseX = random.nextGaussian() * TRANSLATION_NOISE_STDDEV_METERS.in(Meters);
-        double noiseY = random.nextGaussian() * TRANSLATION_NOISE_STDDEV_METERS.in(Meters);
-        double noiseZ = random.nextGaussian() * Z_NOISE_STDDEV_METERS.in(Meters);
-        double noiseYaw = random.nextGaussian() * ROTATION_NOISE_STDDEV_RADIANS.in(Radians);
+        double noiseX =
+            random.nextGaussian() *
+            (TRANSLATION_NOISE_STDDEV_METERS_BASE +
+                TRANSLATION_NOISE_STDDEV_METERS_PER_METERS_PER_SECOND * swerveSubsystem.getVelocityMagnitudeAsDouble());
+        double noiseY =
+            random.nextGaussian() *
+            (TRANSLATION_NOISE_STDDEV_METERS_BASE +
+                TRANSLATION_NOISE_STDDEV_METERS_PER_METERS_PER_SECOND * swerveSubsystem.getVelocityMagnitudeAsDouble());
+        double noiseZ = random.nextGaussian() * Z_NOISE_STDDEV_METERS;
+        double noiseYaw =
+            random.nextGaussian() *
+            (ROTATION_NOISE_STDDEV_RADIANS_BASE +
+                ROTATION_NOISE_STDDEV_RADIANS_PER_METERS_PER_SECOND * swerveSubsystem.getVelocityMagnitudeAsDouble());
 
         return new Pose3d(
             pose2d.getX() + noiseX,
