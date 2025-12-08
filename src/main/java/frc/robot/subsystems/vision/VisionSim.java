@@ -139,9 +139,5 @@ public class VisionSim extends Vision {
         // updateVisionTargets();
 
         super.periodic();
-        // Update vision sim with current robot pose
-        // Updated after because of camera frame calculations
-        // Currently removed because vision sim only has object detection which is handled separately
-        // getVisionSim().update(robotPoseSupplier.get());
     }
 }

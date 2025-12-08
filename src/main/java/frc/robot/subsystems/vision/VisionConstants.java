@@ -13,18 +13,14 @@
 
 package frc.robot.subsystems.vision;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import java.util.List;
-import java.util.function.Supplier;
 import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.SimCameraProperties;
 
@@ -87,6 +83,8 @@ public class VisionConstants {
 
         /**
          * The class name used in the neural detector.
+         * Should match the names used in MapleSim.
+         * {@link org.ironmaple.simulation.gamepieces.GamePieceOnFieldSimulation.GamePieceInfo}
          */
         public final String className;
 
@@ -140,13 +138,12 @@ public class VisionConstants {
         Inches.of(9.5), // (28 - 4.5) - 14 or 0.2413 m
         Inches.of(-5.25), // -((28 - 8.75) - 14) or 0.1397 m
         Inches.of(11.25), // 0.28575 m
-        new Rotation3d()
+        Rotation3d.kZero
     );
 
     /**
      * Camera 0 simulated properties
      */
-    // public static final SimCameraProperties CAMERA_0_PROPERTIES = SimCameraProperties.PERFECT_90DEG();
     public static final SimCameraProperties CAMERA_0_PROPERTIES = SimCameraProperties.LL2_1280_720();
 
     // Basic filtering thresholds
@@ -160,9 +157,7 @@ public class VisionConstants {
 
     // Standard deviation multipliers for each camera
     // (Adjust to trust some cameras more than others)
-    public static final double[] CAMERA_STD_DEV_FACTORS = new double[] {
-        1.0, // Camera 0
-    };
+    public static final double[] CAMERA_STD_DEV_FACTORS = new double[] { 1.0 };
 
     // Multipliers to apply for MegaTag 2 observations
     public static final double LINEAR_STD_DEV_MEGATAG2_FACTOR = 0.5; // More stable than full 3D solve

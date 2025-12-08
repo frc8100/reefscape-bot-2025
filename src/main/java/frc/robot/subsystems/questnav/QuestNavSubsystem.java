@@ -19,11 +19,15 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import frc.robot.subsystems.vision.Vision.VisionConsumer;
 import gg.questnav.questnav.PoseFrame;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Subsystem for interfacing with the QuestNav.
@@ -36,6 +40,8 @@ public class QuestNavSubsystem extends SubsystemBase {
      */
     private static record MeasurementPoint(double x, double y, double z) {}
 
+    public static final Time DEFAULT_TIME_PER_MEASUREMENT = Seconds.of(0.1);
+
     /**
      * The transform from the robot's center to the headset. Used for offsetting pose data.
      */
@@ -43,7 +49,7 @@ public class QuestNavSubsystem extends SubsystemBase {
     public static final Transform3d ROBOT_TO_QUEST = new Transform3d(
         new Translation3d(0.2, 0.2, 0.3),
         // Rotational transform shouldn't matter because of setPose handling, so just leave as identity
-        new Rotation3d()
+        Rotation3d.kZero
     );
     private static final Matrix<N3, N1> QUESTNAV_STD_DEVS = VecBuilder.fill(
         0.02, // Trust down to 2cm in X direction
@@ -104,6 +110,7 @@ public class QuestNavSubsystem extends SubsystemBase {
     public void periodic() {
         // Update the IO inputs
         io.updateInputs(inputs);
+        Logger.processInputs("QuestNav", inputs);
 
         // Handle alerts
         notConnectedAlert.set(inputs.connected);
@@ -148,27 +155,29 @@ public class QuestNavSubsystem extends SubsystemBase {
     /**
      * @return A command that measures the transform between the QuestNav and the robot's coordinate frame.
      * @param swerveSubsystem - The swerve drive subsystem to use for movement.
-     * @param timePerMeasurement - The time to wait between measurements.
      */
-    public Command getMeasureTransformCommand(SwerveDrive swerveSubsystem, Time timePerMeasurement) {
+    public Command getMeasureTransformCommand(Swerve swerveSubsystem) {
         List<MeasurementPoint> measuredPoints = new ArrayList<>();
 
-        Debouncer debounce = new Debouncer(timePerMeasurement.in(Seconds), DebounceType.kRising);
+        Debouncer debounce = new Debouncer(DEFAULT_TIME_PER_MEASUREMENT.in(Seconds), DebounceType.kRising);
+        ChassisSpeeds speedsToRunAt = new ChassisSpeeds(0, 0, 1);
 
         return Commands.runOnce(() -> {
             // Reset poses
             swerveSubsystem.setPose(new Pose2d());
+            swerveSubsystem.zeroGyro();
             io.setPose(new Pose2d());
         }).andThen(
             Commands.run(
                 () -> {
                     // Spin in place
-                    swerveSubsystem.runVelocityChassisSpeeds(new ChassisSpeeds(0, 0, 1));
+                    swerveSubsystem.runVelocityChassisSpeeds(speedsToRunAt);
 
                     if (!inputs.isTracking) {
                         return;
                     }
 
+                    // Debounce to limit measurement rate
                     if (!debounce.calculate(true)) {
                         return;
                     }
@@ -177,7 +186,9 @@ public class QuestNavSubsystem extends SubsystemBase {
                     PoseFrame[] frames = inputs.unreadPoseFrames;
                     for (PoseFrame frame : frames) {
                         Pose3d questPose = frame.questPose3d();
-                        Transform3d measurement = questPose.minus(new Pose3d(swerveSubsystem.getPose()));
+                        Transform3d measurement = questPose.minus(
+                            new Pose3d(0.0, 0.0, 0.0, new Rotation3d(swerveSubsystem.getHeadingFromGyro()))
+                        );
 
                         measuredPoints.add(
                             new MeasurementPoint(measurement.getX(), measurement.getY(), measurement.getZ())
@@ -204,16 +215,18 @@ public class QuestNavSubsystem extends SubsystemBase {
                 double avgY = sumY / measuredPoints.size();
                 double avgZ = sumZ / measuredPoints.size();
 
+                NumberFormat formatter = new DecimalFormat("#0.000");
+
                 System.out.println(
                     "Estimated ROBOT_TO_QUEST transform from " +
                     measuredPoints.size() +
                     " measurements:" +
                     " new Transform3d(" +
-                    avgX +
+                    formatter.format(avgX) +
                     ", " +
-                    avgY +
+                    formatter.format(avgY) +
                     ", " +
-                    avgZ +
+                    formatter.format(avgZ) +
                     ", " +
                     "new Rotation3d()" +
                     ");"

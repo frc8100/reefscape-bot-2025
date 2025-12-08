@@ -208,30 +208,30 @@ public class ObjectiveTracker extends SubsystemBase {
         }
 
         // Test usage
-        addObjective(
-            new Objective(
-                "TestIntake",
-                switchStateAndWaitUntil(
-                    new StateWithPayload<>(
-                        GlobalState.INTAKE_CORAL_FROM_STATION,
-                        new RobotActions.IntakeCoralPayload(FieldLocations.CORAL_STATION_1)
-                    ),
-                    () -> robotActions.swerveSubsystem.stateMachine.is(SwerveState.DRIVE_TO_POSE_AT_TARGET)
-                )
-            )
-        );
-        addObjective(
-            new Objective(
-                "TestScore",
-                switchStateAndWaitUntil(
-                    new StateWithPayload<>(
-                        GlobalState.SCORE_CORAL,
-                        new RobotActions.ScoreCoralPayload(FieldLocations.REEF_1L, SuperstructureConstants.Level.L4)
-                    ),
-                    () -> robotActions.swerveSubsystem.stateMachine.is(SwerveState.DRIVE_TO_POSE_AT_TARGET)
-                )
-            )
-        );
+        // addObjective(
+        //     new Objective(
+        //         "TestIntake",
+        //         switchStateAndWaitUntil(
+        //             new StateWithPayload<>(
+        //                 GlobalState.INTAKE_CORAL_FROM_STATION,
+        //                 new RobotActions.IntakeCoralPayload(FieldLocations.CORAL_STATION_1)
+        //             ),
+        //             () -> robotActions.swerveSubsystem.stateMachine.is(SwerveState.DRIVE_TO_POSE_AT_TARGET)
+        //         )
+        //     )
+        // );
+        // addObjective(
+        //     new Objective(
+        //         "TestScore",
+        //         switchStateAndWaitUntil(
+        //             new StateWithPayload<>(
+        //                 GlobalState.SCORE_CORAL,
+        //                 new RobotActions.ScoreCoralPayload(FieldLocations.REEF_1L, SuperstructureConstants.Level.L4)
+        //             ),
+        //             () -> robotActions.swerveSubsystem.stateMachine.is(SwerveState.DRIVE_TO_POSE_AT_TARGET)
+        //         )
+        //     )
+        // );
 
         SmartDashboard.putData("ScheduleNextObjective", Commands.runOnce(this::scheduleNextObjective));
     }

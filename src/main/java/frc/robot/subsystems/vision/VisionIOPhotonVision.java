@@ -13,22 +13,18 @@
 
 package frc.robot.subsystems.vision;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.subsystems.vision.VisionConstants.aprilTagLayout;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
-import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
-import frc.util.VisionUtil;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.photonvision.PhotonCamera;
+import org.photonvision.targeting.MultiTargetPNPResult;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -53,7 +49,11 @@ public class VisionIOPhotonVision implements VisionIO {
      * A list of all Photon pipeline results from this camera.
      * If photon vision is not used, this is an empty list.
      */
-    // private List<PhotonPipelineResult> photonPipelineResults = new LinkedList<>();
+    // private List<PhotonPipelineResult> photonPipelineResults = new ArrayList<>();
+
+    // Cached data for updateInputs
+    private final Set<Short> tagIds = new HashSet<>();
+    private final List<PoseObservation> poseObservations = new ArrayList<>();
 
     /**
      * Creates a new VisionIOPhotonVision.
@@ -87,23 +87,20 @@ public class VisionIOPhotonVision implements VisionIO {
     //     ));
     // }
 
+    // private void readPoseObservation
+
     @Override
     public void updateInputs(VisionIOInputs inputs) {
         inputs.connected = camera.isConnected();
 
         // Read new camera observations
-        Set<Short> tagIds = new HashSet<>();
-        List<PoseObservation> poseObservations = new LinkedList<>();
-
-        // Add results to inputs
-        // TODO: Optimize memory usage, this creates a new list every time
         List<PhotonPipelineResult> photonPipelineResults = camera.getAllUnreadResults();
 
         for (PhotonPipelineResult result : photonPipelineResults) {
             // Add pose observation
             if (result.multitagResult.isPresent()) {
                 // Multitag result
-                var multitagResult = result.multitagResult.get();
+                MultiTargetPNPResult multitagResult = result.multitagResult.get();
 
                 // Calculate robot pose
                 Transform3d fieldToCamera = multitagResult.estimatedPose.best;
@@ -112,7 +109,7 @@ public class VisionIOPhotonVision implements VisionIO {
 
                 // Calculate average tag distance
                 double totalTagDistance = 0.0;
-                for (var target : result.targets) {
+                for (PhotonTrackedTarget target : result.targets) {
                     totalTagDistance += target.bestCameraToTarget.getTranslation().getNorm();
                 }
 
@@ -122,19 +119,20 @@ public class VisionIOPhotonVision implements VisionIO {
                 // Add observation
                 poseObservations.add(
                     new PoseObservation(
-                        result.getTimestampSeconds(), // Timestamp
-                        robotPose, // 3D pose estimate
-                        multitagResult.estimatedPose.ambiguity, // Ambiguity
-                        multitagResult.fiducialIDsUsed.size(), // Tag count
-                        totalTagDistance / result.targets.size(), // Average tag distance
+                        result.getTimestampSeconds(),
+                        robotPose,
+                        multitagResult.estimatedPose.ambiguity,
+                        multitagResult.fiducialIDsUsed.size(),
+                        totalTagDistance / result.targets.size(),
                         PoseObservationType.PHOTONVISION
                     )
                 ); // Observation type
             } else if (!result.targets.isEmpty()) { // Single tag result
-                var target = result.targets.get(0);
+                PhotonTrackedTarget target = result.targets.get(0);
 
                 // Calculate robot pose
-                var tagPose = aprilTagLayout.getTagPose(target.fiducialId);
+                Optional<Pose3d> tagPose = aprilTagLayout.getTagPose(target.fiducialId);
+
                 if (tagPose.isPresent()) {
                     Transform3d fieldToTarget = new Transform3d(
                         tagPose.get().getTranslation(),
@@ -151,23 +149,21 @@ public class VisionIOPhotonVision implements VisionIO {
                     // Add observation
                     poseObservations.add(
                         new PoseObservation(
-                            result.getTimestampSeconds(), // Timestamp
-                            robotPose, // 3D pose estimate
-                            target.poseAmbiguity, // Ambiguity
-                            1, // Tag count
-                            cameraToTarget.getTranslation().getNorm(), // Average tag distance
+                            result.getTimestampSeconds(),
+                            robotPose,
+                            target.poseAmbiguity,
+                            1,
+                            cameraToTarget.getTranslation().getNorm(),
                             PoseObservationType.PHOTONVISION
                         )
-                    ); // Observation type
+                    );
                 }
             }
         }
 
         // Save pose observations to inputs object
-        inputs.poseObservations = new PoseObservation[poseObservations.size()];
-        for (int i = 0; i < poseObservations.size(); i++) {
-            inputs.poseObservations[i] = poseObservations.get(i);
-        }
+        inputs.poseObservations = poseObservations.toArray(new PoseObservation[poseObservations.size()]);
+        poseObservations.clear();
 
         // Save tag IDs to inputs objects
         inputs.tagIds = new int[tagIds.size()];
@@ -175,5 +171,6 @@ public class VisionIOPhotonVision implements VisionIO {
         for (int id : tagIds) {
             inputs.tagIds[i++] = id;
         }
+        tagIds.clear();
     }
 }

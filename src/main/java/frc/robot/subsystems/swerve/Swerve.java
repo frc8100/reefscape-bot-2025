@@ -1,6 +1,8 @@
 package frc.robot.subsystems.swerve;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
@@ -421,6 +423,22 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         return Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
     }
 
+    /**
+     * Returns orientation data for a Limelight.
+     * See {@link frc.util.LimelightHelpers#SetRobotOrientation} for usage/format.
+     * @return The orientation data to publish to the network.
+     */
+    public double[] getOrientationToPublish() {
+        return new double[] {
+            getRotation().getDegrees(),
+            gyroInputs.yawVelocityRadPerSec.in(DegreesPerSecond),
+            gyroInputs.pitchRadians.in(Degrees),
+            0.0,
+            gyroInputs.rollRadians.in(Degrees),
+            0.0,
+        };
+    }
+
     @Override
     public void zeroGyro(double deg) {
         yawOffset = getPose().getRotation().plus(Rotation2d.fromDegrees(deg));
@@ -429,6 +447,13 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     @Override
     public Rotation2d getHeadingForFieldOriented() {
         return getPose().getRotation().minus(yawOffset);
+    }
+
+    /**
+     * @return The robot heading from the gyro, adjusted by the yaw offset.
+     */
+    public Rotation2d getHeadingFromGyro() {
+        return rawGyroRotation.minus(yawOffset);
     }
 
     @Override

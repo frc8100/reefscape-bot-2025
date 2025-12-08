@@ -149,7 +149,7 @@ public class SwerveSysidRoutines {
     }
 
     /** Measures the robot's wheel radius by spinning in a circle. */
-    public static Command wheelRadiusCharacterization(SwerveDrive drive) {
+    public static Command wheelRadiusCharacterization(Swerve drive) {
         SlewRateLimiter limiter = new SlewRateLimiter(WHEEL_RADIUS_RAMP_RATE);
         WheelRadiusCharacterizationState state = new WheelRadiusCharacterizationState();
 
@@ -174,12 +174,12 @@ public class SwerveSysidRoutines {
                 // Record starting measurement
                 Commands.runOnce(() -> {
                     state.positions = drive.getWheelRadiusCharacterizationPositions();
-                    state.lastAngle = drive.getRotation();
+                    state.lastAngle = drive.getHeadingFromGyro();
                     state.gyroDelta = 0.0;
                 }),
                 // Update gyro delta
                 Commands.run(() -> {
-                    var rotation = drive.getRotation();
+                    var rotation = drive.getHeadingFromGyro();
                     state.gyroDelta += Math.abs(rotation.minus(state.lastAngle).getRadians());
                     state.lastAngle = rotation;
                 }).finallyDo(() -> { // When cancelled, calculate and print results

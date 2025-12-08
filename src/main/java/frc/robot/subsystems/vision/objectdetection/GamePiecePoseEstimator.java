@@ -4,10 +4,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
 import frc.robot.subsystems.vision.VisionIO.GamePieceObservation;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,10 +26,14 @@ public class GamePiecePoseEstimator {
         GamePieceObservationType.class
     );
 
+    /**
+     * Constructs a new GamePiecePoseEstimator.
+     */
     public GamePiecePoseEstimator() {
         // Initialize the latestGamePiecePoses map with empty lists for each observation type
         for (GamePieceObservationType type : GamePieceObservationType.values()) {
-            latestGamePiecePoses.put(type, List.of());
+            latestGamePiecePoses.put(type, new ArrayList<>());
+            hasGamePieceBeenCleared.put(type, false);
         }
     }
 
@@ -82,20 +86,32 @@ public class GamePiecePoseEstimator {
         );
     }
 
+    private final Map<GamePieceObservationType, Boolean> hasGamePieceBeenCleared = new EnumMap<>(
+        GamePieceObservationType.class
+    );
+
     /**
      * Updates the estimator with new game piece observations.
      * @param observations - An array of game piece observations.
      */
     public void updateWithObservations(GamePieceObservation[] observations) {
+        // Skip empty observations
+        if (observations.length == 0) {
+            return;
+        }
+
         // Loop over game piece observations
-        Map<GamePieceObservationType, Boolean> hasGamePieceBeenCleared = new EnumMap<>(GamePieceObservationType.class);
+        hasGamePieceBeenCleared.clear();
 
         for (GamePieceObservation gamePieceObservation : observations) {
-            latestGamePiecePoses.putIfAbsent(gamePieceObservation.type(), new LinkedList<>());
+            latestGamePiecePoses.putIfAbsent(gamePieceObservation.type(), new ArrayList<>());
 
             // Clear previous poses if this is the first observation of this type in this cycle
             if (Boolean.FALSE.equals(hasGamePieceBeenCleared.getOrDefault(gamePieceObservation.type(), false))) {
-                latestGamePiecePoses.put(gamePieceObservation.type(), new LinkedList<>());
+                List<Pose3d> posesList = latestGamePiecePoses.get(gamePieceObservation.type());
+                posesList.clear();
+
+                // Mark as cleared
                 hasGamePieceBeenCleared.put(gamePieceObservation.type(), true);
             }
 

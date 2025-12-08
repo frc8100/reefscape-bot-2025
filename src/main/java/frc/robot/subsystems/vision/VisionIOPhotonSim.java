@@ -17,7 +17,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import frc.robot.subsystems.vision.VisionSim.NeuralDetectorSimPipeline;
-import java.util.LinkedList;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -39,6 +40,7 @@ public class VisionIOPhotonSim extends VisionIOPhotonVision {
     private final NeuralDetectorSimPipeline[] pipelines;
 
     private final Supplier<Pose2d> robotPoseSupplier;
+    private final List<GamePieceObservation> gamePieceObservations = new ArrayList<>();
 
     /**
      * Creates a new VisionIOPhotonVisionSim.
@@ -61,11 +63,57 @@ public class VisionIOPhotonSim extends VisionIOPhotonVision {
         this.pipelines = pipelines;
     }
 
+    private static Field nextNTEntryTimeField = null;
+
+    /**
+     * @return The Field object for the {@link PhotonCameraSim#nextNTEntryTime} field. Can be null if an error occurred.
+     */
+    private static Field getNextNTEntryTimeField() {
+        if (nextNTEntryTimeField == null) {
+            try {
+                // Use reflection to access private field
+                nextNTEntryTimeField = PhotonCameraSim.class.getDeclaredField("nextNTEntryTime");
+                nextNTEntryTimeField.setAccessible(true); // NOSONAR
+            } catch (NoSuchFieldException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return nextNTEntryTimeField;
+    }
+
+    /**
+     * Gets the next entry time without consuming it.
+     * See {@link PhotonCameraSim#consumeNextEntryTime()}.
+     * @return The next entry time in microseconds, or empty if an error occurred or no entry time is available.
+     */
+    private Optional<Long> getNextEntryTimeNoConsume() {
+        try {
+            Field field = getNextNTEntryTimeField();
+            if (field == null) {
+                return Optional.empty();
+            }
+
+            // Store old value
+            long oldNextNTEntryTime = (long) field.get(cameraSim);
+
+            Optional<Long> nextEntryTimeMicrosecondsOpt = cameraSim.consumeNextEntryTime();
+
+            // Restore old value
+            field.set(cameraSim, oldNextNTEntryTime); // NOSONAR
+
+            return nextEntryTimeMicrosecondsOpt;
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return Optional.empty();
+        }
+    }
+
     @Override
     public void updateInputs(VisionIOInputs inputs) {
-        inputs.connected = camera.isConnected();
-
+        // Optional<Long> nextEntryTimeMicrosecondsOpt = getNextEntryTimeNoConsume();
         Optional<Long> nextEntryTimeMicrosecondsOpt = cameraSim.consumeNextEntryTime();
+
         if (!nextEntryTimeMicrosecondsOpt.isPresent()) {
             // No new data
             return;
@@ -75,7 +123,6 @@ public class VisionIOPhotonSim extends VisionIOPhotonVision {
         Pose3d cameraPose = new Pose3d(robotPoseSupplier.get()).transformBy(robotToCamera);
 
         // Object detection
-        List<GamePieceObservation> gamePieceObservations = new LinkedList<>();
 
         // For each pipeline, get potential targets and see if they are visible
         for (NeuralDetectorSimPipeline pipeline : pipelines) {
@@ -91,6 +138,14 @@ public class VisionIOPhotonSim extends VisionIOPhotonVision {
             }
         }
 
-        inputs.gamePieceObservations = gamePieceObservations.toArray(new GamePieceObservation[0]);
+        inputs.gamePieceObservations = gamePieceObservations.toArray(
+            new GamePieceObservation[gamePieceObservations.size()]
+        );
+        gamePieceObservations.clear();
+        // Update vision sim with current robot pose
+        // TODO: Make this only do once with multiple cameras (this updates all cameras)
+        // VisionSim.getVisionSim().update(robotPoseSupplier.get());
+
+        // super.updateInputs(inputs);
     }
 }
