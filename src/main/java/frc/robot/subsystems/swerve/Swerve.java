@@ -117,7 +117,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     /**
      * Previous setpoints used for {@link #setpointGenerator}.
      */
-    private SwerveSetpoint previousSetpoint;
+    private SwerveSetpoint previousSetpoint = null;
 
     /**
      * The swerve modules. These are the four swerve modules on the robot. Each module has a drive
@@ -201,12 +201,6 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         // PathPlannerLogging.setLogActivePathCallback(poses -> field.getObject("path").setPoses(poses));
         // SmartDashboard.putData("Field", field);
 
-        previousSetpoint = new SwerveSetpoint(
-            getChassisSpeeds(),
-            getModuleStates(),
-            DriveFeedforwards.zeros(SwerveConfig.NUMBER_OF_SWERVE_MODULES)
-        );
-
         teleopSwerve = new TeleopSwerve(
             this,
             // Switch between joystick and main drive controls depending on the mode
@@ -230,8 +224,6 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
 
         // Start odometry thread
         OdometryThread.getInstance().start();
-
-        stop();
     }
 
     /**
@@ -260,6 +252,11 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     @SuppressWarnings("unused")
     @Override
     public void runVelocityChassisSpeeds(ChassisSpeeds speed) {
+        // Skip if previous setpoint is null (should only happen on first run)
+        if (previousSetpoint == null) {
+            return;
+        }
+
         // Apply anti-tipping correction
         if (SwerveConfig.IS_ANTI_TIPPING_ENABLED && gyroInputs.isTipping) {
             ChassisSpeeds antiTippingSpeeds = gyroInputs.velocityAntiTipping;
@@ -371,7 +368,12 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
     }
 
-    private final SwerveModuleState[] cachedModuleStates = new SwerveModuleState[4];
+    private final SwerveModuleState[] cachedModuleStates = new SwerveModuleState[] {
+        new SwerveModuleState(),
+        new SwerveModuleState(),
+        new SwerveModuleState(),
+        new SwerveModuleState(),
+    };
 
     @Override
     @AutoLogOutput(key = "Swerve/States/Measured")
@@ -379,14 +381,19 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         return cachedModuleStates;
     }
 
-    private final SwerveModulePosition[] cachedModulePositions = new SwerveModulePosition[4];
+    private final SwerveModulePosition[] cachedModulePositions = new SwerveModulePosition[] {
+        new SwerveModulePosition(),
+        new SwerveModulePosition(),
+        new SwerveModulePosition(),
+        new SwerveModulePosition(),
+    };
 
     @Override
     public SwerveModulePosition[] getModulePositions() {
         return cachedModulePositions;
     }
 
-    private ChassisSpeeds cachedSpeeds = new ChassisSpeeds();
+    private ChassisSpeeds cachedSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
 
     @Override
     @AutoLogOutput(key = "Swerve/ChassisSpeeds/Measured")
@@ -413,20 +420,31 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         return Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
     }
 
+    private double[] cachedOrientationPublish = new double[6];
+
     /**
      * Returns orientation data for a Limelight.
      * See {@link frc.util.LimelightHelpers#SetRobotOrientation} for usage/format.
      * @return The orientation data to publish to the network.
      */
     public double[] getOrientationToPublish() {
-        return new double[] {
-            getRotation().getDegrees(),
-            gyroInputs.yawVelocityRadPerSec.in(DegreesPerSecond),
-            gyroInputs.pitchRadians.in(Degrees),
-            0.0,
-            gyroInputs.rollRadians.in(Degrees),
-            0.0,
-        };
+        // return new double[] {
+        //     getRotation().getDegrees(),
+        //     gyroInputs.yawVelocityRadPerSec.in(DegreesPerSecond),
+        //     gyroInputs.pitchRadians.in(Degrees),
+        //     0.0,
+        //     gyroInputs.rollRadians.in(Degrees),
+        //     0.0,
+        // };
+
+        cachedOrientationPublish[0] = getRotation().getDegrees();
+        cachedOrientationPublish[1] = gyroInputs.yawVelocityRadPerSec.in(DegreesPerSecond);
+        // cachedOrientationPublish[2] = gyroInputs.pitchRadians.in(Degrees);
+        // cachedOrientationPublish[3] = 0.0;
+        // cachedOrientationPublish[4] = gyroInputs.rollRadians.in(Degrees);
+        // cachedOrientationPublish[5] = 0.0;
+
+        return cachedOrientationPublish;
     }
 
     @Override
@@ -457,11 +475,6 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         }
         odometryLock.unlock();
 
-        // Stop moving when disabled
-        if (DriverStation.isDisabled()) {
-            stop();
-        }
-
         // Update cached values
         cachedSpeeds = kinematics.toChassisSpeeds(getModuleStates());
         cachedVelocityMagnitude.mut_replace(getVelocityMagnitudeAsDouble(), MetersPerSecond);
@@ -470,6 +483,16 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
             Module mod = swerveModules[i];
             cachedModuleStates[mod.index] = mod.getState();
             cachedModulePositions[i] = mod.getPosition();
+        }
+
+        // Init previous setpoint if null
+        if (previousSetpoint == null) {
+            previousSetpoint = new SwerveSetpoint(getChassisSpeeds(), getModuleStates(), DriveFeedforwards.zeros(4));
+        }
+
+        // Stop moving when disabled
+        if (DriverStation.isDisabled()) {
+            stop();
         }
 
         // Update odometry

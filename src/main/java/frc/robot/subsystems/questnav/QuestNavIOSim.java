@@ -2,32 +2,38 @@ package frc.robot.subsystems.questnav;
 
 import static edu.wpi.first.units.Units.Centimeters;
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.subsystems.swerve.Swerve;
+import frc.util.VelocityNoiseGenerator;
 import gg.questnav.questnav.PoseFrame;
-import java.util.Random;
 import java.util.function.Supplier;
 
 /**
  * Simulates the QuestNav IO by providing pose data from the swerve subsystem.
+ * Adds noise to the pose data to simulate real-world inaccuracies.
+ * Simulates a 50Hz update rate (lower than real QuestNav) by providing one pose frame per update call.
  */
 public class QuestNavIOSim implements QuestNavIO {
 
     // Noise parameters
-    private static final double TRANSLATION_NOISE_STDDEV_METERS_PER_METERS_PER_SECOND = Centimeters.of(0.2).in(Meters);
-    private static final double TRANSLATION_NOISE_STDDEV_METERS_BASE = Centimeters.of(0.1).in(Meters);
-    private static final double Z_NOISE_STDDEV_METERS = Centimeters.of(0.2).in(Meters);
+    private static final Distance TRANSLATION_NOISE_STDDEV_METERS_BASE = Centimeters.of(0.1);
+    private static final Distance TRANSLATION_NOISE_STDDEV_METERS_PER_METERS_PER_SECOND = Centimeters.of(0.2);
 
-    private static final double ROTATION_NOISE_STDDEV_RADIANS_PER_METERS_PER_SECOND = Degrees.of(0.35).in(Radians);
-    private static final double ROTATION_NOISE_STDDEV_RADIANS_BASE = Degrees.of(0.15).in(Radians);
+    private static final Angle ROTATION_NOISE_STDDEV_RADIANS_BASE = Degrees.of(0.1);
+    private static final Angle ROTATION_NOISE_STDDEV_RADIANS_PER_METERS_PER_SECOND = Degrees.of(0.35);
 
-    private final Random random = new Random();
+    private final VelocityNoiseGenerator.PoseVelocityNoiseGenerator poseNoiseGenerator =
+        new VelocityNoiseGenerator.PoseVelocityNoiseGenerator(
+            TRANSLATION_NOISE_STDDEV_METERS_BASE,
+            TRANSLATION_NOISE_STDDEV_METERS_PER_METERS_PER_SECOND,
+            ROTATION_NOISE_STDDEV_RADIANS_BASE,
+            ROTATION_NOISE_STDDEV_RADIANS_PER_METERS_PER_SECOND
+        );
 
     private final Supplier<Pose2d> simulatedPoseSupplier;
     private final Swerve swerveSubsystem;
@@ -45,26 +51,9 @@ public class QuestNavIOSim implements QuestNavIO {
         Pose2d pose2d = simulatedPoseSupplier.get();
 
         // Add some noise to the simulated pose
-        double noiseX =
-            random.nextGaussian() *
-            (TRANSLATION_NOISE_STDDEV_METERS_BASE +
-                TRANSLATION_NOISE_STDDEV_METERS_PER_METERS_PER_SECOND * swerveSubsystem.getVelocityMagnitudeAsDouble());
-        double noiseY =
-            random.nextGaussian() *
-            (TRANSLATION_NOISE_STDDEV_METERS_BASE +
-                TRANSLATION_NOISE_STDDEV_METERS_PER_METERS_PER_SECOND * swerveSubsystem.getVelocityMagnitudeAsDouble());
-        double noiseZ = random.nextGaussian() * Z_NOISE_STDDEV_METERS;
-        double noiseYaw =
-            random.nextGaussian() *
-            (ROTATION_NOISE_STDDEV_RADIANS_BASE +
-                ROTATION_NOISE_STDDEV_RADIANS_PER_METERS_PER_SECOND * swerveSubsystem.getVelocityMagnitudeAsDouble());
+        Pose2d noisyPose2d = poseNoiseGenerator.applyNoise(pose2d, swerveSubsystem.getVelocityMagnitudeAsDouble());
 
-        return new Pose3d(
-            pose2d.getX() + noiseX,
-            pose2d.getY() + noiseY,
-            noiseZ,
-            new Rotation3d(0, 0, pose2d.getRotation().getRadians() + noiseYaw)
-        );
+        return new Pose3d(noisyPose2d);
     }
 
     @Override
@@ -74,6 +63,7 @@ public class QuestNavIOSim implements QuestNavIO {
         inputs.batteryPercent = 100;
         inputs.trackingLostCounter = 0;
 
+        // Add one pose frame per update
         inputs.unreadPoseFrames = new PoseFrame[] {
             new PoseFrame(
                 getSimulatedPose().transformBy(QuestNavSubsystem.ROBOT_TO_QUEST),

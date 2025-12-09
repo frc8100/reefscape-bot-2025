@@ -13,10 +13,17 @@
 
 package frc.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.Centimeters;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.vision.VisionSim.NeuralDetectorSimPipeline;
+import frc.util.VelocityNoiseGenerator;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +46,19 @@ public class VisionIOPhotonSim extends VisionIOPhotonVision {
      */
     private final NeuralDetectorSimPipeline[] pipelines;
 
+    private final Swerve swerveSubsystem;
+
     private final Supplier<Pose2d> robotPoseSupplier;
     private final List<GamePieceObservation> gamePieceObservations = new ArrayList<>();
+
+    // Noise
+    private final VelocityNoiseGenerator.PoseVelocityNoiseGenerator poseNoiseGenerator =
+        new VelocityNoiseGenerator.PoseVelocityNoiseGenerator(
+            Centimeters.of(0.35),
+            Centimeters.of(0.7),
+            Degrees.of(0.5),
+            Degrees.of(1.0)
+        );
 
     /**
      * Creates a new VisionIOPhotonVisionSim.
@@ -51,7 +69,7 @@ public class VisionIOPhotonSim extends VisionIOPhotonVision {
         String name,
         Transform3d robotToCamera,
         SimCameraProperties cameraProperties,
-        Supplier<Pose2d> robotPoseSupplier,
+        Swerve swerveSubsystem,
         NeuralDetectorSimPipeline[] pipelines
     ) {
         super(name, robotToCamera);
@@ -59,7 +77,9 @@ public class VisionIOPhotonSim extends VisionIOPhotonVision {
         cameraSim = new PhotonCameraSim(camera, cameraProperties, VisionConstants.aprilTagLayout);
         VisionSim.getVisionSim().addCamera(cameraSim, robotToCamera);
 
-        this.robotPoseSupplier = robotPoseSupplier;
+        this.swerveSubsystem = swerveSubsystem;
+
+        this.robotPoseSupplier = swerveSubsystem::getActualPose;
         this.pipelines = pipelines;
     }
 
@@ -131,8 +151,14 @@ public class VisionIOPhotonSim extends VisionIOPhotonVision {
             for (VisionTargetSim target : potentialTargets) {
                 if (cameraSim.canSeeTargetPose(cameraPose, target)) {
                     // Visible, add observation
+                    Pose3d noisyPose = poseNoiseGenerator.applyNoise(
+                        target.getPose(),
+                        swerveSubsystem.getVelocityMagnitudeAsDouble() +
+                        (robotPoseSupplier.get().minus(target.getPose().toPose2d()).getTranslation().getNorm() * 0.3)
+                    );
+
                     gamePieceObservations.add(
-                        new GamePieceObservation(nextTimeMicroseconds / 1e6, target.getPose(), 0.0, pipeline.type())
+                        new GamePieceObservation(nextTimeMicroseconds / 1e6, noisyPose, 0.0, pipeline.type())
                     );
                 }
             }

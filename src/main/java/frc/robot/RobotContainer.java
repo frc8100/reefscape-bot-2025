@@ -149,7 +149,7 @@ public class RobotContainer {
                         VisionConstants.CAMERA_0_NAME,
                         VisionConstants.TRANSFORM_TO_CAMERA_0,
                         VisionConstants.CAMERA_0_PROPERTIES,
-                        swerveSubsystem::getActualPose,
+                        swerveSubsystem,
                         simPipelines
                     )
                 );

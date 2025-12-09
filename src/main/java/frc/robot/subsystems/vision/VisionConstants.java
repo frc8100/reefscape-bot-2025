@@ -57,28 +57,26 @@ public class VisionConstants {
 
         /**
          * @param classID - The class ID from the neural detector.
-         * @return The GamePieceObservationType for the given class ID.
+         * @return The GamePieceObservationType for the given class ID, or null if not found.
          */
         public static GamePieceObservationType fromClassID(int classID) {
-            for (GamePieceObservationType type : values()) {
-                if (type.classID == classID) {
-                    return type;
-                }
-            }
-            return null;
+            return switch (classID) {
+                case 1 -> CORAL;
+                case 2 -> ALGAE;
+                default -> null;
+            };
         }
 
         /**
          * @param className - The class name from the neural detector.
-         * @return The GamePieceObservationType for the given class name.
+         * @return The GamePieceObservationType for the given class name, or null if not found.
          */
         public static GamePieceObservationType fromClassName(String className) {
-            for (GamePieceObservationType type : values()) {
-                if (type.className.equals(className)) {
-                    return type;
-                }
-            }
-            return null;
+            return switch (className) {
+                case "Coral" -> CORAL;
+                case "Algae" -> ALGAE;
+                default -> null;
+            };
         }
 
         /**
@@ -144,7 +142,7 @@ public class VisionConstants {
     /**
      * Camera 0 simulated properties
      */
-    public static final SimCameraProperties CAMERA_0_PROPERTIES = SimCameraProperties.LL2_1280_720();
+    public static final SimCameraProperties CAMERA_0_PROPERTIES = SimCameraProperties.LL2_1280_720().setFPS(20);
 
     // Basic filtering thresholds
     public static final double MAX_AMBIGUITY = 0.3;

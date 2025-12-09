@@ -15,6 +15,7 @@ package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
@@ -112,6 +113,10 @@ public class VisionIOLimelight implements VisionIO {
 
     private static final int VALUES_PER_DETECTION_ENTRY = 12;
 
+    /**
+     * Reads game piece observations from a raw NetworkTables sample.
+     * @param rawSample - The raw sample double array from NetworkTables.
+     */
     private void readGamePieceObservations(TimestampedDoubleArray rawSample) {
         if (rawSample.value.length % VALUES_PER_DETECTION_ENTRY != 0) {
             // No data
@@ -178,6 +183,8 @@ public class VisionIOLimelight implements VisionIO {
         orientationPublisher.accept(rotationSupplier.get());
         // Increases network traffic but recommended by Limelight to flush after publishing
         NetworkTableInstance.getDefault().flush();
+
+        // LimelightHelpers.getLatestResults(name)
 
         // Read new pose observations from NetworkTables
         for (TimestampedDoubleArray rawSample : megatag1Subscriber.readQueue()) {
