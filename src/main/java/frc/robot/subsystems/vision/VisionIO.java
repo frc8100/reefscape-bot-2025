@@ -78,7 +78,7 @@ public interface VisionIO {
     }
 
     public static record GamePieceObservation(
-        double timestamp,
+        double timestampSeconds,
         Pose3d pose,
         double ambiguity,
         GamePieceObservationType type

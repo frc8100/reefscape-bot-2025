@@ -26,22 +26,18 @@ public class VisionUtil {
      * Estimates the Pose2d of a detected object on the field using Limelight data.
      * @param robotPose - Supplies the current robot pose (field-relative)
      * @param robotToCamera - Transform from the robot center to the camera
-     * @param tx - Horizontal offset from Limelight (degrees, +right)
-     * @param ty - Vertical offset from Limelight (degrees, +down)
+     * @param txRad - Horizontal offset from Limelight (degrees, +right)
+     * @param tyRad - Vertical offset from Limelight (degrees, +down)
      * @param targetHeight - Height of the target above the floor (≈ 0 if lying flat)
      * @return The estimated Pose3d of the object on the field
      */
     public static Pose3d estimateTargetPose3d(
         Pose2d robotPose,
         Transform3d robotToCamera,
-        Angle tx,
-        Angle ty,
+        double txRad,
+        double tyRad,
         Distance targetHeight
     ) {
-        // Convert angles to radians
-        double txRad = tx.in(Radians);
-        double tyRad = ty.in(Radians);
-
         // Compute distance from camera to target (flat)
         double totalPitchRad = -robotToCamera.getRotation().getY() + tyRad;
         double distanceToTargetMeters = (robotToCamera.getZ() - targetHeight.in(Meters)) / Math.tan(totalPitchRad);
@@ -60,7 +56,7 @@ public class VisionUtil {
             .getTranslation();
 
         // TODO: investigate this
-        OpenCVHelp.solvePNP_SQPNP(null, null, null, null);
+        // OpenCVHelp.solvePNP_SQPNP(null, null, null, null);
 
         // Return the target pose
         return new Pose3d(new Pose2d(targetFieldTranslation, Rotation2d.kZero));

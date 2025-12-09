@@ -131,7 +131,6 @@ public class VisionIOPhotonSim extends VisionIOPhotonVision {
 
     @Override
     public void updateInputs(VisionIOInputs inputs) {
-        // Optional<Long> nextEntryTimeMicrosecondsOpt = getNextEntryTimeNoConsume();
         Optional<Long> nextEntryTimeMicrosecondsOpt = cameraSim.consumeNextEntryTime();
 
         if (!nextEntryTimeMicrosecondsOpt.isPresent()) {

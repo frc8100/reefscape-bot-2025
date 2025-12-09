@@ -20,6 +20,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.units.measure.Distance;
 import java.util.List;
 import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.SimCameraProperties;
@@ -51,9 +52,10 @@ public class VisionConstants {
         CORAL(
             "Coral",
             1,
-            new TargetModel(Inches.of(11.875).in(Meters), Inches.of(4).in(Meters), Inches.of(4).in(Meters))
+            new TargetModel(Inches.of(11.875).in(Meters), Inches.of(4).in(Meters), Inches.of(4).in(Meters)),
+            Inches.of(2)
         ),
-        ALGAE("Algae", 2, new TargetModel(Inches.of(16.25).in(Meters)));
+        ALGAE("Algae", 2, new TargetModel(Inches.of(16.25).in(Meters)), Inches.of(16.25 / 2));
 
         /**
          * @param classID - The class ID from the neural detector.
@@ -96,10 +98,21 @@ public class VisionConstants {
          */
         public final TargetModel targetModel;
 
-        private GamePieceObservationType(String className, int classID, TargetModel targetModel) {
+        /**
+         * The height of the target off the floor.
+         */
+        public final Distance heightOffFloor;
+
+        private GamePieceObservationType(
+            String className,
+            int classID,
+            TargetModel targetModel,
+            Distance heightOffFloor
+        ) {
             this.className = className;
             this.classID = classID;
             this.targetModel = targetModel;
+            this.heightOffFloor = heightOffFloor;
         }
     }
 

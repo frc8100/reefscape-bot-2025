@@ -97,9 +97,11 @@ public class RobotContainer {
 
                 visionSubsystem = new Vision(
                     swerveSubsystem::addVisionMeasurement,
-                    new VisionIOLimelight(VisionConstants.CAMERA_0_NAME, swerveSubsystem::getOrientationToPublish)
-                    // new VisionIOPhotonVision(VisionConstants.CAMERA_0_NAME, VisionConstants.TRANSFORM_TO_CAMERA_0)
-                    // new VisionIO() {}
+                    new VisionIOLimelight(
+                        VisionConstants.CAMERA_0_NAME,
+                        VisionConstants.TRANSFORM_TO_CAMERA_0,
+                        swerveSubsystem
+                    )
                 );
 
                 questNavSubsystem = new QuestNavSubsystem(swerveSubsystem::addVisionMeasurement, new QuestNavIOReal());
