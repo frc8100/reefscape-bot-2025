@@ -49,13 +49,15 @@ public class VisionIOLimelight implements VisionIO {
      */
     private final String name;
 
+    private final Swerve swerveSubsystem;
+
     /**
      * Supplier for the current estimated rotation, used for MegaTag 2.
      * See {@link frc.util.LimelightHelpers#SetRobotOrientation} for format.
      * Should be a double[6] array: {yaw, yawRate, pitch, pitchRate, roll, rollRate} in degrees and degrees per second.
      */
     private final Supplier<double[]> rotationSupplier;
-    private final Supplier<Pose2d> poseSupplier;
+    // private final Supplier<Pose2d> poseSupplier;
 
     private final Transform3d transformRobotToCamera;
 
@@ -76,15 +78,10 @@ public class VisionIOLimelight implements VisionIO {
      * @param name - The configured name of the Limelight.
      * @param rotationSupplier - Supplier for the current estimated rotation, used for MegaTag 2. See {@link #rotationSupplier} for details.
      */
-    public VisionIOLimelight(
-        String name,
-        Transform3d transformRobotToCamera,
-        Supplier<double[]> rotationSupplier,
-        Supplier<Pose2d> poseSupplier
-    ) {
+    public VisionIOLimelight(String name, Transform3d transformRobotToCamera, Swerve swerveSubsystem) {
         this.name = name;
-        this.rotationSupplier = rotationSupplier;
-        this.poseSupplier = poseSupplier;
+        this.rotationSupplier = swerveSubsystem::getOrientationToPublish;
+        this.swerveSubsystem = swerveSubsystem;
         this.transformRobotToCamera = transformRobotToCamera;
 
         NetworkTable table = NetworkTableInstance.getDefault().getTable(name);
@@ -93,10 +90,6 @@ public class VisionIOLimelight implements VisionIO {
         megatag1Subscriber = table.getDoubleArrayTopic("botpose_wpiblue").subscribe(new double[] {});
         megatag2Subscriber = table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
         rawDetectionsSubscriber = table.getDoubleArrayTopic("rawdetections").subscribe(new double[] {});
-    }
-
-    public VisionIOLimelight(String name, Transform3d transformRobotToCamera, Swerve swerveSubsystem) {
-        this(name, transformRobotToCamera, swerveSubsystem::getOrientationToPublish, swerveSubsystem::getPose);
     }
 
     /**
@@ -138,12 +131,11 @@ public class VisionIOLimelight implements VisionIO {
      */
     private void readGamePieceObservations(TimestampedDoubleArray rawSample) {
         if (rawSample.value.length % VALUES_PER_DETECTION_ENTRY != 0) {
-            // No data
+            // Invalid data lengths
             return;
         }
 
         int numDetections = rawSample.value.length / VALUES_PER_DETECTION_ENTRY;
-        // RawDetection[] rawDetections = new RawDetection[numDetections];
 
         for (int i = 0; i < numDetections; i++) {
             // Starting index for this detection's data
@@ -162,13 +154,16 @@ public class VisionIOLimelight implements VisionIO {
             // double corner3_X = extractArrayEntry(rawDetectionArray, baseIndex + 10);
             // double corner3_Y = extractArrayEntry(rawDetectionArray, baseIndex + 11);
 
+            // TODO: compensate for latency
+            double timestampSeconds = rawSample.timestamp * 1.0e-6;
+
             GamePieceObservationType type = GamePieceObservationType.fromClassID(
                 (int) LimelightHelpers.extractArrayEntry(rawSample.value, baseIndex)
             );
 
-            // TODO: calculate Pose3d
+            // Estimate 3D pose
             Pose3d pose = VisionUtil.estimateTargetPose3d(
-                poseSupplier.get(),
+                swerveSubsystem.poseEstimator.sampleAt(timestampSeconds).orElse(swerveSubsystem.getPose()),
                 transformRobotToCamera,
                 // TODO: should tx or ty be inverted?
                 Units.degreesToRadians(LimelightHelpers.extractArrayEntry(rawSample.value, baseIndex + 1)),
@@ -176,7 +171,6 @@ public class VisionIOLimelight implements VisionIO {
                 type.heightOffFloor
             );
 
-            // TODO: compensate for latency
             gamePieceObservations.add(new GamePieceObservation(rawSample.timestamp * 1.0e-6, pose, 0.0, type));
         }
     }

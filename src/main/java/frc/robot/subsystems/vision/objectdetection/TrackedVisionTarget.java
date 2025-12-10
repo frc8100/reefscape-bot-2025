@@ -1,5 +1,7 @@
 package frc.robot.subsystems.vision.objectdetection;
 
+import static edu.wpi.first.units.Units.Meters;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.KalmanFilter;
@@ -70,17 +72,17 @@ public class TrackedVisionTarget {
     /**
      * The time the target was created.
      */
-    public final double creationTimeSeconds;
+    private final double creationTimeSeconds;
 
     /**
-     * The time the target was last seen.
+     * Whether the target has been hit this frame.
      */
-    public double lastSeenTimeSeconds;
+    public boolean hasBeenHitThisFrame = false;
 
     /**
      * The number of hits for this target.
      */
-    public int hits = 0;
+    private int hits = 0;
 
     /**
      * The number of misses for this target.
@@ -90,7 +92,7 @@ public class TrackedVisionTarget {
     /**
      * The latest pose of the target.
      */
-    public Pose3d latestPose;
+    private Pose3d latestPose;
 
     /**
      * A Kalman filter for estimating the pose of the vision target.
@@ -106,6 +108,12 @@ public class TrackedVisionTarget {
         Constants.LOOP_PERIOD_SECONDS
     );
 
+    /**
+     * Constructs a new TrackedVisionTarget.
+     * @param type - The type of game piece the target represents.
+     * @param creationTimeSeconds - The time the target was created.
+     * @param initialPose - The initial pose of the target.
+     */
     public TrackedVisionTarget(GamePieceObservationType type, double creationTimeSeconds, Pose3d initialPose) {
         this.type = type;
         this.creationTimeSeconds = creationTimeSeconds;
@@ -126,9 +134,11 @@ public class TrackedVisionTarget {
      */
     public void updatePose(Pose3d newPose) {
         this.latestPose = newPose;
-        this.hits++;
+        hits++;
+
         // Reset misses on a successful update
-        this.misses = 0;
+        misses = 0;
+        hasBeenHitThisFrame = true;
 
         // Update the Kalman filter with the new measurement
         cachedMeasurement.set(0, 0, newPose.getX());
@@ -144,9 +154,13 @@ public class TrackedVisionTarget {
         kalmanFilter.predict(emptyInput, Constants.LOOP_PERIOD_SECONDS);
     }
 
-    public Pose2d getEstimatedPose2d() {
+    /**
+     * @return The estimated pose of the target.
+     */
+    public Pose3d getEstimatedPose() {
         Matrix<N4, N1> state = kalmanFilter.getXhat();
-        return new Pose2d(state.get(0, 0), state.get(1, 0), latestPose.getRotation().toRotation2d());
+
+        return new Pose3d(state.get(0, 0), state.get(1, 0), type.heightOffFloor.in(Meters), latestPose.getRotation());
     }
 
     /**

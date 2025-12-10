@@ -54,7 +54,7 @@ public class GamePiecePoseEstimator {
      * @return A list of the latest observed game piece poses for the given type. If no poses have been observed, returns an empty list.
      */
     public List<Pose3d> getLatestGamePiecePoses(GamePieceObservationType type) {
-        return trackedTargets.get(type).stream().map(target -> target.latestPose).toList();
+        return trackedTargets.get(type).stream().map(target -> target.getEstimatedPose()).toList();
     }
 
     /**
@@ -63,7 +63,7 @@ public class GamePiecePoseEstimator {
      * @return A list of the latest observed game piece poses as 2D poses for the given type. If no poses have been observed, returns an empty list.
      */
     public List<Pose2d> getLatestGamePiecePosesAs2d(GamePieceObservationType type) {
-        return trackedTargets.get(type).stream().map(target -> target.latestPose.toPose2d()).toList();
+        return trackedTargets.get(type).stream().map(target -> target.getEstimatedPose().toPose2d()).toList();
     }
 
     /**
@@ -141,20 +141,23 @@ public class GamePiecePoseEstimator {
      */
     public void processObservations() {
         for (List<TrackedVisionTarget> targets : trackedTargets.values()) {
+            // Update each target miss
             for (TrackedVisionTarget target : targets) {
-                // TODO: If the target has been observed recently, increment hits
-                if (true) {
-                    target.hits++;
-                } else {
+                if (!target.hasBeenHitThisFrame) {
                     target.misses++;
                 }
-
-                // Update target kalman filter
-                target.update();
             }
 
             // Remove targets that should be deleted
             targets.removeIf(TrackedVisionTarget::shouldDelete);
+
+            // Update each target
+            for (TrackedVisionTarget target : targets) {
+                target.hasBeenHitThisFrame = false;
+
+                // Update target kalman filter
+                target.update();
+            }
         }
     }
 
@@ -169,7 +172,8 @@ public class GamePiecePoseEstimator {
 
             Logger.recordOutput(
                 "Vision/GamePieces/" + type.className + "/LatestPoses",
-                targets.stream().map(target -> target.latestPose).toArray(Pose3d[]::new)
+                // targets.stream().map(target -> target.latestPose).toArray(Pose3d[]::new)
+                targets.stream().map(target -> target.getEstimatedPose()).toArray(Pose3d[]::new)
             );
         }
     }

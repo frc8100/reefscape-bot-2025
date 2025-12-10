@@ -158,7 +158,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
      */
     // protected Field2d field = new Field2d();
 
-    private final SwerveDrivePoseEstimator poseEstimator;
+    public final SwerveDrivePoseEstimator poseEstimator;
 
     /**
      * The yaw offset for field-oriented driving.

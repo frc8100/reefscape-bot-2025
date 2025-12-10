@@ -58,10 +58,22 @@ public interface VisionIO {
         public Optional<Pose2d> getRobotPoseAtTimestamp(double timestampSeconds);
     }
 
-    /** Represents the angle to a simple target, not used for pose estimation. */
+    /**
+     * Represents the angle to a simple target, not used for pose estimation.
+     * @param tx - The horizontal angle to the target.
+     * @param ty - The vertical angle to the target.
+     */
     // public static record TargetObservation(Rotation2d tx, Rotation2d ty) {}
 
-    /** Represents a robot pose sample used for pose estimation. */
+    /**
+     * Represents a robot pose sample used for pose estimation.
+     * @param timestamp - The timestamp of the observation.
+     * @param pose - The observed field-relative pose of the robot.
+     * @param ambiguity - The ambiguity of the observation (lower is better).
+     * @param tagCount - The number of tags used in the observation.
+     * @param averageTagDistance - The average distance to the tags used in the observation, in meters.
+     * @param type - The type of observation.
+     */
     public static record PoseObservation(
         double timestamp,
         Pose3d pose,
@@ -77,6 +89,13 @@ public interface VisionIO {
         PHOTONVISION,
     }
 
+    /**
+     * Represents a game piece observation used for game piece pose estimation.
+     * @param timestampSeconds - The timestamp of the observation in seconds.
+     * @param pose - The observed field-relative pose of the game piece.
+     * @param ambiguity - The ambiguity of the observation (lower is better).
+     * @param type - The type of game piece observed.
+     */
     public static record GamePieceObservation(
         double timestampSeconds,
         Pose3d pose,
