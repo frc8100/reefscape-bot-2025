@@ -135,6 +135,10 @@ public class GamePiecePoseEstimator {
         }
     }
 
+    /**
+     * Processes the observations to update hits and misses for tracked targets.
+     * Should be called once per update cycle after observations have been processed.
+     */
     public void processObservations() {
         for (List<TrackedVisionTarget> targets : trackedTargets.values()) {
             for (TrackedVisionTarget target : targets) {
@@ -144,6 +148,9 @@ public class GamePiecePoseEstimator {
                 } else {
                     target.misses++;
                 }
+
+                // Update target kalman filter
+                target.update();
             }
 
             // Remove targets that should be deleted

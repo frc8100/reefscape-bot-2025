@@ -14,7 +14,6 @@ public class HungarianAlgorithm {
      * Produce a cost matrix where rows are detections and columns are tracked targets.
      */
     private Matrix<?, ?> getCostMatrix() {
-        // placeholder
         return null;
     }
 
