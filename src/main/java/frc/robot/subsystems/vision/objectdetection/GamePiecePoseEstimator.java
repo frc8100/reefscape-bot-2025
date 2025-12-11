@@ -104,10 +104,29 @@ public class GamePiecePoseEstimator {
         if (observations.length == 0) {
             return;
         }
-        // updateWithAssociatedTargets(hungarianAlgorithm.assignDetectionsToTargets(
-        //     List.of(observations),
-        //     trackedTargets.values().stream().flatMap(List::stream).toList()
-        // ));
+
+        for (GamePieceObservationType type : GamePieceObservationType.values()) {
+            // TODO: optimize this to avoid creating new lists
+            List<GamePieceObservation> observationsOfType = new ArrayList<>();
+            for (GamePieceObservation observation : observations) {
+                if (observation.type() == type) {
+                    observationsOfType.add(observation);
+                }
+            }
+
+            List<TrackedVisionTarget> trackedTargetsOfType = trackedTargets.get(type);
+
+            List<DetectionAssociatedWithTrackedTarget> associatedDetections =
+                hungarianAlgorithm.assignDetectionsToTargets(observationsOfType, trackedTargetsOfType);
+
+            // Determine unassociated detections
+            List<GamePieceObservation> unassociatedDetections = new ArrayList<>(observationsOfType);
+            for (DetectionAssociatedWithTrackedTarget associatedDetection : associatedDetections) {
+                unassociatedDetections.remove(associatedDetection.observation);
+            }
+
+            updateWithAssociatedTargets(associatedDetections, unassociatedDetections);
+        }
     }
 
     private void updateWithAssociatedTargets(

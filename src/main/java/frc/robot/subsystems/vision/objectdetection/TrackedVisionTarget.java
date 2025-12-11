@@ -80,6 +80,11 @@ public class TrackedVisionTarget {
     public boolean hasBeenHitThisFrame = false;
 
     /**
+     * Whether the target has been assigned this frame.
+     */
+    public boolean hasBeenAssignedThisFrame = false;
+
+    /**
      * The number of hits for this target.
      */
     private int hits = 0;
