@@ -17,12 +17,12 @@ public class HungarianAlgorithm {
     /**
      * Maximum cost allowed for greedy assignment in meters.
      */
-    private static final double MAX_COST_ALLOWED_FOR_GREEDY_ASSIGNMENT_METERS = Inches.of(4).in(Meters);
+    private static final double MAX_COST_ALLOWED_FOR_GREEDY_ASSIGNMENT_METERS = Inches.of(6).in(Meters);
 
     /**
      * When the cost of assigning a detection to a tracked target is below this threshold, instantly assign them without checking other options.
      */
-    private static final double INSTANT_ASSIGNMENT_COST_THRESHOLD_METERS = Inches.of(2).in(Meters);
+    private static final double INSTANT_ASSIGNMENT_COST_THRESHOLD_METERS = Inches.of(3).in(Meters);
 
     /**
      * Produce a cost matrix where rows are detections and columns are tracked targets.
@@ -45,7 +45,26 @@ public class HungarianAlgorithm {
         return detection.pose().getTranslation().getDistance(trackedTarget.getEstimatedPose().getTranslation());
     }
 
-    private final List<DetectionAssociatedWithTrackedTarget> cachedAssignments = new ArrayList<>();
+    /**
+     * The result of assigning detections to tracked targets in {@link #assignDetectionsToTargets(List, List)}.
+     * Users should not modify the lists directly.
+     */
+    public static class AssignmentResult {
+
+        // TODO: maybe used index-based assignments instead of lists for performance?
+
+        /**
+         * The list of assignments of detections to tracked targets.
+         */
+        public final List<DetectionAssociatedWithTrackedTarget> assignments = new ArrayList<>();
+
+        /**
+         * The list of unassociated detections.
+         */
+        public final List<GamePieceObservation> unassociatedDetections = new ArrayList<>();
+    }
+
+    private final AssignmentResult cachedResult = new AssignmentResult();
 
     /**
      * Assign detections to tracked targets using a greedy algorithm based on cost.
@@ -53,15 +72,21 @@ public class HungarianAlgorithm {
      * @param trackedTargets - The list of tracked vision targets.
      * @return A list of assignments of detections to tracked targets.
      */
-    public List<DetectionAssociatedWithTrackedTarget> assignDetectionsToTargets(
+    public AssignmentResult assignDetectionsToTargets(
         List<GamePieceObservation> detections,
         List<TrackedVisionTarget> trackedTargets
     ) {
-        cachedAssignments.clear();
+        cachedResult.assignments.clear();
+        cachedResult.unassociatedDetections.clear();
 
         // No assignments possible
-        if (detections.isEmpty() || trackedTargets.isEmpty()) {
-            return cachedAssignments;
+        if (trackedTargets.isEmpty()) {
+            // All detections are unassociated if there are no tracked targets
+            if (!detections.isEmpty()) {
+                cachedResult.unassociatedDetections.addAll(detections);
+            }
+
+            return cachedResult;
         }
 
         // For every tracked target and detection, reset assignment flags
@@ -81,22 +106,28 @@ public class HungarianAlgorithm {
                 }
 
                 double cost = getCost(detection, trackedTarget);
+
+                // Check if this is the best cost so far
                 if (cost < bestCost) {
                     bestCost = cost;
                     bestTarget = trackedTarget;
                 }
 
-                // If the cost is below the instant assignment threshold, we can assign it immediately.
+                // If the cost is below the instant assignment threshold, assign it immediately.
                 if (bestCost <= INSTANT_ASSIGNMENT_COST_THRESHOLD_METERS) {
                     break;
                 }
             }
 
+            // Assign the best target if within allowed cost
             if (bestTarget != null && bestCost <= MAX_COST_ALLOWED_FOR_GREEDY_ASSIGNMENT_METERS) {
-                cachedAssignments.add(new DetectionAssociatedWithTrackedTarget(detection, bestTarget));
+                cachedResult.assignments.add(new DetectionAssociatedWithTrackedTarget(detection, bestTarget));
+            } else {
+                // No suitable target found, mark as unassociated
+                cachedResult.unassociatedDetections.add(detection);
             }
         }
 
-        return cachedAssignments;
+        return cachedResult;
     }
 }

@@ -104,6 +104,7 @@ public class TrackedVisionTarget {
      * The state vector is [x, y, vx, vy].
      * The output vector is [x, y].
      */
+    // TODO: maybe use simple stdev values instead of having a plant that does nothing because velocity is not measured
     public KalmanFilter<N4, N0, N2> kalmanFilter = new KalmanFilter<>(
         N4.instance,
         N2.instance,
@@ -137,7 +138,7 @@ public class TrackedVisionTarget {
      * Updates the pose of the target.
      * @param newPose - The new pose of the target.
      */
-    public void updatePose(Pose3d newPose) {
+    public void addMeasurement(Pose3d newPose) {
         this.latestPose = newPose;
         hits++;
 

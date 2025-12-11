@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
 import frc.robot.subsystems.vision.VisionIO.GamePieceObservation;
+import frc.robot.subsystems.vision.objectdetection.HungarianAlgorithm.AssignmentResult;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -38,6 +39,10 @@ public class GamePiecePoseEstimator {
         GamePieceObservationType.class
     );
 
+    private final Map<GamePieceObservationType, List<GamePieceObservation>> cachedObservationsByType = new EnumMap<>(
+        GamePieceObservationType.class
+    );
+
     /**
      * Constructs a new GamePiecePoseEstimator.
      */
@@ -45,6 +50,7 @@ public class GamePiecePoseEstimator {
         // Initialize the map with empty lists for each observation type
         for (GamePieceObservationType type : GamePieceObservationType.values()) {
             trackedTargets.put(type, new ArrayList<>());
+            cachedObservationsByType.put(type, new ArrayList<>());
         }
     }
 
@@ -105,9 +111,12 @@ public class GamePiecePoseEstimator {
             return;
         }
 
+        // TODO: account for multiple frames being processed at once
         for (GamePieceObservationType type : GamePieceObservationType.values()) {
-            // TODO: optimize this to avoid creating new lists
-            List<GamePieceObservation> observationsOfType = new ArrayList<>();
+            // TODO: new way to filter observations before assignment
+            List<GamePieceObservation> observationsOfType = cachedObservationsByType.get(type);
+            observationsOfType.clear();
+
             for (GamePieceObservation observation : observations) {
                 if (observation.type() == type) {
                     observationsOfType.add(observation);
@@ -116,34 +125,28 @@ public class GamePiecePoseEstimator {
 
             List<TrackedVisionTarget> trackedTargetsOfType = trackedTargets.get(type);
 
-            List<DetectionAssociatedWithTrackedTarget> associatedDetections =
-                hungarianAlgorithm.assignDetectionsToTargets(observationsOfType, trackedTargetsOfType);
-
-            // Determine unassociated detections
-            List<GamePieceObservation> unassociatedDetections = new ArrayList<>(observationsOfType);
-            for (DetectionAssociatedWithTrackedTarget associatedDetection : associatedDetections) {
-                unassociatedDetections.remove(associatedDetection.observation);
-            }
-
-            updateWithAssociatedTargets(associatedDetections, unassociatedDetections);
+            updateWithAssociatedTargets(
+                hungarianAlgorithm.assignDetectionsToTargets(observationsOfType, trackedTargetsOfType)
+            );
         }
     }
 
-    private void updateWithAssociatedTargets(
-        List<DetectionAssociatedWithTrackedTarget> associatedDetections,
-        List<GamePieceObservation> unassociatedDetections
-    ) {
+    /**
+     * Updates the tracked targets with the associated detections from the assignment result.
+     * @param assignmentResult - The assignment result containing associated detections and unassociated detections.
+     */
+    private void updateWithAssociatedTargets(AssignmentResult assignmentResult) {
         // Update associated targets
-        for (DetectionAssociatedWithTrackedTarget associatedDetection : associatedDetections) {
+        for (DetectionAssociatedWithTrackedTarget associatedDetection : assignmentResult.assignments) {
             GamePieceObservation observation = associatedDetection.observation;
             TrackedVisionTarget trackedTarget = associatedDetection.trackedTarget;
 
             // Update the tracked target with the new observation pose
-            trackedTarget.updatePose(observation.pose());
+            trackedTarget.addMeasurement(observation.pose());
         }
 
         // Create new tracked targets for unassociated detections
-        for (GamePieceObservation observation : unassociatedDetections) {
+        for (GamePieceObservation observation : assignmentResult.unassociatedDetections) {
             TrackedVisionTarget newTarget = new TrackedVisionTarget(
                 observation.type(),
                 observation.timestampSeconds(),
