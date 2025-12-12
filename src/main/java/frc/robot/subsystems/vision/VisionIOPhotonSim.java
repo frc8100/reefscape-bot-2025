@@ -22,11 +22,14 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import frc.robot.subsystems.swerve.Swerve;
+import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
 import frc.robot.subsystems.vision.VisionSim.NeuralDetectorSimPipeline;
 import frc.util.VelocityNoiseGenerator;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import org.photonvision.simulation.PhotonCameraSim;
@@ -49,7 +52,9 @@ public class VisionIOPhotonSim extends VisionIOPhotonVision {
     private final Swerve swerveSubsystem;
 
     private final Supplier<Pose2d> robotPoseSupplier;
-    private final List<GamePieceObservation> gamePieceObservations = new ArrayList<>();
+    private final Map<GamePieceObservationType, List<GamePieceObservation>> gamePieceObservationsByType = new EnumMap<>(
+        GamePieceObservationType.class
+    );
 
     // Noise
     private final VelocityNoiseGenerator.PoseVelocityNoiseGenerator poseNoiseGenerator =
@@ -156,17 +161,24 @@ public class VisionIOPhotonSim extends VisionIOPhotonVision {
                         (robotPoseSupplier.get().minus(target.getPose().toPose2d()).getTranslation().getNorm() * 0.3)
                     );
 
-                    gamePieceObservations.add(
-                        new GamePieceObservation(nextTimeMicroseconds / 1e6, noisyPose, 0.0, pipeline.type())
-                    );
+                    gamePieceObservationsByType
+                        .get(pipeline.type())
+                        .add(new GamePieceObservation(nextTimeMicroseconds / 1e6, noisyPose, 0.0, pipeline.type()));
                 }
             }
         }
 
-        inputs.gamePieceObservations = gamePieceObservations.toArray(
-            new GamePieceObservation[gamePieceObservations.size()]
-        );
-        gamePieceObservations.clear();
+        // Save game piece observations to inputs object
+        for (GamePieceObservationType type : GamePieceObservationType.values()) {
+            List<GamePieceObservation> observationsOfType = gamePieceObservationsByType.get(type);
+            inputs.gamePieceObservationsByType[type.getArrayIndexForInputs()] =
+                new GamePieceObservation[observationsOfType.size()];
+            inputs.gamePieceObservationsByType[type.getArrayIndexForInputs()] = observationsOfType.toArray(
+                new GamePieceObservation[observationsOfType.size()]
+            );
+
+            observationsOfType.clear();
+        }
         // Update vision sim with current robot pose
         // TODO: Make this only do once with multiple cameras (this updates all cameras)
         // VisionSim.getVisionSim().update(robotPoseSupplier.get());

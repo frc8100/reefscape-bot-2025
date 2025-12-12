@@ -31,8 +31,10 @@ import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
 import frc.util.LimelightHelpers;
 import frc.util.VisionUtil;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -69,7 +71,9 @@ public class VisionIOLimelight implements VisionIO {
     private final DoubleArraySubscriber rawDetectionsSubscriber;
 
     private final List<PoseObservation> poseObservations = new ArrayList<>();
-    private final List<GamePieceObservation> gamePieceObservations = new ArrayList<>();
+    private final Map<GamePieceObservationType, List<GamePieceObservation>> gamePieceObservationsByType = new EnumMap<>(
+        GamePieceObservationType.class
+    );
 
     private final Set<Integer> tagIds = new HashSet<>();
 
@@ -90,6 +94,11 @@ public class VisionIOLimelight implements VisionIO {
         megatag1Subscriber = table.getDoubleArrayTopic("botpose_wpiblue").subscribe(new double[] {});
         megatag2Subscriber = table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
         rawDetectionsSubscriber = table.getDoubleArrayTopic("rawdetections").subscribe(new double[] {});
+
+        // Initialize the map with empty lists for each observation type
+        for (GamePieceObservationType type : GamePieceObservationType.values()) {
+            gamePieceObservationsByType.put(type, new ArrayList<>());
+        }
     }
 
     /**
@@ -171,7 +180,8 @@ public class VisionIOLimelight implements VisionIO {
                 type.heightOffFloor
             );
 
-            gamePieceObservations.add(new GamePieceObservation(rawSample.timestamp * 1.0e-6, pose, 0.0, type));
+            // Store observation
+            gamePieceObservationsByType.get(type).add(new GamePieceObservation(timestampSeconds, pose, 0.0, type));
         }
     }
 
@@ -208,11 +218,16 @@ public class VisionIOLimelight implements VisionIO {
         poseObservations.clear();
 
         // Save game piece observations to inputs object
-        inputs.gamePieceObservations = new GamePieceObservation[gamePieceObservations.size()];
-        for (int i = 0; i < gamePieceObservations.size(); i++) {
-            inputs.gamePieceObservations[i] = gamePieceObservations.get(i);
+        for (GamePieceObservationType type : GamePieceObservationType.values()) {
+            List<GamePieceObservation> observationsOfType = gamePieceObservationsByType.get(type);
+            inputs.gamePieceObservationsByType[type.getArrayIndexForInputs()] =
+                new GamePieceObservation[observationsOfType.size()];
+            inputs.gamePieceObservationsByType[type.getArrayIndexForInputs()] = observationsOfType.toArray(
+                new GamePieceObservation[observationsOfType.size()]
+            );
+
+            observationsOfType.clear();
         }
-        gamePieceObservations.clear();
 
         // Save tag IDs to inputs objects
         inputs.tagIds = new int[tagIds.size()];

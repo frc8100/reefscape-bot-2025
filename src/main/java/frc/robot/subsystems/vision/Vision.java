@@ -169,9 +169,8 @@ public class Vision extends SubsystemBase {
 
             // Process inputs for this camera
             processInputsForCamera(cameraIndex, inputs[cameraIndex]);
-
-            // Update game piece poses
-            gamePiecePoseEstimator.updateWithObservations(inputs[cameraIndex].gamePieceObservations);
+            // TODO: Update game piece poses
+            // gamePiecePoseEstimator.updateWithObservations(inputs[cameraIndex].gamePieceObservationsByType);
         }
 
         // Log summary data

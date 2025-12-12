@@ -103,6 +103,13 @@ public class VisionConstants {
          */
         public final Distance heightOffFloor;
 
+        /**
+         * @return The array index for inputs, starting at 0.
+         */
+        public int getArrayIndexForInputs() {
+            return classID - 1;
+        }
+
         private GamePieceObservationType(
             String className,
             int classID,

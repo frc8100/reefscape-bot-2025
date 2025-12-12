@@ -43,9 +43,16 @@ public interface VisionIO {
         public int[] tagIds = new int[0];
 
         /**
-         * A queue of unread game piece observations.
+         * A queue of unread game piece observations by type.
+         * Type corresponds to {@link GamePieceObservationType#getArrayIndexForInputs()}.
          */
-        public GamePieceObservation[] gamePieceObservations = new GamePieceObservation[0];
+        public GamePieceObservation[][] gamePieceObservationsByType;
+
+        public VisionIOInputs() {
+            // Initialize the game piece observations array
+            int typeCount = GamePieceObservationType.values().length;
+            gamePieceObservationsByType = new GamePieceObservation[typeCount][0];
+        }
     }
 
     @FunctionalInterface
