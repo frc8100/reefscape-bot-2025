@@ -17,6 +17,18 @@ import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
 
 public class TrackedVisionTarget {
 
+    /**
+     * Logged info for a tracked vision target.
+     */
+    public static record TrackedVisionTargetLoggedInfo(
+        double creationTimeSeconds,
+        GamePieceObservationType type,
+        Pose3d latestPose,
+        Pose3d estimatedPose,
+        int hits,
+        int misses
+    ) {}
+
     // State and measurement standard deviations
     // TODO: Move to constants file
     public static final Matrix<N4, N1> stateStdDevs = VecBuilder.fill(0.1, 0.1, 1.0, 1.0);
@@ -174,5 +186,19 @@ public class TrackedVisionTarget {
      */
     public boolean shouldDelete() {
         return misses > 5;
+    }
+
+    /**
+     * @return The logged info for this tracked vision target.
+     */
+    public TrackedVisionTargetLoggedInfo getLoggedInfo() {
+        return new TrackedVisionTargetLoggedInfo(
+            creationTimeSeconds,
+            type,
+            latestPose,
+            getEstimatedPose(),
+            hits,
+            misses
+        );
     }
 }

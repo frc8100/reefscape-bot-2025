@@ -86,6 +86,11 @@ public class VisionIOPhotonSim extends VisionIOPhotonVision {
 
         this.robotPoseSupplier = swerveSubsystem::getActualPose;
         this.pipelines = pipelines;
+
+        // Init map
+        for (GamePieceObservationType type : GamePieceObservationType.values()) {
+            gamePieceObservationsByType.put(type, new ArrayList<>());
+        }
     }
 
     private static Field nextNTEntryTimeField = null;
@@ -139,7 +144,8 @@ public class VisionIOPhotonSim extends VisionIOPhotonVision {
         Optional<Long> nextEntryTimeMicrosecondsOpt = cameraSim.consumeNextEntryTime();
 
         if (!nextEntryTimeMicrosecondsOpt.isPresent()) {
-            // No new data
+            // No new data, clear old data
+            inputs.gamePieceObservationsByType = new GamePieceObservation[GamePieceObservationType.values().length][0];
             return;
         }
         long nextTimeMicroseconds = nextEntryTimeMicrosecondsOpt.get();

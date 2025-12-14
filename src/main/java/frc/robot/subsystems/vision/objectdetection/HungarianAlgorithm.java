@@ -73,7 +73,7 @@ public class HungarianAlgorithm {
      * @return A list of assignments of detections to tracked targets.
      */
     public AssignmentResult assignDetectionsToTargets(
-        List<GamePieceObservation> detections,
+        GamePieceObservation[] detections,
         List<TrackedVisionTarget> trackedTargets
     ) {
         cachedResult.assignments.clear();
@@ -82,8 +82,10 @@ public class HungarianAlgorithm {
         // No assignments possible
         if (trackedTargets.isEmpty()) {
             // All detections are unassociated if there are no tracked targets
-            if (!detections.isEmpty()) {
-                cachedResult.unassociatedDetections.addAll(detections);
+            if (detections.length > 0) {
+                for (GamePieceObservation detection : detections) {
+                    cachedResult.unassociatedDetections.add(detection);
+                }
             }
 
             return cachedResult;

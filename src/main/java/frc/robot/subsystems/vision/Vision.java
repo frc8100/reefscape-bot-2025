@@ -24,6 +24,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.vision.VisionIO.GamePieceObservation;
 import frc.robot.subsystems.vision.VisionIO.PoseObservation;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import frc.robot.subsystems.vision.objectdetection.GamePiecePoseEstimator;
@@ -169,8 +170,18 @@ public class Vision extends SubsystemBase {
 
             // Process inputs for this camera
             processInputsForCamera(cameraIndex, inputs[cameraIndex]);
-            // TODO: Update game piece poses
-            // gamePiecePoseEstimator.updateWithObservations(inputs[cameraIndex].gamePieceObservationsByType);
+
+            // Update game pieces
+            for (int typeIndex = 0; typeIndex < inputs[cameraIndex].gamePieceObservationsByType.length; typeIndex++) {
+                GamePieceObservation[] gamePieceObservations =
+                    inputs[cameraIndex].gamePieceObservationsByType[typeIndex];
+
+                // TODO: fix memory leak
+                gamePiecePoseEstimator.updateWithObservations(
+                    gamePieceObservations,
+                    GamePieceObservationType.fromArrayIndex(typeIndex)
+                );
+            }
         }
 
         // Log summary data

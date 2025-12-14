@@ -65,7 +65,21 @@ public class VisionConstants {
             return switch (classID) {
                 case 1 -> CORAL;
                 case 2 -> ALGAE;
-                default -> null;
+                default -> CORAL;
+            };
+        }
+
+        /**
+         * Gets the GamePieceObservationType from the array index used for inputs.
+         * Corresponds with {@link #getArrayIndexForInputs()}.
+         * @param index - The array index for inputs, starting at 0.
+         * @return The GamePieceObservationType for the given array index.
+         */
+        public static GamePieceObservationType fromArrayIndex(int index) {
+            return switch (index) {
+                case 0 -> CORAL;
+                case 1 -> ALGAE;
+                default -> CORAL;
             };
         }
 
@@ -162,7 +176,7 @@ public class VisionConstants {
     /**
      * Camera 0 simulated properties
      */
-    public static final SimCameraProperties CAMERA_0_PROPERTIES = SimCameraProperties.LL2_1280_720().setFPS(20);
+    public static final SimCameraProperties CAMERA_0_PROPERTIES = SimCameraProperties.LL2_1280_720().setFPS(2);
 
     // Basic filtering thresholds
     public static final double MAX_AMBIGUITY = 0.3;

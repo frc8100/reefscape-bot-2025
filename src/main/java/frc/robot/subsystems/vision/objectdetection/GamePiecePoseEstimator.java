@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
 import frc.robot.subsystems.vision.VisionIO.GamePieceObservation;
 import frc.robot.subsystems.vision.objectdetection.HungarianAlgorithm.AssignmentResult;
+import frc.robot.subsystems.vision.objectdetection.TrackedVisionTarget.TrackedVisionTargetLoggedInfo;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -23,23 +24,22 @@ public class GamePiecePoseEstimator {
     /**
      * A detection associated with a tracked target.
      * @param observation - The game piece observation.
-     * @param trackedTarget - The tracked vision target.s
+     * @param trackedTarget - The tracked vision target.
      */
     public record DetectionAssociatedWithTrackedTarget(
         GamePieceObservation observation,
         TrackedVisionTarget trackedTarget
     ) {}
 
+    /**
+     * The Hungarian Algorithm instance for assignment of detections to tracked targets.
+     */
     private final HungarianAlgorithm hungarianAlgorithm = new HungarianAlgorithm();
 
     /**
      * The tracked vision targets by type.
      */
-    private final Map<GamePieceObservationType, List<TrackedVisionTarget>> trackedTargets = new EnumMap<>(
-        GamePieceObservationType.class
-    );
-
-    private final Map<GamePieceObservationType, List<GamePieceObservation>> cachedObservationsByType = new EnumMap<>(
+    private final Map<GamePieceObservationType, List<TrackedVisionTarget>> trackedTargetsByType = new EnumMap<>(
         GamePieceObservationType.class
     );
 
@@ -49,8 +49,7 @@ public class GamePiecePoseEstimator {
     public GamePiecePoseEstimator() {
         // Initialize the map with empty lists for each observation type
         for (GamePieceObservationType type : GamePieceObservationType.values()) {
-            trackedTargets.put(type, new ArrayList<>());
-            cachedObservationsByType.put(type, new ArrayList<>());
+            trackedTargetsByType.put(type, new ArrayList<>());
         }
     }
 
@@ -60,7 +59,7 @@ public class GamePiecePoseEstimator {
      * @return A list of the latest observed game piece poses for the given type. If no poses have been observed, returns an empty list.
      */
     public List<Pose3d> getLatestGamePiecePoses(GamePieceObservationType type) {
-        return trackedTargets.get(type).stream().map(target -> target.getEstimatedPose()).toList();
+        return trackedTargetsByType.get(type).stream().map(target -> target.getEstimatedPose()).toList();
     }
 
     /**
@@ -69,7 +68,7 @@ public class GamePiecePoseEstimator {
      * @return A list of the latest observed game piece poses as 2D poses for the given type. If no poses have been observed, returns an empty list.
      */
     public List<Pose2d> getLatestGamePiecePosesAs2d(GamePieceObservationType type) {
-        return trackedTargets.get(type).stream().map(target -> target.getEstimatedPose().toPose2d()).toList();
+        return trackedTargetsByType.get(type).stream().map(target -> target.getEstimatedPose().toPose2d()).toList();
     }
 
     /**
@@ -104,31 +103,17 @@ public class GamePiecePoseEstimator {
     /**
      * Updates the estimator with new game piece observations.
      * @param observations - An array of game piece observations.
+     * @param type - The type of game piece observations.
      */
-    public void updateWithObservations(GamePieceObservation[] observations) {
+    public void updateWithObservations(GamePieceObservation[] observations, GamePieceObservationType type) {
         // Skip empty observations
         if (observations.length == 0) {
             return;
         }
 
-        // TODO: account for multiple frames being processed at once
-        for (GamePieceObservationType type : GamePieceObservationType.values()) {
-            // TODO: new way to filter observations before assignment
-            List<GamePieceObservation> observationsOfType = cachedObservationsByType.get(type);
-            observationsOfType.clear();
+        List<TrackedVisionTarget> trackedTargetsOfType = trackedTargetsByType.get(type);
 
-            for (GamePieceObservation observation : observations) {
-                if (observation.type() == type) {
-                    observationsOfType.add(observation);
-                }
-            }
-
-            List<TrackedVisionTarget> trackedTargetsOfType = trackedTargets.get(type);
-
-            updateWithAssociatedTargets(
-                hungarianAlgorithm.assignDetectionsToTargets(observationsOfType, trackedTargetsOfType)
-            );
-        }
+        updateWithAssociatedTargets(hungarianAlgorithm.assignDetectionsToTargets(observations, trackedTargetsOfType));
     }
 
     /**
@@ -153,7 +138,7 @@ public class GamePiecePoseEstimator {
                 observation.pose()
             );
 
-            trackedTargets.get(observation.type()).add(newTarget);
+            trackedTargetsByType.get(observation.type()).add(newTarget);
         }
     }
 
@@ -162,7 +147,7 @@ public class GamePiecePoseEstimator {
      * Should be called once per update cycle after observations have been processed.
      */
     public void processObservations() {
-        for (List<TrackedVisionTarget> targets : trackedTargets.values()) {
+        for (List<TrackedVisionTarget> targets : trackedTargetsByType.values()) {
             // Update each target miss
             for (TrackedVisionTarget target : targets) {
                 if (!target.hasBeenHitThisFrame) {
@@ -188,14 +173,19 @@ public class GamePiecePoseEstimator {
      */
     public void logGamePiecePoses() {
         // For each game piece type, log the latest observed poses
-        for (Map.Entry<GamePieceObservationType, List<TrackedVisionTarget>> entry : trackedTargets.entrySet()) {
+        for (Map.Entry<GamePieceObservationType, List<TrackedVisionTarget>> entry : trackedTargetsByType.entrySet()) {
             GamePieceObservationType type = entry.getKey();
             List<TrackedVisionTarget> targets = entry.getValue();
 
             Logger.recordOutput(
                 "Vision/GamePieces/" + type.className + "/LatestPoses",
-                // targets.stream().map(target -> target.latestPose).toArray(Pose3d[]::new)
                 targets.stream().map(target -> target.getEstimatedPose()).toArray(Pose3d[]::new)
+            );
+
+            // Log tracked target info
+            Logger.recordOutput(
+                "Vision/GamePieces/" + type.className + "/TrackedTargets",
+                targets.stream().map(target -> target.getLoggedInfo()).toArray(TrackedVisionTargetLoggedInfo[]::new)
             );
         }
     }
