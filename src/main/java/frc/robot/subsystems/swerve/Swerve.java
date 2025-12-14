@@ -37,7 +37,7 @@ import frc.robot.Constants;
 import frc.robot.ControlConstants;
 import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
-import frc.robot.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
+import frc.robot.subsystems.swerve.gyro.GyroIO.GyroIOInputsAutoLoggedFixed;
 import frc.robot.subsystems.swerve.module.Module;
 import frc.robot.subsystems.swerve.module.ModuleIO;
 import frc.util.SwerveFeedForwards;
@@ -129,7 +129,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
      * The gyro. This is used to determine the robot's heading.
      */
     public final GyroIO gyroIO;
-    private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+    private final GyroIOInputsAutoLoggedFixed gyroInputs = new GyroIOInputsAutoLoggedFixed();
 
     /**
      * Raw gyro rotation. Used for the pose estimator.
@@ -163,7 +163,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     /**
      * The yaw offset for field-oriented driving.
      */
-    private Rotation2d yawOffset = new Rotation2d();
+    private Rotation2d yawOffset = Rotation2d.kZero;
 
     protected SysIdRoutine sysId = new SysIdRoutine(
         new SysIdRoutine.Config(null, null, null, state -> Logger.recordOutput("Swerve/SysIdState", state.toString())),
