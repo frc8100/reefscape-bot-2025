@@ -17,25 +17,32 @@ import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.units.measure.MutVoltage;
 import frc.robot.subsystems.swerve.SwerveConfig;
 import java.util.Arrays;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController;
 
-/** Physics sim implementation of module IO. */
+/**
+ * Simulator implementation of a module.
+ */
 public class ModuleIOSim implements ModuleIO {
 
+    // Simulation components
     private final SwerveModuleSimulation moduleSimulation;
     private final SimulatedMotorController.GenericMotorController driveMotor;
     private final SimulatedMotorController.GenericMotorController turnMotor;
 
+    // Controllers
     private boolean driveClosedLoop = false;
     private boolean turnClosedLoop = false;
     private PIDController driveController = new PIDController(SwerveConfig.driveSimKP, 0, SwerveConfig.driveSimKD);
     private PIDController turnController = new PIDController(SwerveConfig.angleSimKP, 0, SwerveConfig.angleSimKD);
-    private double driveFFVolts = 0.0;
-    private double driveAppliedVolts = 0.0;
-    private double turnAppliedVolts = 0.0;
+
+    // Voltages
+    private final MutVoltage driveAppliedVolts = Volts.mutable(0.0);
+    private final MutVoltage turnAppliedVolts = Volts.mutable(0.0);
+    private final MutVoltage driveFFVolts = Volts.mutable(0.0);
 
     public ModuleIOSim(SwerveModuleSimulation moduleSimulation) {
         this.moduleSimulation = moduleSimulation;
@@ -54,33 +61,38 @@ public class ModuleIOSim implements ModuleIO {
     public void updateInputs(ModuleIOInputs inputs) {
         // Run closed-loop control
         if (driveClosedLoop) {
-            driveAppliedVolts =
-                driveFFVolts +
-                driveController.calculate(moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond));
+            driveAppliedVolts.mut_replace(
+                driveFFVolts.in(Volts) +
+                driveController.calculate(moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond)),
+                Volts
+            );
         } else {
             driveController.reset();
         }
         if (turnClosedLoop) {
-            turnAppliedVolts = turnController.calculate(moduleSimulation.getSteerAbsoluteFacing().getRadians());
+            turnAppliedVolts.mut_replace(
+                turnController.calculate(moduleSimulation.getSteerAbsoluteFacing().getRadians()),
+                Volts
+            );
         } else {
             turnController.reset();
         }
 
         // Update simulation state
-        driveMotor.requestVoltage(Volts.of(driveAppliedVolts));
-        turnMotor.requestVoltage(Volts.of(turnAppliedVolts));
+        driveMotor.requestVoltage(driveAppliedVolts);
+        turnMotor.requestVoltage(turnAppliedVolts);
 
         // Update drive inputs
         inputs.driveMotorData.positionAngle.mut_replace(moduleSimulation.getDriveWheelFinalPosition());
         inputs.driveMotorData.velocity.mut_replace(moduleSimulation.getDriveWheelFinalSpeed());
-        inputs.driveMotorData.appliedVolts.mut_replace(driveAppliedVolts, Volts);
+        inputs.driveMotorData.appliedVolts.mut_replace(driveAppliedVolts);
         inputs.driveMotorData.torqueCurrent.mut_replace(moduleSimulation.getDriveMotorStatorCurrent());
-        inputs.driveFFVolts = driveFFVolts;
+        inputs.driveFFVolts = driveFFVolts.in(Volts);
 
         // Update turn inputs
         inputs.turnMotorData.positionAngle.mut_replace(moduleSimulation.getSteerRelativeEncoderPosition());
         inputs.turnMotorData.velocity.mut_replace(moduleSimulation.getSteerAbsoluteEncoderSpeed());
-        inputs.turnMotorData.appliedVolts.mut_replace(turnAppliedVolts, Volts);
+        inputs.turnMotorData.appliedVolts.mut_replace(turnAppliedVolts);
         inputs.turnAbsolutePosition = moduleSimulation.getSteerAbsoluteFacing();
 
         // Update odometry inputs
@@ -93,13 +105,13 @@ public class ModuleIOSim implements ModuleIO {
     @Override
     public void setDriveOpenLoop(double output) {
         driveClosedLoop = false;
-        driveAppliedVolts = output;
+        driveAppliedVolts.mut_replace(output, Volts);
     }
 
     @Override
     public void setTurnOpenLoop(double output) {
         turnClosedLoop = false;
-        turnAppliedVolts = output;
+        turnAppliedVolts.mut_replace(output, Volts);
     }
 
     @Override
@@ -108,7 +120,7 @@ public class ModuleIOSim implements ModuleIO {
 
         driveClosedLoop = true;
 
-        driveFFVolts = driveFeedforwardVoltage;
+        driveFFVolts.mut_replace(driveFeedforwardVoltage, Volts);
 
         driveController.setSetpoint(velocityRadPerSec);
     }
