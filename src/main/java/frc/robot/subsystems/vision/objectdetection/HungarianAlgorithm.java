@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.geometry.Translation3d;
 import frc.robot.subsystems.vision.VisionIO.GamePieceObservation;
 import frc.robot.subsystems.vision.objectdetection.GamePiecePoseEstimator.DetectionAssociatedWithTrackedTarget;
 import java.util.ArrayList;
@@ -36,13 +37,20 @@ public class HungarianAlgorithm {
 
     /**
      * Calculate the cost of assigning a detection to a tracked target.
-     * The cost is the Euclidean distance between the detection pose and the tracked target's estimated pose.
+     * The cost is the Euclidean distance between the detection pose and the tracked target's estimated pose (x and y only).
      * @param detection - The game piece observation detection.
      * @param trackedTarget - The tracked vision target.
      * @return The cost of the assignment.
      */
     private double getCost(GamePieceObservation detection, TrackedVisionTarget trackedTarget) {
-        return detection.pose().getTranslation().getDistance(trackedTarget.getEstimatedPose().getTranslation());
+        Translation3d detectionTranslation = detection.pose().getTranslation();
+        Translation3d targetTranslation = trackedTarget.getEstimatedPose().getTranslation();
+
+        // Only compare x and y distances for cost calculation (ignore z)
+        return Math.hypot(
+            detectionTranslation.getX() - targetTranslation.getX(),
+            detectionTranslation.getY() - targetTranslation.getY()
+        );
     }
 
     /**

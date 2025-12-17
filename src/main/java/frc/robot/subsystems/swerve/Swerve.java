@@ -428,15 +428,6 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
      * @return The orientation data to publish to the network.
      */
     public double[] getOrientationToPublish() {
-        // return new double[] {
-        //     getRotation().getDegrees(),
-        //     gyroInputs.yawVelocityRadPerSec.in(DegreesPerSecond),
-        //     gyroInputs.pitchRadians.in(Degrees),
-        //     0.0,
-        //     gyroInputs.rollRadians.in(Degrees),
-        //     0.0,
-        // };
-
         cachedOrientationPublish[0] = getRotation().getDegrees();
         cachedOrientationPublish[1] = gyroInputs.yawVelocityRadPerSec.in(DegreesPerSecond);
         // cachedOrientationPublish[2] = gyroInputs.pitchRadians.in(Degrees);

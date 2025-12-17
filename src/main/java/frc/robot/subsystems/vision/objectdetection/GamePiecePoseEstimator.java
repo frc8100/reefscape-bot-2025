@@ -44,6 +44,11 @@ public class GamePiecePoseEstimator {
     );
 
     /**
+     * Whether any observations have been processed this frame (50 hz robot loop).
+     */
+    private boolean hasObservationsThisFrame = false;
+
+    /**
      * Constructs a new GamePiecePoseEstimator.
      */
     public GamePiecePoseEstimator() {
@@ -90,14 +95,19 @@ public class GamePiecePoseEstimator {
 
         Pose2d referencePose = referencePoseSupplier.get();
 
-        return Optional.of(
-            Collections.min(
-                poses,
-                Comparator.comparingDouble(pose ->
-                    pose.toPose2d().getTranslation().getDistance(referencePose.getTranslation())
-                )
-            )
-        );
+        Pose3d nearestPose = Pose3d.kZero;
+        double nearestDistance = Double.MAX_VALUE;
+
+        for (Pose3d pose : poses) {
+            double distance = pose.toPose2d().getTranslation().getDistance(referencePose.getTranslation());
+
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestPose = pose;
+            }
+        }
+
+        return Optional.of(nearestPose);
     }
 
     /**
@@ -110,6 +120,8 @@ public class GamePiecePoseEstimator {
         if (observations.length == 0) {
             return;
         }
+
+        hasObservationsThisFrame = true;
 
         List<TrackedVisionTarget> trackedTargetsOfType = trackedTargetsByType.get(type);
 
@@ -147,6 +159,14 @@ public class GamePiecePoseEstimator {
      * Should be called once per update cycle after observations have been processed.
      */
     public void processObservations() {
+        if (!hasObservationsThisFrame) {
+            // No observations this frame, nothing to process
+            return;
+        }
+
+        // Reset for next frame
+        hasObservationsThisFrame = false;
+
         for (List<TrackedVisionTarget> targets : trackedTargetsByType.values()) {
             // Update each target miss
             for (TrackedVisionTarget target : targets) {
