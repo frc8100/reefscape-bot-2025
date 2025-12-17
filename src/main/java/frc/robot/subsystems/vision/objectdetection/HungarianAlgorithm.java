@@ -3,7 +3,6 @@ package frc.robot.subsystems.vision.objectdetection;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Translation3d;
 import frc.robot.subsystems.vision.VisionIO.GamePieceObservation;
 import frc.robot.subsystems.vision.objectdetection.GamePiecePoseEstimator.DetectionAssociatedWithTrackedTarget;
@@ -58,8 +57,6 @@ public class HungarianAlgorithm {
      * Users should not modify the lists directly.
      */
     public static class AssignmentResult {
-
-        // TODO: maybe used index-based assignments instead of lists for performance?
 
         /**
          * The list of assignments of detections to tracked targets.

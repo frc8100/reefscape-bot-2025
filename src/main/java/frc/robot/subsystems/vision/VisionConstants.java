@@ -176,7 +176,7 @@ public class VisionConstants {
     /**
      * Camera 0 simulated properties
      */
-    public static final SimCameraProperties CAMERA_0_PROPERTIES = SimCameraProperties.LL2_1280_720().setFPS(2);
+    public static final SimCameraProperties CAMERA_0_PROPERTIES = SimCameraProperties.LL2_1280_720().setFPS(20);
 
     // Basic filtering thresholds
     public static final double MAX_AMBIGUITY = 0.3;

@@ -4,16 +4,15 @@ import static edu.wpi.first.units.Units.Meters;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.estimator.KalmanFilter;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.numbers.N0;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.numbers.N4;
 import edu.wpi.first.math.system.LinearSystem;
-import frc.robot.Constants;
 import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
+import frc.util.StdDevSmoother;
 
 public class TrackedVisionTarget {
 
@@ -116,15 +115,16 @@ public class TrackedVisionTarget {
      * The state vector is [x, y, vx, vy].
      * The output vector is [x, y].
      */
-    // TODO: maybe use simple stdev values instead of having a plant that does nothing because velocity is not measured
-    public KalmanFilter<N4, N0, N2> kalmanFilter = new KalmanFilter<>(
-        N4.instance,
-        N2.instance,
-        visionTargetLinearSystem,
-        stateStdDevs,
-        measurementStdDevs,
-        Constants.LOOP_PERIOD_SECONDS
-    );
+    // public KalmanFilter<N4, N0, N2> kalmanFilter = new KalmanFilter<>(
+    //     N4.instance,
+    //     N2.instance,
+    //     visionTargetLinearSystem,
+    //     stateStdDevs,
+    //     measurementStdDevs,
+    //     Constants.LOOP_PERIOD_SECONDS
+    // );
+
+    public StdDevSmoother smoother = new StdDevSmoother(3, new double[] { 1.0, 1.0, 1.0 }, 0.1);
 
     /**
      * Constructs a new TrackedVisionTarget.
@@ -140,11 +140,15 @@ public class TrackedVisionTarget {
         // Seed filter
         // Set x and y to the measurement
         // Leave vx and vy at 0
-        kalmanFilter.setXhat(0, initialPose.getX());
-        kalmanFilter.setXhat(1, initialPose.getY());
+        // kalmanFilter.setXhat(0, initialPose.getX());
+        // kalmanFilter.setXhat(1, initialPose.getY());
+
+        smoother.overrideState(
+            new double[] { initialPose.getX(), initialPose.getY(), initialPose.getRotation().getZ() }
+        );
     }
 
-    private final Matrix<N2, N1> cachedMeasurement = new Matrix<>(N2.instance, N1.instance);
+    // private final Matrix<N2, N1> cachedMeasurement = new Matrix<>(N2.instance, N1.instance);
 
     /**
      * Updates the pose of the target.
@@ -159,9 +163,11 @@ public class TrackedVisionTarget {
         hasBeenHitThisFrame = true;
 
         // Update the Kalman filter with the new measurement
-        cachedMeasurement.set(0, 0, newPose.getX());
-        cachedMeasurement.set(1, 0, newPose.getY());
-        kalmanFilter.correct(emptyInput, cachedMeasurement);
+        // cachedMeasurement.set(0, 0, newPose.getX());
+        // cachedMeasurement.set(1, 0, newPose.getY());
+        // kalmanFilter.correct(emptyInput, cachedMeasurement);
+
+        smoother.addMeasurement(new double[] { newPose.getX(), newPose.getY(), newPose.getRotation().getZ() });
     }
 
     /**
@@ -169,16 +175,23 @@ public class TrackedVisionTarget {
      * Should be called once per update cycle.
      */
     public void update() {
-        kalmanFilter.predict(emptyInput, Constants.LOOP_PERIOD_SECONDS);
+        // kalmanFilter.predict(emptyInput, Constants.LOOP_PERIOD_SECONDS);
+
+        smoother.predict();
     }
 
     /**
      * @return The estimated pose of the target.
      */
     public Pose3d getEstimatedPose() {
-        Matrix<N4, N1> state = kalmanFilter.getXhat();
-
-        return new Pose3d(state.get(0, 0), state.get(1, 0), type.heightOffFloor.in(Meters), latestPose.getRotation());
+        return new Pose3d(
+            // kalmanFilter.getXhat(0),
+            // kalmanFilter.getXhat(1),
+            smoother.getCurrentState()[0],
+            smoother.getCurrentState()[1],
+            type.heightOffFloor.in(Meters),
+            new Rotation3d(0, 0, smoother.getCurrentState()[2])
+        );
     }
 
     /**

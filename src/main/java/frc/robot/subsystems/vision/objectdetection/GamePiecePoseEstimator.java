@@ -7,8 +7,6 @@ import frc.robot.subsystems.vision.VisionIO.GamePieceObservation;
 import frc.robot.subsystems.vision.objectdetection.HungarianAlgorithm.AssignmentResult;
 import frc.robot.subsystems.vision.objectdetection.TrackedVisionTarget.TrackedVisionTargetLoggedInfo;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
