@@ -24,6 +24,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.questnav.QuestNavSubsystem;
 import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
 import frc.robot.subsystems.vision.VisionIO.GamePieceObservation;
 import frc.robot.subsystems.vision.VisionIO.PoseObservation;
@@ -31,6 +32,8 @@ import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import frc.robot.subsystems.vision.objectdetection.GamePiecePoseEstimator;
 import frc.util.FieldConstants;
 import frc.util.Mutable3x1Vector;
+import frc.util.statemachine.StateMachine;
+import frc.util.statemachine.StateMachineState;
 import java.util.ArrayList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
@@ -52,6 +55,28 @@ public class Vision extends SubsystemBase {
         );
     }
 
+    public enum VisionState {
+        /**
+         * Before a match starts.
+         * Uses a camera to determine initial pose.
+         */
+        BEFORE_MATCH,
+
+        /**
+         * During a match.
+         * Sets the pose of the Quest to the pose determined by the camera and use the Quest for pose tracking.
+         * Uses a camera for game piece detection.
+         */
+        DURING_MATCH,
+    }
+
+    public final StateMachine<VisionState, Object> stateMachine = new StateMachine<VisionState, Object>(
+        VisionState.class,
+        "Vision"
+    )
+        .withDefaultState(new StateMachineState<>(VisionState.BEFORE_MATCH, "BeforeMatch"))
+        .withState(new StateMachineState<>(VisionState.DURING_MATCH, "DuringMatch"));
+
     private final VisionConsumer consumer;
 
     private final Mutable3x1Vector tempStdDevVector = new Mutable3x1Vector();
@@ -72,9 +97,12 @@ public class Vision extends SubsystemBase {
 
     public final GamePiecePoseEstimator gamePiecePoseEstimator = new GamePiecePoseEstimator();
 
-    public Vision(VisionConsumer consumer, VisionIO... io) {
+    private final QuestNavSubsystem questNavSubsystem;
+
+    public Vision(VisionConsumer consumer, QuestNavSubsystem questSubsystem, VisionIO... io) {
         this.consumer = consumer;
         this.io = io;
+        this.questNavSubsystem = questSubsystem;
 
         // Initialize inputs
         this.inputs = new VisionIOInputsAutoLogged[io.length];
@@ -177,7 +205,6 @@ public class Vision extends SubsystemBase {
                 GamePieceObservation[] gamePieceObservations =
                     inputs[cameraIndex].gamePieceObservationsByType[typeIndex];
 
-                // TODO: fix memory leak
                 gamePiecePoseEstimator.updateWithObservations(
                     gamePieceObservations,
                     GamePieceObservationType.fromArrayIndex(typeIndex)

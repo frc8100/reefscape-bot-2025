@@ -95,16 +95,16 @@ public class RobotContainer {
                     }
                 );
 
+                questNavSubsystem = new QuestNavSubsystem(swerveSubsystem::addVisionMeasurement, new QuestNavIOReal());
                 visionSubsystem = new Vision(
                     swerveSubsystem::addVisionMeasurement,
+                    questNavSubsystem,
                     new VisionIOLimelight(
                         VisionConstants.CAMERA_0_NAME,
                         VisionConstants.TRANSFORM_TO_CAMERA_0,
                         swerveSubsystem
                     )
                 );
-
-                questNavSubsystem = new QuestNavSubsystem(swerveSubsystem::addVisionMeasurement, new QuestNavIOReal());
 
                 clawSubsystem = new Claw(new ClawIOSpark());
                 elevatorSubsystem = new Elevator(new ElevatorIOSpark());
@@ -202,8 +202,12 @@ public class RobotContainer {
                     new GyroIO() {},
                     new ModuleIO[] { new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {} }
                 );
-                visionSubsystem = new Vision(swerveSubsystem::addVisionMeasurement, new VisionIO() {});
                 questNavSubsystem = new QuestNavSubsystem(swerveSubsystem::addVisionMeasurement, new QuestNavIO() {});
+                visionSubsystem = new Vision(
+                    swerveSubsystem::addVisionMeasurement,
+                    questNavSubsystem,
+                    new VisionIO() {}
+                );
                 clawSubsystem = new Claw(new ClawIO() {});
                 elevatorSubsystem = new Elevator(new ElevatorIO() {});
                 break;
