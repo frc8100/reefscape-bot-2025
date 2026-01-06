@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.questnav.QuestNavSubsystem;
+import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
 import frc.robot.subsystems.vision.VisionIO.GamePieceObservation;
 import frc.robot.subsystems.vision.VisionIO.PoseObservation;
@@ -97,11 +98,13 @@ public class Vision extends SubsystemBase {
 
     public final GamePiecePoseEstimator gamePiecePoseEstimator = new GamePiecePoseEstimator();
 
+    private final Swerve swerveSubsystem;
     private final QuestNavSubsystem questNavSubsystem;
 
-    public Vision(VisionConsumer consumer, QuestNavSubsystem questSubsystem, VisionIO... io) {
-        this.consumer = consumer;
+    public Vision(Swerve swerveSubsystem, QuestNavSubsystem questSubsystem, VisionIO... io) {
         this.io = io;
+        this.swerveSubsystem = swerveSubsystem;
+        this.consumer = this.swerveSubsystem::addVisionMeasurement;
         this.questNavSubsystem = questSubsystem;
 
         // Initialize inputs
@@ -120,6 +123,34 @@ public class Vision extends SubsystemBase {
                 AlertType.kWarning
             );
         }
+
+        // State changes
+        stateMachine.onStateChange(VisionState.BEFORE_MATCH, this::setupBeforeMatch);
+        stateMachine.onStateChange(VisionState.DURING_MATCH, this::setupDuringMatch);
+
+        // Start in before match state
+        setupBeforeMatch();
+    }
+
+    private void setupBeforeMatch() {
+        // Change to apriltag pipeline
+        for (VisionIO visionIO : io) {
+            visionIO.setPipeline(VisionConstants.CameraPipelines.APRILTAG);
+        }
+
+        // Pause quest nav pose consumption while we determine initial pose
+        questNavSubsystem.shouldConsumePoseData = false;
+    }
+
+    private void setupDuringMatch() {
+        // Change to game piece detection pipeline
+        for (VisionIO visionIO : io) {
+            visionIO.setPipeline(VisionConstants.CameraPipelines.DETECTION);
+        }
+
+        // Reset quest nav pose to vision pose
+        questNavSubsystem.setPose(swerveSubsystem.getPose());
+        questNavSubsystem.shouldConsumePoseData = true;
     }
 
     /**

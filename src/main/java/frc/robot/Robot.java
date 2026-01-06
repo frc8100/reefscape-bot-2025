@@ -134,6 +134,9 @@ public class Robot extends LoggedRobot {
             SimulatedArena.getInstance().resetFieldForAuto();
         }
 
+        // TODO: also run this on teleop init when not in competition, or other way to trigger it
+        robotContainer.setVisionStateToMatchStart();
+
         autonomousCommand = robotContainer.getAutonomousCommand();
 
         // Schedule the autonomous command

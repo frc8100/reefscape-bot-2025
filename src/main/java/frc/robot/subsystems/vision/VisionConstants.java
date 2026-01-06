@@ -40,12 +40,6 @@ public class VisionConstants {
     );
 
     /**
-     * Whether to simulate AprilTags.
-     * If disabled, april tag targets will not be tracked.
-     */
-    public static final boolean simulateAprilTags = false;
-
-    /**
      * A type of game piece observation that can be detected by the neural detector.
      */
     public enum GamePieceObservationType {
@@ -91,14 +85,14 @@ public class VisionConstants {
             return switch (className) {
                 case "Coral" -> CORAL;
                 case "Algae" -> ALGAE;
-                default -> null;
+                default -> CORAL;
             };
         }
 
         /**
          * The class name used in the neural detector.
          * Should match the names used in MapleSim.
-         * {@link org.ironmaple.simulation.gamepieces.GamePieceOnFieldSimulation.GamePieceInfo}
+         * {@link org.ironmaple.simulation.gamepieces.GamePieceOnFieldSimulation.GamePieceInfo#type}
          */
         public final String className;
 
@@ -109,6 +103,7 @@ public class VisionConstants {
 
         /**
          * The target model for the object.
+         * Used for PhotonVision simulation.
          */
         public final TargetModel targetModel;
 

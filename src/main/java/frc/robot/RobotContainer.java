@@ -97,7 +97,7 @@ public class RobotContainer {
 
                 questNavSubsystem = new QuestNavSubsystem(swerveSubsystem::addVisionMeasurement, new QuestNavIOReal());
                 visionSubsystem = new Vision(
-                    swerveSubsystem::addVisionMeasurement,
+                    swerveSubsystem,
                     questNavSubsystem,
                     new VisionIOLimelight(
                         VisionConstants.CAMERA_0_NAME,
@@ -143,10 +143,15 @@ public class RobotContainer {
                     SimulatedArena.getInstance()::getGamePiecesPosesByType
                 );
 
-                visionSubsystem = new VisionSim(
+                questNavSubsystem = new QuestNavSubsystem(
                     swerveSubsystem::addVisionMeasurement,
-                    swerveSubsystem::getActualPose,
+                    new QuestNavIOSim(swerveSubsystem)
+                );
+
+                visionSubsystem = new VisionSim(
+                    swerveSubsystem,
                     simPipelines,
+                    questNavSubsystem,
                     new VisionIOPhotonSim(
                         VisionConstants.CAMERA_0_NAME,
                         VisionConstants.TRANSFORM_TO_CAMERA_0,
@@ -154,11 +159,6 @@ public class RobotContainer {
                         swerveSubsystem,
                         simPipelines
                     )
-                );
-
-                questNavSubsystem = new QuestNavSubsystem(
-                    swerveSubsystem::addVisionMeasurement,
-                    new QuestNavIOSim(swerveSubsystem)
                 );
 
                 // Create a simulated claw
@@ -203,11 +203,7 @@ public class RobotContainer {
                     new ModuleIO[] { new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {} }
                 );
                 questNavSubsystem = new QuestNavSubsystem(swerveSubsystem::addVisionMeasurement, new QuestNavIO() {});
-                visionSubsystem = new Vision(
-                    swerveSubsystem::addVisionMeasurement,
-                    questNavSubsystem,
-                    new VisionIO() {}
-                );
+                visionSubsystem = new Vision(swerveSubsystem, questNavSubsystem, new VisionIO() {});
                 clawSubsystem = new Claw(new ClawIO() {});
                 elevatorSubsystem = new Elevator(new ElevatorIO() {});
                 break;
@@ -372,5 +368,21 @@ public class RobotContainer {
             "ComponentPositions/CoralInClaw",
             clawSubsystem.getCoralInClawPosition(swerveSubsystem, elevatorSubsystem)
         );
+    }
+
+    /**
+     * Sets the vision subsystem state to {@link Vision.VisionState#BEFORE_MATCH}.
+     * See {@link Vision.VisionState} for more details.
+     */
+    public void setVisionStateToBeforeMatch() {
+        visionSubsystem.stateMachine.scheduleStateChange(Vision.VisionState.BEFORE_MATCH);
+    }
+
+    /**
+     * Sets the vision subsystem state to {@link Vision.VisionState#DURING_MATCH}.
+     * See {@link Vision.VisionState} for more details.
+     */
+    public void setVisionStateToMatchStart() {
+        visionSubsystem.stateMachine.scheduleStateChange(Vision.VisionState.DURING_MATCH);
     }
 }

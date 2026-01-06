@@ -81,6 +81,12 @@ public class QuestNavSubsystem extends SubsystemBase {
     private int lastBatteryPercent = -1;
 
     /**
+     * Whether to consume pose data from the QuestNav ({@link #consumer}).
+     * If false, pose data will be ignored, although it is still calculated.
+     */
+    public boolean shouldConsumePoseData = true;
+
+    /**
      * Creates a new QuestNavSubsystem.
      * @param consumer - The vision consumer to send pose data to.
      * @param io - The IO implementation to use (real or simulated).
