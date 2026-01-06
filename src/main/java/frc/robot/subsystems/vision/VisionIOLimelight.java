@@ -137,8 +137,9 @@ public class VisionIOLimelight implements VisionIO {
     /**
      * Reads game piece observations from a raw NetworkTables sample.
      * @param rawSample - The raw sample double array from NetworkTables.
+     * @param latencySeconds - The latency in seconds to compensate for.
      */
-    private void readGamePieceObservations(TimestampedDoubleArray rawSample) {
+    private void readGamePieceObservations(TimestampedDoubleArray rawSample, double latencySeconds) {
         if (rawSample.value.length % VALUES_PER_DETECTION_ENTRY != 0) {
             // Invalid data lengths
             return;
@@ -163,8 +164,7 @@ public class VisionIOLimelight implements VisionIO {
             // double corner3_X = extractArrayEntry(rawDetectionArray, baseIndex + 10);
             // double corner3_Y = extractArrayEntry(rawDetectionArray, baseIndex + 11);
 
-            // TODO: compensate for latency
-            double timestampSeconds = rawSample.timestamp * 1.0e-6;
+            double timestampSeconds = rawSample.timestamp * 1.0e-6 - latencySeconds;
 
             GamePieceObservationType type = GamePieceObservationType.fromClassID(
                 (int) LimelightHelpers.extractArrayEntry(rawSample.value, baseIndex)
@@ -190,6 +190,8 @@ public class VisionIOLimelight implements VisionIO {
         // Update connection status based on whether an update has been seen in the last 250ms
         inputs.connected = RobotController.getFPGATime() - latencySubscriber.getLastChange() < 0.25;
 
+        double latencySeconds = latencySubscriber.get() * 1.0e-3;
+
         // Update orientation for MegaTag 2
         orientationPublisher.accept(rotationSupplier.get());
         // Increases network traffic but recommended by Limelight to flush after publishing
@@ -207,7 +209,7 @@ public class VisionIOLimelight implements VisionIO {
 
         // Read object detections
         for (TimestampedDoubleArray rawSample : rawDetectionsSubscriber.readQueue()) {
-            readGamePieceObservations(rawSample);
+            readGamePieceObservations(rawSample, latencySeconds);
         }
 
         // Save pose observations to inputs object

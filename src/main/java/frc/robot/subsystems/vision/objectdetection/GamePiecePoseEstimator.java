@@ -2,6 +2,7 @@ package frc.robot.subsystems.vision.objectdetection;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
 import frc.robot.subsystems.vision.VisionIO.GamePieceObservation;
 import frc.robot.subsystems.vision.objectdetection.HungarianAlgorithm.AssignmentResult;
@@ -18,6 +19,28 @@ import org.littletonrobotics.junction.Logger;
  * Implements a Kalman filter-based pose estimator for game pieces.
  */
 public class GamePiecePoseEstimator {
+
+    /**
+     * Gets the target robot pose to a game piece.
+     * Accounts for the intake not being at the front center of the robot.
+     * @param robotPose - The current robot pose.
+     * @param gamePiecePose - The game piece pose.
+     * @return The target robot pose to the game piece.
+     */
+    public static Pose2d getTargetRobotPoseToGamePiece(Pose2d robotPose, Pose2d gamePiecePose) {
+        // Calculate the angle from the robot to the game piece
+        Rotation2d angleToGamePiece = new Rotation2d(
+            gamePiecePose.getX() - robotPose.getX(),
+            gamePiecePose.getY() - robotPose.getY()
+        );
+
+        // Calculate the target robot pose to the game piece
+        // TODO: Account for intake being offset from robot center
+        double targetRobotX = gamePiecePose.getX();
+        double targetRobotY = gamePiecePose.getY();
+
+        return new Pose2d(targetRobotX, targetRobotY, angleToGamePiece);
+    }
 
     /**
      * A detection associated with a tracked target.

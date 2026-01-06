@@ -177,7 +177,6 @@ public class Vision extends SubsystemBase {
                 GamePieceObservation[] gamePieceObservations =
                     inputs[cameraIndex].gamePieceObservationsByType[typeIndex];
 
-                // TODO: fix memory leak
                 gamePiecePoseEstimator.updateWithObservations(
                     gamePieceObservations,
                     GamePieceObservationType.fromArrayIndex(typeIndex)
