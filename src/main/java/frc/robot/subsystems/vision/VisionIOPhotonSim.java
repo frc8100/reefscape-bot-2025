@@ -93,6 +93,15 @@ public class VisionIOPhotonSim extends VisionIOPhotonVision {
         }
     }
 
+    /**
+     * @return Whether to run PhotonVision's {@link org.photonvision.simulation.VisionSystemSim#update}.
+     * When false, only object detection is simulated.
+     */
+    public boolean shouldSimulatePhoton() {
+        // TODO: does pipeline set work if simulation is not iterated
+        return camera.getPipelineIndex() == VisionConstants.CameraPipelines.APRILTAG.index;
+    }
+
     private static Field nextNTEntryTimeField = null;
 
     /**
@@ -139,17 +148,7 @@ public class VisionIOPhotonSim extends VisionIOPhotonVision {
         }
     }
 
-    @Override
-    public void updateInputs(VisionIOInputs inputs) {
-        Optional<Long> nextEntryTimeMicrosecondsOpt = cameraSim.consumeNextEntryTime();
-
-        if (!nextEntryTimeMicrosecondsOpt.isPresent()) {
-            // No new data, clear old data
-            inputs.gamePieceObservationsByType = new GamePieceObservation[GamePieceObservationType.values().length][0];
-            return;
-        }
-        long nextTimeMicroseconds = nextEntryTimeMicrosecondsOpt.get();
-
+    private void updateDetection(VisionIOInputs inputs, long nextTimeMicroseconds) {
         Pose3d cameraPose = new Pose3d(robotPoseSupplier.get()).transformBy(robotToCamera);
 
         // Object detection
@@ -185,10 +184,33 @@ public class VisionIOPhotonSim extends VisionIOPhotonVision {
 
             observationsOfType.clear();
         }
-        // Update vision sim with current robot pose
-        // TODO: Make this only do once with multiple cameras (this updates all cameras)
-        // VisionSim.getVisionSim().update(robotPoseSupplier.get());
+    }
 
-        // super.updateInputs(inputs);
+    @Override
+    public void updateInputs(VisionIOInputs inputs) {
+        Optional<Long> nextEntryTimeMicrosecondsOpt = Optional.empty();
+
+        if (shouldSimulatePhoton()) {
+            // Use non-consuming method to allow PhotonVision to also use the entry time
+            // nextEntryTimeMicrosecondsOpt = getNextEntryTimeNoConsume();
+
+            // Update vision sim with current robot pose
+            // TODO: Make this only do once with multiple cameras (this updates all cameras)
+            VisionSim.getVisionSim().update(robotPoseSupplier.get());
+            super.updateInputs(inputs);
+            return;
+        }
+
+        // Use faster consuming method since PhotonVision won't use it
+        nextEntryTimeMicrosecondsOpt = cameraSim.consumeNextEntryTime();
+
+        if (!nextEntryTimeMicrosecondsOpt.isPresent()) {
+            // No new data, clear old data
+            inputs.gamePieceObservationsByType = new GamePieceObservation[GamePieceObservationType.values().length][0];
+            return;
+        }
+
+        // Update detection
+        updateDetection(inputs, nextEntryTimeMicrosecondsOpt.get());
     }
 }

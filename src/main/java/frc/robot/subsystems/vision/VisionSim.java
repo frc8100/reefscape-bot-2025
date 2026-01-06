@@ -3,6 +3,8 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.util.WPIUtilJNI;
+import frc.robot.subsystems.questnav.QuestNavSubsystem;
+import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
 import java.util.List;
 import java.util.function.Supplier;
@@ -25,14 +27,11 @@ public class VisionSim extends Vision {
         Supplier<List<Pose3d>> potentialTargetsSupplier
     ) {}
 
-    /**
-     * Gets the poses for a type of game piece.
-     */
     @FunctionalInterface
     public interface GetPosesForGamePieceType {
         /**
          * @return The poses for the given class name.
-         * @param className - The class name of the game piece.
+         * @param className - The class name of the game piece. Corresponds to {@link GamePieceObservationType#className}.
          */
         public List<Pose3d> getPoses(String className);
     }
@@ -71,9 +70,7 @@ public class VisionSim extends Vision {
         // Initialize vision sim if needed
         if (photonVisionSimSystem == null) {
             photonVisionSimSystem = new VisionSystemSim("main");
-            if (VisionConstants.simulateAprilTags) {
-                photonVisionSimSystem.addAprilTags(VisionConstants.aprilTagLayout);
-            }
+            photonVisionSimSystem.addAprilTags(VisionConstants.aprilTagLayout);
         }
 
         return photonVisionSimSystem;
@@ -94,16 +91,17 @@ public class VisionSim extends Vision {
      * @param consumer - The vision consumer for pose measurements.
      * @param robotPoseSupplier - Supplier for the robot pose to use in simulation.
      * @param pipelines - The neural detector pipelines. Set to null to use defaults.
+     * @param questNavSubsystem - The QuestNav subsystem.
      * @param ios - The vision IO implementations.
      */
     public VisionSim(
-        VisionConsumer consumer,
-        Supplier<Pose2d> robotPoseSupplier,
+        Swerve swerveSubsystem,
         NeuralDetectorSimPipeline[] pipelines,
+        QuestNavSubsystem questNavSubsystem,
         VisionIO... ios
     ) {
-        super(consumer, ios);
-        this.robotPoseSupplier = robotPoseSupplier;
+        super(swerveSubsystem, questNavSubsystem, ios);
+        this.robotPoseSupplier = swerveSubsystem::getActualPose;
         this.pipelines = pipelines;
     }
 

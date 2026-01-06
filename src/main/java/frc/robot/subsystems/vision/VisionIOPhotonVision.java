@@ -43,14 +43,6 @@ public class VisionIOPhotonVision implements VisionIO {
      */
     protected final Transform3d robotToCamera;
 
-    // protected final RobotPoseAtTimestampSupplier robotPoseSupplier;
-
-    /**
-     * A list of all Photon pipeline results from this camera.
-     * If photon vision is not used, this is an empty list.
-     */
-    // private List<PhotonPipelineResult> photonPipelineResults = new ArrayList<>();
-
     // Cached data for updateInputs
     private final Set<Short> tagIds = new HashSet<>();
     private final List<PoseObservation> poseObservations = new ArrayList<>();
@@ -63,7 +55,11 @@ public class VisionIOPhotonVision implements VisionIO {
     public VisionIOPhotonVision(String name, Transform3d robotToCamera) {
         camera = new PhotonCamera(name);
         this.robotToCamera = robotToCamera;
-        // this.robotPoseSupplier = robotPoseSupplier;
+    }
+
+    @Override
+    public void setPipeline(VisionConstants.CameraPipelines pipelineToSwitchTo) {
+        camera.setPipelineIndex(pipelineToSwitchTo.index);
     }
 
     // private Optional<GamePieceObservation> convertGamePieceObservation(PhotonTrackedTarget target, double timestampSeconds) {
@@ -86,8 +82,6 @@ public class VisionIOPhotonVision implements VisionIO {
     //         GamePieceObservationType.fromClassID(target.objDetectId)
     //     ));
     // }
-
-    // private void readPoseObservation
 
     @Override
     public void updateInputs(VisionIOInputs inputs) {

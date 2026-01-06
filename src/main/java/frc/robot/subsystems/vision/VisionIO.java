@@ -114,4 +114,10 @@ public interface VisionIO {
      * Updates the inputs of the vision IO.
      */
     public default void updateInputs(VisionIOInputs inputs) {}
+
+    /**
+     * Switches the camera pipeline to the given pipeline.
+     * @param pipelineToSwitchTo - The pipeline to switch to.
+     */
+    public default void setPipeline(VisionConstants.CameraPipelines pipelineToSwitchTo) {}
 }
