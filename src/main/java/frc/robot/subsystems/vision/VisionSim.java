@@ -3,6 +3,7 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.util.WPIUtilJNI;
+import frc.robot.subsystems.questnav.QuestNavSubsystem;
 import frc.robot.subsystems.vision.VisionConstants.GamePieceObservationType;
 import java.util.List;
 import java.util.function.Supplier;
@@ -94,15 +95,17 @@ public class VisionSim extends Vision {
      * @param consumer - The vision consumer for pose measurements.
      * @param robotPoseSupplier - Supplier for the robot pose to use in simulation.
      * @param pipelines - The neural detector pipelines. Set to null to use defaults.
+     * @param questNavSubsystem - The QuestNav subsystem.
      * @param ios - The vision IO implementations.
      */
     public VisionSim(
         VisionConsumer consumer,
         Supplier<Pose2d> robotPoseSupplier,
         NeuralDetectorSimPipeline[] pipelines,
+        QuestNavSubsystem questNavSubsystem,
         VisionIO... ios
     ) {
-        super(consumer, ios);
+        super(consumer, questNavSubsystem, ios);
         this.robotPoseSupplier = robotPoseSupplier;
         this.pipelines = pipelines;
     }

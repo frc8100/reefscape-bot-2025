@@ -173,6 +173,28 @@ public class VisionConstants {
         Rotation3d.kZero
     );
 
+    public enum CameraPipelines {
+        /**
+         * AprilTag detection pipeline.
+         */
+        APRILTAG(0),
+
+        /**
+         * Game piece detection pipeline.
+         */
+        DETECTION(1);
+
+        /**
+         * The index corresponding to the pipeline in the camera.
+         * Should match the index configured in the web UI.
+         */
+        public final int index;
+
+        private CameraPipelines(int index) {
+            this.index = index;
+        }
+    }
+
     /**
      * Camera 0 simulated properties
      */

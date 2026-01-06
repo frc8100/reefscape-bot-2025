@@ -101,6 +101,11 @@ public class VisionIOLimelight implements VisionIO {
         }
     }
 
+    @Override
+    public void setPipeline(VisionConstants.CameraPipelines pipelineToSwitchTo) {
+        LimelightHelpers.setPipelineIndex(name, pipelineToSwitchTo.index);
+    }
+
     /**
      * Reads a pose observation from a raw NetworkTables sample.
      * @param rawSample - The raw sample double array from NetworkTables.
