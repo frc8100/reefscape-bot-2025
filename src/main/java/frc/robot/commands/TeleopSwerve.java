@@ -180,7 +180,6 @@ public class TeleopSwerve {
         // Convert to Translation2d to rotate around
         Translation2d previousTranslation = new Translation2d(previous.vxMetersPerSecond, previous.vyMetersPerSecond);
 
-        // TODO: Maybe combine into one Rotation2d construction instead of calling .minus()
         Rotation2d rotateBy =
             // Use atan2 directly to avoid "x and y components of Rotation2d are zero" error
             new Rotation2d(Math.atan2(inputtedNudge.vyMetersPerSecond, inputtedNudge.vxMetersPerSecond))
@@ -224,8 +223,13 @@ public class TeleopSwerve {
     }
 
     private void handleInitialPathfinding(Optional<Supplier<Pose2d>> targetPoseSupplier) {
-        if (pathFindToPoseCommand != null || targetPoseSupplier.isEmpty()) {
-            // No target pose, return to full driver control
+        if (
+            // The pathfinding command is already running
+            pathFindToPoseCommand != null ||
+            // No target pose supplier
+            targetPoseSupplier.isEmpty()
+        ) {
+            // Skip
             return;
         }
 
@@ -242,7 +246,6 @@ public class TeleopSwerve {
             (ChassisSpeeds speeds, DriveFeedforwards feedforwards) ->
                 swerveSubsystem.runVelocityChassisSpeeds(applyInputNudge(speeds)),
             SwerveConfig.PP_INITIAL_PID_CONTROLLER,
-            // new PPHolonomicDriveController(SwerveConfig.PP_INITIAL_TRANSLATION_PID, SwerveConfig.PP_ROTATION_PID),
             SwerveConfig.getRobotConfig()
         )
             // End when we can switch to final alignment

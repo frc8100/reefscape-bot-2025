@@ -56,6 +56,8 @@ public class VisionIOPhotonSim extends VisionIOPhotonVision {
         GamePieceObservationType.class
     );
 
+    private VisionConstants.CameraPipelines currentPipeline = VisionConstants.CameraPipelines.getDefault();
+
     // Noise
     private final VelocityNoiseGenerator.PoseVelocityNoiseGenerator poseNoiseGenerator =
         new VelocityNoiseGenerator.PoseVelocityNoiseGenerator(
@@ -93,13 +95,19 @@ public class VisionIOPhotonSim extends VisionIOPhotonVision {
         }
     }
 
+    @Override
+    public void setPipeline(VisionConstants.CameraPipelines pipeline) {
+        super.setPipeline(pipeline);
+        currentPipeline = pipeline;
+    }
+
     /**
      * @return Whether to run PhotonVision's {@link org.photonvision.simulation.VisionSystemSim#update}.
      * When false, only object detection is simulated.
      */
     public boolean shouldSimulatePhoton() {
-        // TODO: does pipeline set work if simulation is not iterated
-        return camera.getPipelineIndex() == VisionConstants.CameraPipelines.APRILTAG.index;
+        // TODO: does pipeline set work if simulation is not iterated?
+        return currentPipeline.equals(VisionConstants.CameraPipelines.APRILTAG);
     }
 
     private static Field nextNTEntryTimeField = null;

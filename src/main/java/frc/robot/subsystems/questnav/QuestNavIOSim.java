@@ -22,10 +22,10 @@ public class QuestNavIOSim implements QuestNavIO {
 
     // Noise parameters
     private static final Distance TRANSLATION_NOISE_STDDEV_METERS_BASE = Centimeters.of(0.1);
-    private static final Distance TRANSLATION_NOISE_STDDEV_METERS_PER_METERS_PER_SECOND = Centimeters.of(0.2);
+    private static final Distance TRANSLATION_NOISE_STDDEV_METERS_PER_METERS_PER_SECOND = Centimeters.of(0.175);
 
     private static final Angle ROTATION_NOISE_STDDEV_RADIANS_BASE = Degrees.of(0.1);
-    private static final Angle ROTATION_NOISE_STDDEV_RADIANS_PER_METERS_PER_SECOND = Degrees.of(0.35);
+    private static final Angle ROTATION_NOISE_STDDEV_RADIANS_PER_METERS_PER_SECOND = Degrees.of(0.2);
 
     private final VelocityNoiseGenerator.PoseVelocityNoiseGenerator poseNoiseGenerator =
         new VelocityNoiseGenerator.PoseVelocityNoiseGenerator(

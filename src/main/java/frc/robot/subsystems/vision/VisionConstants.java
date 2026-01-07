@@ -180,6 +180,13 @@ public class VisionConstants {
         DETECTION(1);
 
         /**
+         * @return The default pipeline to use. Defaults to {@link #APRILTAG}.
+         */
+        public static CameraPipelines getDefault() {
+            return APRILTAG;
+        }
+
+        /**
          * The index corresponding to the pipeline in the camera.
          * Should match the index configured in the web UI.
          */

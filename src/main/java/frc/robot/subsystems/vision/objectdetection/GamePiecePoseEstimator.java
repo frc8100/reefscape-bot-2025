@@ -116,7 +116,7 @@ public class GamePiecePoseEstimator {
 
         Pose2d referencePose = referencePoseSupplier.get();
 
-        Pose3d nearestPose = Pose3d.kZero;
+        Pose3d nearestPose = null;
         double nearestDistance = Double.MAX_VALUE;
 
         for (Pose3d pose : poses) {
@@ -128,7 +128,7 @@ public class GamePiecePoseEstimator {
             }
         }
 
-        return Optional.of(nearestPose);
+        return Optional.ofNullable(nearestPose);
     }
 
     /**

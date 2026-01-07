@@ -13,11 +13,9 @@
 
 package frc.robot.subsystems.vision;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
@@ -42,11 +40,6 @@ import java.util.function.Supplier;
 public class VisionIOLimelight implements VisionIO {
 
     /**
-     * The Limelight instance for this Limelight. Gets data from NetworkTables.
-     */
-    // private final Limelight limelight;
-
-    /**
      * The name of this Limelight. Used for NetworkTables.
      */
     private final String name;
@@ -59,7 +52,6 @@ public class VisionIOLimelight implements VisionIO {
      * Should be a double[6] array: {yaw, yawRate, pitch, pitchRate, roll, rollRate} in degrees and degrees per second.
      */
     private final Supplier<double[]> rotationSupplier;
-    // private final Supplier<Pose2d> poseSupplier;
 
     private final Transform3d transformRobotToCamera;
 
@@ -76,6 +68,8 @@ public class VisionIOLimelight implements VisionIO {
     );
 
     private final Set<Integer> tagIds = new HashSet<>();
+
+    private VisionConstants.CameraPipelines currentPipeline = VisionConstants.CameraPipelines.getDefault();
 
     /**
      * Creates a new VisionIOLimelight.
@@ -104,6 +98,7 @@ public class VisionIOLimelight implements VisionIO {
     @Override
     public void setPipeline(VisionConstants.CameraPipelines pipelineToSwitchTo) {
         LimelightHelpers.setPipelineIndex(name, pipelineToSwitchTo.index);
+        NetworkTableInstance.getDefault().flush();
     }
 
     /**
@@ -197,12 +192,13 @@ public class VisionIOLimelight implements VisionIO {
 
         double latencySeconds = latencySubscriber.get() * 1.0e-3;
 
-        // Update orientation for MegaTag 2
-        orientationPublisher.accept(rotationSupplier.get());
-        // Increases network traffic but recommended by Limelight to flush after publishing
-        NetworkTableInstance.getDefault().flush();
-
-        // LimelightHelpers.getLatestResults(name)
+        // Only update MegaTag 2 if in the correct pipeline
+        if (currentPipeline.equals(VisionConstants.CameraPipelines.APRILTAG)) {
+            // Update orientation for MegaTag 2
+            orientationPublisher.accept(rotationSupplier.get());
+            // Increases network traffic but recommended by Limelight to flush after publishing
+            NetworkTableInstance.getDefault().flush();
+        }
 
         // Read new pose observations from NetworkTables
         for (TimestampedDoubleArray rawSample : megatag1Subscriber.readQueue()) {
@@ -227,11 +223,13 @@ public class VisionIOLimelight implements VisionIO {
         // Save game piece observations to inputs object
         for (GamePieceObservationType type : GamePieceObservationType.values()) {
             List<GamePieceObservation> observationsOfType = gamePieceObservationsByType.get(type);
+
+            // Clear existing array
             inputs.gamePieceObservationsByType[type.getArrayIndexForInputs()] =
                 new GamePieceObservation[observationsOfType.size()];
-            inputs.gamePieceObservationsByType[type.getArrayIndexForInputs()] = observationsOfType.toArray(
-                new GamePieceObservation[observationsOfType.size()]
-            );
+
+            // Copy observations into inputs array
+            observationsOfType.toArray(inputs.gamePieceObservationsByType[type.getArrayIndexForInputs()]);
 
             observationsOfType.clear();
         }
