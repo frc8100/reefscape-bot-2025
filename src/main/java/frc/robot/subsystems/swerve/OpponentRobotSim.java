@@ -105,7 +105,7 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
             // Provide actual robot speed in simulation, bypassing encoder measurement error
             simulatedDrive::getActualSpeedsRobotRelative,
             // Chassis speeds output
-            (speeds, feedforwards) -> simulatedDrive.runChassisSpeeds(speeds, new Translation2d(), false, false),
+            (speeds, feedforwards) -> simulatedDrive.runChassisSpeeds(speeds, Translation2d.kZero, false, false),
             driveController,
             pathPlannerConfig,
             // Flip path based on alliance side
@@ -123,7 +123,7 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
             pathPlannerPathConstraints,
             simulatedDrive::getActualPoseInSimulationWorld,
             simulatedDrive::getActualSpeedsRobotRelative,
-            (speeds, feedforwards) -> simulatedDrive.runChassisSpeeds(speeds, new Translation2d(), false, false),
+            (speeds, feedforwards) -> simulatedDrive.runChassisSpeeds(speeds, Translation2d.kZero, false, false),
             driveController,
             pathPlannerConfig,
             this
@@ -139,7 +139,7 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
             pathPlannerPathConstraints,
             simulatedDrive::getActualPoseInSimulationWorld,
             simulatedDrive::getActualSpeedsRobotRelative,
-            (speeds, feedforwards) -> simulatedDrive.runChassisSpeeds(speeds, new Translation2d(), false, false),
+            (speeds, feedforwards) -> simulatedDrive.runChassisSpeeds(speeds, Translation2d.kZero, false, false),
             driveController,
             pathPlannerConfig,
             this
@@ -153,14 +153,15 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
     }
 
     @Override
-    public void drive(Translation2d translation, double rotation, boolean fieldRelative) {
-        ChassisSpeeds speeds = new ChassisSpeeds(translation.getX(), translation.getY(), rotation);
-        this.simulatedDrive.runChassisSpeeds(speeds, new Translation2d(), true, true);
+    public void drive(double xMeters, double yMeters, double rotation, boolean fieldRelative) {
+        ChassisSpeeds speeds = new ChassisSpeeds(xMeters, yMeters, rotation);
+
+        this.simulatedDrive.runChassisSpeeds(speeds, Translation2d.kZero, true, true);
     }
 
     @Override
     public void runVelocityChassisSpeeds(ChassisSpeeds speed) {
-        this.simulatedDrive.runChassisSpeeds(speed, new Translation2d(), true, true);
+        this.simulatedDrive.runChassisSpeeds(speed, Translation2d.kZero, true, true);
     }
 
     @Override

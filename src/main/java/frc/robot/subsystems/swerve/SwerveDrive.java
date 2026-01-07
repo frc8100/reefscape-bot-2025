@@ -64,11 +64,12 @@ public interface SwerveDrive extends Subsystem {
      * Drives the swerve modules based on the desired translation and rotation.
      * Should convert the translation and rotation to ChassisSpeeds and set the swerve modules to those speeds
      * in {@link #runVelocityChassisSpeeds}.
-     * @param translation The desired translation (x and y speeds).
+     * @param xMeters The desired x translation speed in meters per second.
+     * @param yMeters The desired y translation speed in meters per second.
      * @param rotation The desired rotation speed.
      * @param fieldRelative Whether the speeds are field-relative.
      */
-    public void drive(Translation2d translation, double rotation, boolean fieldRelative);
+    public void drive(double xMeters, double yMeters, double rotation, boolean fieldRelative);
 
     /**
      * Returns a command to run the max acceleration / max velocity test. Runs the drive in a straight line at maximum voltage.

@@ -1,25 +1,26 @@
 package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.trajectory.PathPlannerTrajectoryState;
+import com.therekrab.autopilot.APTarget;
+import com.therekrab.autopilot.Autopilot;
+import com.therekrab.autopilot.Autopilot.APResult;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveConfig;
-import frc.robot.subsystems.swerve.SwerveDrive;
 import frc.util.PoseUtil;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Uses a PID controller to drive the robot to a specified pose. Does not use path finding/obstacle avoidance.
@@ -47,16 +48,18 @@ public class DriveToPosePID {
         SwerveConfig.PP_ROTATION_PID
     );
 
-    // Tolerances for being "at" the target pose
-    private static final Distance positionTolerance = Inches.of(1.25);
-    private static final Angle angleTolerance = Degrees.of(3);
-    private static final LinearVelocity speedTolerance = InchesPerSecond.of(4);
-    private static final LinearVelocity targetVelocity = MetersPerSecond.of(0);
+    private final PIDController rotationController = new PIDController(
+        SwerveConfig.PP_ROTATION_PID.kP,
+        SwerveConfig.PP_ROTATION_PID.kI,
+        SwerveConfig.PP_ROTATION_PID.kD
+    );
+
+    public static final Autopilot autopilot = new Autopilot(SwerveConfig.autopilotProfile);
 
     // Final alignment only checks position so the tolerance is any (360 degrees)
     private static final Angle finalAlignmentAngleTolerance = Degrees.of(360);
 
-    private final SwerveDrive swerveSubsystem;
+    private final Swerve swerveSubsystem;
 
     /**
      * A supplier that provides the target pose to drive to.
@@ -83,6 +86,14 @@ public class DriveToPosePID {
      */
     private final PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
 
+    private Pose2d lastTargetPose = Pose2d.kZero;
+    private APTarget autopilotTarget = new APTarget(lastTargetPose);
+
+    /**
+     * Whether the target pose has changed since the last execution.
+     */
+    private boolean hasPoseChanged = true;
+
     /**
      * Creates a new DriveToPose command.
      * @param swerveSubsystem - The swerve drive subsystem.
@@ -92,15 +103,18 @@ public class DriveToPosePID {
         this.swerveSubsystem = swerveSubsystem;
         this.targetPoseSupplier = targetPoseSupplier;
 
+        rotationController.enableContinuousInput(-Math.PI, Math.PI);
+        rotationController.reset();
+
         atTarget = () ->
             PoseUtil.isPosesAndVelocityNear(
                 swerveSubsystem.getPose(),
                 this.targetPoseSupplier.get(),
                 swerveSubsystem.getVelocityMagnitude(),
-                targetVelocity,
-                positionTolerance,
-                angleTolerance,
-                speedTolerance
+                SwerveConfig.targetVelocity,
+                SwerveConfig.positionTolerance,
+                SwerveConfig.angleTolerance,
+                SwerveConfig.speedTolerance
             );
 
         canSwitchToFinalAlignment = () ->
@@ -108,17 +122,47 @@ public class DriveToPosePID {
                 swerveSubsystem.getPose(),
                 this.targetPoseSupplier.get(),
                 // Start final alignment when within this distance plus a bit based on current speed
-                0.4 + swerveSubsystem.getVelocityMagnitude().in(MetersPerSecond) * 0.35,
+                0.3 + swerveSubsystem.getVelocityMagnitude().in(MetersPerSecond) * 0.3,
                 finalAlignmentAngleTolerance.in(Radians)
             );
 
         // debug
         atPoseTranslationTarget = () ->
-            PoseUtil.isPoseTranslationNear(swerveSubsystem.getPose(), this.targetPoseSupplier.get(), positionTolerance);
+            PoseUtil.isPoseTranslationNear(
+                swerveSubsystem.getPose(),
+                this.targetPoseSupplier.get(),
+                SwerveConfig.positionTolerance
+            );
         atPoseRotationTarget = () ->
-            PoseUtil.isPoseRotationNear(swerveSubsystem.getPose(), this.targetPoseSupplier.get(), angleTolerance);
+            PoseUtil.isPoseRotationNear(
+                swerveSubsystem.getPose(),
+                this.targetPoseSupplier.get(),
+                SwerveConfig.angleTolerance
+            );
         atVelocityTarget = () ->
-            PoseUtil.isVelocityNear(swerveSubsystem.getVelocityMagnitude(), targetVelocity, speedTolerance);
+            PoseUtil.isVelocityNear(
+                swerveSubsystem.getVelocityMagnitude(),
+                SwerveConfig.targetVelocity,
+                SwerveConfig.speedTolerance
+            );
+    }
+
+    /**
+     * Checks if the target pose has changed since the last execution. Also updates the last target pose.
+     * @return Whether the target pose has changed since the last execution.
+     */
+    private boolean hasPoseChanged() {
+        Pose2d currentTargetPose = targetPoseSupplier.get();
+        boolean changed = !currentTargetPose.equals(lastTargetPose);
+        lastTargetPose = currentTargetPose;
+
+        // Update the autopilot target if the pose has changed
+        if (changed) {
+            // TODO: add way to customize entry angle, etc.
+            autopilotTarget = new APTarget(lastTargetPose);
+        }
+
+        return changed;
     }
 
     public IsAtTargets getAtTargetsRecords() {
@@ -153,8 +197,30 @@ public class DriveToPosePID {
      * @return The chassis speeds needed to drive to the target pose.
      */
     public ChassisSpeeds getChassisSpeeds() {
-        goalState.pose = targetPoseSupplier.get();
+        boolean poseChanged = hasPoseChanged();
 
-        return driveController.calculateRobotRelativeSpeeds(swerveSubsystem.getPose(), goalState);
+        Pose2d currentPose = swerveSubsystem.getPose();
+
+        APResult autopilotResult = autopilot.calculate(
+            currentPose,
+            swerveSubsystem.getChassisSpeeds(),
+            autopilotTarget
+        );
+
+        var test = ChassisSpeeds.fromFieldRelativeSpeeds(
+            autopilotResult.vx(),
+            autopilotResult.vy(),
+            RadiansPerSecond.of(
+                rotationController.calculate(
+                    currentPose.getRotation().getRadians(),
+                    autopilotResult.targetAngle().getRadians()
+                )
+            ),
+            currentPose.getRotation()
+        );
+
+        Logger.recordOutput("AP/Target", autopilotTarget.getReference());
+
+        return test;
     }
 }

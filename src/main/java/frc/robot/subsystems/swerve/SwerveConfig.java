@@ -3,6 +3,7 @@ package frc.robot.subsystems.swerve;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -11,6 +12,7 @@ import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -24,6 +26,9 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.therekrab.autopilot.APConstraints;
+import com.therekrab.autopilot.APProfile;
+import com.therekrab.autopilot.Autopilot;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -33,6 +38,11 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.LinearAccelerationUnit;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.PerUnit;
+import edu.wpi.first.units.TimeUnit;
+import edu.wpi.first.units.VelocityUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -160,8 +170,8 @@ public class SwerveConfig {
     public static final double angleKI = 0.0;
     public static final double angleKD = 0.0;
 
-    public static final TunableValue angleKPTunable = new TunableValue("Drive/angleKP", angleKP);
-    public static final TunableValue angleKDTunable = new TunableValue("Drive/angleKD", angleKD);
+    public static final TunableValue angleKPTunable = new TunableValue("Drive/AngleKP", angleKP);
+    public static final TunableValue angleKDTunable = new TunableValue("Drive/AngleKD", angleKD);
 
     public static final double angleSimKP = 20.0;
     public static final double angleSimKD = 0.1;
@@ -183,7 +193,11 @@ public class SwerveConfig {
 
     // Swerve path constraints
     public static final LinearVelocity MAX_SPEED = MetersPerSecond.of(3.75);
-    public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(7);
+    public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(11.5);
+
+    public static final VelocityUnit<LinearAccelerationUnit> MetersPerSecond3 = MetersPerSecondPerSecond.per(Second);
+    public static final Measure<VelocityUnit<LinearAccelerationUnit>> MAX_JERK = MetersPerSecond3.of(10);
+
     // ! IMPORTANT: The actual max angular velocity is much higher
     public static final AngularVelocity MAX_ANGULAR_VELOCITY_OF_ROBOT = RadiansPerSecond.of(7.0);
 
@@ -195,7 +209,25 @@ public class SwerveConfig {
      */
     public static final AngularVelocity ANGULAR_VELOCITY_FOR_TELEOP = RotationsPerSecond.of(1);
 
-    public static final AngularAcceleration MAX_ANGULAR_ACCELERATION = RadiansPerSecondPerSecond.of(3.0);
+    public static final AngularAcceleration MAX_ANGULAR_ACCELERATION = RadiansPerSecondPerSecond.of(10.0);
+
+    public static final APConstraints AUTO_PILOT_CONSTRAINTS = new APConstraints(
+        MAX_SPEED.in(MetersPerSecond),
+        MAX_ACCELERATION.in(MetersPerSecondPerSecond),
+        MAX_JERK.in(MetersPerSecond3)
+    );
+
+    // Tolerances for being "at" the target pose
+    public static final Distance positionTolerance = Inches.of(1.25);
+    public static final Distance beelineRadius = Inches.of(6);
+    public static final Angle angleTolerance = Degrees.of(3);
+    public static final LinearVelocity speedTolerance = InchesPerSecond.of(4);
+    public static final LinearVelocity targetVelocity = MetersPerSecond.of(0);
+
+    public static final APProfile autopilotProfile = new APProfile(AUTO_PILOT_CONSTRAINTS)
+        .withErrorXY(positionTolerance)
+        .withErrorTheta(angleTolerance)
+        .withBeelineRadius(beelineRadius);
 
     // Tipping config
     /**

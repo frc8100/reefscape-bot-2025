@@ -21,18 +21,18 @@ import java.util.function.Supplier;
 public class QuestNavIOSim implements QuestNavIO {
 
     // Noise parameters
-    private static final Distance TRANSLATION_NOISE_STDDEV_METERS_BASE = Centimeters.of(0.1);
-    private static final Distance TRANSLATION_NOISE_STDDEV_METERS_PER_METERS_PER_SECOND = Centimeters.of(0.175);
+    private static final Distance TRANSLATION_NOISE_BASE = Centimeters.of(0.05);
+    private static final Distance TRANSLATION_NOISE_PER_VELOCITY = Centimeters.of(0.075);
 
-    private static final Angle ROTATION_NOISE_STDDEV_RADIANS_BASE = Degrees.of(0.1);
-    private static final Angle ROTATION_NOISE_STDDEV_RADIANS_PER_METERS_PER_SECOND = Degrees.of(0.2);
+    private static final Angle ROTATION_NOISE_BASE = Degrees.of(0.01);
+    private static final Angle ROTATION_NOISE_PER_VELOCITY = Degrees.of(0.01);
 
     private final VelocityNoiseGenerator.PoseVelocityNoiseGenerator poseNoiseGenerator =
         new VelocityNoiseGenerator.PoseVelocityNoiseGenerator(
-            TRANSLATION_NOISE_STDDEV_METERS_BASE,
-            TRANSLATION_NOISE_STDDEV_METERS_PER_METERS_PER_SECOND,
-            ROTATION_NOISE_STDDEV_RADIANS_BASE,
-            ROTATION_NOISE_STDDEV_RADIANS_PER_METERS_PER_SECOND
+            TRANSLATION_NOISE_BASE,
+            TRANSLATION_NOISE_PER_VELOCITY,
+            ROTATION_NOISE_BASE,
+            ROTATION_NOISE_PER_VELOCITY
         );
 
     private final Supplier<Pose2d> simulatedPoseSupplier;

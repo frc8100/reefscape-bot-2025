@@ -145,26 +145,31 @@ public class TeleopSwerve {
          */
         double speedMultiplier = speedDial.getAsDouble();
 
-        double translationValue =
-            MathUtil.applyDeadband(translationInput, SwerveConfig.DRIVE_STICK_DEADBAND) * speedMultiplier;
-        double strafeValue = MathUtil.applyDeadband(strafeInput, SwerveConfig.DRIVE_STICK_DEADBAND) * speedMultiplier;
-        double rotationValue =
-            MathUtil.applyDeadband(rotationInput, SwerveConfig.DRIVE_STICK_DEADBAND) * speedMultiplier;
+        double vxMetersPerSecond =
+            MathUtil.applyDeadband(translationInput, SwerveConfig.DRIVE_STICK_DEADBAND) *
+            speedMultiplier *
+            SwerveConfig.MAX_SPEED.in(MetersPerSecond);
+        double vyMetersPerSecond =
+            MathUtil.applyDeadband(strafeInput, SwerveConfig.DRIVE_STICK_DEADBAND) *
+            speedMultiplier *
+            SwerveConfig.MAX_SPEED.in(MetersPerSecond);
+
+        double omegaRadPerSecond =
+            MathUtil.applyDeadband(rotationInput, SwerveConfig.DRIVE_STICK_DEADBAND) *
+            speedMultiplier *
+            SwerveConfig.ANGULAR_VELOCITY_FOR_TELEOP.in(RadiansPerSecond);
 
         // Log the values
         if (logValues) {
             Logger.recordOutput("Swerve/TranslationInput", translationInput);
             Logger.recordOutput("Swerve/StrafeInput", strafeInput);
             Logger.recordOutput("Swerve/RotationInput", rotationInput);
-
-            Logger.recordOutput("Swerve/TranslationValue", translationValue);
-            Logger.recordOutput("Swerve/StrafeValue", strafeValue);
-            Logger.recordOutput("Swerve/RotationValue", rotationValue);
         }
 
         return swerveSubsystem.getSpeedsFromTranslation(
-            new Translation2d(translationValue, strafeValue).times(SwerveConfig.MAX_SPEED.in(MetersPerSecond)),
-            rotationValue * SwerveConfig.ANGULAR_VELOCITY_FOR_TELEOP.in(RadiansPerSecond),
+            vxMetersPerSecond,
+            vyMetersPerSecond,
+            omegaRadPerSecond,
             !robotCentricSupplier.getAsBoolean()
         );
     }

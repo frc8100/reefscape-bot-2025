@@ -229,21 +229,26 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     /**
      * @return The chassis speeds from a translation and rotation input, either field-relative or robot-relative.
      */
-    public ChassisSpeeds getSpeedsFromTranslation(Translation2d translation, double rotation, boolean fieldRelative) {
+    public ChassisSpeeds getSpeedsFromTranslation(
+        double vxMetersPerSecond,
+        double vyMetersPerSecond,
+        double omegaRadPerSec,
+        boolean fieldRelative
+    ) {
         // Determine the desired chassis speeds based on whether the control is field-relative
         return fieldRelative
             ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                translation.getX(),
-                translation.getY(),
-                rotation,
+                vxMetersPerSecond,
+                vyMetersPerSecond,
+                omegaRadPerSec,
                 getHeadingForFieldOriented()
             )
-            : new ChassisSpeeds(translation.getX(), translation.getY(), rotation);
+            : new ChassisSpeeds(vxMetersPerSecond, vyMetersPerSecond, omegaRadPerSec);
     }
 
     @Override
-    public void drive(Translation2d translation, double rotation, boolean fieldRelative) {
-        ChassisSpeeds desiredChassisSpeeds = getSpeedsFromTranslation(translation, rotation, fieldRelative);
+    public void drive(double xMeters, double yMeters, double omegaRadPerSec, boolean fieldRelative) {
+        ChassisSpeeds desiredChassisSpeeds = getSpeedsFromTranslation(xMeters, yMeters, omegaRadPerSec, fieldRelative);
 
         runVelocityChassisSpeeds(desiredChassisSpeeds);
     }
@@ -279,6 +284,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         Logger.recordOutput("Swerve/States/Setpoints", setpointStates);
         Logger.recordOutput("Swerve/ChassisSpeeds/Setpoints", previousSetpoint.robotRelativeSpeeds());
         Logger.recordOutput("Swerve/ChassisSpeeds/SetpointsRaw", speed);
+        Logger.recordOutput("Swerve/ChassisSpeeds/Accelerations", feedforwards.accelerationsMPSSq());
 
         Logger.recordOutput("Swerve/States/FeedforwardLinearForces", feedforwardLinearForcesNewtons);
         Logger.recordOutput("Swerve/States/FeedforwardTorqueCurrent", feedforwards.torqueCurrentsAmps());
