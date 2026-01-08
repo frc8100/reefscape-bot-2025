@@ -62,9 +62,9 @@ import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 /**
  * Contains constants and configurations for the swerve drive (for CAN IDs, see {@link frc.robot.subsystems.swerve.SwerveModuleSpecificConstants})
  */
-public class SwerveConfig {
+public class SwerveConstants {
 
-    private SwerveConfig() {}
+    private SwerveConstants() {}
 
     public static final int NUMBER_OF_SWERVE_MODULES = 4;
 
@@ -265,8 +265,8 @@ public class SwerveConfig {
     public static final PIDConstants PP_ROTATION_PID = new PIDConstants(4.0, 0.02);
 
     public static final PPHolonomicDriveController PP_INITIAL_PID_CONTROLLER = new PPHolonomicDriveController(
-        SwerveConfig.PP_INITIAL_TRANSLATION_PID,
-        SwerveConfig.PP_ROTATION_PID
+        SwerveConstants.PP_INITIAL_TRANSLATION_PID,
+        SwerveConstants.PP_ROTATION_PID
     );
 
     // Simulator DC Motors
@@ -347,8 +347,8 @@ public class SwerveConfig {
         SparkMaxConfig angleConfig = new SparkMaxConfig();
 
         angleConfig
-            .smartCurrentLimit((int) SwerveConfig.ANGLE_CONTINUOUS_CURRENT_LIMIT.in(Amps))
-            .inverted(SwerveConfig.IS_ANGLE_MOTOR_INVERTED)
+            .smartCurrentLimit((int) SwerveConstants.ANGLE_CONTINUOUS_CURRENT_LIMIT.in(Amps))
+            .inverted(SwerveConstants.IS_ANGLE_MOTOR_INVERTED)
             .idleMode(SparkBaseConfig.IdleMode.kBrake)
             .openLoopRampRate(0.2);
 
@@ -360,14 +360,14 @@ public class SwerveConfig {
 
         // Configure the PID controller for the angle motor
         angleConfig.closedLoop
-            .pid(SwerveConfig.angleKP, SwerveConfig.angleKI, SwerveConfig.angleKD)
-            .outputRange(-SwerveConfig.MAX_ANGLE_POWER, SwerveConfig.MAX_ANGLE_POWER)
+            .pid(SwerveConstants.angleKP, SwerveConstants.angleKI, SwerveConstants.angleKD)
+            .outputRange(-SwerveConstants.MAX_ANGLE_POWER, SwerveConstants.MAX_ANGLE_POWER)
             .positionWrappingEnabled(true)
             .positionWrappingInputRange(-Math.PI, Math.PI);
 
         angleConfig.signals
             .primaryEncoderPositionAlwaysOn(true)
-            .primaryEncoderPositionPeriodMs((int) (1000.0 / SwerveConfig.ODOMETRY_FREQUENCY_HZ))
+            .primaryEncoderPositionPeriodMs((int) (1000.0 / SwerveConstants.ODOMETRY_FREQUENCY_HZ))
             .primaryEncoderVelocityAlwaysOn(true)
             .primaryEncoderVelocityPeriodMs(20)
             .appliedOutputPeriodMs(20)
@@ -386,8 +386,8 @@ public class SwerveConfig {
         SparkMaxConfig driveConfig = new SparkMaxConfig();
 
         driveConfig
-            .smartCurrentLimit((int) SwerveConfig.DRIVE_CONTINUOUS_CURRENT_LIMIT.in(Amps))
-            .inverted(SwerveConfig.IS_DRIVE_MOTOR_INVERTED)
+            .smartCurrentLimit((int) SwerveConstants.DRIVE_CONTINUOUS_CURRENT_LIMIT.in(Amps))
+            .inverted(SwerveConstants.IS_DRIVE_MOTOR_INVERTED)
             .idleMode(SparkBaseConfig.IdleMode.kBrake)
             .openLoopRampRate(0.2);
 
@@ -402,8 +402,8 @@ public class SwerveConfig {
 
         // Configure the PID controller for the drive motor
         driveConfig.closedLoop
-            .pid(SwerveConfig.driveKP, SwerveConfig.driveKI, SwerveConfig.driveKD)
-            .outputRange(-SwerveConfig.MAX_DRIVE_POWER, SwerveConfig.MAX_DRIVE_POWER);
+            .pid(SwerveConstants.driveKP, SwerveConstants.driveKI, SwerveConstants.driveKD)
+            .outputRange(-SwerveConstants.MAX_DRIVE_POWER, SwerveConstants.MAX_DRIVE_POWER);
 
         driveConfig.closedLoop.feedForward
             .kS(SwerveFeedForwards.linearForceDriveFFConstantsReal.kS())
@@ -412,7 +412,7 @@ public class SwerveConfig {
 
         driveConfig.signals
             .primaryEncoderPositionAlwaysOn(true)
-            .primaryEncoderPositionPeriodMs((int) (1000.0 / SwerveConfig.ODOMETRY_FREQUENCY_HZ))
+            .primaryEncoderPositionPeriodMs((int) (1000.0 / SwerveConstants.ODOMETRY_FREQUENCY_HZ))
             .primaryEncoderVelocityAlwaysOn(true)
             .primaryEncoderVelocityPeriodMs(20)
             .appliedOutputPeriodMs(20)

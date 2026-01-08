@@ -41,8 +41,8 @@ public interface SwerveDrive extends Subsystem {
             },
             swerveSubsystem::getChassisSpeeds,
             swerveSubsystem::runVelocityChassisSpeeds,
-            SwerveConfig.PP_INITIAL_PID_CONTROLLER,
-            SwerveConfig.getRobotConfig(),
+            SwerveConstants.PP_INITIAL_PID_CONTROLLER,
+            SwerveConstants.getRobotConfig(),
             () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
             swerveSubsystem
         );

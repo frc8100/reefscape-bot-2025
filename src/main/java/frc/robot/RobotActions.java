@@ -23,7 +23,7 @@ import frc.robot.subsystems.superstructure.claw.ClawConstants;
 import frc.robot.subsystems.superstructure.claw.ClawConstants.IntakeOuttakeDirection;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.swerve.Swerve;
-import frc.robot.subsystems.swerve.SwerveConfig;
+import frc.robot.subsystems.swerve.SwerveConstants;
 import frc.robot.subsystems.vision.Vision;
 import frc.util.PoseUtil;
 import frc.util.objective.ObjectiveTracker;
@@ -539,12 +539,12 @@ public class RobotActions {
             () ->
                 new PathfindingCommand(
                     pose.get(),
-                    SwerveConfig.pathConstraints,
+                    SwerveConstants.pathConstraints,
                     swerveSubsystem::getPose,
                     swerveSubsystem::getChassisSpeeds,
                     (speeds, feedforwards) -> swerveSubsystem.runVelocityChassisSpeeds(speeds),
                     DriveToPosePID.driveController,
-                    SwerveConfig.getRobotConfig()
+                    SwerveConstants.getRobotConfig()
                 ),
             Set.of(swerveSubsystem)
         );

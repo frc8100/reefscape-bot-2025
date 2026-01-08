@@ -2,7 +2,7 @@ package frc.util;
 
 import static edu.wpi.first.units.Units.Meters;
 
-import frc.robot.subsystems.swerve.SwerveConfig;
+import frc.robot.subsystems.swerve.SwerveConstants;
 import java.util.function.BooleanSupplier;
 
 public class SwerveFeedForwards {
@@ -61,13 +61,14 @@ public class SwerveFeedForwards {
         // Warning: Will not work well if motor is not what we are expecting.
 
         // calculation:
-        return SwerveConfig.driveGearbox.getVoltage(
+        return SwerveConstants.driveGearbox.getVoltage(
             // Since: (1) torque = force * momentOfForce; (2) torque (on wheel) = torque (on motor) * gearRatio
             // torque (on motor) = force * wheelRadius / gearRatio
-            (feedforwardLinearForcesNewtons * SwerveConfig.WHEEL_RADIUS.in(Meters)) / SwerveConfig.DRIVE_GEAR_RATIO,
+            (feedforwardLinearForcesNewtons * SwerveConstants.WHEEL_RADIUS.in(Meters)) /
+            SwerveConstants.DRIVE_GEAR_RATIO,
             // Since: (1) linear velocity = angularVelocity * wheelRadius; (2) wheelVelocity = motorVelocity / gearRatio
             // motorAngularVelocity = linearVelocity / wheelRadius * gearRatio
-            desiredSpeedRadPerSec * SwerveConfig.DRIVE_GEAR_RATIO
+            desiredSpeedRadPerSec * SwerveConstants.DRIVE_GEAR_RATIO
         );
     }
 
@@ -83,7 +84,7 @@ public class SwerveFeedForwards {
     ) {
         return getLinearForcesFFVoltsFromRadPerSec(
             feedforwardLinearForcesNewtons,
-            desiredGroundSpeedMPS / SwerveConfig.WHEEL_RADIUS.in(Meters)
+            desiredGroundSpeedMPS / SwerveConstants.WHEEL_RADIUS.in(Meters)
         );
     }
 

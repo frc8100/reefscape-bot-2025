@@ -27,7 +27,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import frc.robot.CANIdConstants;
 import frc.robot.subsystems.swerve.OdometryThread;
-import frc.robot.subsystems.swerve.SwerveConfig;
+import frc.robot.subsystems.swerve.SwerveConstants;
 import frc.util.AntiTipping;
 import java.util.Queue;
 
@@ -48,9 +48,9 @@ public class GyroIOPigeon2 implements GyroIO {
 
     // Anti-tipping
     private final AntiTipping antiTipping = new AntiTipping(
-        SwerveConfig.ANTI_TIPPING_KP,
-        SwerveConfig.TIPPING_THRESHOLD.in(Degrees),
-        SwerveConfig.MAX_ANTI_TIP_VELOCITY.in(MetersPerSecond)
+        SwerveConstants.ANTI_TIPPING_KP,
+        SwerveConstants.TIPPING_THRESHOLD.in(Degrees),
+        SwerveConstants.MAX_ANTI_TIP_VELOCITY.in(MetersPerSecond)
     );
 
     public GyroIOPigeon2() {
@@ -58,15 +58,15 @@ public class GyroIOPigeon2 implements GyroIO {
         pigeon.getConfigurator().apply(new Pigeon2Configuration());
         pigeon.getConfigurator().setYaw(0.0);
 
-        yaw.setUpdateFrequency(SwerveConfig.ODOMETRY_FREQUENCY_HZ);
-        yawVelocity.setUpdateFrequency(SwerveConfig.STATUS_SIGNAL_FREQUENCY_HZ);
+        yaw.setUpdateFrequency(SwerveConstants.ODOMETRY_FREQUENCY_HZ);
+        yawVelocity.setUpdateFrequency(SwerveConstants.STATUS_SIGNAL_FREQUENCY_HZ);
 
         // Only update pitch and roll if configured to do so
         pitch.setUpdateFrequency(
-            SwerveConfig.IS_GYRO_RECORD_PITCH_ROLL_TIPPING_STATE ? SwerveConfig.STATUS_SIGNAL_FREQUENCY_HZ : 0
+            SwerveConstants.IS_GYRO_RECORD_PITCH_ROLL_TIPPING_STATE ? SwerveConstants.STATUS_SIGNAL_FREQUENCY_HZ : 0
         );
         roll.setUpdateFrequency(
-            SwerveConfig.IS_GYRO_RECORD_PITCH_ROLL_TIPPING_STATE ? SwerveConfig.STATUS_SIGNAL_FREQUENCY_HZ : 0
+            SwerveConstants.IS_GYRO_RECORD_PITCH_ROLL_TIPPING_STATE ? SwerveConstants.STATUS_SIGNAL_FREQUENCY_HZ : 0
         );
 
         pigeon.optimizeBusUtilization();
@@ -79,7 +79,7 @@ public class GyroIOPigeon2 implements GyroIO {
     @Override
     public void updateInputs(GyroIOInputs inputs) {
         // Refresh all signals and set connected status
-        if (SwerveConfig.IS_GYRO_RECORD_PITCH_ROLL_TIPPING_STATE) {
+        if (SwerveConstants.IS_GYRO_RECORD_PITCH_ROLL_TIPPING_STATE) {
             // If anti-tipping is enabled, refresh pitch and roll as well
             inputs.connected = BaseStatusSignal.refreshAll(yaw, yawVelocity, pitch, roll).equals(StatusCode.OK);
         } else {
@@ -90,7 +90,7 @@ public class GyroIOPigeon2 implements GyroIO {
         inputs.yawPosition = Rotation2d.fromDegrees(yaw.getValueAsDouble());
         inputs.yawVelocityRadPerSec.mut_replace(yawVelocity.getValueAsDouble(), DegreesPerSecond);
 
-        if (SwerveConfig.IS_GYRO_RECORD_PITCH_ROLL_TIPPING_STATE) {
+        if (SwerveConstants.IS_GYRO_RECORD_PITCH_ROLL_TIPPING_STATE) {
             // Update pitch and roll only if configured to do so
             inputs.pitchRadians.mut_replace(pitch.getValueAsDouble(), Degrees);
             inputs.rollRadians.mut_replace(roll.getValueAsDouble(), Degrees);
@@ -112,7 +112,7 @@ public class GyroIOPigeon2 implements GyroIO {
     @Override
     public void zeroGyro(double deg) {
         // Invert the gyro if necessary
-        if (SwerveConfig.IS_GYRO_INVERTED) {
+        if (SwerveConstants.IS_GYRO_INVERTED) {
             deg = -deg;
         }
 

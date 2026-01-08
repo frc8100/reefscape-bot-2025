@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants;
 import frc.robot.subsystems.swerve.Swerve;
-import frc.robot.subsystems.swerve.SwerveConfig;
+import frc.robot.subsystems.swerve.SwerveConstants;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import frc.util.SwerveFeedForwards;
 import java.text.DecimalFormat;
@@ -34,7 +34,7 @@ public class SwerveSysidRoutines {
     private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
     private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
 
-    private static final RobotConfig PP_CONFIG = SwerveConfig.getRobotConfig();
+    private static final RobotConfig PP_CONFIG = SwerveConstants.getRobotConfig();
 
     private static ChassisSpeeds previousSpeeds = new ChassisSpeeds();
 
@@ -100,7 +100,7 @@ public class SwerveSysidRoutines {
                     drive.runCharacterization(voltage);
 
                     double currentVelocityRadPerSec = drive.getFFCharacterizationVelocity();
-                    double currentVelocityMPS = currentVelocityRadPerSec * SwerveConfig.WHEEL_RADIUS.in(Meters);
+                    double currentVelocityMPS = currentVelocityRadPerSec * SwerveConstants.WHEEL_RADIUS.in(Meters);
 
                     ChassisSpeeds currentSpeeds = new ChassisSpeeds(currentVelocityMPS, 0.0, 0.0);
 
@@ -188,7 +188,7 @@ public class SwerveSysidRoutines {
                     for (int i = 0; i < 4; i++) {
                         wheelDelta += Math.abs(positions[i] - state.positions[i]) / 4.0;
                     }
-                    double wheelRadius = (state.gyroDelta * SwerveConfig.DRIVE_BASE_RADIUS.in(Meters)) / wheelDelta;
+                    double wheelRadius = (state.gyroDelta * SwerveConstants.DRIVE_BASE_RADIUS.in(Meters)) / wheelDelta;
 
                     NumberFormat formatter = new DecimalFormat("#0.000");
                     System.out.println("********** Wheel Radius Characterization Results **********");

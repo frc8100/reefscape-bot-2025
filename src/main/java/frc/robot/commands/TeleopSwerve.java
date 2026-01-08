@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.ControlConstants;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.Swerve.SwerveState;
-import frc.robot.subsystems.swerve.SwerveConfig;
+import frc.robot.subsystems.swerve.SwerveConstants;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -132,7 +132,7 @@ public class TeleopSwerve {
     }
 
     /**
-     * @return The chassis speeds based on controller input, scaled to {@link SwerveConfig#MAX_SPEED} and {@link SwerveConfig#ANGULAR_VELOCITY_FOR_TELEOP}.
+     * @return The chassis speeds based on controller input, scaled to {@link SwerveConstants#MAX_SPEED} and {@link SwerveConstants#ANGULAR_VELOCITY_FOR_TELEOP}.
      */
     public ChassisSpeeds getChassisSpeedsFromControls() {
         // Get values from suppliers
@@ -146,18 +146,18 @@ public class TeleopSwerve {
         double speedMultiplier = speedDial.getAsDouble();
 
         double vxMetersPerSecond =
-            MathUtil.applyDeadband(translationInput, SwerveConfig.DRIVE_STICK_DEADBAND) *
+            MathUtil.applyDeadband(translationInput, SwerveConstants.DRIVE_STICK_DEADBAND) *
             speedMultiplier *
-            SwerveConfig.MAX_SPEED.in(MetersPerSecond);
+            SwerveConstants.MAX_SPEED.in(MetersPerSecond);
         double vyMetersPerSecond =
-            MathUtil.applyDeadband(strafeInput, SwerveConfig.DRIVE_STICK_DEADBAND) *
+            MathUtil.applyDeadband(strafeInput, SwerveConstants.DRIVE_STICK_DEADBAND) *
             speedMultiplier *
-            SwerveConfig.MAX_SPEED.in(MetersPerSecond);
+            SwerveConstants.MAX_SPEED.in(MetersPerSecond);
 
         double omegaRadPerSecond =
-            MathUtil.applyDeadband(rotationInput, SwerveConfig.DRIVE_STICK_DEADBAND) *
+            MathUtil.applyDeadband(rotationInput, SwerveConstants.DRIVE_STICK_DEADBAND) *
             speedMultiplier *
-            SwerveConfig.ANGULAR_VELOCITY_FOR_TELEOP.in(RadiansPerSecond);
+            SwerveConstants.ANGULAR_VELOCITY_FOR_TELEOP.in(RadiansPerSecond);
 
         // Log the values
         if (logValues) {
@@ -192,10 +192,10 @@ public class TeleopSwerve {
                 .minus(new Rotation2d(Math.atan2(previous.vyMetersPerSecond, previous.vxMetersPerSecond)))
                 .times(
                     // Scale down by the nudge input multiplier (avoid overshooting)
-                    SwerveConfig.NUDGE_TRANSLATION_INPUT_MULTIPLIER *
+                    SwerveConstants.NUDGE_TRANSLATION_INPUT_MULTIPLIER *
                     // Scale the nudge based on the magnitude of the nudge
                     (Math.hypot(inputtedNudge.vxMetersPerSecond, inputtedNudge.vyMetersPerSecond) /
-                        SwerveConfig.MAX_SPEED.in(MetersPerSecond))
+                        SwerveConstants.MAX_SPEED.in(MetersPerSecond))
                 );
 
         Logger.recordOutput("Swerve/NudgeRotateBy", rotateBy.getDegrees());
@@ -207,7 +207,7 @@ public class TeleopSwerve {
             previousTranslation.getY(),
             // Also nudge omega
             previous.omegaRadiansPerSecond +
-            (inputtedNudge.omegaRadiansPerSecond * SwerveConfig.NUDGE_ROTATION_INPUT_MULTIPLIER)
+            (inputtedNudge.omegaRadiansPerSecond * SwerveConstants.NUDGE_ROTATION_INPUT_MULTIPLIER)
         );
     }
 
@@ -245,13 +245,13 @@ public class TeleopSwerve {
         // Initialize pathfinding to the target pose (if not already doing so)
         pathFindToPoseCommand = new PathfindingCommand(
             targetPose,
-            SwerveConfig.pathConstraints,
+            SwerveConstants.pathConstraints,
             swerveSubsystem::getPose,
             swerveSubsystem::getChassisSpeeds,
             (ChassisSpeeds speeds, DriveFeedforwards feedforwards) ->
                 swerveSubsystem.runVelocityChassisSpeeds(applyInputNudge(speeds)),
-            SwerveConfig.PP_INITIAL_PID_CONTROLLER,
-            SwerveConfig.getRobotConfig()
+            SwerveConstants.PP_INITIAL_PID_CONTROLLER,
+            SwerveConstants.getRobotConfig()
         )
             // End when we can switch to final alignment
             .raceWith(Commands.waitUntil(driveToPoseCommand.canSwitchToFinalAlignment))

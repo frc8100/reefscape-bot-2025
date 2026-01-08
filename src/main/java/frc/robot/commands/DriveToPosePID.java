@@ -15,7 +15,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Angle;
 import frc.robot.subsystems.swerve.Swerve;
-import frc.robot.subsystems.swerve.SwerveConfig;
+import frc.robot.subsystems.swerve.SwerveConstants;
 import frc.util.PoseUtil;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
@@ -44,17 +44,17 @@ public class DriveToPosePID {
      * Note: If multiple instances of this command are used simultaneously with different targets, this may cause issues.
      */
     public static final PPHolonomicDriveController driveController = new PPHolonomicDriveController(
-        SwerveConfig.PP_ENDING_TRANSLATION_PID,
-        SwerveConfig.PP_ROTATION_PID
+        SwerveConstants.PP_ENDING_TRANSLATION_PID,
+        SwerveConstants.PP_ROTATION_PID
     );
 
     private final PIDController rotationController = new PIDController(
-        SwerveConfig.PP_ROTATION_PID.kP,
-        SwerveConfig.PP_ROTATION_PID.kI,
-        SwerveConfig.PP_ROTATION_PID.kD
+        SwerveConstants.PP_ROTATION_PID.kP,
+        SwerveConstants.PP_ROTATION_PID.kI,
+        SwerveConstants.PP_ROTATION_PID.kD
     );
 
-    public static final Autopilot autopilot = new Autopilot(SwerveConfig.autopilotProfile);
+    public static final Autopilot autopilot = new Autopilot(SwerveConstants.autopilotProfile);
 
     // Final alignment only checks position so the tolerance is any (360 degrees)
     private static final Angle finalAlignmentAngleTolerance = Degrees.of(360);
@@ -111,10 +111,10 @@ public class DriveToPosePID {
                 swerveSubsystem.getPose(),
                 this.targetPoseSupplier.get(),
                 swerveSubsystem.getVelocityMagnitude(),
-                SwerveConfig.targetVelocity,
-                SwerveConfig.positionTolerance,
-                SwerveConfig.angleTolerance,
-                SwerveConfig.speedTolerance
+                SwerveConstants.targetVelocity,
+                SwerveConstants.positionTolerance,
+                SwerveConstants.angleTolerance,
+                SwerveConstants.speedTolerance
             );
 
         canSwitchToFinalAlignment = () ->
@@ -131,19 +131,19 @@ public class DriveToPosePID {
             PoseUtil.isPoseTranslationNear(
                 swerveSubsystem.getPose(),
                 this.targetPoseSupplier.get(),
-                SwerveConfig.positionTolerance
+                SwerveConstants.positionTolerance
             );
         atPoseRotationTarget = () ->
             PoseUtil.isPoseRotationNear(
                 swerveSubsystem.getPose(),
                 this.targetPoseSupplier.get(),
-                SwerveConfig.angleTolerance
+                SwerveConstants.angleTolerance
             );
         atVelocityTarget = () ->
             PoseUtil.isVelocityNear(
                 swerveSubsystem.getVelocityMagnitude(),
-                SwerveConfig.targetVelocity,
-                SwerveConfig.speedTolerance
+                SwerveConstants.targetVelocity,
+                SwerveConstants.speedTolerance
             );
     }
 

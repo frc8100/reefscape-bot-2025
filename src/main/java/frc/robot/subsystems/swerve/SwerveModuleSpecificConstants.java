@@ -6,7 +6,7 @@ import frc.robot.subsystems.CANIdConnections;
 /**
  * Contains module-specific constants for the swerve drive.
  * For CAN IDs, see {@link CANIdConnections}.
- * For general swerve constants, see {@link SwerveConfig}.
+ * For general swerve constants, see {@link SwerveConstants}.
  */
 public final class SwerveModuleSpecificConstants {
 

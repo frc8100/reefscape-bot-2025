@@ -27,7 +27,7 @@ import frc.robot.subsystems.superstructure.elevator.ElevatorIO;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSpark;
 import frc.robot.subsystems.swerve.Swerve;
-import frc.robot.subsystems.swerve.SwerveConfig;
+import frc.robot.subsystems.swerve.SwerveConstants;
 import frc.robot.subsystems.swerve.SwerveDrive;
 import frc.robot.subsystems.swerve.SwerveModuleSpecificConstants;
 import frc.robot.subsystems.swerve.SwerveSim;
@@ -123,7 +123,10 @@ public class RobotContainer {
                 SimulatedArena.getInstance().placeGamePiecesOnField();
 
                 // Create a simulated drive
-                driveSimulation = new SwerveDriveSimulation(SwerveConfig.mapleSimConfig, SwerveConfig.initialPose);
+                driveSimulation = new SwerveDriveSimulation(
+                    SwerveConstants.mapleSimConfig,
+                    SwerveConstants.initialPose
+                );
                 SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
 
                 SwerveModuleSimulation[] moduleSims = driveSimulation.getModules();

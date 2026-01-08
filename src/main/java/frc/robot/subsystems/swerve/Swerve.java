@@ -110,8 +110,8 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     private final SwerveFeedForwards swerveFeedForwards = new SwerveFeedForwards(this::isSimulation);
 
     private final SwerveSetpointGenerator setpointGenerator = new SwerveSetpointGenerator(
-        SwerveConfig.getRobotConfig(),
-        SwerveConfig.MAX_ANGULAR_VELOCITY_OF_SWERVE_MODULE
+        SwerveConstants.getRobotConfig(),
+        SwerveConstants.MAX_ANGULAR_VELOCITY_OF_SWERVE_MODULE
     );
 
     /**
@@ -139,7 +139,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
     /**
      * Kinematics for the swerve drive. Used to convert between chassis speeds and module states.
      */
-    private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(SwerveConfig.MODULE_TRANSLATIONS);
+    private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(SwerveConstants.MODULE_TRANSLATIONS);
 
     /**
      * The last stored position of the swerve modules for delta tracking.
@@ -174,8 +174,8 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
      * A trigger that syncs the motor encoders to the absolute encoders when the robot is still for a certain time.
      */
     private final Trigger syncMotorEncodersToAbsoluteEncoderTrigger = new Trigger(
-        () -> getVelocityMagnitudeAsDouble() < SwerveConfig.STILL_MPS
-    ).debounce(SwerveConfig.TIME_AFTER_STILL_SYNC_ENCODERS.in(Seconds));
+        () -> getVelocityMagnitudeAsDouble() < SwerveConstants.STILL_MPS
+    ).debounce(SwerveConstants.TIME_AFTER_STILL_SYNC_ENCODERS.in(Seconds));
 
     /** Creates a new Swerve subsystem. */
     public Swerve(GyroIO gyroIO, ModuleIO[] moduleIOs) {
@@ -190,9 +190,9 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
             kinematics,
             rawGyroRotation,
             lastModulePositions,
-            SwerveConfig.initialPose,
-            SwerveConfig.stateStdDevs,
-            SwerveConfig.visionStdDevs
+            SwerveConstants.initialPose,
+            SwerveConstants.stateStdDevs,
+            SwerveConstants.visionStdDevs
         );
 
         zeroGyro(180);
@@ -263,7 +263,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
         }
 
         // Apply anti-tipping correction
-        if (SwerveConfig.IS_ANTI_TIPPING_ENABLED && gyroInputs.isTipping) {
+        if (SwerveConstants.IS_ANTI_TIPPING_ENABLED && gyroInputs.isTipping) {
             ChassisSpeeds antiTippingSpeeds = gyroInputs.velocityAntiTipping;
 
             speed = antiTippingSpeeds;
@@ -300,7 +300,7 @@ public class Swerve extends SubsystemBase implements SwerveDrive {
             Module mod = swerveModules[i];
 
             double driveFFVolts = swerveFeedForwards.getLinearForceFFVolts(
-                desiredStates[mod.index].speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters),
+                desiredStates[mod.index].speedMetersPerSecond / SwerveConstants.WHEEL_RADIUS.in(Meters),
                 feedforwardLinearForcesNewtons[mod.index]
             );
 

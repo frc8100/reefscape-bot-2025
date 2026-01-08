@@ -18,7 +18,7 @@ import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.MutVoltage;
-import frc.robot.subsystems.swerve.SwerveConfig;
+import frc.robot.subsystems.swerve.SwerveConstants;
 import java.util.Arrays;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController;
@@ -36,8 +36,12 @@ public class ModuleIOSim implements ModuleIO {
     // Controllers
     private boolean driveClosedLoop = false;
     private boolean turnClosedLoop = false;
-    private PIDController driveController = new PIDController(SwerveConfig.driveSimKP, 0, SwerveConfig.driveSimKD);
-    private PIDController turnController = new PIDController(SwerveConfig.angleSimKP, 0, SwerveConfig.angleSimKD);
+    private PIDController driveController = new PIDController(
+        SwerveConstants.driveSimKP,
+        0,
+        SwerveConstants.driveSimKD
+    );
+    private PIDController turnController = new PIDController(SwerveConstants.angleSimKP, 0, SwerveConstants.angleSimKD);
 
     // Voltages
     private final MutVoltage driveAppliedVolts = Volts.mutable(0.0);
@@ -48,10 +52,10 @@ public class ModuleIOSim implements ModuleIO {
         this.moduleSimulation = moduleSimulation;
         this.driveMotor = moduleSimulation
             .useGenericMotorControllerForDrive()
-            .withCurrentLimit(SwerveConfig.DRIVE_CONTINUOUS_CURRENT_LIMIT);
+            .withCurrentLimit(SwerveConstants.DRIVE_CONTINUOUS_CURRENT_LIMIT);
         this.turnMotor = moduleSimulation
             .useGenericControllerForSteer()
-            .withCurrentLimit(SwerveConfig.ANGLE_CONTINUOUS_CURRENT_LIMIT);
+            .withCurrentLimit(SwerveConstants.ANGLE_CONTINUOUS_CURRENT_LIMIT);
 
         // Enable wrapping for turn PID
         turnController.enableContinuousInput(-Math.PI, Math.PI);
@@ -116,7 +120,7 @@ public class ModuleIOSim implements ModuleIO {
 
     @Override
     public void setDriveVelocity(SwerveModuleState desiredState, double driveFeedforwardVoltage) {
-        double velocityRadPerSec = desiredState.speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters);
+        double velocityRadPerSec = desiredState.speedMetersPerSecond / SwerveConstants.WHEEL_RADIUS.in(Meters);
 
         driveClosedLoop = true;
 

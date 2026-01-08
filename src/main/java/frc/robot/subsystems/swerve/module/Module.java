@@ -25,7 +25,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import frc.robot.CANIdConstants;
 import frc.robot.subsystems.CANIdAlert;
-import frc.robot.subsystems.swerve.SwerveConfig;
+import frc.robot.subsystems.swerve.SwerveConstants;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -80,7 +80,7 @@ public class Module {
 
         // For each sample, convert the drive position to meters and pair it with the turn angle
         for (int i = 0; i < sampleCount; i++) {
-            double positionMeters = inputs.odometryDrivePositionsRad[i] * SwerveConfig.WHEEL_RADIUS.in(Meters);
+            double positionMeters = inputs.odometryDrivePositionsRad[i] * SwerveConstants.WHEEL_RADIUS.in(Meters);
             Rotation2d angle = inputs.odometryTurnPositions[i];
 
             // Store the position
@@ -129,12 +129,12 @@ public class Module {
 
     /** Returns the current drive position of the module in meters. */
     public double getPositionMeters() {
-        return inputs.driveMotorData.positionAngle.in(Radians) * SwerveConfig.WHEEL_RADIUS.in(Meters);
+        return inputs.driveMotorData.positionAngle.in(Radians) * SwerveConstants.WHEEL_RADIUS.in(Meters);
     }
 
     /** Returns the current drive velocity of the module in meters per second. */
     public double getVelocityMetersPerSec() {
-        return inputs.driveMotorData.velocity.in(RadiansPerSecond) * SwerveConfig.WHEEL_RADIUS.in(Meters);
+        return inputs.driveMotorData.velocity.in(RadiansPerSecond) * SwerveConstants.WHEEL_RADIUS.in(Meters);
     }
 
     /** Returns the module position (turn angle and drive position). */

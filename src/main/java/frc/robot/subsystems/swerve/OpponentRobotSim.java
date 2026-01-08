@@ -70,8 +70,8 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
 
     public final OpponentRobotBehavior behavior;
 
-    private final RobotConfig pathPlannerConfig = SwerveConfig.getRobotConfig();
-    private final PathConstraints pathPlannerPathConstraints = SwerveConfig.pathConstraints;
+    private final RobotConfig pathPlannerConfig = SwerveConstants.getRobotConfig();
+    private final PathConstraints pathPlannerPathConstraints = SwerveConstants.pathConstraints;
     private final PPHolonomicDriveController driveController = new PPHolonomicDriveController(
         new PIDConstants(5.0, 0.02),
         new PIDConstants(7.0, 0.05)
@@ -84,7 +84,7 @@ public class OpponentRobotSim extends SubsystemBase implements SwerveDrive {
 
         // Create the SelfControlledSwerveDriveSimulation instance
         this.simulatedDrive = new SelfControlledSwerveDriveSimulation(
-            new SwerveDriveSimulation(SwerveConfig.mapleSimConfig, startingPose)
+            new SwerveDriveSimulation(SwerveConstants.mapleSimConfig, startingPose)
         );
 
         // Register the drivetrain simulation to the simulation world

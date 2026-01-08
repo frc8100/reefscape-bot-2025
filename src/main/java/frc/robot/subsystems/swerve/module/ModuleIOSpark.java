@@ -34,7 +34,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
 import frc.robot.CANIdConstants;
 import frc.robot.subsystems.swerve.OdometryThread;
-import frc.robot.subsystems.swerve.SwerveConfig;
+import frc.robot.subsystems.swerve.SwerveConstants;
 import frc.robot.subsystems.swerve.SwerveModuleSpecificConstants;
 import frc.robot.subsystems.swerve.SwerveModuleSpecificConstants.RobotSwerveModuleConstants;
 import frc.util.CoupledYAMSSubsystemIO;
@@ -130,26 +130,26 @@ public class ModuleIOSpark implements ModuleIO {
         angleMotor = new SparkMax(canIDs.angleMotorID(), MotorType.kBrushless);
         relativeAngleEncoder = angleMotor.getEncoder();
         angleClosedLoopController = angleMotor.getClosedLoopController();
-        SparkUtil.configure(angleMotor, SwerveConfig.getAngleMotorConfig());
+        SparkUtil.configure(angleMotor, SwerveConstants.getAngleMotorConfig());
 
         // Create and configure the drive motor
         driveMotor = new SparkMax(canIDs.driveMotorID(), MotorType.kBrushless);
         relativeDriveEncoder = driveMotor.getEncoder();
         driveClosedLoopController = driveMotor.getClosedLoopController();
-        SparkUtil.configure(driveMotor, SwerveConfig.getDriveMotorConfig());
+        SparkUtil.configure(driveMotor, SwerveConstants.getDriveMotorConfig());
 
         // Create and configure the CANCoder
         angleCANcoder = new CANcoder(canIDs.canCoderID());
         angleCANcoder.getConfigurator().refresh(new CANcoderConfiguration());
 
         // Apply the angle offset to the CANCoder configuration
-        var cancoderConfig = SwerveConfig.getCANcoderConfig();
+        var cancoderConfig = SwerveConstants.getCANcoderConfig();
         // TODO: invert or not invert?
         cancoderConfig.MagnetSensor.MagnetOffset = -angleOffset.getRotations();
         angleCANcoder.getConfigurator().apply(cancoderConfig);
 
         turnAbsolutePosition = angleCANcoder.getAbsolutePosition();
-        turnAbsolutePosition.setUpdateFrequency(SwerveConfig.ODOMETRY_FREQUENCY_HZ);
+        turnAbsolutePosition.setUpdateFrequency(SwerveConstants.ODOMETRY_FREQUENCY_HZ);
         angleCANcoder.optimizeBusUtilization();
 
         // Reset the module to absolute position
@@ -161,9 +161,9 @@ public class ModuleIOSpark implements ModuleIO {
         turnPositionQueue = OdometryThread.getInstance().registerPhoenixAngleRotationsSignal(turnAbsolutePosition);
 
         anglePidControllerUsingCANCoder = new PIDController(
-            SwerveConfig.angleKP,
-            SwerveConfig.angleKI,
-            SwerveConfig.angleKD
+            SwerveConstants.angleKP,
+            SwerveConstants.angleKI,
+            SwerveConstants.angleKD
         );
         anglePidControllerUsingCANCoder.enableContinuousInput(-Math.PI, Math.PI);
         anglePidControllerUsingCANCoder.setSetpoint(getAngle().getRadians());
@@ -172,16 +172,16 @@ public class ModuleIOSpark implements ModuleIO {
         drivePidTunable = new TunableValue.SparkPIDTunable(
             this.dashboardKey,
             driveMotor,
-            SwerveConfig.getDriveMotorConfig(),
-            SwerveConfig.driveKP,
-            SwerveConfig.driveKD
+            SwerveConstants.getDriveMotorConfig(),
+            SwerveConstants.driveKP,
+            SwerveConstants.driveKD
         );
         anglePidTunable = new TunableValue.SparkPIDTunable(
             this.dashboardKey,
             angleMotor,
-            SwerveConfig.getAngleMotorConfig(),
-            SwerveConfig.angleKP,
-            SwerveConfig.angleKD
+            SwerveConstants.getAngleMotorConfig(),
+            SwerveConstants.angleKP,
+            SwerveConstants.angleKD
         );
 
         TunableValue.addRefreshConfigConsumer(this::onRefresh);
@@ -253,7 +253,7 @@ public class ModuleIOSpark implements ModuleIO {
 
     @Override
     public void setDriveVelocity(SwerveModuleState desiredState, double driveFeedforwardVoltage) {
-        double velocityRadiansPerSecond = desiredState.speedMetersPerSecond / SwerveConfig.WHEEL_RADIUS.in(Meters);
+        double velocityRadiansPerSecond = desiredState.speedMetersPerSecond / SwerveConstants.WHEEL_RADIUS.in(Meters);
 
         this.driveFFVolts = driveFeedforwardVoltage;
 
@@ -271,7 +271,7 @@ public class ModuleIOSpark implements ModuleIO {
         // Stop the motor if the speed is less than 1%. Prevents Jittering
         if (
             Math.abs(getAngle().minus(desiredState.angle).getDegrees()) < 0.5 &&
-            Math.abs(desiredState.speedMetersPerSecond) <= (SwerveConfig.MAX_SPEED.in(MetersPerSecond) * 0.01)
+            Math.abs(desiredState.speedMetersPerSecond) <= (SwerveConstants.MAX_SPEED.in(MetersPerSecond) * 0.01)
         ) {
             angleMotor.stopMotor();
             return;
