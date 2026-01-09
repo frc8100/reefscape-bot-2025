@@ -26,6 +26,7 @@ import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveConstants;
 import frc.robot.subsystems.vision.Vision;
 import frc.util.PoseUtil;
+import frc.util.objective.ObjectiveIO;
 import frc.util.objective.ObjectiveTracker;
 import frc.util.statemachine.StateMachine;
 import frc.util.statemachine.StateMachine.StateWithPayload;
@@ -273,7 +274,7 @@ public class RobotActions {
         .withState(new StateMachineState<>(GlobalState.SCORE_CORAL, "ScoreCoral"))
         .withState(new StateMachineState<>(GlobalState.ENDGAME, "Endgame"));
 
-    public final ObjectiveTracker objectiveTracker = new ObjectiveTracker(this);
+    public final ObjectiveTracker objectiveTracker;
 
     // References to subsystems
     // Public because of use in configuring controls
@@ -289,12 +290,15 @@ public class RobotActions {
         Swerve swerveSubsystem,
         Elevator elevatorSubsystem,
         Claw clawSubsystem,
-        Vision visionSubsystem
+        Vision visionSubsystem,
+        ObjectiveIO objectiveIO
     ) {
         this.swerveSubsystem = swerveSubsystem;
         this.elevatorSubsystem = elevatorSubsystem;
         this.clawSubsystem = clawSubsystem;
         this.visionSubsystem = visionSubsystem;
+
+        this.objectiveTracker = new ObjectiveTracker(this, objectiveIO);
 
         // test
         globalStateMachine.onStateChange(

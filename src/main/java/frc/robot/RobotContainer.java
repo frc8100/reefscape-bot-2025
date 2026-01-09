@@ -46,6 +46,8 @@ import frc.robot.subsystems.vision.VisionSim;
 import frc.robot.subsystems.vision.VisionSim.NeuralDetectorSimPipeline;
 import frc.util.EmptySimulationArena;
 import frc.util.TunableValue;
+import frc.util.objective.ObjectiveIO;
+import frc.util.objective.ObjectiveIODashboard;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
@@ -82,6 +84,8 @@ public class RobotContainer {
 
     /** The container for the robot. Contains subsystems, IO devices, and commands. */
     public RobotContainer() {
+        ObjectiveIO objectiveIO = null;
+
         switch (Constants.currentMode) {
             case REAL:
                 // Real robot, instantiate hardware IO implementations
@@ -108,6 +112,8 @@ public class RobotContainer {
 
                 clawSubsystem = new Claw(new ClawIOSpark());
                 elevatorSubsystem = new Elevator(new ElevatorIOSpark());
+
+                objectiveIO = new ObjectiveIODashboard();
                 break;
             default:
             case SIM:
@@ -198,6 +204,8 @@ public class RobotContainer {
                 // opponentRobotDriveControls
                 //         .getJoystickButtonOf(opponentRobotDriveControls.zeroGyroButton)
                 //         .onTrue(new InstantCommand(() -> opponentRobotSim1.zeroGyro()));
+
+                objectiveIO = new ObjectiveIODashboard();
                 break;
             case REPLAY:
                 // Replay mode, instantiate dummy IO implementations
@@ -209,13 +217,20 @@ public class RobotContainer {
                 visionSubsystem = new Vision(swerveSubsystem, questNavSubsystem, new VisionIO() {});
                 clawSubsystem = new Claw(new ClawIO() {});
                 elevatorSubsystem = new Elevator(new ElevatorIO() {});
+                objectiveIO = new ObjectiveIO() {};
                 break;
         }
 
         SwerveDrive.configurePathPlannerAutoBuilder(swerveSubsystem, questNavSubsystem);
 
         // Set up auto routines
-        robotActions = new RobotActions(swerveSubsystem, elevatorSubsystem, clawSubsystem, visionSubsystem);
+        robotActions = new RobotActions(
+            swerveSubsystem,
+            elevatorSubsystem,
+            clawSubsystem,
+            visionSubsystem,
+            objectiveIO
+        );
 
         // Set up teleop swerve command
         swerveSubsystem.setDefaultCommand(swerveSubsystem.stateMachine.getRunnableCommand(swerveSubsystem));
